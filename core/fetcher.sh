@@ -61,22 +61,27 @@ fetch_all_packages() {
             # ۲. دانلود فایل اصلی ایندکس apk یعنی packages.adb
             log_info "Downloading packages.adb..."
             download_file "$feed_url/packages.adb" "$target_dir/packages.adb" "$proxy"
+# ۳. استخراج نام پکیج‌ها و نسخه‌ها از ساختار واقعی index.json و دانلود دقیق آن‌ها
+            log_info "Parsing packages from index.json..."
 
-            # ۳. استخراج نام پکیج‌ها از روی index.json و دانلود دانه دانه آن‌ها
-            # فرض بر این است که ساختار جِیسون شامل آرایه یا آبجکتی از فایل‌هاست. 
-            # با فرض ساختار استاندارد فایل‌لیست سورس‌فورج، نام فایل‌ها را استخراج می‌کنیم:
-            local pkgs=$(jq -r '.files[].name // .[] | select(strings | endswith(".apk"))' "$index_json_path" 2>/dev/null)
-            
-            # اگر فرمت جیسون سورس‌فورج ساختار متفاوتی داشت، نام کلید را جنریک‌تر می‌خوانیم:
-            if [ -z "$pkgs" ]; then
-                pkgs=$(jq -r '.. | .name? // empty | select(endswith(".apk"))' "$index_json_path")
+            # با این دستور jq، نام پکیج و نسخه را خوانده و به فرمت فایل .apk تبدیل می‌کنیم
+            local pkgs=$(jq -r '.packages | to_entries[] | "\(.key)-\(.value).apk"' "$index_json_path" 2>/dev/null)
+
+            if [ -z "$pkgs" ] || [ "$pkgs" = "null" ]; then
+                log_error "Could not parse any packages from index.json for $feed_name. Checking fallback..."
+                # یک حالت جنریک زاپاس برای اطمینان بیشتر
+                pkgs=$(jq -r '.. | .packages? // empty | to_entries[] | "\(.key)-\(.value).apk"' "$index_json_path" 2>/dev/null)
             fi
 
-            for pkg in $pkgs; do
-                log_info "Downloading package: $pkg"
-                download_file "$feed_url/$pkg" "$target_dir/$pkg" "$proxy"
-            done
-            log_success "Feed $feed_name completely mirrored."
+            if [ -n "$pkgs" ] && [ "$pkgs" != "null" ]; then
+                for pkg in $pkgs; do
+                    log_info "Downloading package archive: ${GREEN}$pkg${NC}"
+                    download_file "$feed_url/$pkg" "$target_dir/$pkg" "$proxy"
+                done
+                log_success "Feed $feed_name completely mirrored with all APK components."
+            else
+                log_error "No packages found to download in $feed_name."
+            fi
         done
     done
 }
