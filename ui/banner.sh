@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-# ساختار ماژولار رنگ‌ها
 export CYAN="\033[1;38;5;51m"
 export PURPLE="\033[38;5;141m"
 export GREEN="\033[32m"
