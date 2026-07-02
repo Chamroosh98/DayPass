@@ -7,7 +7,6 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch:
 
-# دادن دسترسی‌های لازم به گیت‌هاب اکشنز برای آپلود روی گیت‌هاب پیج
 permissions:
   contents: write
   pages: write
@@ -19,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout Repository Source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # این نسخه اوکی هست
 
       - name: Install Official Build Tools & Build Usign
         run: |
@@ -43,13 +42,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # ۱. آپلود پوشه output به عنوان آرتفکت موقت
+      # ارتقا به نسخه v4 جهت استفاده از Node جدید و حذف وارنینگ
       - name: Upload Pages Artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: 'output'
 
-      # ۲. دپلوی و انتشار مستقیم روی GitHub Pages
+      # ارتقا به نسخه v5 جهت سازگاری کامل و حذف وارنینگ
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
