@@ -4,14 +4,13 @@ on:
   push:
     branches: [ "main", "master" ]
   schedule:
-    - cron: '0 0 * * *' # اجرای خودکار روزانه برای چک کردن آپدیت‌های سورس‌فورج
-  workflow_dispatch: # امکان اجرای دستی از داخل داشبورد گیت‌هاب
+    - cron: '0 0 * * *'
+  workflow_dispatch:
 
 jobs:
   build-and-sign:
     runs-on: ubuntu-latest
     
-    # استفاده از کانتینر آلپاین نسخه جدید برای شبیه‌سازی دقیق OpenWrt 25 APK Environment
     container:
       image: alpine:latest
 
@@ -22,7 +21,9 @@ jobs:
       - name: Install Pipeline Dependencies (Bash, Usign, Curl, Jq)
         run: |
           apk update
-          apk add --no-cache bash curl usign jq
+          # اضافه کردن مخزن edge/testing آلپاین برای پیدا کردن usign
+          apk add --no-cache bash curl jq
+          apk add --no-cache usign --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/
           
       - name: Make Scripts Executable
         run: |
