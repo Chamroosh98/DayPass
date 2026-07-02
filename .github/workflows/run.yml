@@ -7,6 +7,12 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch:
 
+# دادن دسترسی‌های لازم به گیت‌هاب اکشنز برای آپلود روی گیت‌هاب پیج
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   build-and-sign:
     runs-on: ubuntu-latest
@@ -19,16 +25,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y jq curl build-essential cmake
-
-          # کلون و کامپایل رسمی usign
           git clone https://git.openwrt.org/project/usign.git
           cd usign
           cmake .
           make
           sudo cp usign /usr/local/bin/usign
           cd .. && rm -rf usign
-
-          # چک کردن ورژن به جای اجرای دستور خالی برای جلوگیری از exit code 1
           echo "Usign successfully built and deployed."
 
       - name: Make Scripts Executable
@@ -40,3 +42,14 @@ jobs:
           ./core/orchestrator.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ۱. آپلود پوشه output به عنوان آرتفکت موقت
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'output'
+
+      # ۲. دپلوی و انتشار مستقیم روی GitHub Pages
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
