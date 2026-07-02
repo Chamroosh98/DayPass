@@ -62,7 +62,6 @@ os_release=$(ubus call system board 2>/dev/null | grep '"release":' | awk -F'"' 
 [ -z "$router_model" ] && router_model="Generic OpenWrt Device"
 [ -z "$os_release" ] && os_release="25.x (Bleeding Edge)"
 
-# فیکس کردن باگ ۴۰۳ گوگل با استفاده از وب‌سایت جایگزین و هدر مرورگر
 public_ip=$(curl -sA "Mozilla/5.0" --connect-timeout 3 icanhazip.com 2>/dev/null | tr -d '\n')
 if [ -z "$public_ip" ]; then
     public_ip="${RED}No Internet / Blocked 🔒${NC}"
@@ -96,13 +95,16 @@ if [ $? -ne 0 ]; then
 fi
 echo -e "${GREEN}[SUCCESS]${NC} Public key deployed safely inside /etc/apk/keys/"
 
-# ست کردن فیدهای سه گانه APK با ساختار اصلاح‌شده و فلت برای گیت‌هاب پیجز
+# ست کردن فیدهای سه گانه APK متناسب با درخت دایرکتوری گیت‌هاب پیجز
 echo -e "${CYAN}[INFO]${NC} Configuring custom APK feed repositories..."
 mkdir -p /etc/apk/repositories.d/
 
-# در سیستم APK اگر آدرس مستقیم به پوشه حاوی ایندکس اشاره کند، جلوی خطای unexpected EOF گرفته می‌شود
+# منطق جدید: چون خود APK اسم معماری را به انتهای آدرس می‌چسباند، 
+# ساختار زیر دقیقاً به دایرکتوری‌های داخلی حاوی packages.adb اشاره خواهد کرد.
 cat << REPOS > /etc/apk/repositories.d/daypass.list
-$REPO_URL/output/
+$REPO_URL/passwall_packages
+$REPO_URL/passwall2
+$REPO_URL/passwall_luci
 REPOS
 
 # آپدیت مخازن و نصب پایانی
