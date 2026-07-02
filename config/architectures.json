@@ -1,0 +1,13 @@
+{
+    "architectures": [
+        {
+        "name": "arm_cortex-a7_neon-vfpv4",
+        "base_url": "https://master.dl.sourceforge.net/projects/openwrt-passwall-build/files/releases/packages-25.12/arm_cortex-a7_neon-vfpv4",
+        "feeds": [
+            "passwall_packages",
+            "passwall2",
+            "passwall_luci"
+        ]
+        }
+    ]
+}

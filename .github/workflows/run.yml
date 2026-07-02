@@ -1,0 +1,37 @@
+name: DayPass Auto Package Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  schedule:
+    - cron: '0 0 * * *' # اجرای خودکار روزانه برای چک کردن آپدیت‌های سورس‌فورج
+  workflow_dispatch: # امکان اجرای دستی از داخل داشبورد گیت‌هاب
+
+jobs:
+  build-and-sign:
+    runs-on: ubuntu-latest
+    
+    # استفاده از کانتینر آلپاین نسخه جدید برای شبیه‌سازی دقیق OpenWrt 25 APK Environment
+    container:
+      image: alpine:latest
+
+    steps:
+      - name: Checkout Repository Source
+        uses: actions/checkout@v4
+
+      - name: Install Pipeline Dependencies (Bash, Usign, Curl, Jq)
+        run: |
+          apk update
+          apk add --no-cache bash curl usign jq
+          
+      - name: Make Scripts Executable
+        run: |
+          chmod +x core/orchestrator.sh
+          chmod +x core/signer.sh
+          chmod +x ui/banner.sh
+
+      - name: Run DayPass Orchestrator
+        run: |
+          ./core/orchestrator.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
