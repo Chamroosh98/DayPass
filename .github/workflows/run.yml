@@ -9,27 +9,30 @@ on:
 
 jobs:
   build-and-sign:
-    runs-on: ubuntu-latest
-    
-    container:
-      image: alpine:latest
+    runs-on: ubuntu-latest # برگشت به اوبونتو برای پایداری ۱۰۰ درصد ابزارها
 
     steps:
       - name: Checkout Repository Source
         uses: actions/checkout@v4
 
-      - name: Install Pipeline Dependencies (Bash, Usign, Curl, Jq)
+      - name: Install Tools & Fetch Static Usign
         run: |
-          apk update
-          # اضافه کردن مخزن edge/testing آلپاین برای پیدا کردن usign
-          apk add --no-cache bash curl jq
-          apk add --no-cache usign --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/
+          sudo apt-get update
+          sudo apt-get install -y jq curl
           
+          # دانلود نسخه از پیش کامپایل شده و استاتیک usign برای لینوکس 64 بیتی
+          mkdir -p bin
+          curl -sL https://github.com/openwrt/usign/releases/download/v1/usign-linux-x64 -o bin/usign || \
+          curl -sL https://raw.githubusercontent.com/tuanvinh/usign-static/master/usign -o bin/usign
+          
+          chmod +x bin/usign
+          sudo cp bin/usign /usr/local/bin/usign
+          echo "Verifying usign installation:"
+          usign
+
       - name: Make Scripts Executable
         run: |
-          chmod +x core/orchestrator.sh
-          chmod +x core/signer.sh
-          chmod +x ui/banner.sh
+          chmod +x core/*.sh ui/*.sh
 
       - name: Run DayPass Orchestrator
         run: |
