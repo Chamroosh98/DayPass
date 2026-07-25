@@ -10,7 +10,6 @@ language_menu()
 
     render_persistent_header
 
-    echo "  ───────────────────────────────────────────────────────────"
     echo "    🕵️‍♀️ Select Language (Passwall 2)                          "
     echo "  ───────────────────────────────────────────────────────────"
     echo "    1) 🦁☀️ Persian  (fa)                                    "
