@@ -10,14 +10,14 @@ language_menu()
 
     render_persistent_header
 
-    echo "  ┌───────────────────────────────────────────────────────────┐"
-    echo "  │  🕵️‍♀️ Select Language (Passwall 2)                          │"
-    echo "  ├───────────────────────────────────────────────────────────┤"
-    echo "  │  1) 🦁☀️ Persian  (fa)                                    │"
-    echo "  │  2) 🇬🇧   English  (en)                                    │"
-    echo "  │  3) 🇨🇳   Chinese  (zh-cn)                                 │"
-    echo "  │  4) 🇷🇺   Russian  (ru)                                    │"
-    echo "  └───────────────────────────────────────────────────────────┘"
+    echo "  ───────────────────────────────────────────────────────────"
+    echo "    🕵️‍♀️ Select Language (Passwall 2)                          "
+    echo "  ───────────────────────────────────────────────────────────"
+    echo "    1) 🦁☀️ Persian  (fa)                                    "
+    echo "    2) 🇬🇧   English  (en)                                    "
+    echo "    3) 🇨🇳   Chinese  (zh-cn)                                 "
+    echo "    4) 🇷🇺   Russian  (ru)                                    "
+    echo "  ───────────────────────────────────────────────────────────"
     echo
 
     printf "  ⁉️ Select option [1-4] (Default: 1) : "
