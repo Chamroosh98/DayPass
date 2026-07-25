@@ -202,8 +202,8 @@ jobs:
             📅 Date   : `${{ env.VERSION }}`
             ⚡ Build  : `${{ github.run_number }}`
           files: |
-            build-artifacts/*.zip
-            build-artifacts/*.sha256
+            merged-release/*.zip
+            merged-release/*.sha256
 
       - name: 🧹 Delete Temporary Build Artifacts
         uses: geekyeggo/delete-artifact@v5
