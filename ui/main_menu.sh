@@ -5,7 +5,6 @@ main_menu()
     while true; 
         do
             show_banner
-            # show_system_info
             echo
 
             printf "   📦 1) Install Package\n"
