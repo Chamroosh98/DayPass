@@ -84,7 +84,7 @@ jobs:
 
       - name: 📁 Prepare Workspace Tree
         run: |
-          mkdir -p merged-beta
+          mkdir -p merged-release
           mkdir -p manifest-workspace
           mkdir -p build-artifacts
           mkdir -p packages-branch-content
@@ -93,7 +93,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: release-*
-          path: merged-beta/
+          path: merged-release/
           merge-multiple: true
 
       - name: 📥 Download All Raw Packages Artifacts (For CDN)
@@ -101,9 +101,7 @@ jobs:
         with:
           pattern: raw-release-*
           path: packages-branch-content/
-          # merge-multiple: false
-          merge-multiple: true
-
+          merge-multiple: false 
 
       - name: 📂 Restructure Architecture Folders for CDN
         run: |
@@ -138,13 +136,13 @@ jobs:
           cp build-artifacts/manifest.json github-pages-content/
           echo "✅ Isolated install.sh and manifest.json for Pages deployment."
 
-      - name: 🌐 Deploy to GitHub Pages
+      - name: 🌐 Deploy Root Manifests to GitHub Pages (Preserving Beta Subfolder)
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: github-pages-content
           target-folder: .
           branch: gh-pages
-          clean: false         
+          clean: false        
           single-commit: true
 
       - name: 🔍 Debug & Verify Raw Packages Tree Structure
@@ -153,11 +151,12 @@ jobs:
           ls -la packages-branch-content/
           find packages-branch-content/ -maxdepth 2 -type d
 
-      - name: 🚀 Deploy Binary Packages to 'packages' Branch (Overwriting)
+      - name: 🚀 Deploy Binary Packages to 'packages' Branch
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: packages-branch-content
           branch: packages
+          clean: false       
           single-commit: true
 
       - name: 🧹 Purge jsDelivr Cache for Manifest & Packages
@@ -192,7 +191,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.VERSION }}-${{ github.run_number }}
-          name: 🚀  v${{ env.VERSION }}
+          name: 🚀 v${{ env.VERSION }}
           prerelease: false
           body: |
             ## 🚀 DayPass Stable Release
@@ -202,3 +201,11 @@ jobs:
           files: |
             build-artifacts/*.zip
             build-artifacts/*.sha256
+
+      - name: 🧹 Delete Temporary Build Artifacts
+        uses: geekyeggo/delete-artifact@v5
+        if: always()
+        with:
+          name: |
+            release-*
+            raw-release-*
