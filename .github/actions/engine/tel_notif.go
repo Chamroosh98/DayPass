@@ -14,7 +14,7 @@ func SendTelegramNotification(
 	architectures []FeedConfig,
 ) {
 	if botToken == "" || chatID == "" {
-		fmt.Println("⚠️ Telegram credentials not provided. Skipping notification.")
+		fmt.Println("⚠️ Telegram credentials not provided. Skipping notification!")
 		return
 	}
 
@@ -24,32 +24,35 @@ func SendTelegramNotification(
 	var msgHeader string
 	var installURL string
 	var btnEmoji string
+	var mergedDir string
 
 	if isRelease {
 		tagFormat = fmt.Sprintf("v%s-%s", version, buildNum)
 		msgHeader = "🚀 *New Stable DayPass Release!*"
 		installURL = "https://Chamroosh98.github.io/DayPass/install.sh"
 		btnEmoji = "📦 "
+		mergedDir = "merged-release" 
 	} else {
 		tagFormat = fmt.Sprintf("v%s-beta-%s", version, buildNum)
 		msgHeader = "🧪 *New Beta DayPass Ready!*"
 		installURL = "https://Chamroosh98.github.io/DayPass/beta/install.sh"
 		btnEmoji = "🧪 "
+		mergedDir = "merged-beta"
 	}
 
 	var keyboard [][]InlineKeyboardButton
 	for _, arch := range architectures {
-		// 1. Secarch in build-artifacts
+		// 1. Search in primary build-artifacts directory
 		zipMatch, _ := filepath.Glob(fmt.Sprintf("build-artifacts/DayPass_%s_*.zip", arch.Name))
-		
-		// 2. Fallback : if the basic path doesn't exits, so search in : merged-beta
+
+		// 2. Fallback: Search dynamically based on releaseType (merged-beta vs merged-release)
 		if len(zipMatch) == 0 {
-			zipMatch, _ = filepath.Glob(fmt.Sprintf("merged-beta/DayPass_%s_*.zip", arch.Name))
+			zipMatch, _ = filepath.Glob(fmt.Sprintf("%s/DayPass_%s_*.zip", mergedDir, arch.Name))
 		}
 
 		if len(zipMatch) > 0 {
 			actualFileName := filepath.Base(zipMatch[0])
-			
+
 			// Create direct links from GitHub Release
 			downloadURL := fmt.Sprintf("https://github.com/%s/releases/download/%s/%s", repo, tagFormat, actualFileName)
 
@@ -59,7 +62,7 @@ func SendTelegramNotification(
 			}
 			keyboard = append(keyboard, []InlineKeyboardButton{btn})
 		} else {
-			fmt.Printf("⚠️ No zip found for architecture: [%s]\n", arch.Name)
+			fmt.Printf("⚠️ No zip found for architecture: [%s] (Searched in build-artifacts/ & %s/)\n", arch.Name, mergedDir)
 		}
 	}
 
@@ -85,7 +88,7 @@ func SendTelegramNotification(
 	apiURL := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", botToken)
 	req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(jsonPayload))
 	if err != nil {
-		fmt.Printf("❌ Failed to create Telegram request: [%v]\n", err)
+		fmt.Printf("❌ Failed to create Telegram request : [%v]\n", err)
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
