@@ -4,9 +4,7 @@ main_menu()
 {
     while true; 
         do
-            show_banner
-            # show_system_info
-            echo
+            render_persistent_header
 
             printf "   📦 1) Install Package\n"
             printf "   🖥️ 2) Network Info & Speed Monitor\n"

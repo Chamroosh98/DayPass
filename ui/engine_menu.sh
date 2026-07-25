@@ -4,13 +4,13 @@ engine_menu()
 {
     render_persistent_header
 
-    echo "  ┌───────────────────────────────────────────────────────────┐"
-    echo "  │  🕵️‍♀️  Select Proxy Engine                                  │"
-    echo "  ├───────────────────────────────────────────────────────────┤"
-    echo "  │  1) ⚡ Auto      (Recommended)                            │"
-    echo "  │  2) ✖️ Xray      (Xray-core proxy engine)                 │"
-    echo "  │  3) 📦 Sing-box  (Sing-box proxy engine)                  │"
-    echo "  └───────────────────────────────────────────────────────────┘"
+    echo "  ───────────────────────────────────────────────────────────"
+    echo "    🕵️‍♀️  Select Proxy Engine                                  "
+    echo "  ───────────────────────────────────────────────────────────"
+    echo "    1) ⚡ Auto      (Recommended)                            "
+    echo "    2) ✖️ Xray      (Xray-core proxy engine)                 "
+    echo "    3) 📦 Sing-box  (Sing-box proxy engine)                  "
+    echo "  ───────────────────────────────────────────────────────────"
     echo
 
     printf "  ⁉️ Select option [1-3] (Default: 1) : "

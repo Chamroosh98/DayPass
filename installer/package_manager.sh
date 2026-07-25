@@ -2,6 +2,8 @@
 
 detect_package_manager()
 {
+    rm -f /var/lock/opkg.lock /lib/apk/db/lock /var/run/apk.lock 2>/dev/null
+    
     # 1. Identify standard package manager binary
     if command -v apk >/dev/null 2>&1; then
         PKG_MANAGER="apk"

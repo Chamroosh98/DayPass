@@ -10,10 +10,10 @@ review_install()
 
     echo "  📊 Installation Plan Summary"
     echo "  ─────────────────────────────────────────────────────────────"
-    printf "  %-18s : %s\n" "👤 Selected Profile" "${SELECTED_PROFILE  :-N/A}"
-    printf "  %-18s : %s\n" "⚙️ Selected Engine"  "${SELECTED_ENGINE   :-auto}"
-    printf "  %-18s : %s\n" "🗣️ Language"         "${SELECTED_LANGUAGE :-none}"
-    printf "  %-18s : %s\n" "🌐 Geo Database"     "${SELECTED_GEO      :-none}"
+    printf "  %-18s : %s\n" "👤 Selected Profile" "${SELECTED_PROFILE:-N/A}"
+    printf "  %-18s : %s\n" "⚙️ Selected Engine"  "${SELECTED_ENGINE:-auto}"
+    printf "  %-18s : %s\n" "🗣️ Language"         "${SELECTED_LANGUAGE:-none}"
+    printf "  %-18s : %s\n" "🌐 Geo Database"     "${SELECTED_GEO:-none}"
     echo "  ─────────────────────────────────────────────────────────────"
     
     PKG_COUNT=$(echo $FINAL_PACKAGES | wc -w | tr -d ' ')

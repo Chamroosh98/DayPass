@@ -4,7 +4,6 @@ menu_mode()
 {
     render_persistent_header
 
-    echo "  ───────────────────────────────────────────────────────────"
     echo "    🕵️‍♀️ Select Installation Mode                              "
     echo "  ───────────────────────────────────────────────────────────"
     echo "    1) ⚡ Recommended (Quick & Pre-configured for users)     "
@@ -17,13 +16,19 @@ menu_mode()
 
     case "$choice" in
         1|"")
+            SELECTED_MODE="recommended"  
+            export SELECTED_MODE
             handle_recommended_profile
             ;;
         2)
+            SELECTED_MODE="custom"       
+            export SELECTED_MODE
             handle_custom_profile
             ;;
         *)
             log_warn "Invalid choice! Defaulting to Recommended mode!"
+            SELECTED_MODE="recommended"   
+            export SELECTED_MODE
             handle_recommended_profile
             ;;
     esac

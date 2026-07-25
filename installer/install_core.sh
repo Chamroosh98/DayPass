@@ -1,7 +1,32 @@
 #!/bin/sh
 
+# 🛑 SIGINT / SIGTERM Handler
+cleanup_and_exit() {
+
+    printf "\r\033[K"
+    echo ""
+    
+    if command -v log_warn >/dev/null 2>&1; then
+        log_warn "Installation cancelled by user. Exiting DayPass..."
+    else
+        echo "⚠️ Installation cancelled by user. Exiting..."
+    fi
+
+    stty echo 2>/dev/null
+    rm -rf /tmp/daypass/*.part 2>/dev/null
+    
+    echo ""
+    exit 130
+}
+
+stty -echoctl 2>/dev/null || true
+
+trap cleanup_and_exit INT TERM
+
 initialize_installer()
 {
+    rm -f /var/lock/opkg.lock /lib/apk/db/lock /var/run/apk.lock 2>/dev/null
+    
     # 1. Detect environment and update local package index
     detect_package_manager
 

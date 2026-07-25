@@ -46,7 +46,8 @@ func generateInstallScript(outputFile string) error {
 		"ui/lib/box_utils.sh",
 		"ui/lib/header.sh",
 		"ui/lib/progress.sh",
-
+		"ui/banner.sh",
+		
 		// 3. Hardware & System Modules
 		"modules/zero_deps.sh",
 		"modules/version_check.sh",
@@ -56,7 +57,7 @@ func generateInstallScript(outputFile string) error {
 		"modules/dns_fix.sh",
 
 		// 4. UI Components & Menus
-		"ui/banner.sh",
+		
 		"ui/state.sh",
 		"ui/menu_recommended.sh",
 		"ui/menu_custom.sh",

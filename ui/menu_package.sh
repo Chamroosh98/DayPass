@@ -4,7 +4,6 @@ package_menu()
 {
     render_persistent_header
 
-    echo "  ───────────────────────────────────────────────────────────"
     echo "    🕵️‍♀️ Select Package Type                                   "
     echo "  ───────────────────────────────────────────────────────────"
     echo "    🔒 1) Passwall-1  (Legacy Stable Release)                "

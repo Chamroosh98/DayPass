@@ -1,7 +1,5 @@
 #!/bin/sh
 
-render_persistent_header
-
 country_flag()
 {
     case "$1" in
@@ -52,7 +50,17 @@ fetch_ip_data()
 
 show_full_network_info()
 {
-    clear
+    
+    # Show Main banner 
+    if command -v render_persistent_header >/dev/null 2>&1; then
+        render_persistent_header
+    else
+        clear
+        [ -n "$(command -v show_banner)" ] && show_banner
+    fi
+    
+    # Show network data
+    
     printf "\n   ${CYAN}🌐 Network Diagnostics & Information${RESET}\n"
     printf "   ${GRAY}─────────────────────────────────────────${RESET}\n"
 
@@ -87,7 +95,7 @@ EOF
             FLAG="$(country_flag "$COUNTRY_CODE")"
         fi
 
-        CITY_STR=""sudo pacman -Syu
+        CITY_STR=""
         [ -n "$CITY" ] && CITY_STR=" ${GRAY}($CITY)${RESET}"
 
         printf "   Public IP   : $PUBLIC_IP\n"
