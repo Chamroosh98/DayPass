@@ -2,9 +2,10 @@
 
 # DayPass
 
-**A Minimalist & High-Performance Network & System Utility for OpenWrt**
+**🕊️ Remembering the IRAN Massacre on Jan 8-9, 2026**
 
-*Fast · Lightweight · Dependency-free · Built with pure POSIX Shell for OpenWrt devices.*
+*A Minimalist & High-Performance Network & System Utility for OpenWrt*
+
 
 [![release](https://img.shields.io/badge/release-latest-purple?style=flat-square)](https://github.com/Chamroosh98/DayPass/releases)
 [![shell](https://img.shields.io/badge/shell-POSIX%20ash-blue?style=flat-square&logo=gnu-bash)](https://www.openwrt.org)

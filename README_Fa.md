@@ -3,9 +3,9 @@
 
 # DayPass
 
-**ابزار مدیریت و عیب‌یابی شبکه و سیستم برای OpenWrt با کارایی بالا و مینیمال**
+*🕊️ یادبود کشتار فجیعانه ایران در ۱۸-۱۹ دی ماه خونین ۱۴۰۴*
 
-*سریع · سبک · بدون نیاز به وابستگی · ساخته شده با POSIX Shell خالص برای دستگاه‌های OpenWrt.*
+*ابزار مدیریت و عیب‌یابی شبکه و سیستم برای OpenWrt با کارایی بالا و مینیمال*
 
 [![release](https://img.shields.io/badge/release-latest-purple?style=flat-square)](https://github.com/Chamroosh98/DayPass/releases)
 [![shell](https://img.shields.io/badge/shell-POSIX%20ash-blue?style=flat-square&logo=gnu-bash)](https://www.openwrt.org)
