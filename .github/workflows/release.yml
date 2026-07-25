@@ -198,7 +198,7 @@ jobs:
           prerelease: false
           body: |
             ## 🚀 DayPass Stable Release
-            🔥 Stable, optimized and production-ready build!
+            🔥 Stable, optimized and production-ready build! 
             📅 Date   : `${{ env.VERSION }}`
             ⚡ Build  : `${{ github.run_number }}`
           files: |
