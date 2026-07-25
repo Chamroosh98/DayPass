@@ -87,7 +87,7 @@ EOF
             FLAG="$(country_flag "$COUNTRY_CODE")"
         fi
 
-        CITY_STR=""sudo pacman -Syu
+        CITY_STR=""
         [ -n "$CITY" ] && CITY_STR=" ${GRAY}($CITY)${RESET}"
 
         printf "   Public IP   : $PUBLIC_IP\n"
