@@ -14,7 +14,7 @@ func SendTelegramNotification(
 	architectures []FeedConfig,
 ) {
 	if botToken == "" || chatID == "" {
-		fmt.Println("⚠️ Telegram credentials not provided. Skipping notification.")
+		fmt.Println("⚠️ Telegram credentials not provided. Skipping notification!")
 		return
 	}
 
