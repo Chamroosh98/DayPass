@@ -115,8 +115,13 @@ func main() {
 
 	persistentCacheDir := fmt.Sprintf(".cache/downloads/%s", targetArch)
 	baseDownloadDir := fmt.Sprintf("matrix-download/%s", targetArch)
+	
+	// 📂 ساخت دایرکتوری موقت مجزا برای ساخت زیپ با Subfolder
+	zipWorkspaceDir := fmt.Sprintf("zip-workspace/%s", targetArch)
+
 	os.MkdirAll(persistentCacheDir, 0755)
 	os.MkdirAll(baseDownloadDir, 0755)
+	os.MkdirAll(zipWorkspaceDir, 0755)
 
 	found := false
 	for _, arch := range archConfig.Architectures {
@@ -128,12 +133,16 @@ func main() {
 
 		for _, feed := range arch.Feeds {
 			feedCacheDir := filepath.Join(persistentCacheDir, feed)
-			feedOutputDir := baseDownloadDir
+			cdnOutputDir := baseDownloadDir                   
+			zipFeedOutputDir := filepath.Join(zipWorkspaceDir, feed) 
+
 			os.MkdirAll(feedCacheDir, 0755)
-			os.MkdirAll(feedOutputDir, 0755)
+			os.MkdirAll(cdnOutputDir, 0755)
+			os.MkdirAll(zipFeedOutputDir, 0755)
 
 			feedURL := fmt.Sprintf("%s/%s", arch.BaseURL, feed)
-			tempIndexPath := filepath.Join(feedOutputDir, "index.json")
+			
+			tempIndexPath := filepath.Join(feedCacheDir, "index.json")
 
 			fmt.Printf("\n💰 Feed : %s\n", feed)
 			if err := downloadWithCurl(feedURL+"/index.json", tempIndexPath); err != nil {
@@ -154,34 +163,35 @@ func main() {
 
 			fmt.Println("⌛ Repository index updated!")
 
-			// Smart Download!
-
 			cachedCount := 0
 			downloadedCount := 0
 
 			for pkgName, pkgVersion := range feedIdx.Packages {
 				apkFileName := fmt.Sprintf("%s-%s.apk", pkgName, pkgVersion)
 				cachePkgPath := filepath.Join(feedCacheDir, apkFileName)
-				targetPkgPath := filepath.Join(feedOutputDir, apkFileName)
+				
+				cdnPkgPath := filepath.Join(cdnOutputDir, apkFileName)
+				zipPkgPath := filepath.Join(zipFeedOutputDir, apkFileName)
+				
 				pkgURL := fmt.Sprintf("%s/%s", feedURL, apkFileName)
 
-				if fileExists(cachePkgPath) {
-					if err := copyFile(cachePkgPath, targetPkgPath); err == nil {
-						fmt.Printf("🔄 Cached : [%-45s]\n", apkFileName)
-						cachedCount++
+				if !fileExists(cachePkgPath) {
+					fmt.Printf("📥 Saved in Cache : [%-45s] ", apkFileName)
+					if err := downloadWithCurl(pkgURL, cachePkgPath); err != nil {
+						fmt.Println("❌ FAILED")
+						os.Remove(cachePkgPath)
 						continue
+					} else {
+						fmt.Println("✅ OK")
+						downloadedCount++
 					}
+				} else {
+					fmt.Printf("🔄 Cached : [%-45s]\n", apkFileName)
+					cachedCount++
 				}
 
-				fmt.Printf("📥 Saved in Cache : [%-45s] ", apkFileName)
-				if err := downloadWithCurl(pkgURL, cachePkgPath); err != nil {
-					fmt.Println("❌ FAILED")
-					os.Remove(cachePkgPath)
-				} else {
-					fmt.Println("✅ OK")
-					copyFile(cachePkgPath, targetPkgPath)
-					downloadedCount++
-				}
+				copyFile(cachePkgPath, cdnPkgPath)
+				copyFile(cachePkgPath, zipPkgPath)
 			}
 
 			fmt.Printf("✅ Feed synchronized! (🔄 [%d] cached, 📥 [%d] downloaded)\n", cachedCount, downloadedCount)
@@ -200,11 +210,12 @@ func main() {
 		zipName = fmt.Sprintf("DayPass_%s_%s_beta.zip", targetArch, releaseVersion)
 	}
 
-	if err := zipDirectory(baseDownloadDir, zipName); err != nil {
+	if err := zipDirectory(zipWorkspaceDir, zipName); err != nil {
 		fmt.Printf("❌ Zipping failed : [%v]\n", err)
 		os.Exit(1)
 	}
 
-	// os.RemoveAll("matrix-download")
+	os.RemoveAll("zip-workspace")
+
 	fmt.Printf("\n📦 Package created successfully : [%s]\n", zipName)
 }
