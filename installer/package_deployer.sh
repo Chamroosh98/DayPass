@@ -102,9 +102,8 @@ download_package()
     # Resilient download logic with fallback
     DOWNLOAD_SUCCESS=0
     
-    trap 'rm -f "$tmp" 2>/dev/null; return 1' INT TERM
+    trap 'rm -f "$tmp" 2>/dev/null' INT TERM
 
-    # تنظیم پارامترهای تایم‌اوت برای جلوگیری از Hang در پکت‌لاس
     if command -v curl >/dev/null 2>&1; then
         curl -fsSL --connect-timeout 10 --max-time 60 --speed-time 15 --speed-limit 1000 "$target_url" -o "$tmp" && DOWNLOAD_SUCCESS=1
     elif command -v wget >/dev/null 2>&1; then
@@ -125,7 +124,7 @@ download_package()
     if ! echo "$sha256  $tmp" | sha256sum -c - >/dev/null 2>&1; then
         log_error "Checksum verification FAILED for : [$package]!"
         log_warn "Expected Hash : [$sha256]"
-        rm -f "$tmp"
+        rm -f "$tmp" 2>/dev/null
         trap - INT TERM    # Reset trap
         return 1
     fi
@@ -135,9 +134,7 @@ download_package()
     log_success "Package [$package] verified successfully!"
 }
 
-
 # Orchestrates download, dependency resolution, and batch installation
-
 deploy_targeted_packages()
 {
     rm -f /var/lock/opkg.lock /lib/apk/db/lock /var/run/apk.lock 2>/dev/null
@@ -181,9 +178,6 @@ deploy_targeted_packages()
         file=$(manifest_lookup "file" "$pkg")
         file_basename=$(basename "$file")
         INSTALL_FILES="$INSTALL_FILES $TMP_DIR/$file_basename"
-        
-        # Record package in transaction log BEFORE installation
-        echo "[$pkg]" >> "$TRANSACTION_LOG"
     done
 
     echo
@@ -191,6 +185,11 @@ deploy_targeted_packages()
     log_info "Package List : [$FINAL_PACKAGES]"
     echo
 
+    # Record package in transaction log BEFORE installation
+    for pkg in $FINAL_PACKAGES; do
+        echo "$pkg" >> "$TRANSACTION_LOG"
+    done
+    
     # 2. Perform installation via native package manager
     INSTALL_SUCCESS=0
 
@@ -230,7 +229,9 @@ deploy_targeted_packages()
         fi
 
         # Clear transaction log on successful deployment
+        rm -f $INSTALL_FILES 2>/dev/null
         rm -f "$TRANSACTION_LOG"
+
         log_success "All targeted packages deployed successfully!"
         return 0
     fi
@@ -242,7 +243,6 @@ deploy_targeted_packages()
 
 
 # Rolls back changes if installation fails mid-way
-
 rollback_failed_install()
 {
     echo
@@ -251,27 +251,26 @@ rollback_failed_install()
     log_warn "=================================================="
     echo
 
-    if [ ! -s "$TRANSACTION_LOG" ]; then
-        log_warn "Transaction log is empty! No installed packages to Rollback!"
-        return 0
-    fi
+    # Remove all files from temp 
+    log_info "Cleaning temp files from RAM ..."
+    rm -f "$TMP_DIR"/*.part "$TMP_DIR"/*.apk "$TMP_DIR"/*.ipk 2>/dev/null
 
-    case "$PKG_MANAGER" in
-        opkg)
-            while read -r pkg; do
-                [ -z "$pkg" ] && continue
-                log_info "Rollback : Removing package [$pkg] ..."
-                opkg remove "$pkg" >/dev/null 2>&1 || log_warn "Could not remove : [$pkg]"
-            done < "$TRANSACTION_LOG"
-            ;;
-        apk)
-            while read -r pkg; do
-                [ -z "$pkg" ] && continue
-                log_info "Rollback : Removing package [$pkg] ..."
-                apk del "$pkg" >/dev/null 2>&1 || log_warn "Could not remove : [$pkg]"
-            done < "$TRANSACTION_LOG"
-            ;;
-    esac
+    # Remove the package that exits in transaction log file!
+    if [ -s "$TRANSACTION_LOG" ]; then
+        log_info "Removing partially installed system packages..."
+        while read -r pkg; do
+            [ -z "$pkg" ] && continue
+            clean_pkg=$(echo "$pkg" | tr -d '[]')
+            
+            log_info "Rollback : Removing package [$clean_pkg] ..."
+            case "$PKG_MANAGER" in
+                opkg) opkg remove "$clean_pkg" >/dev/null 2>&1 || log_warn "Could not remove : [$clean_pkg]" ;;
+                apk)  apk del "$clean_pkg" >/dev/null 2>&1 || log_warn "Could not remove : [$clean_pkg]" ;;
+            esac
+        done < "$TRANSACTION_LOG"
+    else
+        log_info "No system packages were installed yet. Skiping package removal."
+    fi
 
     rm -f "$TRANSACTION_LOG"
     log_success "Rollback process completed!"
