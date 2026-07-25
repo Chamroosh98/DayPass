@@ -4,12 +4,12 @@ menu_mode()
 {
     render_persistent_header
 
-    echo "  ┌───────────────────────────────────────────────────────────┐"
-    echo "  │  🕵️‍♀️ Select Installation Mode                              │"
-    echo "  ├───────────────────────────────────────────────────────────┤"
-    echo "  │  1) ⚡ Recommended (Quick & Pre-configured for users)     │"
-    echo "  │  2) 🛠️ Custom      (Advanced package selection)           │"
-    echo "  └───────────────────────────────────────────────────────────┘"
+    echo "  ───────────────────────────────────────────────────────────"
+    echo "    🕵️‍♀️ Select Installation Mode                              "
+    echo "  ───────────────────────────────────────────────────────────"
+    echo "    1) ⚡ Recommended (Quick & Pre-configured for users)     "
+    echo "    2) 🛠️ Custom      (Advanced package selection)           "
+    echo "  ───────────────────────────────────────────────────────────"
     echo
 
     printf "  ⁉️ Select option [1-2] (Default: 1) : "

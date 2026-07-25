@@ -164,20 +164,20 @@ jobs:
         run: |
           echo "🌐 Purging jsDelivr CDN cache for Release ..."
           
-          echo "🔹 Purging main manifest.json:"
+          echo "🔹 Purging main manifest.json : "
           curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/manifest.json" | jq .
           
-          echo "🔹 Purging main install.sh:"
+          echo "🔹 Purging main install.sh : "
           curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/install.sh" | jq .
           
-          echo "🔹 Purging main packages directory:"
+          echo "🔹 Purging main packages directory : "
           curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@packages/" | jq .
           
           echo "✅ Release CDN cache purged successfully!"
 
       - name: 📊 Verify Release Assets Size & Guardrail
         run: |
-          echo "📁 Listing all files in build-artifacts with their sizes:"
+          echo "📁 Listing all files in build-artifacts with their sizes :"
           ls -lh build-artifacts/
           echo "--------------------------------------------------------"
           echo "🚨 Checking for zero-byte files ..."

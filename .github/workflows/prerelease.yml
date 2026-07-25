@@ -162,20 +162,20 @@ jobs:
         run: |
           echo "🌐 Purging jsDelivr CDN cache for Beta ..."
           
-          echo "🔹 Purging beta manifest.json:"
+          echo "🔹 Purging beta manifest.json : "
           curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/beta/manifest.json" | jq .
           
-          echo "🔹 Purging beta install.sh:"
+          echo "🔹 Purging beta install.sh : "
           curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/beta/install.sh" | jq .
           
-          echo "🔹 Purging beta packages directory:"
+          echo "🔹 Purging beta packages directory : "
           curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@packages/beta/" | jq .
           
           echo "✅ Beta CDN cache purged successfully!"
 
       - name: 📊 Verify Release Assets Size & Guardrail
         run: |
-          echo "📁 Listing all files in build-artifacts with their sizes :"
+          echo "📁 Listing all files in build-artifacts with their sizes : "
           ls -lh build-artifacts/
           echo "--------------------------------------------------------"
           echo "🚨 Checking for zero-byte files ..."

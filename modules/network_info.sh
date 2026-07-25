@@ -1,5 +1,7 @@
 #!/bin/sh
 
+render_persistent_header
+
 country_flag()
 {
     case "$1" in
@@ -85,7 +87,7 @@ EOF
             FLAG="$(country_flag "$COUNTRY_CODE")"
         fi
 
-        CITY_STR=""
+        CITY_STR=""sudo pacman -Syu
         [ -n "$CITY" ] && CITY_STR=" ${GRAY}($CITY)${RESET}"
 
         printf "   Public IP   : $PUBLIC_IP\n"
@@ -113,7 +115,11 @@ network_menu()
         case "$net_choice" in
             1) show_live_speed ;;
             2) continue ;;
-            0) break ;;
+            0) echo "Exiting ..."
+                sleep 2
+                clear
+                break 
+                ;;
             *) log_warn "Invalid choice!" ;;
         esac
     done
@@ -124,7 +130,7 @@ show_live_speed() {
     [ ! -d "/sys/class/net/$IFACE" ] && IFACE="eth0"
 
     echo
-    MSG="Monitoring live speed on [${CYAN}$IFACE${RESET}] ${GRAY}(Press Ctrl+C to stop)...${RESET}"
+    MSG="Monitoring live speed on [${CYAN}$IFACE]${RESET} ${GRAY}(Press Ctrl+C to stop)...${RESET}"
     if command -v log_info >/dev/null 2>&1; then
         log_info "$MSG"
     else
