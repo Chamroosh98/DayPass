@@ -45,6 +45,8 @@ run_cell()
     "$@" >"$tmp" 2>&1 &
     pid=$!
 
+    trap 'kill -9 "$pid" 2>/dev/null; rm -f "$tmp" 2>/dev/null; exit 130' INT TERM
+
     spin_chars='-\|/'
     i=0
     while kill -0 "$pid" 2>/dev/null; do

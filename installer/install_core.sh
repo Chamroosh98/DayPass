@@ -1,7 +1,21 @@
 #!/bin/sh
 
+# 🛑 SIGINT / SIGTERM Handler
+cleanup_and_exit() {
+    echo ""
+    log_warn "Installation cancelled by user (Ctrl+C)!"
+    
+    [ -n "$(command -v rollback_failed_install)" ] && rollback_failed_install >/dev/null 2>&1
+    rm -rf /tmp/daypass/*.part 2>/dev/null
+    exit 130
+}
+
+trap cleanup_and_exit INT TERM
+
 initialize_installer()
 {
+    rm -f /var/lock/opkg.lock /lib/apk/db/lock /var/run/apk.lock 2>/dev/null
+    
     # 1. Detect environment and update local package index
     detect_package_manager
 

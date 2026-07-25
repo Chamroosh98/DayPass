@@ -101,17 +101,22 @@ download_package()
 
     # Resilient download logic with fallback
     DOWNLOAD_SUCCESS=0
+    
+    trap 'rm -f "$tmp" 2>/dev/null; return 1' INT TERM
+
+    # تنظیم پارامترهای تایم‌اوت برای جلوگیری از Hang در پکت‌لاس
     if command -v curl >/dev/null 2>&1; then
-        curl -fsSL "$target_url" -o "$tmp" && DOWNLOAD_SUCCESS=1
+        curl -fsSL --connect-timeout 10 --max-time 60 --speed-time 15 --speed-limit 1000 "$target_url" -o "$tmp" && DOWNLOAD_SUCCESS=1
     elif command -v wget >/dev/null 2>&1; then
-        wget -qO "$tmp" "$target_url" && DOWNLOAD_SUCCESS=1
+        wget -q --timeout=15 --tries=2 -O "$tmp" "$target_url" && DOWNLOAD_SUCCESS=1
     elif command -v uclient-fetch >/dev/null 2>&1; then
-        uclient-fetch -q -O "$tmp" "$target_url" && DOWNLOAD_SUCCESS=1
+        uclient-fetch -q --timeout=15 -O "$tmp" "$target_url" && DOWNLOAD_SUCCESS=1
     fi
 
     if [ "$DOWNLOAD_SUCCESS" -ne 1 ] || [ ! -s "$tmp" ]; then
         log_error "Download failed or produced empty file for : [$package]!"
         rm -f "$tmp"
+        trap - INT TERM    # Reset trap 
         return 1
     fi
 
@@ -121,10 +126,12 @@ download_package()
         log_error "Checksum verification FAILED for : [$package]!"
         log_warn "Expected Hash : [$sha256]"
         rm -f "$tmp"
+        trap - INT TERM    # Reset trap
         return 1
     fi
 
     mv "$tmp" "$target"
+    trap - INT TERM    # Reset trap
     log_success "Package [$package] verified successfully!"
 }
 
@@ -133,6 +140,8 @@ download_package()
 
 deploy_targeted_packages()
 {
+    rm -f /var/lock/opkg.lock /lib/apk/db/lock /var/run/apk.lock 2>/dev/null
+
     mkdir -p "$(dirname "$INSTALL_LOG")"
     touch "$INSTALL_LOG"
     
