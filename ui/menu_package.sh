@@ -4,12 +4,12 @@ package_menu()
 {
     render_persistent_header
 
-    echo "  ┌───────────────────────────────────────────────────────────┐"
-    echo "  │  🕵️‍♀️ Select Package Type                                   │"
-    echo "  ├───────────────────────────────────────────────────────────┤"
-    echo "  │  🔒 1) Passwall-1  (Legacy Stable Release)                │"
-    echo "  │  🔒 2) Passwall-2  (Modern Release - Recommended)         │"
-    echo "  └───────────────────────────────────────────────────────────┘"
+    echo "  ───────────────────────────────────────────────────────────"
+    echo "    🕵️‍♀️ Select Package Type                                   "
+    echo "  ───────────────────────────────────────────────────────────"
+    echo "    🔒 1) Passwall-1  (Legacy Stable Release)                "
+    echo "    🔒 2) Passwall-2  (Modern Release - Recommended)         "
+    echo "  ───────────────────────────────────────────────────────────"
     echo
 
     printf "  ⁉️ Select option [1-2] : "

@@ -101,7 +101,9 @@ jobs:
         with:
           pattern: raw-release-*
           path: packages-branch-content/
-          merge-multiple: false
+          # merge-multiple: false
+          merge-multiple: true
+
 
       - name: 📂 Restructure Architecture Folders for CDN
         run: |
@@ -142,6 +144,7 @@ jobs:
           folder: github-pages-content
           target-folder: .
           branch: gh-pages
+          clean: false         
           single-commit: true
 
       - name: 🔍 Debug & Verify Raw Packages Tree Structure
@@ -159,14 +162,22 @@ jobs:
 
       - name: 🧹 Purge jsDelivr Cache for Manifest & Packages
         run: |
-          echo "🌐 Purging jsDelivr CDN cache ..."
-          curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/manifest.json"
-          curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/install.sh"
-          echo "✅ CDN cache purged successfully!"
+          echo "🌐 Purging jsDelivr CDN cache for Release ..."
+          
+          echo "🔹 Purging main manifest.json : "
+          curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/manifest.json" | jq .
+          
+          echo "🔹 Purging main install.sh : "
+          curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/install.sh" | jq .
+          
+          echo "🔹 Purging main packages directory : "
+          curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@packages/" | jq .
+          
+          echo "✅ Release CDN cache purged successfully!"
 
       - name: 📊 Verify Release Assets Size & Guardrail
         run: |
-          echo "📁 Listing all files in build-artifacts with their sizes:"
+          echo "📁 Listing all files in build-artifacts with their sizes :"
           ls -lh build-artifacts/
           echo "--------------------------------------------------------"
           echo "🚨 Checking for zero-byte files ..."

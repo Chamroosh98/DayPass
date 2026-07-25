@@ -32,7 +32,7 @@ fi
 
 log_info() {
 
-    printf "%b\n""${CYAN}ℹ️${NC} $*"
+    printf "%b\n""${GRAY}ℹ️${NC} $*"
 
 }
 

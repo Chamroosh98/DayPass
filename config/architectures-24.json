@@ -1,0 +1,113 @@
+{
+  "release": "24.10",
+  "architectures": [
+    {
+      "name": "x86_64",
+      "provider": "sourceforge",
+      "repository": "openwrt-passwall-build",
+      "branch": "releases",
+      "base_url": "https://master.dl.sourceforge.net/project/openwrt-passwall-build/releases/packages-24.10/x86_64",
+      "feeds": [
+        "passwall_packages",
+        "passwall2",
+        "passwall_luci"
+      ]
+    },
+    {
+      "name": "mipsel_24kc",
+      "provider": "sourceforge",
+      "repository": "openwrt-passwall-build",
+      "branch": "releases",
+      "base_url": "https://master.dl.sourceforge.net/project/openwrt-passwall-build/releases/packages-24.10/mipsel_24kc",
+      "feeds": [
+        "passwall_packages",
+        "passwall2",
+        "passwall_luci"
+      ]
+    },
+    {
+      "name": "i386_pentium4",
+      "provider": "sourceforge",
+      "repository": "openwrt-passwall-build",
+      "branch": "releases",
+      "base_url": "https://master.dl.sourceforge.net/project/openwrt-passwall-build/releases/packages-24.10/i386_pentium4",
+      "feeds": [
+        "passwall_packages",
+        "passwall2",
+        "passwall_luci"
+      ]
+    },
+    {
+      "name": "aarch64_cortex-a53",
+      "provider": "sourceforge",
+      "repository": "openwrt-passwall-build",
+      "branch": "releases",
+      "base_url": "https://master.dl.sourceforge.net/project/openwrt-passwall-build/releases/packages-24.10/aarch64_cortex-a53",
+      "feeds": [
+        "passwall_packages",
+        "passwall2",
+        "passwall_luci"
+      ]
+    },
+    {
+      "name": "aarch64_cortex-a72",
+      "provider": "sourceforge",
+      "repository": "openwrt-passwall-build",
+      "branch": "releases",
+      "base_url": "https://master.dl.sourceforge.net/project/openwrt-passwall-build/releases/packages-24.10/aarch64_cortex-a72",
+      "feeds": [
+        "passwall_packages",
+        "passwall2",
+        "passwall_luci"
+      ]
+    },
+    {
+      "name": "aarch64_cortex-a76",
+      "provider": "sourceforge",
+      "repository": "openwrt-passwall-build",
+      "branch": "releases",
+      "base_url": "https://master.dl.sourceforge.net/project/openwrt-passwall-build/releases/packages-24.10/aarch64_cortex-a76",
+      "feeds": [
+        "passwall_packages",
+        "passwall2",
+        "passwall_luci"
+      ]
+    },
+    {
+      "name": "aarch64_generic",
+      "provider": "sourceforge",
+      "repository": "openwrt-passwall-build",
+      "branch": "releases",
+      "base_url": "https://master.dl.sourceforge.net/project/openwrt-passwall-build/releases/packages-24.10/aarch64_generic",
+      "feeds": [
+        "passwall_packages",
+        "passwall2",
+        "passwall_luci"
+      ]
+    },
+    {
+      "name": "arm_cortex-a7_neon-vfpv4",
+      "provider": "sourceforge",
+      "repository": "openwrt-passwall-build",
+      "branch": "releases",
+      "base_url": "https://master.dl.sourceforge.net/project/openwrt-passwall-build/releases/packages-24.10/arm_cortex-a7_neon-vfpv4",
+      "feeds": [
+        "passwall_packages",
+        "passwall2",
+        "passwall_luci"
+      ]
+    },
+    {
+      "name": "arm_cortex-a9_vfpv3-d16",
+      "provider": "sourceforge",
+      "repository": "openwrt-passwall-build",
+      "branch": "releases",
+      "base_url": "https://master.dl.sourceforge.net/project/openwrt-passwall-build/releases/packages-24.10/arm_cortex-a9_vfpv3-d16",
+      "feeds": [
+        "passwall_packages",
+        "passwall2",
+        "passwall_luci"
+      ]
+    }
+  ]
+}

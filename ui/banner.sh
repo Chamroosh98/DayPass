@@ -37,6 +37,6 @@ show_banner()
     # printf "                ${GRAY}%s${RESET}\n" "${VERSION:-v2.1.0}"
 
     echo
-    printf " ${GRAY}───────────────────── 🕊️  Remembering the IRAN Massacre on Jan 8-9, 2026 ─────────────────────${RESET}\n"
+    printf " ${GRAY}───────────────────── 🕊️ Remembering the IRAN Massacre on Jan 8-9, 2026 ─────────────────────${RESET}\n"
     echo
 }

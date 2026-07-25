@@ -57,12 +57,11 @@ resource_compare()
     STORAGE_STR="${STORAGE_USED} MB"
 
     echo
-    echo "  ┌───────────────────────────────────────────────────────────┐"
-    echo "  │ 📊 System Resource Impact                                 │"
-    echo "  ├───────────────────────────────────────────────────────────┤"
-    printf "  │ 🧠 RAM Consumed     : %-35s │\n" "$RAM_STR"
-    printf "  │ 💾 Storage Consumed : %-35s │\n" "$STORAGE_STR"
-    echo "  └───────────────────────────────────────────────────────────┘"
+    echo "   📊 System Resource Impact                                 "
+    echo "  ───────────────────────────────────────────────────────────"
+    printf "   🧠 RAM Consumed     : %-35s │\n" "$RAM_STR"
+    printf "   💾 Storage Consumed : %-35s │\n" "$STORAGE_STR"
+    echo "  ───────────────────────────────────────────────────────────"
     echo
 }
 
@@ -86,11 +85,10 @@ estimate_install_size()
     PKG_COUNT=$(echo "$FINAL_PACKAGES" | wc -w | tr -d ' ')
 
     echo
-    echo "  ┌───────────────────────────────────────────────────────────┐"
-    echo "  │ 📥 Download & Deployment Estimate                         │"
-    echo "  ├───────────────────────────────────────────────────────────┤"
-    printf "  │ 📦 Packages Count   : %-35s │\n" "${PKG_COUNT:-0}"
-    printf "  │ 💾 Total Download   : %-35s │\n" "$SIZE_DISPLAY"
-    echo "  └───────────────────────────────────────────────────────────┘"
+    echo "   📥 Download & Deployment Estimate                         "
+    echo "  ───────────────────────────────────────────────────────────"
+    printf "   📦 Packages Count   : %-35s │\n" "${PKG_COUNT:-0}"
+    printf "   💾 Total Download   : %-35s │\n" "$SIZE_DISPLAY"
+    echo "  ───────────────────────────────────────────────────────────"
     echo
 }
