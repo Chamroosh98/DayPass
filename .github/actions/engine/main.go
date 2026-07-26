@@ -48,89 +48,102 @@ func main() {
 	repo := os.Getenv("GITHUB_REPOSITORY")
 	releaseType := os.Getenv("INPUT_RELEASE_TYPE")
 
-	archConfigFile := os.Getenv("DAYPASS_ARCH_FILE")
-	if archConfigFile == "" {
-		archConfigFile = "config/architectures.json"
-	}
-	outputDirectory := os.Getenv("DAYPASS_OUTPUT_DIR")
-	if outputDirectory == "" {
-		outputDirectory = "manifest-workspace"
-	}
+	versions := []string{"24", "25"}
 
-	fmt.Println("🦫 Go Engine Active & Merging Matrix Artifacts ...")
-
-	configData, err := os.ReadFile(archConfigFile)
-	if err != nil {
-		fmt.Printf("❌ Failed to read arch config : [%v]\n", err)
-		os.Exit(1)
-	}
-
-	var archConfig ArchConfig
-	if err := json.Unmarshal(configData, &archConfig); err != nil {
-		fmt.Printf("❌ Failed to parse arch config : [%v]\n", err)
-		os.Exit(1)
-	}
-
+	fmt.Println("🦫 Go Engine Active & Merging Multi-Version Matrix Artifacts ...")
 	os.MkdirAll("build-artifacts", 0755)
 
-	// Unzip all matrix outputs into their respective directories for manifest generation
-	for _, arch := range archConfig.Architectures {
-		destDir := fmt.Sprintf("%s/%s", outputDirectory, arch.Name)
-		os.MkdirAll(destDir, 0755)
+	for _, ver := range versions {
+		archConfigFile := fmt.Sprintf("config/architectures_%s.json", ver)
+		if _, err := os.Stat(archConfigFile); os.IsNotExist(err) {
+			continue
+		}
 
-		matches, _ := filepath.Glob(fmt.Sprintf("merged-beta/DayPass_%s_*.zip", arch.Name))
-		if len(matches) > 0 {
-			zipFile := matches[0]
-			fmt.Printf("📦 Extracting matrix artifact : [%s]\n", zipFile)
+		fmt.Printf("\n⚙️ Processing OpenWrt Version [%s] ...\n", ver)
 
-			r, err := zip.OpenReader(zipFile)
-			if err != nil {
-				fmt.Printf("❌ Error opening zip [%s] : [%v]\n", zipFile, err)
-				continue
+		configData, err := os.ReadFile(archConfigFile)
+		if err != nil {
+			fmt.Printf("❌ Failed to read arch config [%s]: %v\n", archConfigFile, err)
+			continue
+		}
+
+		var archConfig ArchConfig
+		if err := json.Unmarshal(configData, &archConfig); err != nil {
+			fmt.Printf("❌ Failed to parse config [%s]: %v\n", archConfigFile, err)
+			continue
+		}
+
+		verOutputDir := fmt.Sprintf("manifest-workspace/v%s", ver)
+
+		// Unzip matrix outputs
+		for _, arch := range archConfig.Architectures {
+			destDir := fmt.Sprintf("%s/%s", verOutputDir, arch.Name)
+			os.MkdirAll(destDir, 0755)
+
+			matches, _ := filepath.Glob(fmt.Sprintf("merged-beta/DayPass_v%s_%s_*.zip", ver, arch.Name))
+			if len(matches) == 0 {
+				matches, _ = filepath.Glob(fmt.Sprintf("merged-release/DayPass_v%s_%s_*.zip", ver, arch.Name))
 			}
 
-			for _, f := range r.File {
-				if filepath.Base(f.Name) == "index.json" {
-					continue
-				}
+			if len(matches) > 0 {
+				zipFile := matches[0]
+				fmt.Printf("📦 Extracting matrix artifact : [%s]\n", zipFile)
 
-				fpath := filepath.Join(destDir, f.Name)
-				if f.FileInfo().IsDir() {
-					os.MkdirAll(fpath, os.ModePerm)
-					continue
-				}
-				os.MkdirAll(filepath.Dir(fpath), os.ModePerm)
-
-				err := func() error {
-					outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
-					if err != nil {
-						return err
-					}
-					defer outFile.Close()
-					rc, err := f.Open()
-					if err != nil {
-						return err
-					}
-					defer rc.Close()
-					_, err = io.Copy(outFile, rc)
-					return err
-				}()
+				r, err := zip.OpenReader(zipFile)
 				if err != nil {
-					fmt.Printf("❌ Error extracting file [%s] : [%v]\n", f.Name, err)
+					fmt.Printf("❌ Error opening zip [%s] : [%v]\n", zipFile, err)
+					continue
 				}
+
+				for _, f := range r.File {
+					if filepath.Base(f.Name) == "index.json" {
+						continue
+					}
+
+					fpath := filepath.Join(destDir, f.Name)
+					if f.FileInfo().IsDir() {
+						os.MkdirAll(fpath, os.ModePerm)
+						continue
+					}
+					os.MkdirAll(filepath.Dir(fpath), os.ModePerm)
+
+					func() {
+						outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+						if err != nil {
+							return
+						}
+						defer outFile.Close()
+						rc, err := f.Open()
+						if err != nil {
+							return
+						}
+						defer rc.Close()
+						io.Copy(outFile, rc)
+					}()
+				}
+				r.Close()
 			}
-			r.Close()
+		}
+
+		// Generate Manifest per Version
+		fmt.Printf("🧠 Compiling Manifest for v%s ...\n", ver)
+		if err := GenerateManifest(archConfigFile, verOutputDir, ver); err != nil {
+			fmt.Printf("❌ Error generating manifest for v%s: %v\n", ver, err)
+		}
+
+		// Isolating Manifest for Pages
+		targetVerArtifactDir := fmt.Sprintf("build-artifacts/v%s", ver)
+		os.MkdirAll(targetVerArtifactDir, 0755)
+		copyFile(filepath.Join(verOutputDir, "manifest.json"), filepath.Join(targetVerArtifactDir, "manifest.json"))
+
+		// اگر نسخه 25 بود، به عنوان نسخه Root هم کپی می‌کنیم
+		if ver == "25" {
+			copyFile(filepath.Join(verOutputDir, "manifest.json"), "build-artifacts/manifest.json")
 		}
 	}
 
-	fmt.Println("🧠 Processing & Generating Real Manifest Data ...")
-	if err := GenerateManifest(archConfigFile, outputDirectory); err != nil {
-		fmt.Printf("❌ Error generating manifest : [%v]\n", err)
-		os.Exit(1)
-	}
-
-	// Generate SHA256 hashes for all zip packages
-	zipMatches, _ := filepath.Glob("merged-beta/DayPass_*_*.zip")
+	// Calculate SHA256 Hashes
+	zipMatches, _ := filepath.Glob("merged-*/DayPass_v*.zip")
 	for _, zipFile := range zipMatches {
 		func() {
 			f, err := os.Open(zipFile)
@@ -144,38 +157,22 @@ func main() {
 			shaFileName := filepath.Base(zipFile) + ".sha256"
 
 			os.WriteFile("build-artifacts/"+shaFileName, []byte(fileSHA+"  "+filepath.Base(zipFile)+"\n"), 0644)
-
-			copyFile(zipFile, "build-artifacts/"+filepath.Base(zipFile))
 		}()
 	}
 
-	copyFile(filepath.Join(outputDirectory, "manifest.json"), "build-artifacts/manifest.json")
-
+	// Compile Core Install Script
 	if err := generateInstallScript("build-artifacts/install.sh"); err != nil {
 		fmt.Printf("❌ Failed to compile install.sh : [%v]\n", err)
 	}
 
-	fmt.Println("\n📊 Checking Release Assets Sizes :")
-	files, _ := filepath.Glob("build-artifacts/*")
-	for _, f := range files {
-		info, err := os.Stat(f)
-		if err == nil {
-			if info.IsDir() {
-				continue
-			}
-
-			if info.Size() == 0 {
-				fmt.Printf("❌ CRITICAL WARNING : [%s] is 0 bytes!\n", filepath.Base(f))
-			} else {
-				fmt.Printf("📦 [%s] -> %d bytes (%.2f KB)\n", filepath.Base(f), info.Size(), float64(info.Size())/1024.0)
-			}
+	fmt.Println("\n📊 Checking Final Release Assets Structure :")
+	filepath.Walk("build-artifacts", func(path string, info os.FileInfo, err error) error {
+		if err == nil && !info.IsDir() {
+			fmt.Printf("📦 [%s] -> %.2f KB\n", path, float64(info.Size())/1024.0)
 		}
-	}
-	fmt.Println()
+		return nil
+	})
 
-	// Call Telegram notification module
-	SendTelegramNotification(
-		botToken, chatID, version, buildNum, actor, repo, releaseType,
-		archConfig.Architectures,
-	)
+	// Telegram Notification
+	SendTelegramNotification(botToken, chatID, version, buildNum, actor, repo, releaseType)
 }

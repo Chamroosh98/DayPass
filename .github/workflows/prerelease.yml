@@ -20,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        ow_version: ["24", "25"]
         arch: [
           "aarch64_cortex-a53", "aarch64_cortex-a72", "aarch64_cortex-a76",
           "aarch64_generic", "arm_cortex-a7_neon-vfpv4", "arm_cortex-a9_vfpv3-d16",
@@ -42,27 +43,27 @@ jobs:
       - name: 🗓️ Restore / Save DayPass Downloads Cache
         uses: actions/cache@v4
         with:
-          path: .cache/downloads/${{ matrix.arch }}
-          key: daypass-cache-${{ matrix.arch }}-${{ hashFiles('config/architectures.json') }}
+          path: .cache/downloads/v${{ matrix.ow_version }}/${{ matrix.arch }}
+          key: daypass-cache-v${{ matrix.ow_version }}-${{ matrix.arch }}-${{ hashFiles(format('config/architectures_{0}.json', matrix.ow_version)) }}
           restore-keys: |
-            daypass-cache-${{ matrix.arch }}-
+            daypass-cache-v${{ matrix.ow_version }}-${{ matrix.arch }}-
 
       - name: 📥 Download Packages & Create Zip via Go Fetcher
         run: |
-          go run .github/actions/fetch.go ${{ matrix.arch }} ${{ env.VERSION }} beta
+          go run .github/actions/fetch.go ${{ matrix.arch }} ${{ env.VERSION }} beta ${{ matrix.ow_version }}
 
       - name: 📤 Upload Zip Artifact (For GitHub Releases)
         uses: actions/upload-artifact@v4
         with:
-          name: beta-${{ matrix.arch }}
-          path: DayPass_${{ matrix.arch }}_*_beta.zip
+          name: beta-v${{ matrix.ow_version }}-${{ matrix.arch }}
+          path: DayPass_v${{ matrix.ow_version }}_${{ matrix.arch }}_*_beta.zip
           retention-days: 1
 
       - name: 📤 Upload Raw Packages Artifact (For CDN 'packages' Branch)
         uses: actions/upload-artifact@v4
         with:
-          name: raw-beta-${{ matrix.arch }}
-          path: matrix-download/${{ matrix.arch }}
+          name: raw-beta-v${{ matrix.ow_version }}-${{ matrix.arch }}
+          path: matrix-download/v${{ matrix.ow_version }}/${{ matrix.arch }}
           retention-days: 1
 
   deploy:
@@ -107,14 +108,18 @@ jobs:
           path: packages-branch-content/
           merge-multiple: false
 
-      - name: 📂 Restructure Architecture Folders for CDN
+      - name: 📂 Restructure Architecture Folders for CDN Tree
         run: |
           cd packages-branch-content
-          for dir in raw-beta-*; do
+          for dir in raw-beta-v*; do
             if [ -d "$dir" ]; then
-              arch_name="${dir#raw-beta-}"
-              mv "$dir" "$arch_name"
-              echo "✅ Restructured : 📂 $dir -> ⛏️ $arch_name"
+              raw_name="${dir#raw-beta-}" # v24-x86_64
+              ver="${raw_name%%-*}"       # v24
+              arch="${raw_name#*-}"       # x86_64
+              
+              mkdir -p "$ver"
+              mv "$dir" "$ver/$arch"
+              echo "✅ Restructured CDN Directory : 📂 $dir -> ⛏️ $ver/$arch"
             fi
           done
 
@@ -127,7 +132,6 @@ jobs:
           INPUT_ACTOR: ${{ github.actor }}
           INPUT_RELEASE_TYPE: "beta"
           GITHUB_REPOSITORY: ${{ github.repository }}
-          DAYPASS_ARCH_FILE: ${{ github.workspace }}/config/architectures.json
           DAYPASS_OUTPUT_DIR: ${{ github.workspace }}/build-artifacts
         run: |
           cd .github/actions/engine/
@@ -136,11 +140,11 @@ jobs:
       - name: 🕵️‍♀️ Prepare GitHub Pages Assets
         run: |
           mkdir -p github-pages-content
-          cp build-artifacts/install.sh github-pages-content/
-          cp build-artifacts/manifest.json github-pages-content/
-          echo "✅ Isolated install.sh and manifest.json for Pages deployment!"
+          # کپی فایل‌های روت و ساب‌فولدرهای نسخه
+          cp -r build-artifacts/* github-pages-content/
+          echo "✅ Prepared manifest structures & install.sh for Pages deployment!"
 
-      - name: 🌐 Deploy to GitHub Pages
+      - name: 🌐 Deploy Manifests to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: github-pages-content  
@@ -149,38 +153,28 @@ jobs:
           clean: false         
           single-commit: true
 
-      - name: 🔍 Debug & Verify Raw Packages Tree Structure
-        run: |
-          echo "📂 Checking packages-branch-content directory:"
-          ls -la packages-branch-content/
-          find packages-branch-content/ -maxdepth 2 -type d
-          
-      - name: 🚀 Deploy Binary Packages to 'packages' Branch (Overwriting)
+      - name: 🚀 Deploy Binary Packages to 'packages' Branch
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: packages-branch-content
           branch: packages
+          target-folder: beta
+          clean: false
           single-commit: true
 
-      - name: 🧹 Purge jsDelivr Cache for Manifest & Packages
+      - name: 🧹 Purge jsDelivr Cache for Manifests & Packages
         run: |
           echo "🌐 Purging jsDelivr CDN cache for Beta ..."
-          
-          echo "🔹 Purging beta manifest.json : "
           curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/beta/manifest.json" | jq .
-          
-          echo "🔹 Purging beta install.sh : "
+          curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/beta/v24/manifest.json" | jq .
+          curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/beta/v25/manifest.json" | jq .
           curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/beta/install.sh" | jq .
-          
-          echo "🔹 Purging beta packages directory : "
-          curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@packages/beta/" | jq .
-          
           echo "✅ Beta CDN cache purged successfully!"
 
       - name: 📊 Verify Release Assets Size & Guardrail
         run: |
           echo "📁 Listing all files in build-artifacts with their sizes : "
-          ls -lh build-artifacts/
+          find build-artifacts/ -type f -exec ls -lh {} +
           echo "--------------------------------------------------------"
           echo "🚨 Checking for zero-byte files ..."
           if find build-artifacts/ -type f -empty | grep -q .; then
@@ -188,7 +182,7 @@ jobs:
             find build-artifacts/ -type f -empty
             exit 1
           fi
-          echo "✅ All release assets have valid file sizes and are ready for upload!"
+          echo "✅ All release assets have valid file sizes!"
 
       - name: 🧪 Create and Upload Pre-Release Packages to GitHub Release
         uses: softprops/action-gh-release@v2
@@ -201,8 +195,9 @@ jobs:
             📅 Date  : `${{ env.VERSION }}`
             🧪 Build : `${{ github.run_number }}`
           files: |
-            build-artifacts/*.zip
+            merged-beta/*.zip
             build-artifacts/*.sha256
+            build-artifacts/**/*.sha256
 
       - name: 🧹 Cleanup old beta releases
         uses: dev-drprasad/delete-older-releases@v0.3.4

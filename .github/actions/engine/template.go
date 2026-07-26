@@ -34,21 +34,14 @@ func generateInstallScript(outputFile string) error {
 	scriptBuilder.WriteString("export REPO_URL\n\n")
 
 	installerFiles := []string{
-		// 1. Core Installer Logic
-		"installer/network_checker.sh",
-		"installer/package_manager.sh", 
-		"installer/install_core.sh",
-		"installer/package_deployer.sh",
-		"installer/package_resolver.sh",
-
-		// 2. UI Base Libraries & Styles
+		// 1. UI Base Libraries & Styles (MUST BE FIRST for log_info/log_error functions)
 		"ui/lib/styles.sh",
 		"ui/lib/box_utils.sh",
 		"ui/lib/header.sh",
 		"ui/lib/progress.sh",
 		"ui/banner.sh",
-		
-		// 3. Hardware & System Modules
+
+		// 2. Hardware, OS & System Modules (Includes version_check & zero_deps)
 		"modules/zero_deps.sh",
 		"modules/version_check.sh",
 		"modules/system_info.sh",
@@ -56,8 +49,14 @@ func generateInstallScript(outputFile string) error {
 		"modules/resource_monitor.sh",
 		"modules/dns_fix.sh",
 
-		// 4. UI Components & Menus
-		
+		// 3. Core Installer Logic & Package Managers
+		"installer/network_checker.sh",
+		"installer/package_manager.sh", 
+		"installer/install_core.sh",
+		"installer/package_deployer.sh",
+		"installer/package_resolver.sh",
+
+		// 4. UI Components, States & Menus
 		"ui/state.sh",
 		"ui/menu_recommended.sh",
 		"ui/menu_custom.sh",
@@ -90,42 +89,42 @@ func generateInstallScript(outputFile string) error {
 
 
 	scriptBuilder.WriteString(`
+
 ###############################################################################
 # Runtime Execution Pipeline
 ###############################################################################
 DEPLOYMENT_FAILED=0
 
-# 🔴🔴🔴🔴🔴🔴🔴 The execution order of the modules is important! 🔴🔴🔴🔴🔴🔴🔴
-# ============= Checking network connection =============
+# 1
 network_check || exit 1
 
-# ============= Installing requirements =================
-deploy_system_dependencies
-
-# Continue initialization
-check_version
+# 2
+check_version || exit 1
 detect_arch
+
+# 3
+deploy_system_dependencies
 initialize_installer
 
-# ============= Pre-TUI Smooth Transition =============
+# 4
 for i in 3 2 1; do
-    printf "\r🚀 Launching DayPass Interactive UI in \033[1;33m%d\033[0m seconds... (Press \033[1;36m[Enter]\033[0m to skip) " "$i"
+    printf "\r🚀 Launching DayPass Interactive UI in \033[1;33m%d\033[0m seconds ... (Press \033[1;36m[Enter]\033[0m to skip) " "$i"
     if read -t 1 -r; then
         break
     fi
 done
 
-# Launching TUI Interface
 clear
 reset_state
 main_menu
 
-# Execution
+# 5
 deploy_targeted_packages
 
 echo
 echo "🎉 DayPass installation completed successfully! ;))"
 exit 0
+
 `)
 
 

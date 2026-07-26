@@ -90,33 +90,43 @@ func fileExists(path string) bool {
 
 func main() {
 	if len(os.Args) < 3 {
-		fmt.Println("❌ Usage : go run fetch.go <architecture> <release_version> [release_type]")
+		fmt.Println("❌ Usage : go run fetch.go <architecture> <release_version> [release_type] [ow_version]")
 		os.Exit(1)
 	}
 	targetArch := os.Args[1]
 	releaseVersion := os.Args[2]
 
 	releaseType := "release"
-	if len(os.Args) > 3 {
+	if len(os.Args) > 3 && os.Args[3] != "" {
 		releaseType = os.Args[3]
 	}
 
-	configData, err := os.ReadFile("config/architectures.json")
+	owVersion := "25"
+	if len(os.Args) > 4 && os.Args[4] != "" {
+		owVersion = os.Args[4]
+	}
+
+	configFile := fmt.Sprintf("config/architectures_%s.json", owVersion)
+	if !fileExists(configFile) {
+		// Fallback
+		configFile = "config/architectures.json"
+	}
+
+	configData, err := os.ReadFile(configFile)
 	if err != nil {
-		fmt.Printf("❌ Failed to read arch config : %v\n", err)
+		fmt.Printf("❌ Failed to read arch config [%s]: %v\n", configFile, err)
 		os.Exit(1)
 	}
 
 	var archConfig ArchConfig
 	if err := json.Unmarshal(configData, &archConfig); err != nil {
-		fmt.Printf("❌ Failed to parse json : %v\n", err)
+		fmt.Printf("❌ Failed to parse json [%s]: %v\n", configFile, err)
 		os.Exit(1)
 	}
 
-	persistentCacheDir := fmt.Sprintf(".cache/downloads/%s", targetArch)
-	baseDownloadDir := fmt.Sprintf("matrix-download/%s", targetArch)
-	
-	zipWorkspaceDir := fmt.Sprintf("zip-workspace/%s", targetArch)
+	persistentCacheDir := fmt.Sprintf(".cache/downloads/v%s/%s", owVersion, targetArch)
+	baseDownloadDir := fmt.Sprintf("matrix-download/v%s/%s", owVersion, targetArch)
+	zipWorkspaceDir := fmt.Sprintf("zip-workspace/v%s/%s", owVersion, targetArch)
 
 	os.MkdirAll(persistentCacheDir, 0755)
 	os.MkdirAll(baseDownloadDir, 0755)
@@ -128,7 +138,7 @@ func main() {
 			continue
 		}
 		found = true
-		fmt.Printf("\n🗜️ Processing [%s]\n", targetArch)
+		fmt.Printf("\n🗜️ Processing OpenWrt [%s] -> Arch [%s]\n", owVersion, targetArch)
 
 		for _, feed := range arch.Feeds {
 			feedCacheDir := filepath.Join(persistentCacheDir, feed)
@@ -140,10 +150,9 @@ func main() {
 			os.MkdirAll(zipFeedOutputDir, 0755)
 
 			feedURL := fmt.Sprintf("%s/%s", arch.BaseURL, feed)
-			
 			tempIndexPath := filepath.Join(feedCacheDir, "index.json")
 
-			fmt.Printf("\n💰 Feed : %s\n", feed)
+			fmt.Printf("💰 Feed : %s\n", feed)
 			if err := downloadWithCurl(feedURL+"/index.json", tempIndexPath); err != nil {
 				fmt.Printf("❌ Failed to download index for [%s]\n", feed)
 				continue
@@ -159,8 +168,6 @@ func main() {
 				fmt.Printf("⚠️ Formatting error on index [%s] : %v\n", feed, err)
 				continue
 			}
-
-			fmt.Println("⌛ Repository index updated!")
 
 			cachedCount := 0
 			downloadedCount := 0
@@ -198,15 +205,15 @@ func main() {
 	}
 
 	if !found {
-		fmt.Printf("❌ Architecture [%s] not found\n", targetArch)
+		fmt.Printf("❌ Architecture [%s] not found in OpenWrt %s config\n", targetArch, owVersion)
 		os.Exit(1)
 	}
 
 	var zipName string
 	if releaseType == "release" || releaseType == "main" || releaseType == "stable" {
-		zipName = fmt.Sprintf("DayPass_%s_%s.zip", targetArch, releaseVersion)
+		zipName = fmt.Sprintf("DayPass_v%s_%s_%s.zip", owVersion, targetArch, releaseVersion)
 	} else {
-		zipName = fmt.Sprintf("DayPass_%s_%s_beta.zip", targetArch, releaseVersion)
+		zipName = fmt.Sprintf("DayPass_v%s_%s_%s_beta.zip", owVersion, targetArch, releaseVersion)
 	}
 
 	if err := zipDirectory(zipWorkspaceDir, zipName); err != nil {
@@ -215,6 +222,5 @@ func main() {
 	}
 
 	os.RemoveAll("zip-workspace")
-
 	fmt.Printf("\n📦 Package created successfully : [%s]\n", zipName)
 }
