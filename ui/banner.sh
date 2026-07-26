@@ -24,7 +24,7 @@ show_banner()
     echo
 
     printf "${W_LOGO}          .=:   :-+++=-.      ${CYAN}____              ____${RESET}\n"
-    printf "${W_LOGO}      .-+*#%- :*##+==*##=     ${CYAN}|  _ \  __ _ _   _|  _ \  __ _ ___ ___${RESET}\n"
+    printf "${W_LOGO}      .-+*##- :*##+==*##=     ${CYAN}|  _ \  __ _ _   _|  _ \  __ _ ___ ___${RESET}\n"
     printf "${W_LOGO}      =#*###:.##+     =*#-    ${CYAN}| | | |/ _\` | | | | |_) / _\` / __/ __|${RESET}\n"
     printf "${W_LOGO}      .  **#: ***:   .+#*.    ${CYAN}| |_| | (_| | |_| |  __/ (_| \__ \__ \\\\${RESET}\n"
     printf "${R_LOGO}        .**#: .+***++*+=.     ${CYAN}|____/ \__,_|\__, |_|   \__,_|___/___/${RESET}\n"
