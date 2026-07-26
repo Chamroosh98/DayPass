@@ -116,7 +116,6 @@ func main() {
 	persistentCacheDir := fmt.Sprintf(".cache/downloads/%s", targetArch)
 	baseDownloadDir := fmt.Sprintf("matrix-download/%s", targetArch)
 	
-	// 📂 ساخت دایرکتوری موقت مجزا برای ساخت زیپ با Subfolder
 	zipWorkspaceDir := fmt.Sprintf("zip-workspace/%s", targetArch)
 
 	os.MkdirAll(persistentCacheDir, 0755)
@@ -157,7 +156,7 @@ func main() {
 
 			var feedIdx FeedIndex
 			if err := json.Unmarshal(indexData, &feedIdx); err != nil {
-				fmt.Printf("⚠️ Formatting error on index [%s]: %v\n", feed, err)
+				fmt.Printf("⚠️ Formatting error on index [%s] : %v\n", feed, err)
 				continue
 			}
 
