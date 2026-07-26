@@ -32,24 +32,24 @@ fi
 
 log_info() {
 
-    printf "%b\n""${GRAY}ℹ️${NC} $*"
+    printf "%b\n" "${GRAY}ℹ️${NC} $*"
 
 }
 
 log_success() {
 
-    printf "%b\n""${GREEN}✅${NC} $*"
+    printf "%b\n" "${GREEN}✅${NC} $*"
 
 }
 
 log_warn() {
 
-    printf "%b\n""${YELLOW}⚠️${NC} $*"
+    printf "%b\n" "${YELLOW}⚠️${NC} $*"
 
 }
 
 log_error() {
 
-    printf "%b\n""${RED}❌${NC} $*"
+    printf "%b\n" "${RED}❌${NC} $*"
 
 }

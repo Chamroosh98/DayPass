@@ -4,6 +4,9 @@ main_menu()
 {
     while true; 
         do
+
+            render_persistent_header
+            
             printf "   📦 1) Install Package\n"
             printf "   🖥️ 2) Network Info & Speed Monitor\n"
             printf "   🚪 0) Exit\n\n"
