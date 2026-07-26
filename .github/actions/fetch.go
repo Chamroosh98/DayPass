@@ -173,25 +173,24 @@ func main() {
 			downloadedCount := 0
 
 			for pkgName, pkgVersion := range feedIdx.Packages {
-				
-				// detect extension in order to openwrt version
-				pkgExt := ".apk"
+				var pkgFileName string
+
 				if owVersion == "24" {
-					pkgExt = ".ipk"
+					// OpenWrt 24: name_version_arch.ipk
+					pkgFileName = fmt.Sprintf("%s_%s_%s.ipk", pkgName, pkgVersion, feedIdx.Architecture)
+				} else {
+					// OpenWrt 25: name-version.apk
+					pkgFileName = fmt.Sprintf("%s-%s.apk", pkgName, pkgVersion)
 				}
 
-				apkFileName := fmt.Sprintf("%s-%s%s", pkgName, pkgVersion, pkgExt)
+				cachePkgPath := filepath.Join(feedCacheDir, pkgFileName)
+				cdnPkgPath := filepath.Join(cdnOutputDir, pkgFileName)
+				zipPkgPath := filepath.Join(zipFeedOutputDir, pkgFileName)
 
-
-				cachePkgPath := filepath.Join(feedCacheDir, apkFileName)
-				
-				cdnPkgPath := filepath.Join(cdnOutputDir, apkFileName)
-				zipPkgPath := filepath.Join(zipFeedOutputDir, apkFileName)
-				
-				pkgURL := fmt.Sprintf("%s/%s", feedURL, apkFileName)
+				pkgURL := fmt.Sprintf("%s/%s", feedURL, pkgFileName)
 
 				if !fileExists(cachePkgPath) {
-					fmt.Printf("📥 Saved in Cache : [%-45s] ", apkFileName)
+					fmt.Printf("📥 Saved in Cache : [%-55s] ", pkgFileName)
 					if err := downloadWithCurl(pkgURL, cachePkgPath); err != nil {
 						fmt.Println("❌ FAILED")
 						os.Remove(cachePkgPath)
@@ -201,7 +200,7 @@ func main() {
 						downloadedCount++
 					}
 				} else {
-					fmt.Printf("🔄 Cached : [%-45s]\n", apkFileName)
+					fmt.Printf("🔄 Cached : [%-55s]\n", pkgFileName)
 					cachedCount++
 				}
 
