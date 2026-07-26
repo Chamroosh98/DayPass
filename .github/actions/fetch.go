@@ -172,37 +172,46 @@ func main() {
 			cachedCount := 0
 			downloadedCount := 0
 
+			// Handling diffrence names of files!
 			for pkgName, pkgVersion := range feedIdx.Packages {
 				var pkgFileName string
 
 				if owVersion == "24" {
-					// OpenWrt 24: name_version_arch.ipk
 					pkgFileName = fmt.Sprintf("%s_%s_%s.ipk", pkgName, pkgVersion, feedIdx.Architecture)
 				} else {
-					// OpenWrt 25: name-version.apk
 					pkgFileName = fmt.Sprintf("%s-%s.apk", pkgName, pkgVersion)
 				}
 
 				cachePkgPath := filepath.Join(feedCacheDir, pkgFileName)
-				cdnPkgPath := filepath.Join(cdnOutputDir, pkgFileName)
-				zipPkgPath := filepath.Join(zipFeedOutputDir, pkgFileName)
-
 				pkgURL := fmt.Sprintf("%s/%s", feedURL, pkgFileName)
 
 				if !fileExists(cachePkgPath) {
 					fmt.Printf("📥 Saved in Cache : [%-55s] ", pkgFileName)
-					if err := downloadWithCurl(pkgURL, cachePkgPath); err != nil {
+					err := downloadWithCurl(pkgURL, cachePkgPath)
+
+					if err != nil && owVersion == "24" {
+						pkgFileName = fmt.Sprintf("%s_%s_all.ipk", pkgName, pkgVersion)
+						cachePkgPath = filepath.Join(feedCacheDir, pkgFileName)
+						altPkgURL := fmt.Sprintf("%s/%s", feedURL, pkgFileName)
+
+						err = downloadWithCurl(altPkgURL, cachePkgPath)
+					}
+
+					if err != nil {
 						fmt.Println("❌ FAILED")
 						os.Remove(cachePkgPath)
 						continue
 					} else {
-						fmt.Println("✅ OK")
+						fmt.Printf("✅ OK (%s)\n", pkgFileName)
 						downloadedCount++
 					}
 				} else {
 					fmt.Printf("🔄 Cached : [%-55s]\n", pkgFileName)
 					cachedCount++
 				}
+
+				cdnPkgPath := filepath.Join(cdnOutputDir, pkgFileName)
+				zipPkgPath := filepath.Join(zipFeedOutputDir, pkgFileName)
 
 				copyFile(cachePkgPath, cdnPkgPath)
 				copyFile(cachePkgPath, zipPkgPath)

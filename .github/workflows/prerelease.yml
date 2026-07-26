@@ -137,10 +137,22 @@ jobs:
           cd .github/actions/engine/
           go run .
 
+      - name: 📊 Verify Release Assets Size & Guardrail (BEFORE DEPLOYMENT)
+        run: |
+          echo "📁 Listing all files in build-artifacts with their sizes : "
+          find build-artifacts/ -type f -exec ls -lh {} +
+          echo "--------------------------------------------------------"
+          echo "🚨 Checking for zero-byte or invalid files ..."
+          if find build-artifacts/ -type f -empty | grep -q .; then
+            echo "❌ Error : Zero-byte files detected in build-artifacts!"
+            find build-artifacts/ -type f -empty
+            exit 1
+          fi
+          echo "✅ All release assets passed health check successfully!"
+
       - name: 🕵️‍♀️ Prepare GitHub Pages Assets
         run: |
           mkdir -p github-pages-content
-          # کپی فایل‌های روت و ساب‌فولدرهای نسخه
           cp -r build-artifacts/* github-pages-content/
           echo "✅ Prepared manifest structures & install.sh for Pages deployment!"
 
@@ -170,19 +182,6 @@ jobs:
           curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/beta/v25/manifest.json" | jq .
           curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/beta/install.sh" | jq .
           echo "✅ Beta CDN cache purged successfully!"
-
-      - name: 📊 Verify Release Assets Size & Guardrail
-        run: |
-          echo "📁 Listing all files in build-artifacts with their sizes : "
-          find build-artifacts/ -type f -exec ls -lh {} +
-          echo "--------------------------------------------------------"
-          echo "🚨 Checking for zero-byte files ..."
-          if find build-artifacts/ -type f -empty | grep -q .; then
-            echo "❌ Error : Zero-byte files detected in build-artifacts!"
-            find build-artifacts/ -type f -empty
-            exit 1
-          fi
-          echo "✅ All release assets have valid file sizes!"
 
       - name: 🧪 Create and Upload Pre-Release Packages to GitHub Release
         uses: softprops/action-gh-release@v2
