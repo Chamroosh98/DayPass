@@ -173,7 +173,16 @@ func main() {
 			downloadedCount := 0
 
 			for pkgName, pkgVersion := range feedIdx.Packages {
-				apkFileName := fmt.Sprintf("%s-%s.apk", pkgName, pkgVersion)
+				
+				// detect extension in order to openwrt version
+				pkgExt := ".apk"
+				if owVersion == "24" {
+					pkgExt = ".ipk"
+				}
+
+				apkFileName := fmt.Sprintf("%s-%s%s", pkgName, pkgVersion, pkgExt)
+
+
 				cachePkgPath := filepath.Join(feedCacheDir, apkFileName)
 				
 				cdnPkgPath := filepath.Join(cdnOutputDir, apkFileName)
