@@ -113,9 +113,9 @@ jobs:
           cd packages-branch-content
           for dir in raw-beta-v*; do
             if [ -d "$dir" ]; then
-              raw_name="${dir#raw-beta-}" # v24-x86_64
-              ver="${raw_name%%-*}"       # v24
-              arch="${raw_name#*-}"       # x86_64
+              raw_name="${dir#raw-beta-}"
+              ver="${raw_name%%-*}"
+              arch="${raw_name#*-}"
               
               mkdir -p "$ver"
               mv "$dir" "$ver/$arch"
@@ -150,6 +150,33 @@ jobs:
           fi
           echo "✅ All release assets passed health check successfully!"
 
+      - name: 🧪 Create and Upload Pre-Release Packages via GitHub CLI
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="v${{ env.VERSION }}-beta-${{ github.run_number }}"
+          RELEASE_TITLE="🧪 v${{ env.VERSION }} (Build ${{ github.run_number }})"
+          
+          echo "🚀 Creating release $TAG_NAME via GitHub CLI ..."
+          
+          # Delete tag if partially created in a failed attempt
+          gh release delete "$TAG_NAME" -y --cleanup-tag 2>/dev/null || true
+
+          gh release create "$TAG_NAME" \
+            --title "$RELEASE_TITLE" \
+            --prerelease \
+            --notes "## 🧪 DayPass Beta Release%0A📅 Date : \`${{ env.VERSION }}\`%0A🧪 Build : \`${{ github.run_number }}\`"
+
+          # Collect unique files to avoid duplicate upload issues
+          mkdir -p release-files
+          cp merged-beta/*.zip release-files/ 2>/dev/null || true
+          find build-artifacts/ -type f -name "*.sha256" -exec cp {} release-files/ \; 2>/dev/null || true
+
+          echo "📤 Uploading assets to GitHub Release ..."
+          gh release upload "$TAG_NAME" release-files/* --clobber
+          
+          echo "✅ Pre-release uploaded successfully via GitHub CLI!"
+
       - name: 🕵️‍♀️ Prepare GitHub Pages Assets
         run: |
           mkdir -p github-pages-content
@@ -182,32 +209,6 @@ jobs:
           curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/beta/v25/manifest.json" | jq .
           curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/beta/install.sh" | jq .
           echo "✅ Beta CDN cache purged successfully!"
-
-      - name: 🧪 Create and Upload Pre-Release Packages to GitHub Release via GitHub CLI
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          TAG_NAME="v${{ env.VERSION }}-beta-${{ github.run_number }}"
-          RELEASE_TITLE="🧪 v${{ env.VERSION }} (Build ${{ github.run_number }})"
-          
-          echo "🚀 Creating release $TAG_NAME via GitHub CLI ..."
-          
-          # 1. Create the Release Tag first
-          gh release create "$TAG_NAME" \
-            --title "$RELEASE_TITLE" \
-            --prerelease \
-            --notes "## 🧪 DayPass Beta Release%0A📅 Date : \`${{ env.VERSION }}\`%0A🧪 Build : \`${{ github.run_number }}\`"
-
-          # 2. Collect unique list of files (no duplicate matches)
-          mkdir -p release-files
-          cp merged-beta/*.zip release-files/ 2>/dev/null || true
-          find build-artifacts/ -type f -name "*.sha256" -exec cp {} release-files/ \; 2>/dev/null || true
-
-          # 3. Upload all assets securely to the newly created release
-          echo "📤 Uploading assets to GitHub Release ..."
-          gh release upload "$TAG_NAME" release-files/* --clobber
-          
-          echo "✅ Pre-release uploaded successfully via GitHub CLI!"
 
       - name: 🧹 Cleanup old beta releases
         uses: dev-drprasad/delete-older-releases@v0.3.4
