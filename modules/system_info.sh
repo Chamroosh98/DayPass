@@ -2,9 +2,25 @@
 
 detect_arch()
 {
+    ARCH=""
+
+    # 1. Primary method: Read DISTRIB_ARCH directly from release file
     if [ -f /etc/openwrt_release ]; then
-        ARCH=$(grep "DISTRIB_ARCH" /etc/openwrt_release | cut -d"'" -f2)
-    else
+        . /etc/openwrt_release
+        ARCH="${DISTRIB_ARCH:-}"
+    fi
+
+    # 2. Secondary fallback: Query package managers (apk for v25 / opkg for v24)
+    if [ -z "$ARCH" ]; then
+        if command -v apk >/dev/null 2>&1; then
+            ARCH="$(apk --print-arch 2>/dev/null)"
+        elif command -v opkg >/dev/null 2>&1; then
+            ARCH="$(opkg print-architecture 2>/dev/null | awk 'NR==1{print $2}')"
+        fi
+    fi
+
+    # 3. Final fallback: Map kernel architecture (uname -m) to standard OpenWrt targets
+    if [ -z "$ARCH" ]; then
         case "$(uname -m)" in
             armv7l)  ARCH="arm_cortex-a7_neon-vfpv4" ;;
             aarch64) ARCH="aarch64_generic" ;;
@@ -12,6 +28,7 @@ detect_arch()
             *)       ARCH="$(uname -m)" ;;
         esac
     fi
+
     export ARCH
 }
 
@@ -60,6 +77,7 @@ show_system_info()
     show_system_info_content
 }
 
+# Standalone execution handler
 case "$0" in
     *system_info.sh) show_system_info ;;
 esac

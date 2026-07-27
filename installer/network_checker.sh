@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# Cross-platform sleeping utility for UI spinner rendering
 spin_sleep() {
     if command -v usleep >/dev/null 2>&1; then
         usleep 100000
@@ -20,6 +21,7 @@ ROW_PING_ICON="·"
 ROW_HTTPS_ICON="·"
 ROW_ACTIVE=""
 
+# Redraw the current table row with updated status icons / spinner
 redraw_row()
 {
     spin="$1"
@@ -36,6 +38,7 @@ redraw_row()
     printf "\r  %-16s %-6s %-7s %-6s\033[K" "$ROW_HOST" "$d" "$p" "$h"
 }
 
+# Run execution cell asynchronously while displaying animated CLI spinner
 run_cell()
 {
     ROW_ACTIVE="$1"
@@ -52,7 +55,7 @@ run_cell()
     while kill -0 "$pid" 2>/dev/null; do
         c="$(printf '%s' "$spin_chars" | cut -c$(( (i % 4) + 1 )))"
 
-        if [ -n "$CYAN" ] && [ -n "$RESET" ]; then
+        if [ -n "${CYAN:-}" ] && [ -n "${RESET:-}" ]; then
             redraw_row "${CYAN}${c}${RESET}"
         else
             redraw_row "$c"
@@ -67,6 +70,7 @@ run_cell()
     rm -f "$tmp"
 }
 
+# Execute health diagnostics for a single target hostname
 process_host()
 {
     ROW_HOST="$1"
@@ -76,8 +80,16 @@ process_host()
     ROW_ACTIVE=""
     redraw_row "·"
 
-    # DNS
-    run_cell "dns" "/tmp/.nc_dns_$$" nslookup "$ROW_HOST" 127.0.0.1
+    # 1. DNS Resolution Check
+    if command -v nslookup >/dev/null 2>&1; then
+        run_cell "dns" "/tmp/.nc_dns_$$" nslookup "$ROW_HOST"
+    elif command -v host >/dev/null 2>&1; then
+        run_cell "dns" "/tmp/.nc_dns_$$" host "$ROW_HOST"
+    else
+        # Fallback using ping host resolution
+        run_cell "dns" "/tmp/.nc_dns_$$" ping -c 1 -W 2 "$ROW_HOST"
+    fi
+
     if [ "$CELL_EXIT" -eq 0 ]; then
         ROW_DNS_ICON="🟢"
     else
@@ -85,10 +97,11 @@ process_host()
         DNS_FAILED=1
     fi
 
-    # Ping
+    # 2. ICMP Ping / Latency Check
     run_cell "ping" "/tmp/.nc_ping_$$" ping -c 2 -W 2 "$ROW_HOST"
     LOSS="$(printf '%s' "$CELL_OUTPUT" | grep -o '[0-9]*% packet loss' | grep -o '^[0-9]*')"
     [ -z "$LOSS" ] && LOSS=100
+
     if [ "$LOSS" -eq 0 ]; then
         ROW_PING_ICON="🟢"
     elif [ "$LOSS" -lt 100 ]; then
@@ -97,11 +110,12 @@ process_host()
         ROW_PING_ICON="🔴"
     fi
 
-    # HTTPS Check (Dual-Engine: curl or wget fallback)
+    # 3. HTTPS Reachability & Performance Check
     if command -v curl >/dev/null 2>&1; then
         run_cell "https" "/tmp/.nc_https_$$" curl -fsS -o /dev/null -w '%{time_total}' --connect-timeout 5 "https://$ROW_HOST"
+    elif command -v uclient-fetch >/dev/null 2>&1; then
+        run_cell "https" "/tmp/.nc_https_$$" uclient-fetch -q -T 5 -O /dev/null "https://$ROW_HOST"
     else
-        # Fallback for minimal systems using wget
         run_cell "https" "/tmp/.nc_https_$$" wget -q --spider --timeout=5 "https://$ROW_HOST"
     fi
 
@@ -134,6 +148,7 @@ process_host()
     done
 }
 
+# Master execution function for system network checks
 network_check()
 {
     GREEN_COUNT=0
@@ -143,36 +158,37 @@ network_check()
     DNS_FAILED=0
 
     echo
-    printf "  ${BOLD}${CYAN}🔎 DayPass Network Health Check${RESET}\n"
+    printf "  ${BOLD:-}${CYAN:-}🔎 DayPass Network Health Check${RESET:-}\n"
     
-    printf "  ${GRAY}──────────────────────────────────────────${RESET}\n"
+    printf "  ${GRAY:-}──────────────────────────────────────────${RESET:-}\n"
 
-    printf "  ${BOLD}%-16s %-6s %-7s %-6s${RESET}\n" "Host" "DNS" "Ping" "HTTPS"
-    printf "  ${GRAY}──────────────────────────────────────────${RESET}\n"
+    printf "  ${BOLD:-}%-16s %-6s %-7s %-6s${RESET:-}\n" "Host" "DNS" "Ping" "HTTPS"
+    printf "  ${GRAY:-}──────────────────────────────────────────${RESET:-}\n"
 
-    process_host "Google.com"
-    process_host "Github.com"
-    process_host "Openwrt.org"
-    process_host "Cloudflare.com"
+    process_host "google.com"
+    process_host "github.com"
+    process_host "openwrt.org"
+    process_host "cloudflare.com"
 
-    printf "  ${GRAY}──────────────────────────────────────────${RESET}\n\n"
+    printf "  ${GRAY:-}──────────────────────────────────────────${RESET:-}\n\n"
 
     PCT=0
     [ "$TOTAL_CHECKS" -gt 0 ] && PCT=$((GREEN_COUNT * 100 / TOTAL_CHECKS))
 
-    printf "  ${BOLD}Overall Score :${RESET} "
+    printf "  ${BOLD:-}Overall Score :${RESET:-} "
     if command -v draw_bar >/dev/null 2>&1; then
         draw_bar "$PCT" 12 "score"
     fi
     printf " %s%% (🟢 %s  🟡 %s  🔴 %s)\n\n" "$PCT" "$GREEN_COUNT" "$YELLOW_COUNT" "$RED_COUNT"
 
-    printf "  ${BOLD}Diagnostic Report :${RESET}"
+    printf "  ${BOLD:-}Diagnostic Report :${RESET:-} "
     if [ "$DNS_FAILED" -eq 1 ]; then
         if command -v log_error >/dev/null 2>&1; then
             log_error "DNS resolution is failing! Router cannot translate domain names."
         else
-            printf "❌${RED}DNS resolution failed! Domain name lookup is broken.${RESET}\n"
+            printf "❌${RED:-}DNS resolution failed! Domain name lookup is broken.${RESET:-}\n"
         fi
+        
         if ping -c 1 -W 2 1.1.1.1 >/dev/null 2>&1; then
             if command -v dns_fix_menu >/dev/null 2>&1; then
                 dns_fix_menu
@@ -182,29 +198,30 @@ network_check()
         if command -v log_warn >/dev/null 2>&1; then
             log_warn "HTTPS connections are blocked or filtered (Possible Censorship/DPI)."
         else
-            printf "⚠️${YELLOW}HTTPS traffic is blocked or severely interfered with.${RESET}\n"
+            printf "⚠️${YELLOW:-}HTTPS traffic is blocked or severely interfered with.${RESET:-}\n"
         fi
     elif [ "$YELLOW_COUNT" -gt 0 ]; then
         if command -v log_warn >/dev/null 2>&1; then
             log_warn "Network is active but experiencing high packet loss/latency (>2s)."
         else
-            printf "⚠️${YELLOW}High latency or degraded response time detected.${RESET}\n"
+            printf "⚠️${YELLOW:-}High latency or degraded response time detected.${RESET:-}\n"
         fi
     else
         if command -v log_success >/dev/null 2>&1; then
             log_success "Network is fully functional with clean connectivity!"
         else
-            printf "✅${GREEN}Network is fully functional!${RESET}\n"
+            printf "✅${GREEN:-}Network is fully functional!${RESET:-}\n"
         fi
     fi
 
     echo
-    printf "  ${GRAY}Press [Enter] to continue ...${RESET}"
+    printf "  ${GRAY:-}Press [Enter] to continue ...${RESET:-}"
     read -r _ </dev/tty
     echo
     return 0
 }
 
+# Standalone execution handler
 case "$0" in
-    *network_checker.sh) network_check ;;
+    *network_check.sh|*network_checker.sh) network_check ;;
 esac

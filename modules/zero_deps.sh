@@ -2,42 +2,51 @@
 
 deploy_system_dependencies()
 {
-    echo "  🔎 Checking system dependencies ..."
+    log_info "Checking and deploying zero-dependencies ..."
 
     detect_package_manager
     pkg_update
 
-    # 1st ca-bundle, ca-certificates that HTTPS working whell!
-    REQUIRED_PACKAGES="ca-bundle ca-certificates curl jq"
+    COMMON_DEPS="ca-bundle ca-certificates curl jq"
 
-    for pkg in $REQUIRED_PACKAGES; do
+    OW24_EXTRA_DEPS="coreutils coreutils-base64 coreutils-nohup coreutils-timeout ip-full unzip resolveip lua libuci-lua luci-compat luci-lib-jsonc luci-lua-runtime lyaml"
+
+    TARGET_PACKAGES="$COMMON_DEPS"
+
+    if [ "$PKG_MANAGER" = "opkg" ] || [ "${OPENWRT_MAJOR:-24}" = "24" ]; then
+        log_info "OpenWrt 24 detected: Adding core system & LuCI dependencies..."
+        TARGET_PACKAGES="$TARGET_PACKAGES $OW24_EXTRA_DEPS"
+    else
+        log_info "OpenWrt 25+ detected: Using minimal base tools."
+    fi
+
+    for pkg in $TARGET_PACKAGES; do
         if pkg_installed "$pkg"; then
             continue
         fi
-        echo "  📦 Installing [$pkg] ..."
+        log_info "Installing required dependency: [$pkg] ..."
         pkg_install "$pkg"
     done
 
-    if ! command -v curl >/dev/null 2>&1; then
-        echo "  ⚠️ Warning : curl installation via [$PKG_MANAGER] failed. Falling back to wget ..."
-    fi
-
+    # بررسی و ارتقای dnsmasq به dnsmasq-full
     if [ -f /etc/openwrt_release ]; then
-        echo
-        echo "  🔎 Checking dnsmasq ..."
+        log_info "Checking dnsmasq installation status ..."
 
         if ! pkg_installed "dnsmasq-full"; then
-            echo "  🔼 Upgrading dnsmasq to dnsmasq-full ..."
+            log_info "Upgrading dnsmasq to dnsmasq-full ..."
             case "$PKG_MANAGER" in
                 opkg)
-                    opkg install dnsmasq-full --replace-files >/dev/null 2>&1 || true
+                    opkg remove dnsmasq --force-depends >/dev/null 2>&1 || true
+                    opkg install dnsmasq-full --force-overwrite >/dev/null 2>&1 || true
                     ;;
                 apk)
-                    apk add dnsmasq-full >/dev/null 2>&1 || true
+                    apk del dnsmasq >/dev/null 2>&1 || true
+                    apk add dnsmasq-full --force-overwrite >/dev/null 2>&1 || true
                     ;;
             esac
+            log_success "dnsmasq-full installed successfully."
         else
-            echo "  💣 dnsmasq-full is already installed!"
+            log_success "dnsmasq-full is already present."
         fi
     fi
 }

@@ -1,8 +1,10 @@
 #!/bin/sh
 
+# Detect and initialize the active package manager engine (apk or opkg)
 detect_package_manager()
 {
-    rm -f /var/lock/opkg.lock /lib/apk/db/lock /var/run/apk.lock 2>/dev/null
+    # Clear lock files across all supported OpenWrt releases
+    rm -f /var/lock/opkg.lock /lib/apk/db/lock /var/run/apk.lock /run/apk/db.lock 2>/dev/null
     
     # 1. Identify standard package manager binary
     if command -v apk >/dev/null 2>&1; then
@@ -19,8 +21,11 @@ detect_package_manager()
     export PKG_MANAGER
 }
 
+# Update package index with fallback logic for network/mirror failures
 pkg_update()
 {
+    [ -z "${PKG_MANAGER:-}" ] && detect_package_manager
+
     log_info "Updating package indexes using [$PKG_MANAGER] ..."
 
     if [ "$PKG_MANAGER" = "apk" ]; then
@@ -45,26 +50,31 @@ pkg_update()
     fi
 }
 
+# Check if target package is currently installed on host system
 pkg_installed()
 {
     PACKAGE_NAME="$1"
+    [ -z "$PACKAGE_NAME" ] && return 1
+    [ -z "${PKG_MANAGER:-}" ] && detect_package_manager
 
-    # Check if target package is registered as installed in the local DB
     if [ "$PKG_MANAGER" = "apk" ]; then
         apk info -e "$PACKAGE_NAME" >/dev/null 2>&1
     elif [ "$PKG_MANAGER" = "opkg" ]; then
-        opkg list-installed | grep -q "^$PACKAGE_NAME - "
+        opkg status "$PACKAGE_NAME" 2>/dev/null | grep -q "Status: .* installed"
     fi
 }
 
+# Install a specific single package via system package manager
 pkg_install()
 {
     PACKAGE_NAME="$1"
+    [ -z "$PACKAGE_NAME" ] && return 1
+    [ -z "${PKG_MANAGER:-}" ] && detect_package_manager
 
     log_info "Executing package installation : [$PACKAGE_NAME]"
 
     if [ "$PKG_MANAGER" = "apk" ]; then
-        # 1. Try standard installation with untrusted keyring bypass (for local/custom builds)
+        # 1. Try standard installation with untrusted keyring bypass
         if apk add --no-cache --allow-untrusted "$PACKAGE_NAME" >/dev/null 2>&1; then
             log_success "Package [$PACKAGE_NAME] installed successfully via APK."
             return 0

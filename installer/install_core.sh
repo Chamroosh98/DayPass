@@ -2,7 +2,6 @@
 
 # 🛑 SIGINT / SIGTERM Handler
 cleanup_and_exit() {
-
     printf "\r\033[K"
     echo ""
     
@@ -25,13 +24,18 @@ trap cleanup_and_exit INT TERM
 
 initialize_installer()
 {
-    rm -f /var/lock/opkg.lock /lib/apk/db/lock /var/run/apk.lock 2>/dev/null
+    # Clear lock files for both opkg (OpenWrt <=24) and apk (OpenWrt >=25)
+    rm -f /var/lock/opkg.lock /lib/apk/db/lock /var/run/apk.lock /run/apk/db.lock 2>/dev/null
     
-    # 1. Detect environment and update local package index
-    detect_package_manager
+    # 1. Detect package manager (opkg or apk)
+    if command -v detect_package_manager >/dev/null 2>&1; then
+        detect_package_manager
+    fi
 
     log_info "Updating package database ..."
-    pkg_update >/dev/null 2>&1 || log_warn "Package index update finished with warnings!"
+    if command -v pkg_update >/dev/null 2>&1; then
+        pkg_update >/dev/null 2>&1 || log_warn "Package index update finished with warnings!"
+    fi
 
     # 2. Setup temporary workspace
     TMP_DIR="/tmp/daypass"
@@ -71,10 +75,15 @@ initialize_installer()
     log_info "Manifest downloaded successfully ($MANIFEST_SIZE bytes)."
 
     # 6. Detect host system target architecture
-    if [ -f /etc/openwrt_release ]; then
-        ARCH=$(grep "DISTRIB_ARCH" /etc/openwrt_release | cut -d"'" -f2)
-    else
-        ARCH="$(uname -m)"
+    if [ -z "${ARCH:-}" ]; then
+        if command -v detect_arch >/dev/null 2>&1; then
+            detect_arch
+        elif [ -f /etc/openwrt_release ]; then
+            . /etc/openwrt_release
+            ARCH="${DISTRIB_ARCH:-}"
+        fi
+        
+        [ -z "$ARCH" ] && ARCH="$(uname -m)"
     fi
 
     if [ -z "$ARCH" ]; then
@@ -85,6 +94,11 @@ initialize_installer()
     log_info "Target System Architecture detected : [$ARCH]"
 
     # 7. Validate JSON syntax integrity
+    if ! command -v jq >/dev/null 2>&1; then
+        log_error "jq parser utility is not available on host system!"
+        exit 1
+    fi
+
     if ! jq empty "$MANIFEST_FILE" >/dev/null 2>&1; then
         log_error "Manifest file is corrupted or invalid JSON!"
         log_warn "JSON Parser Output Error:"

@@ -1,17 +1,15 @@
 #!/bin/sh
 
-
 INSTALL_LOG="/tmp/daypass/install.log"
 TRANSACTION_LOG="/tmp/daypass/transaction.log"
 
 # Queries manifest metadata for a given package and field
-
 manifest_lookup()
 {
     field="$1"
     package="$2"
 
-    jq -r \
+    val=$(jq -r \
         --arg pkg "$package" \
         --arg arch "$ARCH" \
         --arg field "$field" \
@@ -26,12 +24,41 @@ manifest_lookup()
 )
 | .[$field] // empty
 ' \
-"$MANIFEST_FILE" 2>/dev/null | head -n1
+"$MANIFEST_FILE" 2>/dev/null | head -n1)
+
+    # Fallback lookup for case sensitivity variations (e.g. Size vs size)
+    if [ -z "$val" ] || [ "$val" = "null" ]; then
+        alt_field=""
+        case "$field" in
+            size) alt_field="Size" ;;
+            Size) alt_field="size" ;;
+        esac
+
+        if [ -n "$alt_field" ]; then
+            val=$(jq -r \
+                --arg pkg "$package" \
+                --arg arch "$ARCH" \
+                --arg field "$alt_field" \
+'
+.architectures[]?
+| select(.name == $arch)
+| .packages[]?
+| select(
+    (.package == $pkg)
+    or
+    (.package | startswith($pkg + "-"))
+)
+| .[$field] // empty
+' \
+"$MANIFEST_FILE" 2>/dev/null | head -n1)
+        fi
+    fi
+
+    echo "$val"
 }
 
 
 # Formats package size into human-readable units (KB / MB)
-
 format_size()
 {
     bytes="$1"
@@ -53,7 +80,6 @@ format_size()
 
 
 # Fetches package details for UI display
-
 manifest_info()
 {
     package="$1"
@@ -67,7 +93,6 @@ manifest_info()
 
 
 # Downloads and verifies package integrity against SHA256 checksum
-
 download_package()
 {
     package="$1"
@@ -80,7 +105,7 @@ download_package()
         return 1
     fi
 
-    # download_base from manifest
+    # download_base from manifest fallback to REPO_URL
     base_url=$(jq -r '.download_base // empty' "$MANIFEST_FILE" 2>/dev/null)
     
     if [ -n "$base_url" ]; then
@@ -137,7 +162,8 @@ download_package()
 # Orchestrates download, dependency resolution, and batch installation
 deploy_targeted_packages()
 {
-    rm -f /var/lock/opkg.lock /lib/apk/db/lock /var/run/apk.lock 2>/dev/null
+    # Clear active locks across package management engines
+    rm -f /var/lock/opkg.lock /lib/apk/db/lock /var/run/apk.lock /run/apk/db.lock 2>/dev/null
 
     mkdir -p "$(dirname "$INSTALL_LOG")"
     touch "$INSTALL_LOG"
@@ -190,10 +216,11 @@ deploy_targeted_packages()
         echo "$pkg" >> "$TRANSACTION_LOG"
     done
     
-    # 2. Perform installation via native package manager
+    # 2. Perform installation via active package manager (opkg / apk)
     INSTALL_SUCCESS=0
+    CURRENT_PKG_MGR="${PKG_MANAGER:-opkg}"
 
-    case "$PKG_MANAGER" in
+    case "$CURRENT_PKG_MGR" in
         apk)
             log_info "Installing packages into system via APK..."
             APK_LOG=$(mktemp)
@@ -206,7 +233,7 @@ deploy_targeted_packages()
             fi
             rm -f "$APK_LOG"
             ;;
-        opkg)
+        opkg|*)
             log_info "Installing packages into system via OPKG..."
             OPKG_LOG=$(mktemp)
             
@@ -228,7 +255,7 @@ deploy_targeted_packages()
             resource_compare
         fi
 
-        # Clear transaction log on successful deployment
+        # Clear transaction log and cached packages on successful deployment
         rm -f $INSTALL_FILES 2>/dev/null
         rm -f "$TRANSACTION_LOG"
 
@@ -241,7 +268,6 @@ deploy_targeted_packages()
     return 1
 }
 
-
 # Rolls back changes if installation fails mid-way
 rollback_failed_install()
 {
@@ -251,11 +277,11 @@ rollback_failed_install()
     log_warn "=================================================="
     echo
 
-    # Remove all files from temp 
+    # Remove all cached files from temp memory workspace
     log_info "Cleaning temp files from RAM ..."
     rm -f "$TMP_DIR"/*.part "$TMP_DIR"/*.apk "$TMP_DIR"/*.ipk 2>/dev/null
 
-    # Remove the package that exits in transaction log file!
+    # Remove packages logged in transaction file
     if [ -s "$TRANSACTION_LOG" ]; then
         log_info "Removing partially installed system packages..."
         while read -r pkg; do
@@ -263,13 +289,13 @@ rollback_failed_install()
             clean_pkg=$(echo "$pkg" | tr -d '[]')
             
             log_info "Rollback : Removing package [$clean_pkg] ..."
-            case "$PKG_MANAGER" in
-                opkg) opkg remove "$clean_pkg" >/dev/null 2>&1 || log_warn "Could not remove : [$clean_pkg]" ;;
+            case "${PKG_MANAGER:-opkg}" in
                 apk)  apk del "$clean_pkg" >/dev/null 2>&1 || log_warn "Could not remove : [$clean_pkg]" ;;
+                opkg|*) opkg remove "$clean_pkg" >/dev/null 2>&1 || log_warn "Could not remove : [$clean_pkg]" ;;
             esac
         done < "$TRANSACTION_LOG"
     else
-        log_info "No system packages were installed yet. Skiping package removal."
+        log_info "No system packages were installed yet. Skipping package removal."
     fi
 
     rm -f "$TRANSACTION_LOG"
