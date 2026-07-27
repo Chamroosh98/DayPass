@@ -2,10 +2,19 @@
 
 handle_custom_profile()
 {
+    # Dynamic manifest determination for opkg (24) vs apk (25)
+    if [ -z "$MANIFEST_FILE" ]; then
+        if [ "${PKG_MANAGER:-opkg}" = "apk" ]; then
+            MANIFEST_FILE="config/architectures_25.json"
+        else
+            MANIFEST_FILE="config/architectures_24.json"
+        fi
+    fi
+
     ALL_AVAILABLE_PKGS="$(jq -r --arg arch "$ARCH" '.architectures[] | select(.name==$arch) | .packages[].package' "$MANIFEST_FILE" 2>/dev/null)"
 
     if [ -z "$ALL_AVAILABLE_PKGS" ]; then
-        log_error "No packages found in manifest for architecture: $ARCH"
+        log_error "No packages found in manifest [$MANIFEST_FILE] for architecture: $ARCH"
         return 1
     fi
 

@@ -8,7 +8,7 @@ import (
 )
 
 func generateInstallScript(outputFile string) error {
-	fmt.Println("⌛ Processing Core Components with Go Engine ...")
+	fmt.Println("⌛ Processing Core Components with Go Engine for DayPass ...")
 	
 	branch := os.Getenv("GITHUB_REF_NAME")
 	if branch == "" {
@@ -17,7 +17,6 @@ func generateInstallScript(outputFile string) error {
 
 	var scriptBuilder strings.Builder
 	scriptBuilder.WriteString("#!/bin/sh\n\n")
-	// scriptBuilder.WriteString("#!/bin/sh\nset -eu\n\n")
 
 	scriptBuilder.WriteString("###############################################################################\n")
 	scriptBuilder.WriteString("# DayPass Installer (Auto-generated via Go Action)\n")
@@ -33,32 +32,36 @@ func generateInstallScript(outputFile string) error {
 	scriptBuilder.WriteString("fi\n")
 	scriptBuilder.WriteString("export REPO_URL\n\n")
 
+	// Cleaned & strict dependency-aware sourcing sequence
 	installerFiles := []string{
-		// 1. UI Base Libraries & Styles (MUST BE FIRST for log_info/log_error functions)
+		// 1. UI Base Libraries & Styles (Removed ui/style.sh)
 		"ui/lib/styles.sh",
 		"ui/lib/box_utils.sh",
 		"ui/lib/header.sh",
 		"ui/lib/progress.sh",
 		"ui/banner.sh",
 
-		// 2. Hardware, OS & System Modules (Includes version_check & zero_deps)
+		// 2. Hardware, OS & System Modules
 		"modules/zero_deps.sh",
 		"modules/version_check.sh",
 		"modules/system_info.sh",
 		"modules/network_info.sh",
 		"modules/resource_monitor.sh",
 		"modules/dns_fix.sh",
+		"modules/backup_restore.sh",
+		"modules/service_manager.sh",
 
-		// 3. Core Installer Logic & Package Managers
+		// 3. Core Installer Logic & Package Management
 		"installer/network_checker.sh",
+		"installer/arch_detector.sh",
 		"installer/package_manager.sh", 
 		"installer/install_core.sh",
-		"installer/package_deployer.sh",
+		"installer/resource_checker.sh",
 		"installer/package_resolver.sh",
+		"installer/package_deployer.sh",
 
-		// 4. UI Components, States & Menus
+		// 4. UI Components & Interactive Menus (Removed ui/menu_recommended.sh)
 		"ui/state.sh",
-		"ui/menu_recommended.sh",
 		"ui/menu_custom.sh",
 		"ui/menu_mode.sh",
 		"ui/engine_menu.sh",
@@ -67,6 +70,7 @@ func generateInstallScript(outputFile string) error {
 		"ui/review.sh",
 		"ui/menu_package.sh",
 		"ui/main_menu.sh",
+		"ui/installer_ui.sh",
 	}
 
 	for _, file := range installerFiles {
@@ -79,7 +83,7 @@ func generateInstallScript(outputFile string) error {
 		scriptBuilder.WriteString(fmt.Sprintf("\n# 📄 Source : %s\n", filepath.Base(file)))
 		lines := strings.Split(string(data), "\n")
 		for _, line := range lines {
-			
+			// Strip duplicate shebangs from individual modules
 			if !strings.HasPrefix(line, "#!") {
 				scriptBuilder.WriteString(line + "\n")
 			}
@@ -87,7 +91,7 @@ func generateInstallScript(outputFile string) error {
 		fmt.Printf("✅ [%s] appended dynamically!\n", filepath.Base(file))
 	}
 
-
+	// Cleaned Runtime Execution Pipeline
 	scriptBuilder.WriteString(`
 
 ###############################################################################
@@ -95,39 +99,36 @@ func generateInstallScript(outputFile string) error {
 ###############################################################################
 DEPLOYMENT_FAILED=0
 
-# 1
+# 1. Pre-flight connectivity check
 network_check || exit 1
 
-# 2
+# 2. System environment discovery & version validation
 check_version || exit 1
-detect_arch
+detect_system_architecture
 
-# 3
+# 3. Core dependency initialization
 deploy_system_dependencies
 initialize_installer
 
-# 4
-for i in 3 2 1; do
-    printf "\r🚀 Launching DayPass Interactive UI in \033[1;33m%d\033[0m seconds ... (Press \033[1;36m[Enter]\033[0m to skip) " "$i"
-    if read -t 1 -r; then
-        break
-    fi
-done
+# 4. Optional Automatic UCI Config Backup
+if command -v backup_configs >/dev/null 2>&1; then
+    backup_configs
+fi
 
+# 5. Interactive UI Launch
 clear
 reset_state
 main_menu
 
-# 5
-deploy_targeted_packages
-
+# 6. Clean Exit
 echo
-echo "🎉 DayPass installation completed successfully! ;))"
+log_success "👋 DayPass session finished!"
 exit 0
 
 `)
 
-
-	os.MkdirAll(filepath.Dir(outputFile), 0755)
+	if err := os.MkdirAll(filepath.Dir(outputFile), 0755); err != nil {
+		return err
+	}
 	return os.WriteFile(outputFile, []byte(scriptBuilder.String()), 0755)
 }

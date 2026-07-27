@@ -25,8 +25,13 @@ geo_menu()
             ;;
         2)
             SELECTED_GEO="official"
-            add_selected_package "v2ray-geoip"
-            add_selected_package "v2ray-geosite"
+            if [ "${PKG_MANAGER:-opkg}" = "apk" ]; then
+                add_selected_package "geosite" 2>/dev/null || add_selected_package "v2ray-geosite"
+                add_selected_package "geoip" 2>/dev/null || add_selected_package "v2ray-geoip"
+            else
+                add_selected_package "v2ray-geoip"
+                add_selected_package "v2ray-geosite"
+            fi
             ;;
         3)
             SELECTED_GEO="iran-full"
