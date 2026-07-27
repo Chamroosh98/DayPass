@@ -183,21 +183,31 @@ jobs:
           curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/beta/install.sh" | jq .
           echo "✅ Beta CDN cache purged successfully!"
 
-      - name: 🧪 Create and Upload Pre-Release Packages to GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ env.VERSION }}-beta-${{ github.run_number }}
-          name: 🧪 v${{ env.VERSION }} (Build ${{ github.run_number }})
-          prerelease: true
-          make_latest: "false"
-          fail_on_unmatched_files: false
-          append_body: false
-          files: |
-            merged-beta/*.zip
-            build-artifacts/*.sha256
-            build-artifacts/**/*.sha256
+      - name: 🧪 Create and Upload Pre-Release Packages to GitHub Release via GitHub CLI
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="v${{ env.VERSION }}-beta-${{ github.run_number }}"
+          RELEASE_TITLE="🧪 v${{ env.VERSION }} (Build ${{ github.run_number }})"
+          
+          echo "🚀 Creating release $TAG_NAME via GitHub CLI ..."
+          
+          # 1. Create the Release Tag first
+          gh release create "$TAG_NAME" \
+            --title "$RELEASE_TITLE" \
+            --prerelease \
+            --notes "## 🧪 DayPass Beta Release%0A📅 Date : \`${{ env.VERSION }}\`%0A🧪 Build : \`${{ github.run_number }}\`"
+
+          # 2. Collect unique list of files (no duplicate matches)
+          mkdir -p release-files
+          cp merged-beta/*.zip release-files/ 2>/dev/null || true
+          find build-artifacts/ -type f -name "*.sha256" -exec cp {} release-files/ \; 2>/dev/null || true
+
+          # 3. Upload all assets securely to the newly created release
+          echo "📤 Uploading assets to GitHub Release ..."
+          gh release upload "$TAG_NAME" release-files/* --clobber
+          
+          echo "✅ Pre-release uploaded successfully via GitHub CLI!"
 
       - name: 🧹 Cleanup old beta releases
         uses: dev-drprasad/delete-older-releases@v0.3.4
