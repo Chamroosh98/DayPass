@@ -150,6 +150,7 @@ jobs:
           fi
           echo "✅ All release assets passed health check successfully!"
 
+      
       - name: 🧪 Create and Upload Pre-Release Packages via GitHub CLI
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -162,10 +163,11 @@ jobs:
           # Delete tag if partially created in a failed attempt
           gh release delete "$TAG_NAME" -y --cleanup-tag 2>/dev/null || true
 
+          # Create release with proper multiline body
           gh release create "$TAG_NAME" \
             --title "$RELEASE_TITLE" \
             --prerelease \
-            --notes "## 🧪 DayPass Beta Release%0A📅 Date : \`${{ env.VERSION }}\`%0A🧪 Build : \`${{ github.run_number }}\`"
+            --notes $'## 🧪 DayPass Beta Release\n📅 Date : `v'${{ env.VERSION }}'`\n🧪 Build : `'${{ github.run_number }}'`'
 
           # Collect unique files to avoid duplicate upload issues
           mkdir -p release-files
@@ -176,6 +178,7 @@ jobs:
           gh release upload "$TAG_NAME" release-files/* --clobber
           
           echo "✅ Pre-release uploaded successfully via GitHub CLI!"
+
 
       - name: 🕵️‍♀️ Prepare GitHub Pages Assets
         run: |
