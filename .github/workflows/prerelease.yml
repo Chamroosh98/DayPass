@@ -187,19 +187,21 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.VERSION }}-beta-${{ github.run_number }}
-          name: 🧪 v${{ env.VERSION }}
+          name: 🧪 v${{ env.VERSION }} (Build ${{ github.run_number }})
           prerelease: true
-          body: |
-            ## 🧪 DayPass Beta Release
-            📅 Date  : `${{ env.VERSION }}`
-            🧪 Build : `${{ github.run_number }}`
+          make_latest: "false"
+          fail_on_unmatched_files: false
+          append_body: false
           files: |
             merged-beta/*.zip
             build-artifacts/*.sha256
             build-artifacts/**/*.sha256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🧹 Cleanup old beta releases
         uses: dev-drprasad/delete-older-releases@v0.3.4
+        if: success()
         with:
           keep_latest: 2
           delete_tags: true
