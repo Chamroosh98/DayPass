@@ -40,5 +40,5 @@ show_banner()
     printf "${R_LOGO}       .......  .::::.        ${WHITE}💾 Storage      : %s/%s MB${RESET}\n" "$USED_STO_MB" "$TOTAL_STO_MB"
 
     echo
-    printf "   ${GRAY}───────────────────── 🕊️ Remembering the IRAN Massacre on Jan 8-9, 2026 ─────────────────────${RESET}\n"
+    printf "  ${GRAY}───────────────────── 🕊️ Remembering the IRAN Massacre on Jan 8-9, 2026 ─────────────────────${RESET}\n"
 }

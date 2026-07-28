@@ -103,7 +103,8 @@ EOF
         CITY_STR=""
         [ -n "$CITY" ] && CITY_STR=" ${GRAY:-}($CITY)${RESET:-}"
 
-        printf "   Public IP   : %s\n" "$PUBLIC_IP"
+        # printf "   Public IP   : %s\n" "$PUBLIC_IP"
+        printf "\033[K   Public IP   : %s\n" "$PUBLIC_IP"
         printf "   Country     : %s %s%s\n" "$FLAG" "$COUNTRY" "${CITY_STR}"
         [ -n "$ISP" ] && printf "   ISP         : %s\n" "$ISP"
         [ -n "$ASN" ] && printf "   ASN         : %s%s%s\n" "${GRAY:-}" "$ASN" "${RESET:-}"

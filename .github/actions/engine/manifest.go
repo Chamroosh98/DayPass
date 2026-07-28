@@ -94,7 +94,15 @@ func GenerateManifest(archConfigPath, outputDir, owVersion string) error {
 	if repo == "" {
 		repo = "Chamroosh98/DayPass"
 	}
-	cdnBaseUrl := fmt.Sprintf("https://cdn.jsdelivr.net/gh/%s@packages/v%s", repo, owVersion)
+
+	releaseType := os.Getenv("INPUT_RELEASE_TYPE") 
+	var cdnBaseUrl string
+
+	if releaseType != "" {
+		cdnBaseUrl = fmt.Sprintf("https://cdn.jsdelivr.net/gh/%s@packages/%s/v%s", repo, releaseType, owVersion)
+	} else {
+		cdnBaseUrl = fmt.Sprintf("https://cdn.jsdelivr.net/gh/%s@packages/v%s", repo, owVersion)
+	}
 
 	manifest := ManifestOutput{
 		Release:       config.Release,
