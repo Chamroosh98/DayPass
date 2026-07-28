@@ -1,5 +1,6 @@
 #!/bin/sh
 
+clear
 # Cross-platform sleeping utility for UI spinner rendering
 spin_sleep() {
     if command -v usleep >/dev/null 2>&1; then

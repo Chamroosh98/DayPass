@@ -92,7 +92,7 @@ pkg_install()
     if [ "$PKG_MANAGER" = "apk" ]; then
         # 1. Try standard installation with untrusted keyring bypass
         if apk add --no-cache --allow-untrusted "$PACKAGE_NAME" >/dev/null 2>&1; then
-            log_success "Package [$PACKAGE_NAME] installed successfully via APK." 2>/dev/null
+            log_success "[$PACKAGE_NAME]" 2>/dev/null
             return 0
         fi
 
