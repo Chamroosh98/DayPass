@@ -32,6 +32,7 @@ manifest_lookup()
             Size) alt_field="size" ;;
             version) alt_field="Version" ;;
             Version) alt_field="version" ;;
+            sha256) alt_field="SHA256" ;;
         esac
 
         if [ -n "$alt_field" ]; then
@@ -69,7 +70,6 @@ format_size()
     fi
 }
 
-# Resilient Download Logic with SHA256 Verification & Timeout Control
 download_package()
 {
     package="$1"
@@ -90,7 +90,6 @@ download_package()
     target="$TMP_DIR/$file_basename"
     tmp="$target.part"
 
-    # Skip download if already verified in current session
     if [ -f "$target" ]; then
         if echo "$sha256  $target" | sha256sum -c - >/dev/null 2>&1; then
             log_info "Cached package [$package] verified successfully. Skipping download."
@@ -104,7 +103,6 @@ download_package()
     DOWNLOAD_SUCCESS=0
     trap 'rm -f "$tmp" 2>/dev/null' INT TERM
 
-    # Network resilient parameters (Retry 3 times, longer timeouts for Iran connections)
     if command -v curl >/dev/null 2>&1; then
         curl -fsSL --connect-timeout 15 --max-time 120 --retry 3 --retry-delay 2 "$target_url" -o "$tmp" && DOWNLOAD_SUCCESS=1
     elif command -v wget >/dev/null 2>&1; then
@@ -120,29 +118,37 @@ download_package()
         return 1
     fi
 
-    # SHA256 Check
-    if ! echo "$sha256  $tmp" | sha256sum -c - >/dev/null 2>&1; then
-        log_error "SHA256 checksum MISMATCH for : [$package]!"
-        rm -f "$tmp"
-        trap - INT TERM
-        return 1
+    if [ -n "$sha256" ] && [ "$sha256" != "null" ]; then
+        if ! echo "$sha256  $tmp" | sha256sum -c - >/dev/null 2>&1; then
+            log_error "SHA256 checksum MISMATCH for : [$package]!"
+            rm -f "$tmp"
+            trap - INT TERM
+            return 1
+        fi
     fi
 
     mv "$tmp" "$target"
     trap - INT TERM
-    log_success "Package [$package] downloaded and SHA256 verified!"
+    log_success "Package [$package] downloaded and verified!"
     return 0
 }
 
-# Pre-Install Inspection Table
+# Pre-Install Inspection Table with strict ANSI alignment
 inspect_and_confirm_packages()
 {
+    C_RESET="\033[0m"
+    C_PKG="\033[1;36m"
+    C_VER="\033[0;33m"
+    C_UPG="\033[1;33m"
+    C_INS="\033[1;32m"
+    C_OK="\033[0;32m"
+
     echo
-    echo "  ───────────────────────────────────────────────────────────"
-    echo "   📦 DayPass Package Inspection Table"
-    echo "  ───────────────────────────────────────────────────────────"
-    printf "   %-22s %-12s %-15s\n" "Package" "Installed" "Manifest Ver"
-    echo "  ───────────────────────────────────────────────────────────"
+    echo "──────────────────────────────────────────────────────────────────────────────────────────"
+    echo "📦 DayPass Package Inspection Table"
+    echo "──────────────────────────────────────────────────────────────────────────────────────────"
+    printf "  %-32s %-18s %-18s %-12s\n" "Package" "Installed" "Manifest Ver" "Action"
+    echo "──────────────────────────────────────────────────────────────────────────────────────────"
 
     PACKAGES_TO_PROCESS=""
     UPGRADE_COUNT=0
@@ -152,35 +158,60 @@ inspect_and_confirm_packages()
     for pkg in $FINAL_PACKAGES; do
         inst_ver=$(pkg_get_installed_version "$pkg")
         manif_ver=$(manifest_lookup "version" "$pkg")
+        manif_hash=$(manifest_lookup "sha256" "$pkg")
         
         [ -z "$inst_ver" ] && inst_ver="None"
-        [ -z "$manif_ver" ] && manif_ver="Latest"
+        [ -z "$manif_ver" ] || [ "$manif_ver" = "null" ] && manif_ver="N/A"
 
+        ACTION_STR=""
+        
         if [ "$inst_ver" = "None" ]; then
-            ACTION="📥 Install"
+            ACTION_STR="${C_INS}[➕ Install]${C_RESET}"
             INSTALL_COUNT=$((INSTALL_COUNT + 1))
             PACKAGES_TO_PROCESS="$PACKAGES_TO_PROCESS $pkg"
-        elif [ "$inst_ver" != "$manif_ver" ]; then
-            ACTION="🔄 Upgrade"
+        elif [ "$manif_ver" != "N/A" ] && [ "$manif_ver" != "Latest" ] && [ "$inst_ver" != "$manif_ver" ]; then
+            ACTION_STR="${C_UPG}[🔄 Upgrade]${C_RESET}"
             UPGRADE_COUNT=$((UPGRADE_COUNT + 1))
             PACKAGES_TO_PROCESS="$PACKAGES_TO_PROCESS $pkg"
-        else
-            ACTION="⚡ Up-to-date"
-            SKIP_COUNT=$((SKIP_COUNT + 1))
+        elif [ "$manif_ver" = "Latest" ] || [ "$inst_ver" = "$manif_ver" ]; then
+            # Hash Mismatch Check for Patch updates (SourceForge/Rebuilds)
+            inst_hash=$(pkg_get_installed_hash "$pkg" 2>/dev/null)
+            if [ -n "$manif_hash" ] && [ "$manif_hash" != "null" ] && [ -n "$inst_hash" ] && [ "$inst_hash" != "$manif_hash" ]; then
+                ACTION_STR="${C_UPG}[🩹 Patch]${C_RESET}"
+                UPGRADE_COUNT=$((UPGRADE_COUNT + 1))
+                PACKAGES_TO_PROCESS="$PACKAGES_TO_PROCESS $pkg"
+            else
+                ACTION_STR="${C_OK}[✅ Up-to-date]${C_RESET}"
+                SKIP_COUNT=$((SKIP_COUNT + 1))
+            fi
         fi
 
-        printf "   %-22s %-12s %-15s [%s]\n" "$pkg" "$inst_ver" "$manif_ver" "$ACTION"
+        printf "  🔹 ${C_PKG}%-26s${C_RESET} ${C_VER}%-16s${C_RESET} %-16s %b\n" \
+            "$pkg" "$inst_ver" "$manif_ver" "$ACTION_STR"
     done
 
-    echo "  ───────────────────────────────────────────────────────────"
-    printf "   Summary: %d to install, %d to upgrade, %d skipped.\n" "$INSTALL_COUNT" "$UPGRADE_COUNT" "$SKIP_COUNT"
-    echo "  ───────────────────────────────────────────────────────────"
+    echo "──────────────────────────────────────────────────────────────────────────────────────────"
+    printf "  Summary: %d to install, %d to upgrade, %d skipped.\n" "$INSTALL_COUNT" "$UPGRADE_COUNT" "$SKIP_COUNT"
+    echo "──────────────────────────────────────────────────────────────────────────────────────────"
     echo
 
     if [ -z "$PACKAGES_TO_PROCESS" ]; then
         log_success "All packages are up-to-date! No changes required."
         return 2
     fi
+
+    # Interactive User Confirmation Prompt
+    printf " Do you want to proceed with deployment? [Y/n]: "
+    read -r user_confirm
+    case "$user_confirm" in
+        [nN][oO]|[nN])
+            log_warn "Installation cancelled by user."
+            return 3
+            ;;
+        *)
+            log_info "User confirmed. Proceeding with installation..."
+            ;;
+    esac
 
     export PACKAGES_TO_PROCESS
     return 0
@@ -198,7 +229,7 @@ deploy_targeted_packages()
     inspect_and_confirm_packages
     INSPECT_STATUS=$?
 
-    if [ "$INSPECT_STATUS" -eq 2 ]; then
+    if [ "$INSPECT_STATUS" -eq 2 ] || [ "$INSPECT_STATUS" -eq 3 ]; then
         return 0
     fi
 
@@ -226,7 +257,6 @@ deploy_targeted_packages()
     echo
     log_info "Executing Batch Package Installation ..."
 
-    # Log into Transaction File for Rollback tracking
     for pkg in $PACKAGES_TO_PROCESS; do
         echo "$pkg" >> "$TRANSACTION_LOG"
     done
@@ -261,7 +291,6 @@ deploy_targeted_packages()
         echo "$PACKAGES_TO_PROCESS" >> "$INSTALL_LOG"
         resource_compare
         
-        # Cleanup temporary files
         rm -f $INSTALL_FILES 2>/dev/null
         rm -f "$TRANSACTION_LOG"
         
@@ -274,7 +303,6 @@ deploy_targeted_packages()
     return 1
 }
 
-# Atomic Rollback Function
 rollback_failed_install()
 {
     echo
@@ -283,10 +311,8 @@ rollback_failed_install()
     log_warn "=================================================="
     echo
 
-    # 1. Clean downloaded temp packages
     rm -f "$TMP_DIR"/*.part "$TMP_DIR"/*.apk "$TMP_DIR"/*.ipk 2>/dev/null
 
-    # 2. Rollback only modified/partially installed packages from transaction log
     if [ -s "$TRANSACTION_LOG" ]; then
         log_info "Rolling back modified packages from current session..."
         while read -r pkg; do

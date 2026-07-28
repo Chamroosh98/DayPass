@@ -55,7 +55,7 @@ resource_snapshot()
     log_info "  └─ Free Flash Space : [$(human_readable_bytes "$BEFORE_FREE_FLASH")]"
 }
 
-# Smart estimation: Counts ONLY Action=INSTALL or UPGRADE packages
+# Smart estimation: Calculates REAL net storage expansion
 estimate_install_size()
 {
     [ -z "${FINAL_PACKAGES:-}" ] && return 0
@@ -63,31 +63,37 @@ estimate_install_size()
 
     TOTAL_REQUIRED_BYTES=0
     TOTAL_SAVED_BYTES=0
+    RECLAIMABLE_BYTES=0
 
     for pkg in $FINAL_PACKAGES; do
         pkg_bytes=$(manifest_lookup "size" "$pkg")
         [ -z "$pkg_bytes" ] || [ "$pkg_bytes" = "null" ] && pkg_bytes=0
 
-        # Check action status
         inst_ver=$(pkg_get_installed_version "$pkg")
-        m_ver=$(manifest_lookup "version" "$pkg")
+        manif_ver=$(manifest_lookup "version" "$pkg")
 
-        if [ -n "$inst_ver" ] && [ "$inst_ver" = "$m_ver" ]; then
-            # Skipped package - Add to saved traffic counter
+        # Skip logic if version is identical and not generic "Latest"
+        if [ -n "$inst_ver" ] && [ "$inst_ver" = "$manif_ver" ] && [ "$manif_ver" != "Latest" ]; then
             TOTAL_SAVED_BYTES=$((TOTAL_SAVED_BYTES + pkg_bytes))
         else
-            # Needs download/install
             TOTAL_REQUIRED_BYTES=$((TOTAL_REQUIRED_BYTES + pkg_bytes))
+
+            # If replacing an existing package, account for reclaimed space
+            if [ -n "$inst_ver" ] && [ "$inst_ver" != "None" ]; then
+                RECLAIMABLE_BYTES=$((RECLAIMABLE_BYTES + pkg_bytes))
+            fi
         fi
     done
 
-    # Buffer: 2x safety margin for extraction & temporary files
-    ESTIMATED_EXTRACTED_BYTES=$((TOTAL_REQUIRED_BYTES * 2))
+    # Buffer: Only 10% safety margin for extract/temp operational overhead
+    TEMP_OVERHEAD=$((TOTAL_REQUIRED_BYTES / 10))
+    PEAK_STORAGE_REQ=$((TOTAL_REQUIRED_BYTES + TEMP_OVERHEAD))
 
     log_info "Smart Resource Allocation Requirements:"
     log_info "  ├─ Payload Download Req : [$(human_readable_bytes "$TOTAL_REQUIRED_BYTES")]"
-    log_info "  ├─ Saved Traffic (Skip) : [$(human_readable_bytes "$TOTAL_SAVED_BYTES")]"
-    log_info "  └─ Estimated Storage Req : [$(human_readable_bytes "$ESTIMATED_EXTRACTED_BYTES")] (with safety buffer)"
+    log_info "  ├─ Reclaimable Storage  : [$(human_readable_bytes "$RECLAIMABLE_BYTES")] ♻️"
+    log_info "  ├─ Saved Traffic (Skip) : [$(human_readable_bytes "$TOTAL_SAVED_BYTES")] ⚡"
+    log_info "  └─ Peak Temp Storage Req: [$(human_readable_bytes "$PEAK_STORAGE_REQ")]"
 
     CURRENT_RAM=$(get_free_ram_bytes)
     RAM_MARGIN=$((2 * 1024 * 1024)) # 2MB margin
@@ -100,13 +106,16 @@ estimate_install_size()
     fi
 
     CURRENT_FLASH=$(get_free_flash_bytes "/overlay")
-    FLASH_MARGIN=$((1 * 1024 * 1024)) # 1MB margin
-    MIN_FLASH_NEEDED=$((ESTIMATED_EXTRACTED_BYTES + FLASH_MARGIN))
 
-    if [ "$CURRENT_FLASH" -lt "$MIN_FLASH_NEEDED" ]; then
-        log_error "Insufficient Flash storage space on system!"
-        log_warn "Available Storage: $(human_readable_bytes "$CURRENT_FLASH") | Required: $(human_readable_bytes "$MIN_FLASH_NEEDED")"
-        return 1
+    # Soft check: If space is tight, warn but DON'T abort if old packages can be purged first
+    if [ "$CURRENT_FLASH" -lt "$PEAK_STORAGE_REQ" ]; then
+        if [ "$((CURRENT_FLASH + RECLAIMABLE_BYTES))" -ge "$PEAK_STORAGE_REQ" ]; then
+            log_warn "Flash storage is tight, but replacing old packages will yield enough space."
+        else
+            log_error "Insufficient Flash storage space on system!"
+            log_warn "Available Storage: $(human_readable_bytes "$CURRENT_FLASH") | Peak Required: $(human_readable_bytes "$PEAK_STORAGE_REQ")"
+            return 1
+        fi
     fi
 
     log_success "System resource check PASSED!"
