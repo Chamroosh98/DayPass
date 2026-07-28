@@ -61,7 +61,7 @@ show_full_network_info()
         [ -n "$(command -v show_banner)" ] && show_banner
     fi
     
-    printf "\n   ${CYAN:-}🌐 Network Diagnostics & Information${RESET:-}\n"
+    printf "   ${CYAN:-}🌐 Network Diagnostics & Information${RESET:-}\n"
     printf "   ${GRAY:-}─────────────────────────────────────────${RESET:-}\n"
 
     # Determine available HTTP client engine
@@ -124,7 +124,7 @@ show_live_speed() {
     fi
 
     echo
-    MSG="Monitoring live speed on [${CYAN:-}$IFACE${RESET:-}] ${GRAY:-}(Press Ctrl+C to stop)...${RESET:-}"
+    MSG="Monitoring live speed on [${CYAN:-}$IFACE]${RESET:-} ${GRAY:-}(Press Ctrl+C to stop) ...${RESET:-}"
     if command -v log_info >/dev/null 2>&1; then
         log_info "$MSG"
     else
@@ -183,7 +183,7 @@ network_menu()
         case "$net_choice" in
             1) show_live_speed ;;
             2) continue ;;
-            0) echo "   🚪${GRAY} Exiting ...${RESET}"
+            0) echo "   ${GRAY} Exiting ...${RESET}"
                 sleep 1
                 clear
                 break 

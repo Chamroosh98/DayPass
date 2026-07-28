@@ -170,7 +170,7 @@ jobs:
           🧪 **Build** : \`${{ github.run_number }}\`
           EOF
 
-          # Create release using --notes-file
+          # Create release using --notes-fileRELEASE_TITLE
           gh release create "$TAG_NAME" \
             --title "$RELEASE_TITLE" \
             --prerelease \

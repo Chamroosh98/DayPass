@@ -8,7 +8,6 @@ deploy_system_dependencies()
     pkg_update
 
     COMMON_DEPS="ca-bundle ca-certificates curl jq"
-
     OW24_EXTRA_DEPS="coreutils coreutils-base64 coreutils-nohup coreutils-timeout ip-full unzip resolveip lua libuci-lua luci-compat luci-lib-jsonc luci-lua-runtime lyaml"
 
     TARGET_PACKAGES="$COMMON_DEPS"
@@ -21,14 +20,29 @@ deploy_system_dependencies()
     fi
 
     for pkg in $TARGET_PACKAGES; do
-        if pkg_installed "$pkg"; then
-            continue
+        case "$pkg" in
+            curl) command -v curl >/dev/null 2>&1 && { log_info "Dependency [$pkg] is already available."; continue; } ;;
+            jq)   command -v jq >/dev/null 2>&1 && { log_info "Dependency [$pkg] is already available."; continue; } ;;
+            unzip) command -v unzip >/dev/null 2>&1 && { log_info "Dependency [$pkg] is already available."; continue; } ;;
+            lua)  command -v lua >/dev/null 2>&1 && { log_info "Dependency [$pkg] is already available."; continue; } ;;
+        esac
+
+        if command -v pkg_installed >/dev/null 2>&1; then
+            if pkg_installed "$pkg"; then
+                log_info "Package [$pkg] is already installed."
+                continue
+            fi
         fi
-        log_info "Installing required dependency: [$pkg] ..."
-        pkg_install "$pkg"
+
+        log_info "Installing required dependency : [$pkg] ..."
+        
+        if pkg_install "$pkg"; then
+            log_success "Package [$pkg] installed successfully."
+        else
+            log_warn "Failed or finished with warning while installing [$pkg]."
+        fi
     done
 
-    # بررسی و ارتقای dnsmasq به dnsmasq-full
     if [ -f /etc/openwrt_release ]; then
         log_info "Checking dnsmasq installation status ..."
 
