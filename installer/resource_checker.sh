@@ -51,8 +51,8 @@ resource_snapshot()
     BEFORE_FREE_FLASH=$(get_free_flash_bytes "/overlay")
 
     log_info "System Memory Snapshot:"
-    log_info "  ├─ Available RAM    : [$(human_readable_bytes "$BEFORE_FREE_RAM")]"
-    log_info "  └─ Free Flash Space : [$(human_readable_bytes "$BEFORE_FREE_FLASH")]"
+    log_info "  ├─ Available RAM        : [$(human_readable_bytes "$BEFORE_FREE_RAM")]"
+    log_info "  └─ Free Flash Space     : [$(human_readable_bytes "$BEFORE_FREE_FLASH")]"
 }
 
 # Smart estimation: Calculates REAL net storage expansion
@@ -90,10 +90,10 @@ estimate_install_size()
     PEAK_STORAGE_REQ=$((TOTAL_REQUIRED_BYTES + TEMP_OVERHEAD))
 
     log_info "Smart Resource Allocation Requirements:"
-    log_info "  ├─ Payload Download Req : [$(human_readable_bytes "$TOTAL_REQUIRED_BYTES")]"
-    log_info "  ├─ Reclaimable Storage  : [$(human_readable_bytes "$RECLAIMABLE_BYTES")] ♻️"
-    log_info "  ├─ Saved Traffic (Skip) : [$(human_readable_bytes "$TOTAL_SAVED_BYTES")] ⚡"
-    log_info "  └─ Peak Temp Storage Req: [$(human_readable_bytes "$PEAK_STORAGE_REQ")]"
+    log_info "  ├─ Payload Download Req   : [$(human_readable_bytes "$TOTAL_REQUIRED_BYTES")]"
+    log_info "  ├─ Reclaimable Storage    : [$(human_readable_bytes "$RECLAIMABLE_BYTES")] ♻️"
+    log_info "  ├─ Saved Traffic (Skip)   : [$(human_readable_bytes "$TOTAL_SAVED_BYTES")] ⚡"
+    log_info "  └─ Peak Temp Storage Req  : [$(human_readable_bytes "$PEAK_STORAGE_REQ")]"
 
     CURRENT_RAM=$(get_free_ram_bytes)
     RAM_MARGIN=$((2 * 1024 * 1024)) # 2MB margin
@@ -134,10 +134,10 @@ resource_compare()
     echo "=========================================================="
     echo "📊 DayPass Deployment Efficiency Summary"
     echo "=========================================================="
-    echo "  ├─ Total Downloaded Payload : $(human_readable_bytes "$TOTAL_REQUIRED_BYTES")"
-    echo "  ├─ Total Network Traffic Saved : $(human_readable_bytes "$TOTAL_SAVED_BYTES") ⚡"
-    echo "  ├─ Net Storage Consumed      : $(human_readable_bytes "$USED_FLASH")"
-    echo "  └─ Free Storage Remaining    : $(human_readable_bytes "$AFTER_FREE_FLASH")"
+    echo "  ├─ Total Downloaded Payload     : $(human_readable_bytes "$TOTAL_REQUIRED_BYTES")"
+    echo "  ├─ Total Network Traffic Saved  : $(human_readable_bytes "$TOTAL_SAVED_BYTES") ⚡"
+    echo "  ├─ Net Storage Consumed         : $(human_readable_bytes "$USED_FLASH")"
+    echo "  └─ Free Storage Remaining       : $(human_readable_bytes "$AFTER_FREE_FLASH")"
     echo "=========================================================="
     echo
 }

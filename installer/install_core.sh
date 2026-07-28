@@ -48,17 +48,27 @@ initialize_installer()
         exit 1
     fi
 
-    log_info "Downloading architecture manifest from : [$REPO_URL/manifest.json]"
+    # 🛠️ Dynamic Manifest Selection based on PKG_MANAGER (opkg vs apk)
+    MANIFEST_PATH="manifest.json"
+    if [ "${PKG_MANAGER:-opkg}" = "apk" ]; then
+        MANIFEST_PATH="v25/manifest.json"
+    else
+        MANIFEST_PATH="v24/manifest.json"
+    fi
+
+    MANIFEST_TARGET_URL="${REPO_URL}/${MANIFEST_PATH}"
+
+    log_info "Downloading architecture manifest from : [$MANIFEST_TARGET_URL]"
     
     # 4. Download manifest using resilient fallback mechanisms (curl -> wget -> uclient-fetch)
     DOWNLOAD_SUCCESS=0
 
     if command -v curl >/dev/null 2>&1; then
-        curl -fsSL "$REPO_URL/manifest.json" -o "$MANIFEST_FILE" && DOWNLOAD_SUCCESS=1
+        curl -fsSL "$MANIFEST_TARGET_URL" -o "$MANIFEST_FILE" && DOWNLOAD_SUCCESS=1
     elif command -v wget >/dev/null 2>&1; then
-        wget -qO "$MANIFEST_FILE" "$REPO_URL/manifest.json" && DOWNLOAD_SUCCESS=1
+        wget -qO "$MANIFEST_FILE" "$MANIFEST_TARGET_URL" && DOWNLOAD_SUCCESS=1
     elif command -v uclient-fetch >/dev/null 2>&1; then
-        uclient-fetch -q -O "$MANIFEST_FILE" "$REPO_URL/manifest.json" && DOWNLOAD_SUCCESS=1
+        uclient-fetch -q -O "$MANIFEST_FILE" "$MANIFEST_TARGET_URL" && DOWNLOAD_SUCCESS=1
     else
         log_error "No network download utility found (curl, wget, or uclient-fetch)!"
         exit 1
@@ -66,7 +76,7 @@ initialize_installer()
 
     # 5. Verify downloaded file presence and size
     if [ "$DOWNLOAD_SUCCESS" -ne 1 ] || [ ! -s "$MANIFEST_FILE" ]; then
-        log_error "Failed to download or received empty manifest from [$REPO_URL/manifest.json]"
+        log_error "Failed to download or received empty manifest from [$MANIFEST_TARGET_URL]"
         exit 1
     fi
 

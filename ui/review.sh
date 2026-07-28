@@ -11,8 +11,8 @@ review_install()
     echo "  📊 Installation Plan Summary"
     echo "  ─────────────────────────────────────────────────────────────"
     printf "  👤 %-16s : %s\n" "Selected Profile" "${SELECTED_PROFILE:-N/A}"
-    printf "  ⚙️  %-16s : %s\n" "Selected Engine"  "${SELECTED_ENGINE:-auto}"
-    printf "  🗣️  %-16s : %s\n" "Language"         "${SELECTED_LANGUAGE:-none}"
+    printf "  ⚙️ %-16s : %s\n" "Selected Engine"  "${SELECTED_ENGINE:-auto}"
+    printf "  🗣️ %-16s : %s\n" "Language"         "${SELECTED_LANGUAGE:-none}"
     printf "  🌐 %-16s : %s\n" "Geo Database"     "${SELECTED_GEO:-none}"
     echo "  ─────────────────────────────────────────────────────────────"
 

@@ -144,11 +144,11 @@ inspect_and_confirm_packages()
     C_OK="\033[0;32m"
 
     echo
-    echo "──────────────────────────────────────────────────────────────────────────────────────────"
-    echo "📦 DayPass Package Inspection Table"
-    echo "──────────────────────────────────────────────────────────────────────────────────────────"
-    printf "  %-32s %-18s %-18s %-12s\n" "Package" "Installed" "Manifest Ver" "Action"
-    echo "──────────────────────────────────────────────────────────────────────────────────────────"
+    echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
+    echo "  📦 DayPass Package Inspection Table"
+    echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
+    printf "    %-32s %-18s %-18s %-12s\n" "Package" "Installed" "Manifest Ver" "Action"
+    echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
 
     PACKAGES_TO_PROCESS=""
     UPGRADE_COUNT=0
@@ -190,9 +190,9 @@ inspect_and_confirm_packages()
             "$pkg" "$inst_ver" "$manif_ver" "$ACTION_STR"
     done
 
-    echo "──────────────────────────────────────────────────────────────────────────────────────────"
-    printf "  Summary: %d to install, %d to upgrade, %d skipped.\n" "$INSTALL_COUNT" "$UPGRADE_COUNT" "$SKIP_COUNT"
-    echo "──────────────────────────────────────────────────────────────────────────────────────────"
+    echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
+    printf "    Summary: %d to install, %d to upgrade, %d skipped.\n" "$INSTALL_COUNT" "$UPGRADE_COUNT" "$SKIP_COUNT"
+    echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
     echo
 
     if [ -z "$PACKAGES_TO_PROCESS" ]; then
