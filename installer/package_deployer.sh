@@ -136,13 +136,6 @@ download_package()
 # Pre-Install Inspection Table with strict ANSI alignment
 inspect_and_confirm_packages()
 {
-    C_RESET="\033[0m"
-    C_PKG="\033[1;36m"
-    C_VER="\033[0;33m"
-    C_UPG="\033[1;33m"
-    C_INS="\033[1;32m"
-    C_OK="\033[0;32m"
-
     echo "  📦 DayPass Package Inspection Table"
     echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
     printf "   %-32s %-18s %-18s %-12s\n" "Package" "Installed" "Manifest Ver" "Action"
@@ -154,7 +147,8 @@ inspect_and_confirm_packages()
     SKIP_COUNT=0
 
     for pkg in $FINAL_PACKAGES; do
-        inst_ver=$(pkg_get_installed_version "$pkg")
+        # فقط خط اول نسخه رو می‌گیریم تا متن چندخطی جدول رو بهم نریزه
+        inst_ver=$(pkg_get_installed_version "$pkg" | head -n1)
         manif_ver=$(manifest_lookup "version" "$pkg")
         manif_hash=$(manifest_lookup "sha256" "$pkg")
         
@@ -164,27 +158,26 @@ inspect_and_confirm_packages()
         ACTION_STR=""
         
         if [ "$inst_ver" = "None" ]; then
-            ACTION_STR="${C_INS}[➕ Install]${C_RESET}"
+            ACTION_STR="${GREEN}[➕ Install]${RESET}"
             INSTALL_COUNT=$((INSTALL_COUNT + 1))
             PACKAGES_TO_PROCESS="$PACKAGES_TO_PROCESS $pkg"
         elif [ "$manif_ver" != "N/A" ] && [ "$manif_ver" != "Latest" ] && [ "$inst_ver" != "$manif_ver" ]; then
-            ACTION_STR="${C_UPG}[🔄 Upgrade]${C_RESET}"
+            ACTION_STR="${YELLOW}[🔄 Upgrade]${RESET}"
             UPGRADE_COUNT=$((UPGRADE_COUNT + 1))
             PACKAGES_TO_PROCESS="$PACKAGES_TO_PROCESS $pkg"
         elif [ "$manif_ver" = "Latest" ] || [ "$inst_ver" = "$manif_ver" ]; then
-            # Hash Mismatch Check for Patch updates (SourceForge/Rebuilds)
             inst_hash=$(pkg_get_installed_hash "$pkg" 2>/dev/null)
             if [ -n "$manif_hash" ] && [ "$manif_hash" != "null" ] && [ -n "$inst_hash" ] && [ "$inst_hash" != "$manif_hash" ]; then
-                ACTION_STR="${C_UPG}[🩹 Patch]${C_RESET}"
+                ACTION_STR="${ORANGE}[🩹 Patch]${RESET}"
                 UPGRADE_COUNT=$((UPGRADE_COUNT + 1))
                 PACKAGES_TO_PROCESS="$PACKAGES_TO_PROCESS $pkg"
             else
-                ACTION_STR="${C_OK}[✅ Up-to-date]${C_RESET}"
+                ACTION_STR="${GREEN}[✅ Up-to-date]${RESET}"
                 SKIP_COUNT=$((SKIP_COUNT + 1))
             fi
         fi
 
-        printf "   🔹 ${C_PKG}%-26s${C_RESET} ${C_VER}%-16s${C_RESET} %-16s %b\n" \
+        printf "   🔹 ${CYAN}%-26s${RESET} ${YELLOW}%-16s${RESET} %-16s %b\n" \
             "$pkg" "$inst_ver" "$manif_ver" "$ACTION_STR"
     done
 
@@ -199,15 +192,15 @@ inspect_and_confirm_packages()
     fi
 
     # Interactive User Confirmation Prompt
-    printf " Do you want to proceed with deployment? [Y/n]: "
+    printf " Do you want to proceed with deployment? [Y/n] : "
     read -r user_confirm
     case "$user_confirm" in
         [nN][oO]|[nN])
-            log_warn "Installation cancelled by user."
+            log_warn "Installation cancelled by user!"
             return 3
             ;;
         *)
-            log_info "User confirmed. Proceeding with installation..."
+            log_info "User confirmed. Proceeding with installation ..."
             ;;
     esac
 
