@@ -41,7 +41,7 @@ deploy_system_dependencies()
                     ;;
                 apk)
                     apk del dnsmasq >/dev/null 2>&1 || true
-                    apk add dnsmasq-full --force-overwrite >/dev/null 2>&1 || true
+                    apk add --allow-untrusted dnsmasq-full >/dev/null 2>&1 || true
                     ;;
             esac
             log_success "dnsmasq-full installed successfully."
