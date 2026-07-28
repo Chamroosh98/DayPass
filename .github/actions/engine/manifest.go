@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -22,6 +23,7 @@ type ArchitectureConfig struct {
 
 type PackageInfo struct {
 	Package string `json:"package"`
+	Version string `json:"version"` // Explicit version field
 	File    string `json:"file"`
 	Sha256  string `json:"sha256"`
 	Size    int64  `json:"size"`
@@ -51,6 +53,30 @@ func calculateSHA256(filePath string) (string, error) {
 		return "", err
 	}
 	return fmt.Sprintf("%x", hash.Sum(nil)), nil
+}
+
+// Extract base package name and version string safely
+// Example: "luci-app-passwall2-26.7.16-r1.apk" -> pkg="luci-app-passwall2", ver="26.7.16-r1"
+func parsePackageNameAndVersion(fileName string) (string, string) {
+	cleanName := fileName
+	for _, ext := range []string{".apk", ".ipk"} {
+		if strings.HasSuffix(strings.ToLower(cleanName), ext) {
+			cleanName = cleanName[:len(cleanName)-len(ext)]
+			break
+		}
+	}
+
+	// Regex pattern for Alpine/OpenWrt package naming standard: <name>-<version_revision>
+	// Matches: (package-name)-(digits.*)
+	re := regexp.MustCompile(`^(.+?)-(\d+.*)$`)
+	matches := re.FindStringSubmatch(cleanName)
+
+	if len(matches) == 3 {
+		return matches[1], matches[2]
+	}
+
+	// Fallback if version pattern didn't match
+	return cleanName, "Latest"
 }
 
 func GenerateManifest(archConfigPath, outputDir, owVersion string) error {
@@ -98,12 +124,7 @@ func GenerateManifest(archConfigPath, outputDir, owVersion string) error {
 			fileName := d.Name()
 			loweredName := strings.ToLower(fileName)
 
-			var pkgName string
-			if strings.HasSuffix(loweredName, ".apk") {
-				pkgName = strings.TrimSuffix(fileName, ".apk")
-			} else if strings.HasSuffix(loweredName, ".ipk") {
-				pkgName = strings.TrimSuffix(fileName, ".ipk")
-			} else {
+			if !strings.HasSuffix(loweredName, ".apk") && !strings.HasSuffix(loweredName, ".ipk") {
 				return nil
 			}
 
@@ -117,8 +138,12 @@ func GenerateManifest(archConfigPath, outputDir, owVersion string) error {
 				return fmt.Errorf("❌ Failed to calculate sha256 for [%s] : [%w]", path, err)
 			}
 
+			// Parse clean package name and version
+			pkgName, pkgVersion := parsePackageNameAndVersion(fileName)
+
 			archOut.Packages = append(archOut.Packages, PackageInfo{
 				Package: pkgName,
+				Version: pkgVersion,
 				File:    fmt.Sprintf("%s/%s", arch.Name, fileName),
 				Sha256:  sha,
 				Size:    fileInfo.Size(),

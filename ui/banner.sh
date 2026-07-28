@@ -33,7 +33,7 @@ show_banner()
     printf "${R_LOGO}        .**#: .+***++*+=.     ${CYAN}|____/ \__,_|\__, |_|   \__,_|___/___/${RESET}\n"
     printf "${R_LOGO}        .***:.+**+=-::::-:    ${CYAN}             |___/${RESET}\n"
     printf "${R_LOGO}        .***:=+=:      :--.   ${RESET}\n"
-    printf "${R_LOGO}        .***::-:       :--.   ${WHITE}🐱 Github       : github.com/Chamroosh98${RESET}\n"
+    printf "${R_LOGO}        .***::-:       :--.   ${WHITE}🐱github.com/Chamroosh98${RESET}\n"
     printf "${R_LOGO}        .++*. :--:....:--:    ${WHITE}🩻 Architecture : %s${RESET}\n" "$ARCH"
     printf "${R_LOGO}        .+++:  .::::::--:     ${WHITE}💡 OpenWrt      : %s (%s)${RESET}\n" "$OW_VER" "$PKG_MGR"
     printf "${R_LOGO}       =+++++=     .:::.      ${WHITE}🧠 Memory       : %s/%s MB${RESET}\n" "$USED_RAM_MB" "$TOTAL_RAM_MB"
@@ -41,5 +41,4 @@ show_banner()
 
     echo
     printf " ${GRAY}───────────────────── 🕊️ Remembering the IRAN Massacre on Jan 8-9, 2026 ─────────────────────${RESET}\n"
-    echo
 }
