@@ -163,11 +163,21 @@ jobs:
           # Delete tag if partially created in a failed attempt
           gh release delete "$TAG_NAME" -y --cleanup-tag 2>/dev/null || true
 
-          # Create release with proper multiline body
+          # Create release notes using a clean heredoc file
+          cat <<EOF > release_notes.md
+          ## 🧪 DayPass Beta Release
+          📅 **Date** : \`v${{ env.VERSION }}\`
+          🧪 **Build** : \`${{ github.run_number }}\`
+          EOF
+
+          # Create release using --notes-file
           gh release create "$TAG_NAME" \
             --title "$RELEASE_TITLE" \
             --prerelease \
-            --notes $'## 🧪 DayPass Beta Release\n📅 Date : `v'${{ env.VERSION }}'`\n🧪 Build : `'${{ github.run_number }}'`'
+            --notes-file release_notes.md
+
+          # Clean up notes file
+          rm -f release_notes.md
 
           # Collect unique files to avoid duplicate upload issues
           mkdir -p release-files
@@ -178,7 +188,6 @@ jobs:
           gh release upload "$TAG_NAME" release-files/* --clobber
           
           echo "✅ Pre-release uploaded successfully via GitHub CLI!"
-
 
       - name: 🕵️‍♀️ Prepare GitHub Pages Assets
         run: |
