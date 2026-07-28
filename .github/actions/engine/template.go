@@ -11,6 +11,7 @@ func generateInstallScript(outputFile string) error {
 	fmt.Println("⌛ Processing Core Components with Go Engine for DayPass ...")
 	
 	branch := os.Getenv("GITHUB_REF_NAME")
+	releaseType := os.Getenv("INPUT_RELEASE_TYPE")
 	if branch == "" {
 		branch = "dev" 
 	}
@@ -24,8 +25,10 @@ func generateInstallScript(outputFile string) error {
 
 	scriptBuilder.WriteString("# Dynamic REPO_URL configuration\n")
 	scriptBuilder.WriteString("if [ -z \"${REPO_URL:-}\" ]; then\n")
-	if branch == "main" {
+	if branch == "main" && releaseType != "beta" {
 		scriptBuilder.WriteString("    REPO_URL=\"https://chamroosh98.github.io/DayPass\"\n")
+	} else if releaseType == "beta" || branch == "beta" {
+		scriptBuilder.WriteString("    REPO_URL=\"https://chamroosh98.github.io/DayPass/beta\"\n")
 	} else {
 		scriptBuilder.WriteString(fmt.Sprintf("    REPO_URL=\"https://chamroosh98.github.io/DayPass/%s\"\n", branch))
 	}
@@ -34,14 +37,15 @@ func generateInstallScript(outputFile string) error {
 
 	// Cleaned & strict dependency-aware sourcing sequence
 	installerFiles := []string{
-		// 1. UI Base Libraries & Styles (Removed ui/style.sh)
+		// 1. Core Globals, UI Base Libraries & Styles
+		"installer/globals.sh",
 		"ui/lib/styles.sh",
 		"ui/lib/box_utils.sh",
 		"ui/lib/header.sh",
 		"ui/lib/progress.sh",
 		"ui/banner.sh",
 
-		// 2. Hardware, OS & System Modules
+		// 2. Hardware, OS, Maintenance & System Modules
 		"modules/zero_deps.sh",
 		"modules/version_check.sh",
 		"modules/system_info.sh",
@@ -49,6 +53,7 @@ func generateInstallScript(outputFile string) error {
 		"modules/resource_monitor.sh",
 		"modules/dns_fix.sh",
 		"modules/backup_restore.sh",
+		"modules/maintenance.sh",
 		"modules/service_manager.sh",
 
 		// 3. Core Installer Logic & Package Management
@@ -60,7 +65,7 @@ func generateInstallScript(outputFile string) error {
 		"installer/package_resolver.sh",
 		"installer/package_deployer.sh",
 
-		// 4. UI Components & Interactive Menus (Removed ui/menu_recommended.sh)
+		// 4. UI Components & Interactive Menus
 		"ui/state.sh",
 		"ui/menu_custom.sh",
 		"ui/menu_mode.sh",

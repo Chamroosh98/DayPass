@@ -1,8 +1,5 @@
 #!/bin/sh
 
-INSTALL_LOG="/tmp/daypass/install.log"
-TRANSACTION_LOG="/tmp/daypass/transaction.log"
-
 manifest_lookup()
 {
     field="$1"
@@ -279,7 +276,14 @@ deploy_targeted_packages()
     esac
 
     if [ "$INSTALL_SUCCESS" -eq 1 ]; then
-        echo "$PACKAGES_TO_PROCESS" >> "$INSTALL_LOG"
+        for pkg in $PACKAGES_TO_PROCESS; do
+            echo "$pkg" >> "$INSTALL_LOG"
+        done
+
+        if [ -f "$INSTALL_LOG" ]; then
+            sort -u "$INSTALL_LOG" -o "$INSTALL_LOG"
+        fi
+        
         resource_compare
         
         rm -f $INSTALL_FILES 2>/dev/null

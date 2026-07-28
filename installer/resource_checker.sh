@@ -50,7 +50,7 @@ resource_snapshot()
     BEFORE_FREE_RAM=$(get_free_ram_bytes)
     BEFORE_FREE_FLASH=$(get_free_flash_bytes "/overlay")
 
-    log_info "System Memory Snapshot:"
+    log_info "System Memory Snapshot :"
     log_info "  ├─ Available RAM        : [$(human_readable_bytes "$BEFORE_FREE_RAM")]"
     log_info "  └─ Free Flash Space     : [$(human_readable_bytes "$BEFORE_FREE_FLASH")]"
 }
@@ -91,8 +91,8 @@ estimate_install_size()
 
     log_info "Smart Resource Allocation Requirements:"
     log_info "  ├─ Payload Download Req   : [$(human_readable_bytes "$TOTAL_REQUIRED_BYTES")]"
-    log_info "  ├─ Reclaimable Storage    : [$(human_readable_bytes "$RECLAIMABLE_BYTES")] ♻️"
-    log_info "  ├─ Saved Traffic (Skip)   : [$(human_readable_bytes "$TOTAL_SAVED_BYTES")] ⚡"
+    log_info "  ├─ Reclaimable Storage    : [$(human_readable_bytes "$RECLAIMABLE_BYTES")]"
+    log_info "  ├─ Saved Traffic (Skip)   : [$(human_readable_bytes "$TOTAL_SAVED_BYTES")]"
     log_info "  └─ Peak Temp Storage Req  : [$(human_readable_bytes "$PEAK_STORAGE_REQ")]"
 
     CURRENT_RAM=$(get_free_ram_bytes)
@@ -100,8 +100,8 @@ estimate_install_size()
     MIN_RAM_NEEDED=$((TOTAL_REQUIRED_BYTES + RAM_MARGIN))
 
     if [ "$CURRENT_RAM" -lt "$MIN_RAM_NEEDED" ]; then
-        log_error "Insufficient RAM workspace for package downloads!"
-        log_warn "Available RAM: $(human_readable_bytes "$CURRENT_RAM") | Required: $(human_readable_bytes "$MIN_RAM_NEEDED")"
+        log_error "Insufficient RAM workspace for package downloads :( "
+        log_warn "Available RAM : $(human_readable_bytes "$CURRENT_RAM") | Required : $(human_readable_bytes "$MIN_RAM_NEEDED")"
         return 1
     fi
 
@@ -110,10 +110,10 @@ estimate_install_size()
     # Soft check: If space is tight, warn but DON'T abort if old packages can be purged first
     if [ "$CURRENT_FLASH" -lt "$PEAK_STORAGE_REQ" ]; then
         if [ "$((CURRENT_FLASH + RECLAIMABLE_BYTES))" -ge "$PEAK_STORAGE_REQ" ]; then
-            log_warn "Flash storage is tight, but replacing old packages will yield enough space."
+            log_warn "Flash storage is tight, but replacing old packages will yield enough space :("
         else
             log_error "Insufficient Flash storage space on system!"
-            log_warn "Available Storage: $(human_readable_bytes "$CURRENT_FLASH") | Peak Required: $(human_readable_bytes "$PEAK_STORAGE_REQ")"
+            log_warn "Available Storage : $(human_readable_bytes "$CURRENT_FLASH") | Peak Required : $(human_readable_bytes "$PEAK_STORAGE_REQ")"
             return 1
         fi
     fi
@@ -131,13 +131,12 @@ resource_compare()
     [ "$BEFORE_FREE_FLASH" -gt "$AFTER_FREE_FLASH" ] && USED_FLASH=$((BEFORE_FREE_FLASH - AFTER_FREE_FLASH)) || USED_FLASH=0
 
     echo
-    echo "=========================================================="
-    echo "📊 DayPass Deployment Efficiency Summary"
-    echo "=========================================================="
-    echo "  ├─ Total Downloaded Payload     : $(human_readable_bytes "$TOTAL_REQUIRED_BYTES")"
-    echo "  ├─ Total Network Traffic Saved  : $(human_readable_bytes "$TOTAL_SAVED_BYTES") ⚡"
-    echo "  ├─ Net Storage Consumed         : $(human_readable_bytes "$USED_FLASH")"
-    echo "  └─ Free Storage Remaining       : $(human_readable_bytes "$AFTER_FREE_FLASH")"
-    echo "=========================================================="
+    echo "  📊 DayPass Deployment Efficiency Summary"
+    echo "  =========================================================="
+    echo "    ├─ Total Downloaded Payload     : $(human_readable_bytes "$TOTAL_REQUIRED_BYTES")"
+    echo "    ├─ Total Network Traffic Saved  : $(human_readable_bytes "$TOTAL_SAVED_BYTES") "
+    echo "    ├─ Net Storage Consumed         : $(human_readable_bytes "$USED_FLASH")"
+    echo "    └─ Free Storage Remaining       : $(human_readable_bytes "$AFTER_FREE_FLASH")"
+    echo "  =========================================================="
     echo
 }
