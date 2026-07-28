@@ -143,11 +143,9 @@ inspect_and_confirm_packages()
     C_INS="\033[1;32m"
     C_OK="\033[0;32m"
 
-    echo
-    echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
     echo "  📦 DayPass Package Inspection Table"
     echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
-    printf "    %-32s %-18s %-18s %-12s\n" "Package" "Installed" "Manifest Ver" "Action"
+    printf "   %-32s %-18s %-18s %-12s\n" "Package" "Installed" "Manifest Ver" "Action"
     echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
 
     PACKAGES_TO_PROCESS=""
@@ -186,12 +184,12 @@ inspect_and_confirm_packages()
             fi
         fi
 
-        printf "  🔹 ${C_PKG}%-26s${C_RESET} ${C_VER}%-16s${C_RESET} %-16s %b\n" \
+        printf "   🔹 ${C_PKG}%-26s${C_RESET} ${C_VER}%-16s${C_RESET} %-16s %b\n" \
             "$pkg" "$inst_ver" "$manif_ver" "$ACTION_STR"
     done
 
     echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
-    printf "    Summary: %d to install, %d to upgrade, %d skipped.\n" "$INSTALL_COUNT" "$UPGRADE_COUNT" "$SKIP_COUNT"
+    printf "   Summary: %d to install, %d to upgrade, %d skipped.\n" "$INSTALL_COUNT" "$UPGRADE_COUNT" "$SKIP_COUNT"
     echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
     echo
 

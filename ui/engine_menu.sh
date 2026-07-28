@@ -4,7 +4,6 @@ engine_menu()
 {
     render_persistent_header
 
-    echo "  ───────────────────────────────────────────────────────────"
     echo "    🕵️‍♀️  Select Proxy Engine                                  "
     echo "  ───────────────────────────────────────────────────────────"
     echo "    1) ⚡ Auto      (Recommended)                            "

@@ -6,9 +6,9 @@ cleanup_and_exit() {
     echo ""
     
     if command -v log_warn >/dev/null 2>&1; then
-        log_warn "Installation cancelled by user. Exiting DayPass..."
+        log_warn "Installation cancelled by user. Exiting DayPass ..."
     else
-        echo "⚠️ Installation cancelled by user. Exiting..."
+        echo "⚠️ Installation cancelled by user. Exiting ..."
     fi
 
     stty echo 2>/dev/null
@@ -126,7 +126,7 @@ initialize_installer()
 
     if [ -z "$FOUND_ARCH" ] || [ "$FOUND_ARCH" = "null" ]; then
         log_error "Architecture [$ARCH] is NOT supported in this build manifest!"
-        log_warn "Available architectures in current manifest:"
+        log_warn "Available architectures in current manifest : "
         
         jq -r '.architectures[].name' "$MANIFEST_FILE" 2>/dev/null | sed 's/^/   • /'
         
