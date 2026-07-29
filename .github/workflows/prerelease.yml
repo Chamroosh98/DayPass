@@ -56,7 +56,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: beta-v${{ matrix.ow_version }}-${{ matrix.arch }}
-          path: DayPass_v${{ matrix.ow_version }}_${{ matrix.arch }}_*_beta.zip
+          path: DayPass_OW${{ matrix.ow_version }}_${{ matrix.arch }}_*_beta.zip
           retention-days: 1
 
       - name: 📤 Upload Raw Packages Artifact (For CDN 'packages' Branch)
@@ -160,26 +160,25 @@ jobs:
           
           echo "🚀 Creating release $TAG_NAME via GitHub CLI ..."
           
-          # Delete tag if partially created in a failed attempt
           gh release delete "$TAG_NAME" -y --cleanup-tag 2>/dev/null || true
 
-          # Create release notes using a clean heredoc file
           cat <<EOF > release_notes.md
           ## 🧪 DayPass Beta Release
           📅 **Date** : \`v${{ env.VERSION }}\`
           🧪 **Build** : \`${{ github.run_number }}\`
+
+          ### 📦 Asset Naming Convention
+          - \`DayPass_OW24_{arch}_v${{ env.VERSION }}_beta.zip\` : Compiled for OpenWrt 24.x
+          - \`DayPass_OW25_{arch}_v${{ env.VERSION }}_beta.zip\` : Compiled for OpenWrt 25.x
           EOF
 
-          # Create release using --notes-fileRELEASE_TITLE
           gh release create "$TAG_NAME" \
             --title "$RELEASE_TITLE" \
             --prerelease \
             --notes-file release_notes.md
 
-          # Clean up notes file
           rm -f release_notes.md
 
-          # Collect unique files to avoid duplicate upload issues
           mkdir -p release-files
           cp merged-beta/*.zip release-files/ 2>/dev/null || true
           find build-artifacts/ -type f -name "*.sha256" -exec cp {} release-files/ \; 2>/dev/null || true

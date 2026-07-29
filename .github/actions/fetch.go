@@ -228,9 +228,9 @@ func main() {
 
 	var zipName string
 	if releaseType == "release" || releaseType == "main" || releaseType == "stable" {
-		zipName = fmt.Sprintf("DayPass_v%s_%s_%s.zip", owVersion, targetArch, releaseVersion)
+		zipName = fmt.Sprintf("DayPass_OW%s_%s_%s.zip", owVersion, targetArch, releaseVersion)
 	} else {
-		zipName = fmt.Sprintf("DayPass_v%s_%s_%s_beta.zip", owVersion, targetArch, releaseVersion)
+		zipName = fmt.Sprintf("DayPass_OW%s_%s_%s_beta.zip", owVersion, targetArch, releaseVersion)
 	}
 
 	if err := zipDirectory(zipWorkspaceDir, zipName); err != nil {

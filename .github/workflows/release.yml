@@ -1,14 +1,18 @@
 name: 🚀 DayPass Release
 
 on:
+  schedule:
+    # 🕐 اجرا به صورت اتوماتیک هر روز ساعت 00:00 UTC برای دریافت آپدیت‌های SourceForge
+    - cron: '0 0 * * *'
   push:
     branches:
       - main
   workflow_dispatch:
 
 concurrency:
-  group: github-pages-deploy
+  group: github-pages-deploy-release
   cancel-in-progress: false
+
 permissions:
   contents: write
   pages: write
@@ -19,6 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        ow_version: ["24", "25"]
         arch: [
           "aarch64_cortex-a53", "aarch64_cortex-a72", "aarch64_cortex-a76",
           "aarch64_generic", "arm_cortex-a7_neon-vfpv4", "arm_cortex-a9_vfpv3-d16",
@@ -30,7 +35,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🏷️ Generate Release Version for Filenames
-        run: echo "VERSION=v$(date +%y.%m.%d)" >> $GITHUB_ENV
+        run: echo "VERSION=$(date +%y.%m.%d)" >> $GITHUB_ENV
 
       - name: 🦫 Setup Go Environment
         uses: actions/setup-go@v5
@@ -41,27 +46,27 @@ jobs:
       - name: 🗓️ Restore / Save DayPass Downloads Cache
         uses: actions/cache@v4
         with:
-          path: .cache/downloads/${{ matrix.arch }}
-          key: daypass-cache-${{ matrix.arch }}-${{ hashFiles('config/architectures.json') }}
+          path: .cache/downloads/v${{ matrix.ow_version }}/${{ matrix.arch }}
+          key: daypass-cache-release-v${{ matrix.ow_version }}-${{ matrix.arch }}-${{ hashFiles(format('config/architectures_{0}.json', matrix.ow_version)) }}
           restore-keys: |
-            daypass-cache-${{ matrix.arch }}-
+            daypass-cache-release-v${{ matrix.ow_version }}-${{ matrix.arch }}-
 
       - name: 📥 Download Packages & Create Zip via Go Fetcher
         run: |
-          go run .github/actions/fetch.go ${{ matrix.arch }} ${{ env.VERSION }} release
+          go run .github/actions/fetch.go ${{ matrix.arch }} ${{ env.VERSION }} release ${{ matrix.ow_version }}
 
       - name: 📤 Upload Zip Artifact (For GitHub Releases)
         uses: actions/upload-artifact@v4
         with:
-          name: release-${{ matrix.arch }}
-          path: DayPass_${{ matrix.arch }}_*.zip
+          name: release-v${{ matrix.ow_version }}-${{ matrix.arch }}
+          path: DayPass_OW${{ matrix.ow_version }}_${{ matrix.arch }}_*.zip
           retention-days: 1
 
       - name: 📤 Upload Raw Packages Artifact (For CDN 'packages' Branch)
         uses: actions/upload-artifact@v4
         with:
-          name: raw-release-${{ matrix.arch }}
-          path: matrix-download/${{ matrix.arch }}
+          name: raw-release-v${{ matrix.ow_version }}-${{ matrix.arch }}
+          path: matrix-download/v${{ matrix.ow_version }}/${{ matrix.arch }}
           retention-days: 1
 
   deploy:
@@ -104,16 +109,20 @@ jobs:
         with:
           pattern: raw-release-*
           path: packages-branch-content/
-          merge-multiple: false 
+          merge-multiple: false
 
-      - name: 📂 Restructure Architecture Folders for CDN
+      - name: 📂 Restructure Architecture Folders for CDN Tree
         run: |
           cd packages-branch-content
-          for dir in raw-release-*; do
+          for dir in raw-release-v*; do
             if [ -d "$dir" ]; then
-              arch_name="${dir#raw-release-}"
-              mv "$dir" "$arch_name"
-              echo "✅ Restructured : 📂 $dir -> ⛏️ $arch_name"
+              raw_name="${dir#raw-release-}"
+              ver="${raw_name%%-*}"
+              arch="${raw_name#*-}"
+              
+              mkdir -p "$ver"
+              mv "$dir" "$ver/$arch"
+              echo "✅ Restructured CDN Directory : 📂 $dir -> ⛏️ $ver/$arch"
             fi
           done
 
@@ -126,61 +135,15 @@ jobs:
           INPUT_ACTOR: ${{ github.actor }}
           INPUT_RELEASE_TYPE: "release"
           GITHUB_REPOSITORY: ${{ github.repository }}
-          DAYPASS_ARCH_FILE: ${{ github.workspace }}/config/architectures.json
           DAYPASS_OUTPUT_DIR: ${{ github.workspace }}/build-artifacts
         run: |
           cd .github/actions/engine/
           go run .
 
-      - name: 🕵️‍♀️ Prepare GitHub Pages Assets for ignoring zip heavy files
-        run: |
-          mkdir -p github-pages-content
-          cp build-artifacts/install.sh github-pages-content/
-          cp build-artifacts/manifest.json github-pages-content/
-          echo "✅ Isolated install.sh and manifest.json for Pages deployment."
-
-      - name: 🌐 Deploy Root Manifests to GitHub Pages (Preserving Beta Subfolder)
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: github-pages-content
-          target-folder: .
-          branch: gh-pages
-          clean: false        
-          single-commit: true
-
-      - name: 🔍 Debug & Verify Raw Packages Tree Structure
-        run: |
-          echo "📂 Checking packages-branch-content directory:"
-          ls -la packages-branch-content/
-          find packages-branch-content/ -maxdepth 2 -type d
-
-      - name: 🚀 Deploy Binary Packages to 'packages' Branch
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: packages-branch-content
-          branch: packages
-          clean: false       
-          single-commit: true
-
-      - name: 🧹 Purge jsDelivr Cache for Manifest & Packages
-        run: |
-          echo "🌐 Purging jsDelivr CDN cache for Release ..."
-          
-          echo "🔹 Purging main manifest.json : "
-          curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/manifest.json" | jq .
-          
-          echo "🔹 Purging main install.sh : "
-          curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/install.sh" | jq .
-          
-          echo "🔹 Purging main packages directory : "
-          curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@packages/" | jq .
-          
-          echo "✅ Release CDN cache purged successfully!"
-
       - name: 📊 Verify Release Assets Size & Guardrail
         run: |
           echo "📁 Listing all files in build-artifacts with their sizes :"
-          ls -lh build-artifacts/
+          find build-artifacts/ -type f -exec ls -lh {} +
           echo "--------------------------------------------------------"
           echo "🚨 Checking for zero-byte files ..."
           if find build-artifacts/ -type f -empty | grep -q .; then
@@ -188,22 +151,79 @@ jobs:
             find build-artifacts/ -type f -empty
             exit 1
           fi
-          echo "✅ All release assets have valid file sizes and are ready for upload!"
+          echo "✅ All release assets passed health check successfully!"
 
-      - name: 🚀 Create and Upload Release Packages to GitHub Release
-        uses: softprops/action-gh-release@v2
+      - name: 🚀 Create and Upload Stable Release via GitHub CLI
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="v${{ env.VERSION }}-${{ github.run_number }}"
+          RELEASE_TITLE="🚀 Stable v${{ env.VERSION }}"
+          
+          echo "🚀 Creating release $TAG_NAME via GitHub CLI ..."
+          
+          # Delete tag if partially created in a failed attempt
+          gh release delete "$TAG_NAME" -y --cleanup-tag 2>/dev/null || true
+
+          cat <<EOF > release_notes.md
+          ## 🚀 DayPass Production Release
+          🔥 Stable, optimized and production-ready build!
+          
+          📅 **Date** : \`${{ env.VERSION }}\`
+          ⚡ **Build Number** : \`${{ github.run_number }}\`
+
+          ### 📦 Asset Naming Convention
+          - \`DayPass_OW24_{arch}_${{ env.VERSION }}.zip\` : Packages compiled for OpenWrt 24.x series.
+          - \`DayPass_OW25_{arch}_${{ env.VERSION }}.zip\` : Packages compiled for OpenWrt 25.x series.
+          EOF
+
+          gh release create "$TAG_NAME" \
+            --title "$RELEASE_TITLE" \
+            --notes-file release_notes.md
+
+          rm -f release_notes.md
+
+          mkdir -p release-files
+          cp merged-release/*.zip release-files/ 2>/dev/null || true
+          find build-artifacts/ -type f -name "*.sha256" -exec cp {} release-files/ \; 2>/dev/null || true
+
+          echo "📤 Uploading assets to GitHub Release ..."
+          gh release upload "$TAG_NAME" release-files/* --clobber
+          
+          echo "✅ Release uploaded successfully!"
+
+      - name: 🕵️‍♀️ Prepare GitHub Pages Assets for Release
+        run: |
+          mkdir -p github-pages-content
+          cp -r build-artifacts/* github-pages-content/
+          echo "✅ Prepared manifest structures for Pages root deployment!"
+
+      - name: 🌐 Deploy Manifests to GitHub Pages Root
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          tag_name: v${{ env.VERSION }}-${{ github.run_number }}
-          name: 🚀 v${{ env.VERSION }}
-          prerelease: false
-          body: |
-            ## 🚀 DayPass Stable Release
-            🔥 Stable, optimized and production-ready build! 
-            📅 Date   : `${{ env.VERSION }}`
-            ⚡ Build  : `${{ github.run_number }}`
-          files: |
-            merged-release/*.zip
-            merged-release/*.sha256
+          folder: github-pages-content
+          target-folder: .
+          branch: gh-pages
+          clean: false
+          single-commit: true
+
+      - name: 🚀 Deploy Binary Packages to 'packages' Branch Root
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: packages-branch-content
+          branch: packages
+          target-folder: .
+          clean: false
+          single-commit: true
+
+      - name: 🧹 Purge jsDelivr Cache for Manifest & Packages
+        run: |
+          echo "🌐 Purging jsDelivr CDN cache for Release ..."
+          curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/manifest.json" | jq .
+          curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/v24/manifest.json" | jq .
+          curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/v25/manifest.json" | jq .
+          curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/install.sh" | jq .
+          echo "✅ Release CDN cache purged successfully!"
 
       - name: 🧹 Delete Temporary Build Artifacts
         uses: geekyeggo/delete-artifact@v5

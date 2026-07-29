@@ -118,9 +118,9 @@ log_step()
     message="$2"
 
     case "$status" in
-        ok)   printf "   ${GREEN}✔ [  OK  ]${RESET} %s\n" "$message" ;;
-        fail) printf "   ${RED}✖ [ FAIL ]${RESET} %s\n" "$message" >&2 ;;
-        warn) printf "   ${YELLOW}! [ WARN ]${RESET} %s\n" "$message" ;;
-        *)    printf "   ${CYAN}ℹ [ INFO ]${RESET} %s\n" "$message" ;;
+        ok)   printf "   ${GREEN}✔ ${RESET} %s\n" "$message" ;;
+        fail) printf "   ${RED}✖ ${RESET} %s\n" "$message" >&2 ;;
+        warn) printf "   ${YELLOW}! ${RESET} %s\n" "$message" ;;
+        *)    printf "   ${CYAN}ℹ ${RESET} %s\n" "$message" ;;
     esac
 }
