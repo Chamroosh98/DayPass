@@ -35,7 +35,7 @@ main_menu()
                     fi
                     ;;
                 0)
-                    printf "  ${GRAY:-}TNX for using DayPass! =)${RESET:-}"
+                    printf "   ${GRAY:-}TNX for using DayPass! =)  \n${RESET:-}"
                     exit 0
                     ;;
                 *)

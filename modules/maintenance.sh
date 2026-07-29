@@ -51,7 +51,7 @@ purge_daypass_packages()
 factory_reset_system()
 {
     echo
-    printf "   ${RED}🚨 WARNING: FACTORY RESET SYSTEM${RESET}\n"
+    printf "   ${RED}🚨 WARNING : FACTORY RESET SYSTEM${RESET}\n"
     printf "   This will erase ALL user configurations and restore system defaults!\n\n"
     
     printf "   Type '${BOLD}RESET${RESET}' to confirm factory reset : "
@@ -119,7 +119,7 @@ maintenance_menu()
                 ;;
         esac
         
-        printf "  ${GRAY:-}Press [Enter] to continue ...${RESET:-}"
+        printf "   \n${GRAY:-}Press [Enter] to continue ...${RESET:-}"
         read -r _ </dev/tty
     done
 }
