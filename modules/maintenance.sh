@@ -3,7 +3,7 @@
 # 1. Purge Packages Installed by DayPass
 purge_daypass_packages()
 {
-    log_info "Analyzing installed DayPass packages..."
+    log_info "Analyzing installed DayPass packages ..."
 
     if [ ! -s "$INSTALL_LOG" ]; then
         log_warn "No installed package records found in $INSTALL_LOG!"
@@ -26,7 +26,7 @@ purge_daypass_packages()
     read -r confirm </dev/tty
     case "$confirm" in
         [yY][eE][sS]|[yY])
-            log_info "Initiating package purge..."
+            log_info "Initiating package purge ..."
             
             PKG_MGR="${PKG_MANAGER:-opkg}"
             for pkg in $INSTALLED_PKGS; do
@@ -42,7 +42,7 @@ purge_daypass_packages()
             log_success "DayPass packages purged successfully!"
             ;;
         *)
-            log_info "Purge cancelled by user."
+            log_info "Purge cancelled by use :("
             ;;
     esac
 }
@@ -54,11 +54,11 @@ factory_reset_system()
     printf "   ${RED}🚨 WARNING: FACTORY RESET SYSTEM${RESET}\n"
     printf "   This will erase ALL user configurations and restore system defaults!\n\n"
     
-    printf "   Type '${BOLD}RESET${RESET}' to confirm factory reset: "
+    printf "   Type '${BOLD}RESET${RESET}' to confirm factory reset : "
     read -r confirm </dev/tty
 
     if [ "$confirm" = "RESET" ]; then
-        log_warn "Initiating Firstboot / Factory Reset procedure..."
+        log_warn "Initiating Firstboot / Factory Reset procedure ..."
         sleep 2
         if command -v firstboot >/dev/null 2>&1; then
             firstboot -y && reboot
@@ -73,7 +73,7 @@ factory_reset_system()
 # 3. Clean DayPass Temporary Cache
 clean_daypass_cache()
 {
-    log_info "Cleaning DayPass temporary files and package caches..."
+    log_info "Cleaning DayPass temporary files and package caches ..."
     rm -rf "${DAYPASS_DIR:?}"/*.apk "${DAYPASS_DIR:?}"/*.ipk "${DAYPASS_DIR:?}"/*.part 2>/dev/null
     log_success "Cache cleaned successfully!"
 }
@@ -84,7 +84,7 @@ backup_system_config()
     BACKUP_FILE="/tmp/backup-$(date +%Y%m%d_%H%M%S).tar.gz"
     log_info "Generating OpenWrt system configuration backup..."
     if sysupgrade -b "$BACKUP_FILE" >/dev/null 2>&1; then
-        log_success "Backup saved to: $BACKUP_FILE"
+        log_success "Backup saved to : [$BACKUP_FILE]"
     else
         log_error "Failed to generate system backup!"
     fi
@@ -119,7 +119,7 @@ maintenance_menu()
                 ;;
         esac
         
-        printf "\nPress [Enter] to continue..."
+        printf "  ${GRAY:-}Press [Enter] to continue ...${RESET:-}"v
         read -r _ </dev/tty
     done
 }
