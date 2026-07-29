@@ -97,12 +97,13 @@ download_package()
     DOWNLOAD_SUCCESS=0
     trap 'rm -f "$tmp" 2>/dev/null' INT TERM
 
+    # Silent curl/wget/uclient-fetch stderr to keep UI clean
     if command -v curl >/dev/null 2>&1; then
-        curl -fsSL --connect-timeout 15 --max-time 120 --retry 3 --retry-delay 2 "$target_url" -o "$tmp" && DOWNLOAD_SUCCESS=1
+        curl -fsSL --connect-timeout 15 --max-time 120 --retry 3 --retry-delay 2 "$target_url" -o "$tmp" 2>/dev/null && DOWNLOAD_SUCCESS=1
     elif command -v wget >/dev/null 2>&1; then
-        wget -q --timeout=20 --tries=3 -O "$tmp" "$target_url" && DOWNLOAD_SUCCESS=1
+        wget -q --timeout=20 --tries=3 -O "$tmp" "$target_url" 2>/dev/null && DOWNLOAD_SUCCESS=1
     elif command -v uclient-fetch >/dev/null 2>&1; then
-        uclient-fetch -q --timeout=20 -O "$tmp" "$target_url" && DOWNLOAD_SUCCESS=1
+        uclient-fetch -q --timeout=20 -O "$tmp" "$target_url" 2>/dev/null && DOWNLOAD_SUCCESS=1
     fi
 
     if [ "$DOWNLOAD_SUCCESS" -ne 1 ] || [ ! -s "$tmp" ]; then
@@ -138,7 +139,6 @@ inspect_and_confirm_packages()
     SKIP_COUNT=0
 
     for pkg in $FINAL_PACKAGES; do
-        # 🛠️ فیکس باگ اول: فقط کلمه اول (رقم نسخه) رو می‌گیریم و از توضیحات طولانی صرف‌نظر می‌کنیم!
         raw_inst_ver=$(pkg_get_installed_version "$pkg" 2>/dev/null | head -n1)
         inst_ver=$(echo "$raw_inst_ver" | awk '{print $1}')
         
@@ -158,7 +158,7 @@ inspect_and_confirm_packages()
             ACTION_STR="${YELLOW}[🔄 Upgrade]${RESET}"
             UPGRADE_COUNT=$((UPGRADE_COUNT + 1))
             PACKAGES_TO_PROCESS="$PACKAGES_TO_PROCESS $pkg"
-        elif [ "$manif_ver" = "Latest" ] || [ "$inst_ver" = "$manif_ver" ]; me
+        elif [ "$manif_ver" = "Latest" ] || [ "$inst_ver" = "$manif_ver" ]; then
             inst_hash=$(pkg_get_installed_hash "$pkg" 2>/dev/null)
             if [ -n "$manif_hash" ] && [ "$manif_hash" != "null" ] && [ -n "$inst_hash" ] && [ "$inst_hash" != "$manif_hash" ]; then
                 ACTION_STR="${ORANGE}[🩹 Patch]${RESET}"
@@ -170,7 +170,6 @@ inspect_and_confirm_packages()
             fi
         fi
 
-        # Cut off version strings if they are too long to prevent row wrapping
         inst_ver_fmt=$(printf "%.14s" "$inst_ver")
         manif_ver_fmt=$(printf "%.14s" "$manif_ver")
 
@@ -188,7 +187,7 @@ inspect_and_confirm_packages()
         return 2
     fi
 
-    # 🛠️ فیکس باگ دوم: پرامپت تایید کاربر واقعی و مسدودکننده (Blocking Prompt)
+    # Blocking confirmation prompt
     printf " ${BOLD}${YELLOW}?${RESET} Do you want to proceed with deployment? [Y/n] : "
     read -r user_confirm </dev/tty
     echo
@@ -236,7 +235,6 @@ deploy_targeted_packages()
         total_pkgs=$((total_pkgs + 1))
     done
 
-    # 🟢 3. دانلود پکیج‌ها با پروگرس‌بار ASCII شیک
     current_idx=0
     log_info "Downloading required packages..."
 
@@ -267,7 +265,6 @@ deploy_targeted_packages()
     INSTALL_SUCCESS=0
     CURRENT_PKG_MGR="${PKG_MANAGER:-opkg}"
 
-    # 🟢 4. نصب پکیج‌ها با تایمر زنده
     case "$CURRENT_PKG_MGR" in
         apk)
             (apk add --allow-untrusted --no-progress $INSTALL_FILES >/tmp/apk_inst.log 2>&1) &
