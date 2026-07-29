@@ -15,7 +15,7 @@ show_timer_progress()
     # Hide Cursor
     printf "\033[?25l" 2>/dev/null
 
-    echo "  ✨ Please wait, $message ..."
+    echo "   ✨ Please wait, $message ..."
 
     while kill -0 "$pid" 2>/dev/null; do
         now=$(date +%s)
@@ -65,8 +65,8 @@ show_timer_progress()
         i=$((i + 1))
     done
 
-    printf "    \033[K✨ Task finished! total time : ${GREEN}%d seconds${RESET}\n" "$elapsed"
-    printf "    \033[K[${GREEN}%s${RESET}] ${BOLD}100%%${RESET}\n" "$full_bar"
+    printf "   \033[K✨ Task finished! total time : ${GREEN}%d seconds${RESET}\n" "$elapsed"
+    printf "   \033[K[${GREEN}%s${RESET}] ${BOLD}100%%${RESET}\n" "$full_bar"
 
     # Restore Cursor
     printf "\033[?25h" 2>/dev/null
