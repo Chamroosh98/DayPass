@@ -8,16 +8,16 @@ import (
 )
 
 func generateInstallScript(outputFile string) error {
-	fmt.Println("⌛ Processing Core Components with Go Engine ...")
+	fmt.Println("⌛ Processing Core Components with Go Engine for DayPass ...")
 	
 	branch := os.Getenv("GITHUB_REF_NAME")
+	releaseType := os.Getenv("INPUT_RELEASE_TYPE")
 	if branch == "" {
 		branch = "beta" 
 	}
 
 	var scriptBuilder strings.Builder
 	scriptBuilder.WriteString("#!/bin/sh\n\n")
-	// scriptBuilder.WriteString("#!/bin/sh\nset -eu\n\n")
 
 	scriptBuilder.WriteString("###############################################################################\n")
 	scriptBuilder.WriteString("# DayPass Installer (Auto-generated via Go Action)\n")
@@ -25,41 +25,48 @@ func generateInstallScript(outputFile string) error {
 
 	scriptBuilder.WriteString("# Dynamic REPO_URL configuration\n")
 	scriptBuilder.WriteString("if [ -z \"${REPO_URL:-}\" ]; then\n")
-	if branch == "main" {
+	if branch == "main" && releaseType != "beta" {
 		scriptBuilder.WriteString("    REPO_URL=\"https://chamroosh98.github.io/DayPass\"\n")
+	} else if releaseType == "beta" || branch == "beta" {
+		scriptBuilder.WriteString("    REPO_URL=\"https://chamroosh98.github.io/DayPass/beta\"\n")
 	} else {
 		scriptBuilder.WriteString(fmt.Sprintf("    REPO_URL=\"https://chamroosh98.github.io/DayPass/%s\"\n", branch))
 	}
 	scriptBuilder.WriteString("fi\n")
 	scriptBuilder.WriteString("export REPO_URL\n\n")
 
+	// Cleaned & strict dependency-aware sourcing sequence
 	installerFiles := []string{
-		// 1. Core Installer Logic
-		"installer/network_checker.sh",
-		"installer/package_manager.sh", 
-		"installer/install_core.sh",
-		"installer/package_deployer.sh",
-		"installer/package_resolver.sh",
-
-		// 2. UI Base Libraries & Styles
+		// 1. Core Globals, UI Base Libraries & Styles
+		"installer/globals.sh",
 		"ui/lib/styles.sh",
 		"ui/lib/box_utils.sh",
 		"ui/lib/header.sh",
 		"ui/lib/progress.sh",
 		"ui/banner.sh",
-		
-		// 3. Hardware & System Modules
+
+		// 2. Hardware, OS, Maintenance & System Modules
 		"modules/zero_deps.sh",
 		"modules/version_check.sh",
 		"modules/system_info.sh",
 		"modules/network_info.sh",
 		"modules/resource_monitor.sh",
 		"modules/dns_fix.sh",
+		"modules/backup_restore.sh",
+		"modules/maintenance.sh",
+		"modules/service_manager.sh",
 
-		// 4. UI Components & Menus
-		
+		// 3. Core Installer Logic & Package Management
+		"installer/network_checker.sh",
+		"installer/arch_detector.sh",
+		"installer/package_manager.sh", 
+		"installer/install_core.sh",
+		"installer/resource_checker.sh",
+		"installer/package_resolver.sh",
+		"installer/package_deployer.sh",
+
+		// 4. UI Components & Interactive Menus
 		"ui/state.sh",
-		"ui/menu_recommended.sh",
 		"ui/menu_custom.sh",
 		"ui/menu_mode.sh",
 		"ui/engine_menu.sh",
@@ -68,6 +75,7 @@ func generateInstallScript(outputFile string) error {
 		"ui/review.sh",
 		"ui/menu_package.sh",
 		"ui/main_menu.sh",
+		"ui/installer_ui.sh",
 	}
 
 	for _, file := range installerFiles {
@@ -80,7 +88,7 @@ func generateInstallScript(outputFile string) error {
 		scriptBuilder.WriteString(fmt.Sprintf("\n# 📄 Source : %s\n", filepath.Base(file)))
 		lines := strings.Split(string(data), "\n")
 		for _, line := range lines {
-			
+			// Strip duplicate shebangs from individual modules
 			if !strings.HasPrefix(line, "#!") {
 				scriptBuilder.WriteString(line + "\n")
 			}
@@ -88,47 +96,44 @@ func generateInstallScript(outputFile string) error {
 		fmt.Printf("✅ [%s] appended dynamically!\n", filepath.Base(file))
 	}
 
-
+	// Cleaned Runtime Execution Pipeline
 	scriptBuilder.WriteString(`
+
 ###############################################################################
 # Runtime Execution Pipeline
 ###############################################################################
 DEPLOYMENT_FAILED=0
 
-# 🔴🔴🔴🔴🔴🔴🔴 The execution order of the modules is important! 🔴🔴🔴🔴🔴🔴🔴
-# ============= Checking network connection =============
+# 1. Pre-flight connectivity check
 network_check || exit 1
 
-# ============= Installing requirements =================
-deploy_system_dependencies
+# 2. System environment discovery & version validation
+check_version || exit 1
+detect_system_architecture
 
-# Continue initialization
-check_version
-detect_arch
+# 3. Core dependency initialization
+deploy_system_dependencies
 initialize_installer
 
-# ============= Pre-TUI Smooth Transition =============
-for i in 3 2 1; do
-    printf "\r🚀 Launching DayPass Interactive UI in \033[1;33m%d\033[0m seconds... (Press \033[1;36m[Enter]\033[0m to skip) " "$i"
-    if read -t 1 -r; then
-        break
-    fi
-done
+# 4. Optional Automatic UCI Config Backup
+if command -v backup_configs >/dev/null 2>&1; then
+    backup_configs
+fi
 
-# Launching TUI Interface
+# 5. Interactive UI Launch
 clear
 reset_state
 main_menu
 
-# Execution
-deploy_targeted_packages
-
+# 6. Clean Exit
 echo
-echo "🎉 DayPass installation completed successfully! ;))"
+log_success "👋 DayPass session finished!"
 exit 0
+
 `)
 
-
-	os.MkdirAll(filepath.Dir(outputFile), 0755)
+	if err := os.MkdirAll(filepath.Dir(outputFile), 0755); err != nil {
+		return err
+	}
 	return os.WriteFile(outputFile, []byte(scriptBuilder.String()), 0755)
 }

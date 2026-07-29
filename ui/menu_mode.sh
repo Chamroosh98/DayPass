@@ -1,5 +1,11 @@
 #!/bin/sh
 
+handle_recommended_profile()
+{
+    SELECTED_PACKAGES=""
+    export SELECTED_PACKAGES
+}
+
 menu_mode()
 {
     render_persistent_header

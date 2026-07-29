@@ -2,14 +2,13 @@
 
 # 🛑 SIGINT / SIGTERM Handler
 cleanup_and_exit() {
-
     printf "\r\033[K"
     echo ""
     
     if command -v log_warn >/dev/null 2>&1; then
-        log_warn "Installation cancelled by user. Exiting DayPass..."
+        log_warn "Installation cancelled by user. Exiting DayPass ..."
     else
-        echo "⚠️ Installation cancelled by user. Exiting..."
+        echo "⚠️ Installation cancelled by user. Exiting ..."
     fi
 
     stty echo 2>/dev/null
@@ -25,13 +24,18 @@ trap cleanup_and_exit INT TERM
 
 initialize_installer()
 {
-    rm -f /var/lock/opkg.lock /lib/apk/db/lock /var/run/apk.lock 2>/dev/null
+    # Clear lock files for both opkg (OpenWrt <=24) and apk (OpenWrt >=25)
+    rm -f /var/lock/opkg.lock /lib/apk/db/lock /var/run/apk.lock /run/apk/db.lock 2>/dev/null
     
-    # 1. Detect environment and update local package index
-    detect_package_manager
+    # 1. Detect package manager (opkg or apk)
+    if command -v detect_package_manager >/dev/null 2>&1; then
+        detect_package_manager
+    fi
 
     log_info "Updating package database ..."
-    pkg_update >/dev/null 2>&1 || log_warn "Package index update finished with warnings!"
+    if command -v pkg_update >/dev/null 2>&1; then
+        pkg_update >/dev/null 2>&1 || log_warn "Package index update finished with warnings!"
+    fi
 
     # 2. Setup temporary workspace
     TMP_DIR="/tmp/daypass"
@@ -44,17 +48,27 @@ initialize_installer()
         exit 1
     fi
 
-    log_info "Downloading architecture manifest from : [$REPO_URL/manifest.json]"
+    # 🛠️ Dynamic Manifest Selection based on PKG_MANAGER (opkg vs apk)
+    MANIFEST_PATH="manifest.json"
+    if [ "${PKG_MANAGER:-opkg}" = "apk" ]; then
+        MANIFEST_PATH="v25/manifest.json"
+    else
+        MANIFEST_PATH="v24/manifest.json"
+    fi
+
+    MANIFEST_TARGET_URL="${REPO_URL}/${MANIFEST_PATH}"
+
+    log_info "Downloading architecture manifest from : [$MANIFEST_TARGET_URL]"
     
     # 4. Download manifest using resilient fallback mechanisms (curl -> wget -> uclient-fetch)
     DOWNLOAD_SUCCESS=0
 
     if command -v curl >/dev/null 2>&1; then
-        curl -fsSL "$REPO_URL/manifest.json" -o "$MANIFEST_FILE" && DOWNLOAD_SUCCESS=1
+        curl -fsSL "$MANIFEST_TARGET_URL" -o "$MANIFEST_FILE" && DOWNLOAD_SUCCESS=1
     elif command -v wget >/dev/null 2>&1; then
-        wget -qO "$MANIFEST_FILE" "$REPO_URL/manifest.json" && DOWNLOAD_SUCCESS=1
+        wget -qO "$MANIFEST_FILE" "$MANIFEST_TARGET_URL" && DOWNLOAD_SUCCESS=1
     elif command -v uclient-fetch >/dev/null 2>&1; then
-        uclient-fetch -q -O "$MANIFEST_FILE" "$REPO_URL/manifest.json" && DOWNLOAD_SUCCESS=1
+        uclient-fetch -q -O "$MANIFEST_FILE" "$MANIFEST_TARGET_URL" && DOWNLOAD_SUCCESS=1
     else
         log_error "No network download utility found (curl, wget, or uclient-fetch)!"
         exit 1
@@ -62,7 +76,7 @@ initialize_installer()
 
     # 5. Verify downloaded file presence and size
     if [ "$DOWNLOAD_SUCCESS" -ne 1 ] || [ ! -s "$MANIFEST_FILE" ]; then
-        log_error "Failed to download or received empty manifest from [$REPO_URL/manifest.json]"
+        log_error "Failed to download or received empty manifest from [$MANIFEST_TARGET_URL]"
         exit 1
     fi
 
@@ -71,10 +85,15 @@ initialize_installer()
     log_info "Manifest downloaded successfully ($MANIFEST_SIZE bytes)."
 
     # 6. Detect host system target architecture
-    if [ -f /etc/openwrt_release ]; then
-        ARCH=$(grep "DISTRIB_ARCH" /etc/openwrt_release | cut -d"'" -f2)
-    else
-        ARCH="$(uname -m)"
+    if [ -z "${ARCH:-}" ]; then
+        if command -v detect_arch >/dev/null 2>&1; then
+            detect_arch
+        elif [ -f /etc/openwrt_release ]; then
+            . /etc/openwrt_release
+            ARCH="${DISTRIB_ARCH:-}"
+        fi
+        
+        [ -z "$ARCH" ] && ARCH="$(uname -m)"
     fi
 
     if [ -z "$ARCH" ]; then
@@ -85,6 +104,11 @@ initialize_installer()
     log_info "Target System Architecture detected : [$ARCH]"
 
     # 7. Validate JSON syntax integrity
+    if ! command -v jq >/dev/null 2>&1; then
+        log_error "jq parser utility is not available on host system!"
+        exit 1
+    fi
+
     if ! jq empty "$MANIFEST_FILE" >/dev/null 2>&1; then
         log_error "Manifest file is corrupted or invalid JSON!"
         log_warn "JSON Parser Output Error:"
@@ -102,7 +126,7 @@ initialize_installer()
 
     if [ -z "$FOUND_ARCH" ] || [ "$FOUND_ARCH" = "null" ]; then
         log_error "Architecture [$ARCH] is NOT supported in this build manifest!"
-        log_warn "Available architectures in current manifest:"
+        log_warn "Available architectures in current manifest : "
         
         jq -r '.architectures[].name' "$MANIFEST_FILE" 2>/dev/null | sed 's/^/   • /'
         

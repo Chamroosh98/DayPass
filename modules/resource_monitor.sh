@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# Get free RAM in Megabytes
 get_free_ram_mb()
 {
     FREE_KB=$(grep MemAvailable /proc/meminfo | awk '{print $2}')
@@ -7,12 +8,14 @@ get_free_ram_mb()
     echo $((FREE_KB / 1024))
 }
 
+# Get total RAM in Megabytes
 get_total_ram_mb()
 {
     TOTAL_KB=$(grep MemTotal /proc/meminfo | awk '{print $2}')
     echo $((TOTAL_KB / 1024))
 }
 
+# Get free disk storage in Megabytes
 get_free_storage_mb()
 {
     TARGET="/"
@@ -20,6 +23,7 @@ get_free_storage_mb()
     df -k "$TARGET" | awk 'END {printf "%.0f\n", $4 / 1024}'
 }
 
+# Get total disk storage in Megabytes
 get_total_storage_mb()
 {
     TARGET="/"
@@ -27,6 +31,7 @@ get_total_storage_mb()
     df -k "$TARGET" | awk 'END {printf "%.0f\n", $2 / 1024}'
 }
 
+# Capture snapshot of current resource states
 resource_snapshot()
 {
     SNAPSHOT_RAM_FREE="$(get_free_ram_mb)"
@@ -36,18 +41,19 @@ resource_snapshot()
     export SNAPSHOT_STORAGE_FREE
 }
 
+# Compare resource usage between snapshot and current state
 resource_compare()
 {
     CURRENT_RAM_FREE="$(get_free_ram_mb)"
     CURRENT_STORAGE_FREE="$(get_free_storage_mb)"
 
-    if [ "$SNAPSHOT_RAM_FREE" -gt "$CURRENT_RAM_FREE" ]; then
+    if [ "${SNAPSHOT_RAM_FREE:-0}" -gt "$CURRENT_RAM_FREE" ]; then
         RAM_USED=$((SNAPSHOT_RAM_FREE - CURRENT_RAM_FREE))
     else
         RAM_USED=0
     fi
 
-    if [ "$SNAPSHOT_STORAGE_FREE" -gt "$CURRENT_STORAGE_FREE" ]; then
+    if [ "${SNAPSHOT_STORAGE_FREE:-0}" -gt "$CURRENT_STORAGE_FREE" ]; then
         STORAGE_USED=$((SNAPSHOT_STORAGE_FREE - CURRENT_STORAGE_FREE))
     else
         STORAGE_USED=0
@@ -65,17 +71,31 @@ resource_compare()
     echo
 }
 
+# Estimate total package download size based on package manager engine (opkg / apk)
 estimate_install_size()
 {
     TOTAL_SIZE=0
 
+    # Determine size field identifier depending on package manager
+    SIZE_KEY="Size"
+    if [ "${PKG_MANAGER:-opkg}" = "apk" ]; then
+        SIZE_KEY="size"
+    fi
+
     for pkg in $FINAL_PACKAGES; do
-        size="$(manifest_lookup "size" "$pkg")"
+        # Fetch package size from local manifest index
+        size="$(manifest_lookup "$SIZE_KEY" "$pkg")"
+
+        # Fallback check if size was stored under lowercase key
+        if [ -z "$size" ] || [ "$size" = "null" ]; then
+            size="$(manifest_lookup "Size" "$pkg")"
+        fi
 
         [ -z "$size" ] || [ "$size" = "null" ] && continue
         TOTAL_SIZE=$((TOTAL_SIZE + size))
     done
 
+    # Format output display (KB vs MB)
     if [ "$TOTAL_SIZE" -lt 1048576 ]; then
         SIZE_DISPLAY="$((TOTAL_SIZE / 1024)) KB"
     else

@@ -14,7 +14,6 @@ package_menu()
     printf "  ⁉️ Select option [1-2] : "
     read -r choice </dev/tty
 
-    # Reset manual selections to let resolver handle exact dependency hierarchy
     SELECTED_PACKAGES=""
 
     case "$choice" in
@@ -33,10 +32,10 @@ package_menu()
 
     export SELECTED_PROFILE
 
-    # 1. Select Mode (Recommended / Custom) via modular menu
+    # 1. Select Mode
     menu_mode
 
-    # 2. Select Engine, Language and Geo if Custom mode requires
+    # 2. Select Engine, Language and Geo
     if [ "${SELECTED_MODE:-}" = "custom" ]; then
         engine_menu || return 1
         language_menu || return 1
@@ -57,14 +56,14 @@ package_menu()
         echo
         log_success "All targeted components deployed successfully!"
         echo
-        printf "  ${GRAY}Press [ENTER] to return to main menu ...${NC}"
+        printf "  ${GRAY}Press [ENTER] to return to main menu ...${RESET}"
         read -r _ </dev/tty
         render_persistent_header
     else
         echo
         log_error "Installation process failed!"
         echo
-        printf "  ${GRAY}Press [ENTER] to return to main menu ...${NC}"
+        printf "  ${GRAY}Press [ENTER] to return to main menu ...${RESET}"
         read -r _ </dev/tty
         render_persistent_header
         return 1

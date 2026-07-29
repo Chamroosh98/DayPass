@@ -1,17 +1,11 @@
 #!/bin/sh
 
-
-INSTALL_LOG="/tmp/daypass/install.log"
-TRANSACTION_LOG="/tmp/daypass/transaction.log"
-
-# Queries manifest metadata for a given package and field
-
 manifest_lookup()
 {
     field="$1"
     package="$2"
 
-    jq -r \
+    val=$(jq -r \
         --arg pkg "$package" \
         --arg arch "$ARCH" \
         --arg field "$field" \
@@ -26,47 +20,52 @@ manifest_lookup()
 )
 | .[$field] // empty
 ' \
-"$MANIFEST_FILE" 2>/dev/null | head -n1
+"$MANIFEST_FILE" 2>/dev/null | head -n1)
+
+    if [ -z "$val" ] || [ "$val" = "null" ]; then
+        alt_field=""
+        case "$field" in
+            size) alt_field="Size" ;;
+            Size) alt_field="size" ;;
+            version) alt_field="Version" ;;
+            Version) alt_field="version" ;;
+            sha256) alt_field="SHA256" ;;
+        esac
+
+        if [ -n "$alt_field" ]; then
+            val=$(jq -r \
+                --arg pkg "$package" \
+                --arg arch "$ARCH" \
+                --arg field "$alt_field" \
+'
+.architectures[]?
+| select(.name == $arch)
+| .packages[]?
+| select(
+    (.package == $pkg)
+    or
+    (.package | startswith($pkg + "-"))
+)
+| .[$field] // empty
+' \
+"$MANIFEST_FILE" 2>/dev/null | head -n1)
+        fi
+    fi
+
+    echo "$val"
 }
-
-
-# Formats package size into human-readable units (KB / MB)
 
 format_size()
 {
-    bytes="$1"
-    if [ -z "$bytes" ] || [ "$bytes" = "null" ]; then
-        echo "0 B"
-        return
-    fi
-
+    bytes="${1:-0}"
     if [ "$bytes" -ge 1048576 ]; then
-        mb=$(awk "BEGIN {printf \"%.2f\", $bytes/1048576}")
-        echo "${mb} MB"
+        awk "BEGIN {printf \"%.2f MB\", $bytes/1048576}" 2>/dev/null
     elif [ "$bytes" -ge 1024 ]; then
-        kb=$(awk "BEGIN {printf \"%.1f\", $bytes/1024}")
-        echo "${kb} KB"
+        awk "BEGIN {printf \"%.1f KB\", $bytes/1024}" 2>/dev/null
     else
         echo "${bytes} Bytes"
     fi
 }
-
-
-# Fetches package details for UI display
-
-manifest_info()
-{
-    package="$1"
-
-    raw_size=$(manifest_lookup "size" "$package")
-    formatted_size=$(format_size "$raw_size")
-    file_name=$(manifest_lookup "file" "$package")
-
-    echo "[$package] -> $file_name ($formatted_size)"
-}
-
-
-# Downloads and verifies package integrity against SHA256 checksum
 
 download_package()
 {
@@ -76,101 +75,179 @@ download_package()
     sha256=$(manifest_lookup "sha256" "$package")
 
     if [ -z "$file" ] || [ "$file" = "null" ]; then
-        log_error "Package [$package] not found in manifest for architecture [$ARCH]!"
+        log_error "Package [$package] not found in manifest for target [$ARCH]!"
         return 1
     fi
 
-    # download_base from manifest
     base_url=$(jq -r '.download_base // empty' "$MANIFEST_FILE" 2>/dev/null)
-    
-    if [ -n "$base_url" ]; then
-        target_url="${base_url}/${file}"
-    else
-        target_url="${REPO_URL}/${file}"
-    fi
+    [ -z "$base_url" ] && base_url="$REPO_URL"
+    target_url="${base_url}/${file}"
 
     file_basename=$(basename "$file")
     target="$TMP_DIR/$file_basename"
     tmp="$target.part"
 
-    mkdir -p "$(dirname "$target")"
+    if [ -f "$target" ]; then
+        if echo "$sha256  $target" | sha256sum -c - >/dev/null 2>&1; then
+            return 0
+        fi
+        rm -f "$target"
+    fi
 
-    log_info "Processing Package : $(manifest_info "$package")"
-    log_info "Target URL         : $target_url"
-    log_info "Downloading [$package] ..."
-
-    # Resilient download logic with fallback
     DOWNLOAD_SUCCESS=0
-    
     trap 'rm -f "$tmp" 2>/dev/null' INT TERM
 
+    # Silent curl/wget/uclient-fetch stderr to keep UI clean
     if command -v curl >/dev/null 2>&1; then
-        curl -fsSL --connect-timeout 10 --max-time 60 --speed-time 15 --speed-limit 1000 "$target_url" -o "$tmp" && DOWNLOAD_SUCCESS=1
+        curl -fsSL --connect-timeout 15 --max-time 120 --retry 3 --retry-delay 2 "$target_url" -o "$tmp" 2>/dev/null && DOWNLOAD_SUCCESS=1
     elif command -v wget >/dev/null 2>&1; then
-        wget -q --timeout=15 --tries=2 -O "$tmp" "$target_url" && DOWNLOAD_SUCCESS=1
+        wget -q --timeout=20 --tries=3 -O "$tmp" "$target_url" 2>/dev/null && DOWNLOAD_SUCCESS=1
     elif command -v uclient-fetch >/dev/null 2>&1; then
-        uclient-fetch -q --timeout=15 -O "$tmp" "$target_url" && DOWNLOAD_SUCCESS=1
+        uclient-fetch -q --timeout=20 -O "$tmp" "$target_url" 2>/dev/null && DOWNLOAD_SUCCESS=1
     fi
 
     if [ "$DOWNLOAD_SUCCESS" -ne 1 ] || [ ! -s "$tmp" ]; then
-        log_error "Download failed or produced empty file for : [$package]!"
         rm -f "$tmp"
-        trap - INT TERM    # Reset trap 
+        trap - INT TERM
         return 1
     fi
 
-    # SHA256 Checksum Verification
-    log_info "Verifying SHA256 checksum for : [$file_basename]!"
-    if ! echo "$sha256  $tmp" | sha256sum -c - >/dev/null 2>&1; then
-        log_error "Checksum verification FAILED for : [$package]!"
-        log_warn "Expected Hash : [$sha256]"
-        rm -f "$tmp" 2>/dev/null
-        trap - INT TERM    # Reset trap
-        return 1
+    if [ -n "$sha256" ] && [ "$sha256" != "null" ]; then
+        if ! echo "$sha256  $tmp" | sha256sum -c - >/dev/null 2>&1; then
+            rm -f "$tmp"
+            trap - INT TERM
+            return 1
+        fi
     fi
 
     mv "$tmp" "$target"
-    trap - INT TERM    # Reset trap
-    log_success "Package [$package] verified successfully!"
+    trap - INT TERM
+    return 0
 }
 
-# Orchestrates download, dependency resolution, and batch installation
+# Pre-Install Inspection Table with strict ANSI alignment
+inspect_and_confirm_packages()
+{
+    echo "  📦 DayPass Package Inspection Table"
+    echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
+    printf "   %-28s %-16s %-16s %-12s\n" "Package" "Installed" "Manifest Ver" "Action"
+    echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
+
+    PACKAGES_TO_PROCESS=""
+    UPGRADE_COUNT=0
+    INSTALL_COUNT=0
+    SKIP_COUNT=0
+
+    for pkg in $FINAL_PACKAGES; do
+        raw_inst_ver=$(pkg_get_installed_version "$pkg" 2>/dev/null | head -n1)
+        inst_ver=$(echo "$raw_inst_ver" | awk '{print $1}')
+        
+        manif_ver=$(manifest_lookup "version" "$pkg")
+        manif_hash=$(manifest_lookup "sha256" "$pkg")
+        
+        [ -z "$inst_ver" ] && inst_ver="None"
+        [ -z "$manif_ver" ] || [ "$manif_ver" = "null" ] && manif_ver="N/A"
+
+        ACTION_STR=""
+        
+        if [ "$inst_ver" = "None" ]; then
+            ACTION_STR="${GREEN}[➕ Install]${RESET}"
+            INSTALL_COUNT=$((INSTALL_COUNT + 1))
+            PACKAGES_TO_PROCESS="$PACKAGES_TO_PROCESS $pkg"
+        elif [ "$manif_ver" != "N/A" ] && [ "$manif_ver" != "Latest" ] && [ "$inst_ver" != "$manif_ver" ]; then
+            ACTION_STR="${YELLOW}[🔄 Upgrade]${RESET}"
+            UPGRADE_COUNT=$((UPGRADE_COUNT + 1))
+            PACKAGES_TO_PROCESS="$PACKAGES_TO_PROCESS $pkg"
+        elif [ "$manif_ver" = "Latest" ] || [ "$inst_ver" = "$manif_ver" ]; then
+            inst_hash=$(pkg_get_installed_hash "$pkg" 2>/dev/null)
+            if [ -n "$manif_hash" ] && [ "$manif_hash" != "null" ] && [ -n "$inst_hash" ] && [ "$inst_hash" != "$manif_hash" ]; then
+                ACTION_STR="${ORANGE}[🩹 Patch]${RESET}"
+                UPGRADE_COUNT=$((UPGRADE_COUNT + 1))
+                PACKAGES_TO_PROCESS="$PACKAGES_TO_PROCESS $pkg"
+            else
+                ACTION_STR="${GREEN}[✅ Up-to-date]${RESET}"
+                SKIP_COUNT=$((SKIP_COUNT + 1))
+            fi
+        fi
+
+        inst_ver_fmt=$(printf "%.14s" "$inst_ver")
+        manif_ver_fmt=$(printf "%.14s" "$manif_ver")
+
+        printf "   🔹 ${CYAN}%-24s${RESET} ${YELLOW}%-14s${RESET} %-14s %b\n" \
+            "$pkg" "$inst_ver_fmt" "$manif_ver_fmt" "$ACTION_STR"
+    done
+
+    echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
+    printf "   Summary: %d to install, %d to upgrade, %d skipped.\n" "$INSTALL_COUNT" "$UPGRADE_COUNT" "$SKIP_COUNT"
+    echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
+    echo
+
+    if [ -z "$PACKAGES_TO_PROCESS" ]; then
+        log_success "All packages are up-to-date! No changes required."
+        return 2
+    fi
+
+    # Blocking confirmation prompt
+    printf " ${BOLD}${YELLOW}?${RESET} Do you want to proceed with deployment? [Y/n] : "
+    read -r user_confirm </dev/tty
+    echo
+
+    case "$user_confirm" in
+        [nN][oO]|[nN])
+            log_warn "Installation cancelled by user!"
+            return 3
+            ;;
+        *)
+            log_info "User confirmed. Proceeding with installation ..."
+            echo
+            ;;
+    esac
+
+    export PACKAGES_TO_PROCESS
+    return 0
+}
+
 deploy_targeted_packages()
 {
-    rm -f /var/lock/opkg.lock /lib/apk/db/lock /var/run/apk.lock 2>/dev/null
+    rm -f /var/lock/opkg.lock /lib/apk/db/lock /var/run/apk.lock /run/apk/db.lock 2>/dev/null
 
     mkdir -p "$(dirname "$INSTALL_LOG")"
     touch "$INSTALL_LOG"
-    
-    # Initialize transaction log for rollback tracking
     rm -f "$TRANSACTION_LOG"
     touch "$TRANSACTION_LOG"
 
-    if command -v pkg_update >/dev/null 2>&1; then
-        pkg_update
+    inspect_and_confirm_packages
+    INSPECT_STATUS=$?
+
+    if [ "$INSPECT_STATUS" -eq 2 ] || [ "$INSPECT_STATUS" -eq 3 ]; then
+        return 0
     fi
 
-    echo
-    log_info "=================================================="
-    log_info "Starting Package Deployment Pipeline"
-    log_info "=================================================="
-    echo
-
-    # Resource check integration (if available)
-    if command -v resource_snapshot >/dev/null 2>&1; then
-        resource_snapshot
-    fi
-
-    if command -v estimate_install_size >/dev/null 2>&1; then
-        estimate_install_size
+    resource_snapshot
+    if ! estimate_install_size; then
+        log_error "Installation aborted due to system resource limits."
+        return 1
     fi
 
     INSTALL_FILES=""
+    total_pkgs=0
+    for p in $PACKAGES_TO_PROCESS; do
+        total_pkgs=$((total_pkgs + 1))
+    done
 
-    # 1. Download and verify all target packages
-    for pkg in $FINAL_PACKAGES; do
+    current_idx=0
+    log_info "Downloading required packages..."
+
+    for pkg in $PACKAGES_TO_PROCESS; do
+        current_idx=$((current_idx + 1))
+        
+        if command -v show_ascii_progress >/dev/null 2>&1; then
+            show_ascii_progress "Downloading packages" "$current_idx" "$total_pkgs"
+        fi
+
         if ! download_package "$pkg"; then
-            log_error "Failed during download phase : [$pkg]"
+            echo
+            log_error "Failed downloading dependency : [$pkg]"
             rollback_failed_install
             return 1
         fi
@@ -179,99 +256,87 @@ deploy_targeted_packages()
         file_basename=$(basename "$file")
         INSTALL_FILES="$INSTALL_FILES $TMP_DIR/$file_basename"
     done
-
-    echo
-    log_info "Batch installing resolved package files ..."
-    log_info "Package List : [$FINAL_PACKAGES]"
     echo
 
-    # Record package in transaction log BEFORE installation
-    for pkg in $FINAL_PACKAGES; do
+    for pkg in $PACKAGES_TO_PROCESS; do
         echo "$pkg" >> "$TRANSACTION_LOG"
     done
-    
-    # 2. Perform installation via native package manager
-    INSTALL_SUCCESS=0
 
-    case "$PKG_MANAGER" in
+    INSTALL_SUCCESS=0
+    CURRENT_PKG_MGR="${PKG_MANAGER:-opkg}"
+
+    case "$CURRENT_PKG_MGR" in
         apk)
-            log_info "Installing packages into system via APK..."
-            APK_LOG=$(mktemp)
-            
-            if apk add --allow-untrusted --no-progress $INSTALL_FILES >"$APK_LOG" 2>&1; then
-                INSTALL_SUCCESS=1
-            else
-                log_error "APK installation failed! Output:"
-                cat "$APK_LOG"
+            (apk add --allow-untrusted --no-progress $INSTALL_FILES >/tmp/apk_inst.log 2>&1) &
+            BG_PID=$!
+            if command -v show_timer_progress >/dev/null 2>&1; then
+                show_timer_progress "$BG_PID" "applying APK package bundle"
             fi
-            rm -f "$APK_LOG"
+            wait "$BG_PID"
+            [ $? -eq 0 ] && INSTALL_SUCCESS=1
             ;;
-        opkg)
-            log_info "Installing packages into system via OPKG..."
-            OPKG_LOG=$(mktemp)
-            
-            if opkg install $INSTALL_FILES >"$OPKG_LOG" 2>&1; then
-                INSTALL_SUCCESS=1
-            else
-                log_error "OPKG installation failed! Output:"
-                cat "$OPKG_LOG"
+        opkg|*)
+            (opkg install --force-reinstall --force-checksum $INSTALL_FILES >/tmp/opkg_inst.log 2>&1) &
+            BG_PID=$!
+            if command -v show_timer_progress >/dev/null 2>&1; then
+                show_timer_progress "$BG_PID" "applying OPKG package bundle"
             fi
-            rm -f "$OPKG_LOG"
+            wait "$BG_PID"
+            [ $? -eq 0 ] && INSTALL_SUCCESS=1
             ;;
     esac
 
-    # 3. Post-installation check and state commit
     if [ "$INSTALL_SUCCESS" -eq 1 ]; then
-        echo "$FINAL_PACKAGES" >> "$INSTALL_LOG"
-        
-        if command -v resource_compare >/dev/null 2>&1; then
-            resource_compare
-        fi
+        for pkg in $PACKAGES_TO_PROCESS; do
+            echo "$pkg" >> "$INSTALL_LOG"
+        done
 
-        # Clear transaction log on successful deployment
+        if [ -f "$INSTALL_LOG" ]; then
+            sort -u "$INSTALL_LOG" -o "$INSTALL_LOG"
+        fi
+        
+        resource_compare
+        
         rm -f $INSTALL_FILES 2>/dev/null
         rm -f "$TRANSACTION_LOG"
-
+        
         log_success "All targeted packages deployed successfully!"
         return 0
     fi
 
-    log_error "Batch installation failed during package manager execution!"
+    echo
+    log_error "Package manager batch execution failed!"
+    if [ -f /tmp/opkg_inst.log ]; then cat /tmp/opkg_inst.log; fi
+    if [ -f /tmp/apk_inst.log ]; then cat /tmp/apk_inst.log; fi
     rollback_failed_install
     return 1
 }
 
-
-# Rolls back changes if installation fails mid-way
 rollback_failed_install()
 {
     echo
     log_warn "=================================================="
-    log_warn "Initiating Automatic Rollback Procedures ..."
+    log_warn "Initiating Selective Atomic Rollback Procedures ..."
     log_warn "=================================================="
     echo
 
-    # Remove all files from temp 
-    log_info "Cleaning temp files from RAM ..."
     rm -f "$TMP_DIR"/*.part "$TMP_DIR"/*.apk "$TMP_DIR"/*.ipk 2>/dev/null
 
-    # Remove the package that exits in transaction log file!
     if [ -s "$TRANSACTION_LOG" ]; then
-        log_info "Removing partially installed system packages..."
+        log_info "Rolling back modified packages from current session..."
         while read -r pkg; do
             [ -z "$pkg" ] && continue
-            clean_pkg=$(echo "$pkg" | tr -d '[]')
+            log_info "Rollback: Removing package [$pkg] ..."
             
-            log_info "Rollback : Removing package [$clean_pkg] ..."
-            case "$PKG_MANAGER" in
-                opkg) opkg remove "$clean_pkg" >/dev/null 2>&1 || log_warn "Could not remove : [$clean_pkg]" ;;
-                apk)  apk del "$clean_pkg" >/dev/null 2>&1 || log_warn "Could not remove : [$clean_pkg]" ;;
+            case "${PKG_MANAGER:-opkg}" in
+                apk)  apk del "$pkg" >/dev/null 2>&1 || true ;;
+                opkg|*) opkg remove "$pkg" >/dev/null 2>&1 || true ;;
             esac
         done < "$TRANSACTION_LOG"
     else
-        log_info "No system packages were installed yet. Skiping package removal."
+        log_info "No system packages were installed in this session. Skipping removal."
     fi
 
     rm -f "$TRANSACTION_LOG"
-    log_success "Rollback process completed!"
+    log_success "Rollback procedure completed safely!"
 }

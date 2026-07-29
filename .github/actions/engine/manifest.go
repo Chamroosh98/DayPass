@@ -1,154 +1,178 @@
 package main
 
 import (
-    "crypto/sha256"
-    "encoding/json"
-    "fmt"
-    "io"
-    "os"
-    "path/filepath"
-    "strings"
-    "time"
+	"crypto/sha256"
+	"encoding/json"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
+	"time"
 )
 
 type ArchInput struct {
-    Name string `json:"name"`
+	Name string `json:"name"`
 }
 
 type ArchitectureConfig struct {
-    Release       string      `json:"release"`
-    Architectures []ArchInput `json:"architectures"`
+	Release       string      `json:"release"`
+	Architectures []ArchInput `json:"architectures"`
 }
 
 type PackageInfo struct {
-    Package string  `json:"package"`
-    File    string  `json:"file"`
-    Sha256  string  `json:"sha256"`
-    Size    int64   `json:"size"`
+	Package string `json:"package"`
+	Version string `json:"version"` // Explicit version field
+	File    string `json:"file"`
+	Sha256  string `json:"sha256"`
+	Size    int64  `json:"size"`
 }
 
 type ArchOutput struct {
-    Name     string        `json:"name"`
-    Packages []PackageInfo `json:"packages"`
+	Name     string        `json:"name"`
+	Packages []PackageInfo `json:"packages"`
 }
 
 type ManifestOutput struct {
-    Release       string       `json:"release"`
-    GeneratedAt   string       `json:"generated_at"`
-    DownloadBase  string       `json:"download_base"` 
-    Architectures []ArchOutput `json:"architectures"`
+	Release       string       `json:"release"`
+	GeneratedAt   string       `json:"generated_at"`
+	DownloadBase  string       `json:"download_base"`
+	Architectures []ArchOutput `json:"architectures"`
 }
 
 func calculateSHA256(filePath string) (string, error) {
-    file, err := os.Open(filePath)
-    if err != nil {
-        return "", err
-    }
-    defer file.Close()
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
 
-    hash := sha256.New()
-    if _, err := io.Copy(hash, file); err != nil {
-        return "", err
-    }
-    return fmt.Sprintf("%x", hash.Sum(nil)), nil
+	hash := sha256.New()
+	if _, err := io.Copy(hash, file); err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%x", hash.Sum(nil)), nil
 }
 
-func GenerateManifest(archConfigPath, outputDir string) error {
-    configData, err := os.ReadFile(archConfigPath)
-    if err != nil {
-        return fmt.Errorf("❌ Failed to read arch config : %w", err)
-    }
+// Extract base package name and version string safely
+// Example: "luci-app-passwall2-26.7.16-r1.apk" -> pkg="luci-app-passwall2", ver="26.7.16-r1"
+func parsePackageNameAndVersion(fileName string) (string, string) {
+	cleanName := fileName
+	for _, ext := range []string{".apk", ".ipk"} {
+		if strings.HasSuffix(strings.ToLower(cleanName), ext) {
+			cleanName = cleanName[:len(cleanName)-len(ext)]
+			break
+		}
+	}
 
-    var config ArchitectureConfig
-    if err := json.Unmarshal(configData, &config); err != nil {
-        return fmt.Errorf("❌ Failed to unmarshal arch config : %w", err)
-    }
+	// Regex pattern for Alpine/OpenWrt package naming standard: <name>-<version_revision>
+	// Matches: (package-name)-(digits.*)
+	re := regexp.MustCompile(`^(.+?)-(\d+.*)$`)
+	matches := re.FindStringSubmatch(cleanName)
 
-    repo := os.Getenv("GITHUB_REPOSITORY")
-    if repo == "" {
-        repo = "Chamroosh98/DayPass" 
-    }
-    cdnBaseUrl := fmt.Sprintf("https://cdn.jsdelivr.net/gh/%s@packages", repo)
+	if len(matches) == 3 {
+		return matches[1], matches[2]
+	}
 
-    manifest := ManifestOutput{
-        Release:       config.Release,
-        GeneratedAt:   time.Now().UTC().Format(time.RFC3339),
-        DownloadBase:  cdnBaseUrl,
-        Architectures: []ArchOutput{},
-    }
+	// Fallback if version pattern didn't match
+	return cleanName, "Latest"
+}
 
-    for _, arch := range config.Architectures {
-        archDir := filepath.Join(outputDir, arch.Name)
-        archOut := ArchOutput{
-            Name:     arch.Name,
-            Packages: []PackageInfo{},
-        }
+func GenerateManifest(archConfigPath, outputDir, owVersion string) error {
+	configData, err := os.ReadFile(archConfigPath)
+	if err != nil {
+		return fmt.Errorf("❌ Failed to read arch config : %w", err)
+	}
 
-        if _, err := os.Stat(archDir); os.IsNotExist(err) {
-            fmt.Printf("⚠️ Directory not found : %s (Skipping ...)\n", archDir)
-            manifest.Architectures = append(manifest.Architectures, archOut)
-            continue
-        }
+	var config ArchitectureConfig
+	if err := json.Unmarshal(configData, &config); err != nil {
+		return fmt.Errorf("❌ Failed to unmarshal arch config : %w", err)
+	}
 
-        err := filepath.WalkDir(archDir, func(path string, d os.DirEntry, err error) error {
-            if err != nil {
-                return err
-            }
-            
-            if d.IsDir() {
-                return nil
-            }
+	repo := os.Getenv("GITHUB_REPOSITORY")
+	if repo == "" {
+		repo = "Chamroosh98/DayPass"
+	}
 
-            fileName := d.Name()
-            loweredName := strings.ToLower(fileName)
-            
-            var pkgName string
-            if strings.HasSuffix(loweredName, ".apk") {
-                pkgName = strings.TrimSuffix(fileName, ".apk")
-            } else if strings.HasSuffix(loweredName, ".ipk") {
-                pkgName = strings.TrimSuffix(fileName, ".ipk")
-            } else {
-                return nil 
-            }
+	releaseType := os.Getenv("INPUT_RELEASE_TYPE") 
+	var cdnBaseUrl string
 
-            fileInfo, err := d.Info()
-            if err != nil {
-                return fmt.Errorf("❌ Failed to get file info for [%s] : [%w]", path, err)
-            }
+	if releaseType != "" {
+		cdnBaseUrl = fmt.Sprintf("https://cdn.jsdelivr.net/gh/%s@packages/%s/v%s", repo, releaseType, owVersion)
+	} else {
+		cdnBaseUrl = fmt.Sprintf("https://cdn.jsdelivr.net/gh/%s@packages/v%s", repo, owVersion)
+	}
 
-            sha, err := calculateSHA256(path)
-            if err != nil {
-                return fmt.Errorf("❌ Failed to calculate sha256 for [%s] : [%w]", path, err)
-            }
+	manifest := ManifestOutput{
+		Release:       config.Release,
+		GeneratedAt:   time.Now().UTC().Format(time.RFC3339),
+		DownloadBase:  cdnBaseUrl,
+		Architectures: []ArchOutput{},
+	}
 
-            archOut.Packages = append(archOut.Packages, PackageInfo{
-                Package: pkgName,
-                File:    fmt.Sprintf("%s/%s", arch.Name, fileName),
-                Sha256:  sha,
-                Size:    fileInfo.Size(),
-            })
+	for _, arch := range config.Architectures {
+		archDir := filepath.Join(outputDir, arch.Name)
+		archOut := ArchOutput{
+			Name:     arch.Name,
+			Packages: []PackageInfo{},
+		}
 
-            return nil
-        })
+		if _, err := os.Stat(archDir); os.IsNotExist(err) {
+			fmt.Printf("⚠️ Directory not found : %s (Skipping ...)\n", archDir)
+			manifest.Architectures = append(manifest.Architectures, archOut)
+			continue
+		}
 
-        if err != nil {
-            return fmt.Errorf("❌ Error while walking directory %s: %w", archDir, err)
-        }
+		err := filepath.WalkDir(archDir, func(path string, d os.DirEntry, err error) error {
+			if err != nil || d.IsDir() {
+				return err
+			}
 
-        manifest.Architectures = append(manifest.Architectures, archOut)
-        fmt.Printf("✅ Generated manifest for [%s] with [%d] packages!\n", arch.Name, len(archOut.Packages))
-    }
+			fileName := d.Name()
+			loweredName := strings.ToLower(fileName)
 
-    finalManifestPath := filepath.Join(outputDir, "manifest.json")
-    finalJson, err := json.MarshalIndent(manifest, "", "  ")
-    if err != nil {
-        return fmt.Errorf("❌ Failed to marshal final manifest : %w", err)
-    }
+			if !strings.HasSuffix(loweredName, ".apk") && !strings.HasSuffix(loweredName, ".ipk") {
+				return nil
+			}
 
-    if err := os.WriteFile(finalManifestPath, finalJson, 0644); err != nil {
-        return fmt.Errorf("❌ Failed to write manifest.json : %w", err)
-    }
+			fileInfo, err := d.Info()
+			if err != nil {
+				return fmt.Errorf("❌ Failed to get file info for [%s] : [%w]", path, err)
+			}
 
-    fmt.Println("🦾 manifest.json successfully updated for all package formats recursively!")
-    return nil
+			sha, err := calculateSHA256(path)
+			if err != nil {
+				return fmt.Errorf("❌ Failed to calculate sha256 for [%s] : [%w]", path, err)
+			}
+
+			// Parse clean package name and version
+			pkgName, pkgVersion := parsePackageNameAndVersion(fileName)
+
+			archOut.Packages = append(archOut.Packages, PackageInfo{
+				Package: pkgName,
+				Version: pkgVersion,
+				File:    fmt.Sprintf("%s/%s", arch.Name, fileName),
+				Sha256:  sha,
+				Size:    fileInfo.Size(),
+			})
+
+			return nil
+		})
+
+		if err != nil {
+			return fmt.Errorf("❌ Error while walking directory %s: %w", archDir, err)
+		}
+
+		manifest.Architectures = append(manifest.Architectures, archOut)
+		fmt.Printf("✅ Manifest for OpenWrt v%s [%s] generated (%d packages)\n", owVersion, arch.Name, len(archOut.Packages))
+	}
+
+	finalManifestPath := filepath.Join(outputDir, "manifest.json")
+	finalJson, err := json.MarshalIndent(manifest, "", "  ")
+	if err != nil {
+		return fmt.Errorf("❌ Failed to marshal final manifest : %w", err)
+	}
+
+	return os.WriteFile(finalManifestPath, finalJson, 0644)
 }

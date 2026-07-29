@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
 func SendTelegramNotification(
 	botToken, chatID, version, buildNum, actor, repo, releaseType string,
-	architectures []FeedConfig,
 ) {
 	if botToken == "" || chatID == "" {
 		fmt.Println("⚠️ Telegram credentials not provided. Skipping notification!")
@@ -31,7 +31,7 @@ func SendTelegramNotification(
 		msgHeader = "🚀 *New Stable DayPass Release!*"
 		installURL = "https://Chamroosh98.github.io/DayPass/install.sh"
 		btnEmoji = "📦 "
-		mergedDir = "merged-release" 
+		mergedDir = "merged-release"
 	} else {
 		tagFormat = fmt.Sprintf("v%s-beta-%s", version, buildNum)
 		msgHeader = "🧪 *New Beta DayPass Ready!*"
@@ -41,29 +41,35 @@ func SendTelegramNotification(
 	}
 
 	var keyboard [][]InlineKeyboardButton
-	for _, arch := range architectures {
-		// 1. Search in primary build-artifacts directory
-		zipMatch, _ := filepath.Glob(fmt.Sprintf("build-artifacts/DayPass_%s_*.zip", arch.Name))
 
-		// 2. Fallback: Search dynamically based on releaseType (merged-beta vs merged-release)
-		if len(zipMatch) == 0 {
-			zipMatch, _ = filepath.Glob(fmt.Sprintf("%s/DayPass_%s_*.zip", mergedDir, arch.Name))
+	zipMatches, _ := filepath.Glob("build-artifacts/DayPass_*.zip")
+	mergedMatches, _ := filepath.Glob(fmt.Sprintf("%s/DayPass_*.zip", mergedDir))
+	zipMatches = append(zipMatches, mergedMatches...)
+
+	seenFiles := make(map[string]bool)
+
+	for _, zipPath := range zipMatches {
+		actualFileName := filepath.Base(zipPath)
+
+		if seenFiles[actualFileName] {
+			continue
 		}
+		seenFiles[actualFileName] = true
 
-		if len(zipMatch) > 0 {
-			actualFileName := filepath.Base(zipMatch[0])
+		btnLabel := strings.TrimPrefix(actualFileName, "DayPass_")
+		btnLabel = strings.TrimSuffix(btnLabel, ".zip")
 
-			// Create direct links from GitHub Release
-			downloadURL := fmt.Sprintf("https://github.com/%s/releases/download/%s/%s", repo, tagFormat, actualFileName)
+		downloadURL := fmt.Sprintf("https://github.com/%s/releases/download/%s/%s", repo, tagFormat, actualFileName)
 
-			btn := InlineKeyboardButton{
-				Text: btnEmoji + arch.Name,
-				URL:  downloadURL,
-			}
-			keyboard = append(keyboard, []InlineKeyboardButton{btn})
-		} else {
-			fmt.Printf("⚠️ No zip found for architecture: [%s] (Searched in build-artifacts/ & %s/)\n", arch.Name, mergedDir)
+		btn := InlineKeyboardButton{
+			Text: btnEmoji + btnLabel,
+			URL:  downloadURL,
 		}
+		keyboard = append(keyboard, []InlineKeyboardButton{btn})
+	}
+
+	if len(keyboard) == 0 {
+		fmt.Printf("⚠️ No zip artifacts found in build-artifacts/ or %s/\n", mergedDir)
 	}
 
 	msgText := fmt.Sprintf(

@@ -4,11 +4,15 @@ main_menu()
 {
     while true; 
         do
+
+            render_persistent_header
+            
             printf "   📦 1) Install Package\n"
             printf "   🖥️ 2) Network Info & Speed Monitor\n"
+            printf "   🛠️ 3) Maintenance & Recovery\n"
             printf "   🚪 0) Exit\n\n"
 
-            printf "   ⁉️ Select option [0-2] : "
+            printf "   ⁉️ Select option [0-3] : "
             read -r choice </dev/tty
 
             case "$choice" in
@@ -22,13 +26,21 @@ main_menu()
                         network_menu || true
                     fi
                     ;;
+                3)
+                    if command -v maintenance_menu >/dev/null 2>&1; then
+                        maintenance_menu || true
+                    else
+                        log_error "Maintenance module not found!"
+                        sleep 2
+                    fi
+                    ;;
                 0)
-                    log_info "Exiting DayPass ..."
+                    printf "   ${GRAY:-}TNX for using DayPass! =)  \n${RESET:-}"
                     exit 0
                     ;;
                 *)
                     log_warn "Invalid choice!"
-                    sleep 3
+                    sleep 2
                     clear
                     ;;
             esac
