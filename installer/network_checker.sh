@@ -182,7 +182,7 @@ network_check()
     fi
     printf " %s%% (🟢 %s  🟡 %s  🔴 %s)\n\n" "$PCT" "$GREEN_COUNT" "$YELLOW_COUNT" "$RED_COUNT"
 
-    printf "  ${BOLD:-}Diagnostic Report :${RESET:-} "
+    printf "  ${BOLD:-}Diagnostic Report :${RESET:-}"
     if [ "$DNS_FAILED" -eq 1 ]; then
         if command -v log_error >/dev/null 2>&1; then
             log_error "DNS resolution is failing! Router cannot translate domain names."

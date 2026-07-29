@@ -132,11 +132,11 @@ resource_compare()
 
     echo
     echo "  📊 DayPass Deployment Efficiency Summary"
-    echo "  =========================================================="
+    echo "  ────────────────────────────────────────────────────────── "
     echo "    ├─ Total Downloaded Payload     : $(human_readable_bytes "$TOTAL_REQUIRED_BYTES")"
     echo "    ├─ Total Network Traffic Saved  : $(human_readable_bytes "$TOTAL_SAVED_BYTES") "
     echo "    ├─ Net Storage Consumed         : $(human_readable_bytes "$USED_FLASH")"
     echo "    └─ Free Storage Remaining       : $(human_readable_bytes "$AFTER_FREE_FLASH")"
-    echo "  =========================================================="
+    echo "  ────────────────────────────────────────────────────────── "
     echo
 }
