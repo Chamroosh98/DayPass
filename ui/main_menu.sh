@@ -35,7 +35,7 @@ main_menu()
                     fi
                     ;;
                 0)
-                    log_info "Exiting DayPass ..."
+                    printf "  ${GRAY:-}TNX for using DayPass! =)${RESET:-}"
                     exit 0
                     ;;
                 *)

@@ -87,7 +87,7 @@ pkg_install()
     [ -z "$PACKAGE_NAME" ] && return 1
     [ -z "${PKG_MANAGER:-}" ] && detect_package_manager
 
-    log_info "Executing package installation : [$PACKAGE_NAME]" 2>/dev/null || echo "[INFO] Installing: $PACKAGE_NAME"
+    # log_info "Executing package installation : [$PACKAGE_NAME]" 2>/dev/null || echo "[INFO] Installing: $PACKAGE_NAME"
 
     if [ "$PKG_MANAGER" = "apk" ]; then
         # 1. Try standard installation with untrusted keyring bypass
