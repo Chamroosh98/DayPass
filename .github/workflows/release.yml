@@ -207,6 +207,11 @@ jobs:
           clean: false
           single-commit: true
 
+      - name: 🔧 Increase Git HTTP Buffer Size
+        run: |
+          git config --global http.postBuffer 524288000
+          git config --global http.maxRequestBuffer 100M
+
       - name: 🚀 Deploy Binary Packages to 'packages' Branch Root
         uses: JamesIves/github-pages-deploy-action@v4
         with:
