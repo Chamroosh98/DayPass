@@ -89,14 +89,11 @@ download_package()
 
     if [ -f "$target" ]; then
         if echo "$sha256  $target" | sha256sum -c - >/dev/null 2>&1; then
-            log_info "Cached package [$package] verified successfully. Skipping download."
             return 0
         fi
         rm -f "$target"
     fi
 
-    log_info "Downloading [$package] -> $target_url"
-    
     DOWNLOAD_SUCCESS=0
     trap 'rm -f "$tmp" 2>/dev/null' INT TERM
 
@@ -109,7 +106,6 @@ download_package()
     fi
 
     if [ "$DOWNLOAD_SUCCESS" -ne 1 ] || [ ! -s "$tmp" ]; then
-        log_error "Download failed or timed out for : [$package]!"
         rm -f "$tmp"
         trap - INT TERM
         return 1
@@ -117,7 +113,6 @@ download_package()
 
     if [ -n "$sha256" ] && [ "$sha256" != "null" ]; then
         if ! echo "$sha256  $tmp" | sha256sum -c - >/dev/null 2>&1; then
-            log_error "SHA256 checksum MISMATCH for : [$package]!"
             rm -f "$tmp"
             trap - INT TERM
             return 1
@@ -126,7 +121,6 @@ download_package()
 
     mv "$tmp" "$target"
     trap - INT TERM
-    log_success "Package [$package] downloaded and verified!"
     return 0
 }
 
@@ -135,7 +129,7 @@ inspect_and_confirm_packages()
 {
     echo "  📦 DayPass Package Inspection Table"
     echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
-    printf "   %-32s %-18s %-18s %-12s\n" "Package" "Installed" "Manifest Ver" "Action"
+    printf "   %-28s %-16s %-16s %-12s\n" "Package" "Installed" "Manifest Ver" "Action"
     echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
 
     PACKAGES_TO_PROCESS=""
@@ -144,8 +138,10 @@ inspect_and_confirm_packages()
     SKIP_COUNT=0
 
     for pkg in $FINAL_PACKAGES; do
-        # فقط خط اول نسخه رو می‌گیریم تا متن چندخطی جدول رو بهم نریزه
-        inst_ver=$(pkg_get_installed_version "$pkg" | head -n1)
+        # 🛠️ فیکس باگ اول: فقط کلمه اول (رقم نسخه) رو می‌گیریم و از توضیحات طولانی صرف‌نظر می‌کنیم!
+        raw_inst_ver=$(pkg_get_installed_version "$pkg" 2>/dev/null | head -n1)
+        inst_ver=$(echo "$raw_inst_ver" | awk '{print $1}')
+        
         manif_ver=$(manifest_lookup "version" "$pkg")
         manif_hash=$(manifest_lookup "sha256" "$pkg")
         
@@ -162,7 +158,7 @@ inspect_and_confirm_packages()
             ACTION_STR="${YELLOW}[🔄 Upgrade]${RESET}"
             UPGRADE_COUNT=$((UPGRADE_COUNT + 1))
             PACKAGES_TO_PROCESS="$PACKAGES_TO_PROCESS $pkg"
-        elif [ "$manif_ver" = "Latest" ] || [ "$inst_ver" = "$manif_ver" ]; then
+        elif [ "$manif_ver" = "Latest" ] || [ "$inst_ver" = "$manif_ver" ]; me
             inst_hash=$(pkg_get_installed_hash "$pkg" 2>/dev/null)
             if [ -n "$manif_hash" ] && [ "$manif_hash" != "null" ] && [ -n "$inst_hash" ] && [ "$inst_hash" != "$manif_hash" ]; then
                 ACTION_STR="${ORANGE}[🩹 Patch]${RESET}"
@@ -174,8 +170,12 @@ inspect_and_confirm_packages()
             fi
         fi
 
-        printf "   🔹 ${CYAN}%-26s${RESET} ${YELLOW}%-16s${RESET} %-16s %b\n" \
-            "$pkg" "$inst_ver" "$manif_ver" "$ACTION_STR"
+        # Cut off version strings if they are too long to prevent row wrapping
+        inst_ver_fmt=$(printf "%.14s" "$inst_ver")
+        manif_ver_fmt=$(printf "%.14s" "$manif_ver")
+
+        printf "   🔹 ${CYAN}%-24s${RESET} ${YELLOW}%-14s${RESET} %-14s %b\n" \
+            "$pkg" "$inst_ver_fmt" "$manif_ver_fmt" "$ACTION_STR"
     done
 
     echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
@@ -188,9 +188,11 @@ inspect_and_confirm_packages()
         return 2
     fi
 
-    # Interactive User Confirmation Prompt
-    printf " Do you want to proceed with deployment? [Y/n] : "
-    read -r user_confirm
+    # 🛠️ فیکس باگ دوم: پرامپت تایید کاربر واقعی و مسدودکننده (Blocking Prompt)
+    printf " ${BOLD}${YELLOW}?${RESET} Do you want to proceed with deployment? [Y/n] : "
+    read -r user_confirm </dev/tty
+    echo
+
     case "$user_confirm" in
         [nN][oO]|[nN])
             log_warn "Installation cancelled by user!"
@@ -198,6 +200,7 @@ inspect_and_confirm_packages()
             ;;
         *)
             log_info "User confirmed. Proceeding with installation ..."
+            echo
             ;;
     esac
 
@@ -228,10 +231,24 @@ deploy_targeted_packages()
     fi
 
     INSTALL_FILES=""
+    total_pkgs=0
+    for p in $PACKAGES_TO_PROCESS; do
+        total_pkgs=$((total_pkgs + 1))
+    done
 
-    # Download Phase
+    # 🟢 3. دانلود پکیج‌ها با پروگرس‌بار ASCII شیک
+    current_idx=0
+    log_info "Downloading required packages..."
+
     for pkg in $PACKAGES_TO_PROCESS; do
+        current_idx=$((current_idx + 1))
+        
+        if command -v show_ascii_progress >/dev/null 2>&1; then
+            show_ascii_progress "Downloading packages" "$current_idx" "$total_pkgs"
+        fi
+
         if ! download_package "$pkg"; then
+            echo
             log_error "Failed downloading dependency : [$pkg]"
             rollback_failed_install
             return 1
@@ -241,9 +258,7 @@ deploy_targeted_packages()
         file_basename=$(basename "$file")
         INSTALL_FILES="$INSTALL_FILES $TMP_DIR/$file_basename"
     done
-
     echo
-    log_info "Executing Batch Package Installation ..."
 
     for pkg in $PACKAGES_TO_PROCESS; do
         echo "$pkg" >> "$TRANSACTION_LOG"
@@ -252,26 +267,25 @@ deploy_targeted_packages()
     INSTALL_SUCCESS=0
     CURRENT_PKG_MGR="${PKG_MANAGER:-opkg}"
 
+    # 🟢 4. نصب پکیج‌ها با تایمر زنده
     case "$CURRENT_PKG_MGR" in
         apk)
-            log_info "Installing packages via APK engine..."
-            if apk add --allow-untrusted --no-progress $INSTALL_FILES >/tmp/apk_inst.log 2>&1; then
-                INSTALL_SUCCESS=1
-            else
-                log_error "APK install error:"
-                cat /tmp/apk_inst.log
+            (apk add --allow-untrusted --no-progress $INSTALL_FILES >/tmp/apk_inst.log 2>&1) &
+            BG_PID=$!
+            if command -v show_timer_progress >/dev/null 2>&1; then
+                show_timer_progress "$BG_PID" "applying APK package bundle"
             fi
-            rm -f /tmp/apk_inst.log
+            wait "$BG_PID"
+            [ $? -eq 0 ] && INSTALL_SUCCESS=1
             ;;
         opkg|*)
-            log_info "Installing packages via OPKG engine..."
-            if opkg install --force-reinstall --force-checksum $INSTALL_FILES >/tmp/opkg_inst.log 2>&1; then
-                INSTALL_SUCCESS=1
-            else
-                log_error "OPKG install error:"
-                cat /tmp/opkg_inst.log
+            (opkg install --force-reinstall --force-checksum $INSTALL_FILES >/tmp/opkg_inst.log 2>&1) &
+            BG_PID=$!
+            if command -v show_timer_progress >/dev/null 2>&1; then
+                show_timer_progress "$BG_PID" "applying OPKG package bundle"
             fi
-            rm -f /tmp/opkg_inst.log
+            wait "$BG_PID"
+            [ $? -eq 0 ] && INSTALL_SUCCESS=1
             ;;
     esac
 
@@ -293,7 +307,10 @@ deploy_targeted_packages()
         return 0
     fi
 
+    echo
     log_error "Package manager batch execution failed!"
+    if [ -f /tmp/opkg_inst.log ]; then cat /tmp/opkg_inst.log; fi
+    if [ -f /tmp/apk_inst.log ]; then cat /tmp/apk_inst.log; fi
     rollback_failed_install
     return 1
 }
