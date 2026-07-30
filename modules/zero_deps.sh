@@ -14,7 +14,7 @@ deploy_system_dependencies()
     fi
     wait "$BG_PID"
 
-    # Added libnetfilter-conntrack to prevent dnsmasq-full shared library crash
+    # Define base packages (dnsmasq-full handling moved to final stage)
     COMMON_DEPS="ca-bundle ca-certificates curl jq libnetfilter-conntrack"
     OW24_EXTRA_DEPS="coreutils coreutils-base64 coreutils-nohup coreutils-timeout ip-full unzip resolveip lua libuci-lua luci-compat luci-lib-jsonc luci-lua-runtime lyaml"
 
@@ -27,7 +27,7 @@ deploy_system_dependencies()
         log_info "OpenWrt 25+ detected: Using minimal base tools."
     fi
 
-    # 2. Iterate and Deploy Core System Dependencies
+    # 2. Iterate and Deploy Core System Dependencies FIRST
     for pkg in $TARGET_PACKAGES; do
         case "$pkg" in
             curl) command -v curl >/dev/null 2>&1 && { log_info "Dependency [$pkg] is already available."; continue; } ;;
@@ -60,7 +60,7 @@ deploy_system_dependencies()
         fi
     done
 
-    # 3. Upgrade dnsmasq to dnsmasq-full safely for OpenWrt
+    # 3. Upgrade dnsmasq to dnsmasq-full LAST (To avoid DNS resolution drop during pkg installs)
     if [ -f /etc/openwrt_release ]; then
         log_info "Checking dnsmasq installation status ..."
 
@@ -84,15 +84,17 @@ deploy_system_dependencies()
             fi
             wait "$BG_PID"
             
-            # Post-installation DNS & Network Safety Reload
+            # Temporary DNS Fallback to ensure background processes don't stall
             log_info "Reloading DNS resolver and Network stack ..."
+            echo "nameserver 8.8.8.8" > /tmp/resolv.conf.auto 2>/dev/null || true
+            
             /etc/init.d/dnsmasq restart >/dev/null 2>&1 || true
             /etc/init.d/network reload >/dev/null 2>&1 || true
             sleep 3
 
             # Network Connection Recovery Guardrail
             if ! nslookup chamroosh98.github.io >/dev/null 2>&1; then
-                log_warn "DNS resolution momentary lag detected. Refreshing WAN link..."
+                log_warn "DNS resolution lag detected. Refreshing WAN link..."
                 ifup wan >/dev/null 2>&1 || true
                 sleep 3
             fi
