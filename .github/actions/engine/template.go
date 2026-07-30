@@ -111,8 +111,9 @@ network_check || exit 1
 check_version || exit 1
 detect_system_architecture
 
-# 3. Core dependency initialization
+# 3. Core dependency initialization => with delay (2 secs) to ensure system stability after installing the dnsmasq-full tool!
 deploy_system_dependencies
+sleep 2
 initialize_installer
 
 # 4. Optional Automatic UCI Config Backup

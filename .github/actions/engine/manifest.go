@@ -112,7 +112,7 @@ func GenerateManifest(archConfigPath, outputDir, owVersion string) error {
 	}
 
 	for _, arch := range config.Architectures {
-		archDir := filepath.Join(outputDir, arch.Name)
+		archDir := filepath.Join(outputDir, fmt.Sprintf("v%s", owVersion), arch.Name)
 		archOut := ArchOutput{
 			Name:     arch.Name,
 			Packages: []PackageInfo{},

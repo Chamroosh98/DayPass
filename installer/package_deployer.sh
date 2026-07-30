@@ -188,7 +188,7 @@ inspect_and_confirm_packages()
     fi
 
     # Blocking confirmation prompt
-    printf " ${BOLD}${YELLOW}?${RESET} Do you want to proceed with deployment? [Y/n] : "
+    printf "  ⁉️ Do you want to proceed with deployment? [Y/n] : "
     read -r user_confirm </dev/tty
     echo
 
