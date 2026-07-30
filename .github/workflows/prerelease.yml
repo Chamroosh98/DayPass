@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🏷️ Generate Beta Version for Filenames
-        run: echo "VERSION=v$(date +%y.%m.%d)" >> $GITHUB_ENV
+        run: echo "VERSION=$(date +%y.%m.%d)" >> $GITHUB_ENV
 
       - name: 🦫 Setup Go Environment
         uses: actions/setup-go@v5
