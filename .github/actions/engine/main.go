@@ -80,9 +80,9 @@ func main() {
 			destDir := fmt.Sprintf("%s/%s", verOutputDir, arch.Name)
 			os.MkdirAll(destDir, 0755)
 
-			matches, _ := filepath.Glob(fmt.Sprintf("merged-beta/DayPass_v%s_%s_*.zip", ver, arch.Name))
+			matches, _ := filepath.Glob(fmt.Sprintf("merged-beta/DayPass_OW%s_%s_*.zip", ver, arch.Name))
 			if len(matches) == 0 {
-				matches, _ = filepath.Glob(fmt.Sprintf("merged-release/DayPass_v%s_%s_*.zip", ver, arch.Name))
+				matches, _ = filepath.Glob(fmt.Sprintf("merged-release/DayPass_OW%s_%s_*.zip", ver, arch.Name))
 			}
 
 			if len(matches) > 0 {
