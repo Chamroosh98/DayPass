@@ -140,12 +140,16 @@ inspect_and_confirm_packages()
 
     for pkg in $FINAL_PACKAGES; do
         raw_inst_ver=$(pkg_get_installed_version "$pkg" 2>/dev/null | head -n1)
-        inst_ver=$(echo "$raw_inst_ver" | awk '{print $1}')
+        
+        inst_ver=$(echo "$raw_inst_ver" | awk '{print $1}' | tr -d ':')
+        
+        if [ "$inst_ver" = "$pkg" ] || [ -z "$inst_ver" ]; then
+            inst_ver="None"
+        fi
         
         manif_ver=$(manifest_lookup "version" "$pkg")
         manif_hash=$(manifest_lookup "sha256" "$pkg")
         
-        [ -z "$inst_ver" ] && inst_ver="None"
         [ -z "$manif_ver" ] || [ "$manif_ver" = "null" ] && manif_ver="N/A"
 
         ACTION_STR=""
@@ -178,12 +182,12 @@ inspect_and_confirm_packages()
     done
 
     echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
-    printf "   Summary: %d to install, %d to upgrade, %d skipped.\n" "$INSTALL_COUNT" "$UPGRADE_COUNT" "$SKIP_COUNT"
+    printf "   Summary: %d to install, %d to upgrade, %d skipped!\n" "$INSTALL_COUNT" "$UPGRADE_COUNT" "$SKIP_COUNT"
     echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
     echo
 
     if [ -z "$PACKAGES_TO_PROCESS" ]; then
-        log_success "All packages are up-to-date! No changes required."
+        log_success "All packages are up-to-date! No changes required!"
         return 2
     fi
 
@@ -223,6 +227,7 @@ deploy_targeted_packages()
         return 0
     fi
 
+    echo "🔍 Executing Pre-Flight System Resource Validation ..."
     resource_snapshot
     if ! estimate_install_size; then
         log_error "Installation aborted due to system resource limits."
@@ -236,13 +241,18 @@ deploy_targeted_packages()
     done
 
     current_idx=0
-    log_info "Downloading required packages..."
+    log_info "Downloading required packages ..."
 
     for pkg in $PACKAGES_TO_PROCESS; do
         current_idx=$((current_idx + 1))
         
+        curr_ram_bytes=$(get_free_ram_bytes 2>/dev/null)
+        curr_ram_fmt=$(human_readable_bytes "$curr_ram_bytes" 2>/dev/null)
+        
         if command -v show_ascii_progress >/dev/null 2>&1; then
-            show_ascii_progress "Downloading packages" "$current_idx" "$total_pkgs"
+            show_ascii_progress "Downloading ($pkg) [Free RAM: ${curr_ram_fmt:-N/A}]" "$current_idx" "$total_pkgs"
+        else
+            echo "  📦 [$current_idx/$total_pkgs] Downloading $pkg... (Free RAM: ${curr_ram_fmt:-N/A})"
         fi
 
         if ! download_package "$pkg"; then

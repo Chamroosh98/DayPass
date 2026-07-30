@@ -106,7 +106,7 @@ show_ascii_progress()
     [ "$percent" -ge 50 ] && COLOR="${CYAN}"
     [ "$percent" -eq 100 ] && COLOR="${GREEN}"
 
-    printf "\r⏳ %-20s [${COLOR}%s${RESET}] ${BOLD}%3d%%${RESET} (%s/%s)" \
+    printf "\r  ⏳ %-20s [${COLOR}%s${RESET}] ${BOLD}%3d%%${RESET} (%s/%s)" \
             "$title" "$bar" "$percent" "$current" "$total"
 
     [ "$current" -ge "$total" ] && echo

@@ -119,7 +119,7 @@ maintenance_menu()
                 ;;
         esac
         
-        printf "   \n${GRAY:-}Press [Enter] to continue ...${RESET:-}"
+        printf "   ${GRAY:-}\nPress [Enter] to continue ... ${RESET:-}"
         read -r _ </dev/tty
     done
 }

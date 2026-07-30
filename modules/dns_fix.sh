@@ -65,8 +65,8 @@ dns_fix_menu()
     echo "   📡 DNS Resolution Recovery                                "
     echo "  ───────────────────────────────────────────────────────────"
     echo "   1) ☁️ Cloudflare DNS   (1.1.1.1)                          "
-    echo "   2) 🔍 Google DNS       (8.8.8.8)                           "
-    echo "   3) 🛡️ Quad9 DNS        (9.9.9.9)                           "
+    echo "   2) 🔍 Google DNS       (8.8.8.8)                          "
+    echo "   3) 🛡️ Quad9 DNS        (9.9.9.9)                          "
     
     if [ -f "$BACKUP_DNS_FILE" ]; then
         echo "   4) 🔄 Restore Original DNS                           "

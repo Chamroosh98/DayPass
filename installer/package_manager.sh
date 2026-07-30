@@ -58,8 +58,12 @@ pkg_get_installed_version()
     [ -z "${PKG_MANAGER:-}" ] && detect_package_manager
 
     if [ "$PKG_MANAGER" = "apk" ]; then
+        if ! apk info -e "$pkg" >/dev/null 2>&1; then
+            echo ""
+            return 0
+        fi
         ver=$(apk list --installed "$pkg" 2>/dev/null | awk '{print $1}' | sed "s/^$pkg-//")
-        [ -z "$ver" ] && ver=$(apk info -v "$pkg" 2>/dev/null | sed "s/^$pkg-//")
+        [ -z "$ver" ] && ver=$(apk info -v "$pkg" 2>/dev/null | sed -e "s/^$pkg-//" -e 's/ WARNING:.*//')
         echo "$ver"
     elif [ "$PKG_MANAGER" = "opkg" ]; then
         opkg status "$pkg" 2>/dev/null | awk '/^Version:/ {print $2}'
