@@ -27,13 +27,13 @@ func SendTelegramNotification(
 	var mergedDir string
 
 	if isRelease {
-		tagFormat = fmt.Sprintf("v%s-%s", version, buildNum)
+		tagFormat = fmt.Sprintf("%s-%s", version, buildNum)
 		msgHeader = "🚀 *New Stable DayPass Release!*"
 		installURL = "https://Chamroosh98.github.io/DayPass/install.sh"
 		btnEmoji = "📦 "
 		mergedDir = "merged-release"
 	} else {
-		tagFormat = fmt.Sprintf("v%s-beta-%s", version, buildNum)
+		tagFormat = fmt.Sprintf("%s-beta-%s", version, buildNum)
 		msgHeader = "🧪 *New Beta DayPass Ready!*"
 		installURL = "https://Chamroosh98.github.io/DayPass/dev/install.sh"
 		btnEmoji = "🧪 "
