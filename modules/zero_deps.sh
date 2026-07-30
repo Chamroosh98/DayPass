@@ -14,13 +14,14 @@ deploy_system_dependencies()
     fi
     wait "$BG_PID"
 
-    COMMON_DEPS="ca-bundle ca-certificates curl jq"
+    # Added libnetfilter-conntrack to prevent dnsmasq-full shared library crash
+    COMMON_DEPS="ca-bundle ca-certificates curl jq libnetfilter-conntrack"
     OW24_EXTRA_DEPS="coreutils coreutils-base64 coreutils-nohup coreutils-timeout ip-full unzip resolveip lua libuci-lua luci-compat luci-lib-jsonc luci-lua-runtime lyaml"
 
     TARGET_PACKAGES="$COMMON_DEPS"
 
     if [ "$PKG_MANAGER" = "opkg" ] || [ "${OPENWRT_MAJOR:-24}" = "24" ]; then
-        log_info "OpenWrt 24 detected: Adding core system & LuCI dependencies..."
+        log_info "OpenWrt 24 detected: Adding core system & LuCI dependencies ..."
         TARGET_PACKAGES="$TARGET_PACKAGES $OW24_EXTRA_DEPS"
     else
         log_info "OpenWrt 25+ detected: Using minimal base tools."
@@ -37,7 +38,7 @@ deploy_system_dependencies()
 
         if command -v pkg_installed >/dev/null 2>&1; then
             if pkg_installed "$pkg"; then
-                log_info "Package [$pkg] is already installed."
+                log_info "Package [$pkg] is already installed!"
                 continue
             fi
         fi
@@ -59,7 +60,7 @@ deploy_system_dependencies()
         fi
     done
 
-    # 3. Upgrade dnsmasq to dnsmasq-full for OpenWrt
+    # 3. Upgrade dnsmasq to dnsmasq-full safely for OpenWrt
     if [ -f /etc/openwrt_release ]; then
         log_info "Checking dnsmasq installation status ..."
 
@@ -68,11 +69,11 @@ deploy_system_dependencies()
                 case "$PKG_MANAGER" in
                     opkg)
                         opkg remove dnsmasq --force-depends >/dev/null 2>&1 || true
-                        opkg install dnsmasq-full --force-overwrite >/dev/null 2>&1 || true
+                        opkg install dnsmasq-full libnetfilter-conntrack --force-overwrite >/dev/null 2>&1 || true
                         ;;
                     apk)
                         apk del dnsmasq >/dev/null 2>&1 || true
-                        apk add --allow-untrusted dnsmasq-full >/dev/null 2>&1 || true
+                        apk add --allow-untrusted dnsmasq-full libnetfilter-conntrack >/dev/null 2>&1 || true
                         ;;
                 esac
             ) &
@@ -83,9 +84,28 @@ deploy_system_dependencies()
             fi
             wait "$BG_PID"
             
-            log_success "dnsmasq-full installed successfully."
+            # Post-installation DNS & Network Safety Reload
+            log_info "Reloading DNS resolver and Network stack ..."
+            /etc/init.d/dnsmasq restart >/dev/null 2>&1 || true
+            /etc/init.d/network reload >/dev/null 2>&1 || true
+            sleep 3
+
+            # Network Connection Recovery Guardrail
+            if ! nslookup chamroosh98.github.io >/dev/null 2>&1; then
+                log_warn "DNS resolution momentary lag detected. Refreshing WAN link..."
+                ifup wan >/dev/null 2>&1 || true
+                sleep 3
+            fi
+
+            log_success "dnsmasq-full installed and DNS engine restarted successfully."
         else
             log_success "dnsmasq-full is already present."
+            
+            # Ensure libnetfilter-conntrack is present even if dnsmasq-full was already installed
+            if ! pkg_installed "libnetfilter-conntrack"; then
+                pkg_install "libnetfilter-conntrack" >/dev/null 2>&1 || true
+                /etc/init.d/dnsmasq restart >/dev/null 2>&1 || true
+            fi
         fi
     fi
 }

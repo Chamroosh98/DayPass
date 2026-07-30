@@ -216,7 +216,7 @@ network_check()
     fi
 
     echo
-    printf "  ${GRAY:-}Press [Enter] to continue ... ${RESET:-}"
+    printf "  ${GRAY:-}Press [Enter] to continue ... ${RESET:-}\n"
     read -r _ </dev/tty
     echo
     return 0

@@ -73,7 +73,7 @@ func SendTelegramNotification(
 	}
 
 	msgText := fmt.Sprintf(
-		"%s\n\n🏷️ *Version :* `%s`\n🛠️ *Build :* `%s`\n👤 *By :* `%s`\n\n⚡ *Installer :*\n`wget -O- %s | sh`",
+		"%s\n\n🏷️ *Version :* `%s`\n🛠️ *Build :* `%s`\n👤 *By :* `%s`\n\n⚡ *Installer :*\n`wget -qO- %s | sh`",
 		msgHeader, tagFormat, buildNum, actor, installURL,
 	)
 

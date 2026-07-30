@@ -15,7 +15,7 @@ show_timer_progress()
     # Hide Cursor
     printf "\033[?25l" 2>/dev/null
 
-    echo "   ✨ Please wait, $message ..."
+    echo "   🖐️ Please wait, $message ..."
 
     while kill -0 "$pid" 2>/dev/null; do
         now=$(date +%s)
@@ -43,7 +43,7 @@ show_timer_progress()
 
         # Line 1: Timer line
         # Line 2: Progress bar line
-        printf "    \033[K✨ DayPass is working in the background, timer: ${BOLD}%d seconds${RESET}\n" "$elapsed"
+        printf "    \033[K⏰ DayPass is working in the background, timer : ${BOLD}%d seconds${RESET}\n" "$elapsed"
         printf "    \033[K[${CYAN}%s${RESET}] ${BOLD}%3d%%${RESET}\033[1A\r" "$bar" "$percent"
 
         if command -v usleep >/dev/null 2>&1; then
@@ -65,7 +65,7 @@ show_timer_progress()
         i=$((i + 1))
     done
 
-    printf "   \033[K✨ Task finished! total time : ${GREEN}%d seconds${RESET}\n" "$elapsed"
+    printf "   \033[K✌️ Task finished! total time : ${GREEN}%d seconds${RESET}\n" "$elapsed"
     printf "   \033[K[${GREEN}%s${RESET}] ${BOLD}100%%${RESET}\n" "$full_bar"
 
     # Restore Cursor
@@ -106,7 +106,7 @@ show_ascii_progress()
     [ "$percent" -ge 50 ] && COLOR="${CYAN}"
     [ "$percent" -eq 100 ] && COLOR="${GREEN}"
 
-    printf "\r✨ %-20s [${COLOR}%s${RESET}] ${BOLD}%3d%%${RESET} (%s/%s)" \
+    printf "\r⏳ %-20s [${COLOR}%s${RESET}] ${BOLD}%3d%%${RESET} (%s/%s)" \
             "$title" "$bar" "$percent" "$current" "$total"
 
     [ "$current" -ge "$total" ] && echo
