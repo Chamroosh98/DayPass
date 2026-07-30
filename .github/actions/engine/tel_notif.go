@@ -37,7 +37,7 @@ func SendTelegramNotification(
 		msgHeader = "🧪 *New Beta DayPass Ready!*"
 		installURL = "https://Chamroosh98.github.io/DayPass/beta/install.sh"
 		btnEmoji = "🧪 "
-		mergedDir = "merged-beta"
+		mergedDir = "merged-beta" 
 	}
 
 	var keyboard [][]InlineKeyboardButton
