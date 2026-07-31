@@ -184,7 +184,7 @@ network_menu()
         case "$net_choice" in
             1) show_live_speed ;;
             2) continue ;;
-            0) echo "   ${GRAY} Exiting ...${RESET}"
+            0) echo "   ${GRAY}  Exiting ...${RESET}"
                 sleep 1
                 clear
                 break 

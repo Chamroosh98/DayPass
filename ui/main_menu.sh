@@ -7,12 +7,13 @@ main_menu()
 
             render_persistent_header
             
-            printf "   📦 1) Install Package\n"
-            printf "   🖥️ 2) Network Info & Speed Monitor\n"
-            printf "   🛠️ 3) Maintenance & Recovery\n"
+            printf "   📦 1) Install Package Profile\n"
+            printf "   🔄 2) Check & Update Packages\n"
+            printf "   🖥️ 3) Network Info & Speed Monitor\n"
+            printf "   🛠️ 4) Maintenance & Recovery\n"
             printf "   🚪 0) Exit\n\n"
 
-            printf "   ⁉️ Select option [0-3] : "
+            printf "   ⁉️ Select option [0-4] : "
             read -r choice </dev/tty
 
             case "$choice" in
@@ -22,11 +23,19 @@ main_menu()
                     fi
                     ;;
                 2)
+                    if command -v update_packages_menu >/dev/null 2>&1; then
+                        update_packages_menu || true
+                    else
+                        log_error "Update module not found!"
+                        sleep 2
+                    fi
+                    ;;
+                3)
                     if command -v network_menu >/dev/null 2>&1; then
                         network_menu || true
                     fi
                     ;;
-                3)
+                4)
                     if command -v maintenance_menu >/dev/null 2>&1; then
                         maintenance_menu || true
                     else
