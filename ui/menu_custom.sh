@@ -20,7 +20,9 @@ handle_custom_profile()
 
     PAGE_SIZE=5
     CURRENT_PAGE=1
-    TOTAL_PKGS=$(echo "$ALL_AVAILABLE_PKGS" | wc -w)
+    
+    set -- $ALL_AVAILABLE_PKGS
+    TOTAL_PKGS=$#
     TOTAL_PAGES=$(( (TOTAL_PKGS + PAGE_SIZE - 1) / PAGE_SIZE ))
     
     FIRST_RENDER=1
@@ -39,12 +41,11 @@ handle_custom_profile()
         START_IDX=$(( (CURRENT_PAGE - 1) * PAGE_SIZE + 1 ))
         END_IDX=$(( CURRENT_PAGE * PAGE_SIZE ))
 
-        i=1
         item_no=1
-        eval set -- "$ALL_AVAILABLE_PKGS"
+        curr_idx=1
         
         for pkg in "$@"; do
-            if [ "$i" -ge "$START_IDX" ] && [ "$i" -le "$END_IDX" ]; then
+            if [ "$curr_idx" -ge "$START_IDX" ] && [ "$curr_idx" -le "$END_IDX" ]; then
                 
                 is_selected="${GRAY}[ ]${RESET}"
                 case " $SELECTED_PACKAGES " in
@@ -59,7 +60,7 @@ handle_custom_profile()
 
                 item_no=$((item_no + 1))
             fi
-            i=$((i + 1))
+            curr_idx=$((curr_idx + 1))
         done
 
         FIRST_RENDER=0
@@ -83,15 +84,20 @@ handle_custom_profile()
                 break
                 ;;
             [1-9])
-                TARGET_INDEX=$(( START_IDX + cmd - 1 ))
-                idx=1
-                for pkg in "$@"; do
-                    if [ "$idx" -eq "$TARGET_INDEX" ]; then
-                        add_selected_package "$pkg"
-                        break
-                    fi
-                    idx=$((idx + 1))
-                done
+                if [ "$cmd" -ge 1 ] && [ "$cmd" -lt "$item_no" ]; then
+                    TARGET_INDEX=$(( START_IDX + cmd - 1 ))
+                    idx=1
+                    for pkg in "$@"; do
+                        if [ "$idx" -eq "$TARGET_INDEX" ]; then
+                            add_selected_package "$pkg"
+                            break
+                        fi
+                        idx=$((idx + 1))
+                    done
+                else
+                    log_warn "Invalid selection range!"
+                    sleep 1
+                fi
                 ;;
             *)
                 log_warn "Invalid command!"

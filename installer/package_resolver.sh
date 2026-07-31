@@ -3,7 +3,7 @@
 # Resolves target packages and dependencies for opkg / apk engines
 resolve_packages()
 {
-    log_info "Resolving targeted packages and dependencies for engine : [${PKG_MANAGER:-opkg}]..."
+    log_info "Resolving targeted packages and dependencies for engine : [${PKG_MANAGER:-opkg}] ..."
 
     FINAL_PACKAGES=""
 
@@ -93,11 +93,11 @@ resolve_packages()
 
     # Validate non-empty final package list
     if [ -z "$FINAL_PACKAGES" ]; then
-        log_error "Package resolution finished with an empty target package list!"
+        log_error "Package resolution finished with an empty target package list :("
         return 1
     fi
 
-    log_success "Package resolution completed successfully."
+    log_success "Package resolution completed successfully :)"
     log_info "Final deployment target list : [$FINAL_PACKAGES]"
 
     export FINAL_PACKAGES

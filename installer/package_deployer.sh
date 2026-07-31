@@ -227,7 +227,7 @@ deploy_targeted_packages()
         return 0
     fi
 
-    echo "🔍 Executing Pre-Flight System Resource Validation ..."
+    echo "  🔍 Executing Pre-Flight System Resource Validation ..."
     resource_snapshot
     if ! estimate_install_size; then
         log_error "Installation aborted due to system resource limits."

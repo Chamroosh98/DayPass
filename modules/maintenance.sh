@@ -6,7 +6,7 @@ purge_daypass_packages()
     log_info "Analyzing installed DayPass packages ..."
 
     if [ ! -s "$INSTALL_LOG" ]; then
-        log_warn "No installed package records found in $INSTALL_LOG!"
+        log_warn "No installed package records found in [$INSTALL_LOG]"
         return 0
     fi
 
@@ -14,15 +14,15 @@ purge_daypass_packages()
     INSTALLED_PKGS=$(sort -u "$INSTALL_LOG" | tr '\n' ' ')
 
     if [ -z "$INSTALLED_PKGS" ]; then
-        log_warn "No tracked packages to purge."
+        log_warn "No tracked packages to purge!"
         return 0
     fi
 
     echo
-    printf "   ${YELLOW}⚠️ The following packages will be REMOVED:${RESET}\n"
-    printf "   ${CYAN}%s${RESET}\n\n" "$INSTALLED_PKGS"
+    printf "  ${YELLOW}⚠️ The following packages will be REMOVED:${RESET}\n"
+    printf "  ${CYAN}%s${RESET}\n\n" "$INSTALLED_PKGS"
 
-    printf "   Are you sure you want to purge these packages? [y/N]: "
+    printf "  Are you sure you want to purge these packages? [y/N]: "
     read -r confirm </dev/tty
     case "$confirm" in
         [yY][eE][sS]|[yY])
@@ -51,10 +51,10 @@ purge_daypass_packages()
 factory_reset_system()
 {
     echo
-    printf "   ${RED}🚨 WARNING : FACTORY RESET SYSTEM${RESET}\n"
-    printf "   This will erase ALL user configurations and restore system defaults!\n\n"
+    printf "  ${RED}🚨 WARNING : FACTORY RESET SYSTEM${RESET}\n"
+    printf "  This will erase ALL user configurations and restore system defaults!\n\n"
     
-    printf "   Type '${BOLD}RESET${RESET}' to confirm factory reset : "
+    printf "  Type '${BOLD}RESET${RESET}' to confirm factory reset : "
     read -r confirm </dev/tty
 
     if [ "$confirm" = "RESET" ]; then
@@ -82,7 +82,7 @@ clean_daypass_cache()
 backup_system_config()
 {
     BACKUP_FILE="/tmp/backup-$(date +%Y%m%d_%H%M%S).tar.gz"
-    log_info "Generating OpenWrt system configuration backup..."
+    log_info "Generating OpenWrt system configuration backup ..."
     if sysupgrade -b "$BACKUP_FILE" >/dev/null 2>&1; then
         log_success "Backup saved to : [$BACKUP_FILE]"
     else
@@ -96,15 +96,15 @@ maintenance_menu()
     while true; do
         render_persistent_header
         
-        printf "   🛠️  ${BOLD}DayPass Maintenance & Recovery${RESET}\n"
-        printf "   ──────────────────────────────────────────────────\n"
-        printf "   🧹 1) Purge DayPass Installed Packages\n"
-        printf "   🗑️ 2) Clean Temporary Cache & Downloads\n"
-        printf "   💾 3) Backup System Configuration\n"
-        printf "   🚨 4) Factory Reset OpenWrt (Firstboot)\n"
-        printf "   🚪 0) Back to Main Menu\n\n"
+        printf "  🛠️  ${BOLD}DayPass Maintenance & Recovery${RESET}\n"
+        printf "  ──────────────────────────────────────────────────\n"
+        printf "  🧹 1) Purge DayPass Installed Packages\n"
+        printf "  🗑️ 2) Clean Temporary Cache & Downloads\n"
+        printf "  💾 3) Backup System Configuration\n"
+        printf "  🚨 4) Factory Reset OpenWrt (Firstboot)\n"
+        printf "  🚪 0) Back to Main Menu\n\n"
 
-        printf "   ⁉️ Select option [0-4] : "
+        printf "  ⁉️ Select option [0-4] : "
         read -r choice </dev/tty
 
         case "$choice" in
@@ -119,7 +119,7 @@ maintenance_menu()
                 ;;
         esac
         
-        printf "   ${GRAY:-}\nPress [Enter] to continue ... ${RESET:-}"
+        printf "  ${GRAY:-}\nPress [Enter] to continue ... ${RESET:-}"
         read -r _ </dev/tty
     done
 }

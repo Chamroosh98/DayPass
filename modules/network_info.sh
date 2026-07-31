@@ -61,8 +61,8 @@ show_full_network_info()
         [ -n "$(command -v show_banner)" ] && show_banner
     fi
     
-    printf "   ${CYAN:-}🌐 Network Diagnostics & Information${RESET:-}\n"
-    printf "   ${GRAY:-}─────────────────────────────────────────${RESET:-}\n"
+    printf "  ${CYAN:-}🌐 Network Diagnostics & Information${RESET:-}\n"
+    printf "  ${GRAY:-}─────────────────────────────────────────${RESET:-}\n"
 
     # Determine available HTTP client engine
     if command -v curl >/dev/null 2>&1; then
@@ -72,7 +72,7 @@ show_full_network_info()
     elif command -v wget >/dev/null 2>&1; then
         FETCH_CMD="wget -q -T 4 -O-"
     else
-        printf "   ${YELLOW:-}⚠️  curl / uclient-fetch / wget unavailable!${RESET:-}\n\n"
+        printf "  ${YELLOW:-}⚠️  curl / uclient-fetch / wget unavailable!${RESET:-}\n\n"
         return 0
     fi
 
@@ -83,7 +83,7 @@ show_full_network_info()
         return 0
     fi
 
-    printf "   ${GRAY:-}Fetching network details ...${RESET:-}\r"
+    printf "  ${GRAY:-}Fetching network details ...${RESET:-}\r"
     PARSED_DATA="$(fetch_ip_data 2>/dev/null || echo "false|||||||")"
 
     IFS='|' read -r SUCCESS PUBLIC_IP COUNTRY COUNTRY_CODE FLAG CITY ISP ASN <<EOF
@@ -91,8 +91,8 @@ $PARSED_DATA
 EOF
 
     if [ "${SUCCESS:-false}" != "true" ] || [ -z "$PUBLIC_IP" ]; then
-        printf "   ${GRAY:-}Public IP :${RESET:-} ${RED:-}Offline / Disconnected${RESET:-}\n"
-        printf "   ${GRAY:-}Status    :${RESET:-} ${YELLOW:-}No Internet Access${RESET:-}\n"
+        printf "  ${GRAY:-}Public IP :${RESET:-} ${RED:-}Offline / Disconnected${RESET:-}\n"
+        printf "  ${GRAY:-}Status    :${RESET:-} ${YELLOW:-}No Internet Access${RESET:-}\n"
     else
         if [ "$COUNTRY_CODE" = "IR" ]; then
             FLAG="🦁☀️"
@@ -110,7 +110,7 @@ EOF
         [ -n "$ASN" ] && printf "   ASN         : %s%s%s\n" "${GRAY:-}" "$ASN" "${RESET:-}"
     fi
 
-    printf "   ${GRAY:-}─────────────────────────────────────────${RESET:-}\n\n"
+    printf "  ${GRAY:-}─────────────────────────────────────────${RESET:-}\n\n"
 }
 
 # Real-time WAN bandwidth monitoring
@@ -125,7 +125,7 @@ show_live_speed() {
     fi
 
     echo
-    MSG="Monitoring live speed on [${CYAN:-}$IFACE]${RESET:-} ${GRAY:-}(Press Ctrl+C to stop) ...${RESET:-}"
+    MSG="Monitoring live speed on [${CYAN:-}$IFACE]${RESET:-} ${GRAY:-}(Press Ctrl+C to stop) ... ${RESET:-}"
     if command -v log_info >/dev/null 2>&1; then
         log_info "$MSG"
     else
