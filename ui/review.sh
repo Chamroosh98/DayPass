@@ -2,18 +2,26 @@
 
 review_install()
 {
-    resolve_packages
+    if [ "${SELECTED_MODE:-}" = "recommended" ]; then
+        resolve_packages
+    else
+        FINAL_PACKAGES="$SELECTED_PACKAGES"
+        export FINAL_PACKAGES
+    fi
 
     clear
-    
     [ -n "$(command -v render_persistent_header)" ] && render_persistent_header
 
     echo "  📊 Installation Plan Summary"
     echo "  ─────────────────────────────────────────────────────────────"
-    printf "  👤 %-16s : %s\n" "Selected Profile" "${SELECTED_PROFILE:-N/A}"
-    printf "  ⚙️ %-16s : %s\n" "Selected Engine"  "${SELECTED_ENGINE:-auto}"
-    printf "  🗣️ %-16s : %s\n" "Language"         "${SELECTED_LANGUAGE:-none}"
-    printf "  🌐 %-16s : %s\n" "Geo Database"     "${SELECTED_GEO:-none}"
+    printf "  👤 %-18s : %s\n" "Selected Profile" "${SELECTED_PROFILE:-N/A}"
+    printf "  🛠️ %-18s : %s\n" "Installation Mode" "${SELECTED_MODE:-recommended}"
+    
+    if [ "${SELECTED_MODE:-}" = "recommended" ]; then
+        printf "  ⚙️ %-18s : %s\n" "Proxy Engine"    "${SELECTED_ENGINE:-xray}"
+        printf "  🗣️ %-18s : %s\n" "Language"        "${SELECTED_LANGUAGE:-fa}"
+        printf "  🌐 %-18s : %s\n" "Geo Database"     "${SELECTED_GEO:-official}"
+    fi
     echo "  ─────────────────────────────────────────────────────────────"
 
     PKG_COUNT=$(echo $FINAL_PACKAGES | wc -w | tr -d ' ')
@@ -23,29 +31,30 @@ review_install()
     for pkg in $FINAL_PACKAGES; do
         i=$((i + 1))
         if [ "$i" -eq "$PKG_COUNT" ]; then
-            echo "     └─ 🔹 $pkg"
+            echo "     └─ 🔹 ${CYAN}$pkg${RESET}"
         else
-            echo "     ├─ 🔹 $pkg"
+            echo "     ├─ 🔹 ${CYAN}$pkg${RESET}"
         fi
     done
     echo "  ─────────────────────────────────────────────────────────────"
     echo
 
     while true; do
-        printf "  ⁉️  Continue with installation? [y/N] : "
+        printf "  ⁉️  Proceed with deployment? [Y/n] : "
         read -r confirm </dev/tty
 
         case "$confirm" in
-            y|Y)
+            y|Y|"")
                 return 0
                 ;;
-            n|N|"")
+            n|N)
                 log_warn "Installation cancelled by user!"
+                sleep 1
                 clear
                 return 1
                 ;;
             *)
-                log_error "Invalid input! Please enter Y or N!"
+                log_error "Invalid input! Please enter Y or N."
                 ;;
         esac
     done

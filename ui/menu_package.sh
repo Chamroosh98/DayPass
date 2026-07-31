@@ -32,22 +32,23 @@ package_menu()
 
     export SELECTED_PROFILE
 
-    # 1. Select Mode
+    # 1. Select Mode (Recommended or Custom)
     menu_mode
 
-    # 2. Select Engine, Language and Geo
-    if [ "${SELECTED_MODE:-}" = "custom" ]; then
-        engine_menu || return 1
-        language_menu || return 1
-        geo_menu || return 1
-    else
+    # 2. Set environment vars based on Mode
+    if [ "${SELECTED_MODE:-}" = "recommended" ]; then
         SELECTED_ENGINE="xray"
         SELECTED_LANGUAGE="fa"
         SELECTED_GEO="official"
         export SELECTED_ENGINE SELECTED_LANGUAGE SELECTED_GEO
+    else
+        SELECTED_ENGINE="custom"
+        SELECTED_LANGUAGE="auto-detected"
+        SELECTED_GEO="auto-detected"
+        export SELECTED_ENGINE SELECTED_LANGUAGE SELECTED_GEO
     fi
 
-    # 3. Review Summary Screen
+    # 3. Review Summary Screen 
     review_install || return 1
 
     # 4. Deployment Pipeline

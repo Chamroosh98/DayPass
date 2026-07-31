@@ -1,6 +1,5 @@
 #!/bin/sh
 
-# نمایش راهنمای کاربر در منوی کاستوم
 show_custom_help()
 {
     render_persistent_header
