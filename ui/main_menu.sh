@@ -7,13 +7,13 @@ main_menu()
 
             render_persistent_header
             
-            printf "   📦 1) Install Package Profile\n"
-            printf "   🔄 2) Check & Update Packages\n"
-            printf "   🖥️ 3) Network Info & Speed Monitor\n"
-            printf "   🛠️ 4) Maintenance & Recovery\n"
-            printf "   🚪 0) Exit\n\n"
+            printf "  📦 1) Install Package Profile\n"
+            printf "  🔄 2) Check & Update Packages\n"
+            printf "  🖥️ 3) Network Info & Speed Monitor\n"
+            printf "  🛠️ 4) Maintenance & Recovery\n"
+            printf "  🚪 0) Exit\n\n"
 
-            printf "   ⁉️ Select option [0-4] : "
+            printf "  ⁉️ Select option [0-4] : "
             read -r choice </dev/tty
 
             case "$choice" in
@@ -44,7 +44,7 @@ main_menu()
                     fi
                     ;;
                 0)
-                    printf "   ${GRAY:-}TNX for using DayPass! =)  \n${RESET:-}"
+                    printf "  ${GRAY:-}TNX for using DayPass! =)  \n${RESET:-}"
                     exit 0
                     ;;
                 *)

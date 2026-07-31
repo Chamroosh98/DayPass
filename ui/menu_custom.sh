@@ -43,7 +43,7 @@ toggle_custom_package()
             [ "$p" != "$pkg_to_toggle" ] && NEW_SEL="$NEW_SEL $p"
         done
         SELECTED_PACKAGES="$NEW_SEL"
-        log_info "Removed package: [$pkg_to_toggle]"
+        log_info "Removed package : [$pkg_to_toggle]"
     else
         SELECTED_PACKAGES="$SELECTED_PACKAGES $pkg_to_toggle"
         log_success "Selected package: [$pkg_to_toggle]"
@@ -52,8 +52,8 @@ toggle_custom_package()
             case "${ARCH:-}" in
                 *mips*|*ramips*|*aarch64_cortex-a53*)
                     echo
-                    log_warn "⚠️ PERFORMANCE NOTICE: Engine [$pkg_to_toggle] on architecture [$ARCH]"
-                    log_warn "Running heavy proxy engines alongside Passwall on low-resource hardware may cause high CPU/RAM usage."
+                    log_warn "⚠️ PERFORMANCE NOTICE : Engine [$pkg_to_toggle] on architecture [$ARCH]"
+                    log_warn "Running heavy proxy engines alongside Passwall on low-resource hardware may cause high CPU/RAM usage!"
                     sleep 1
                     ;;
             esac
@@ -77,7 +77,7 @@ handle_custom_profile()
     ALL_AVAILABLE_PKGS="$(jq -r --arg arch "$ARCH" '.architectures[] | select(.name==$arch) | .packages[].package' "$MANIFEST_FILE" 2>/dev/null)"
 
     if [ -z "$ALL_AVAILABLE_PKGS" ]; then
-        log_error "No packages found in manifest [$MANIFEST_FILE] for architecture: $ARCH"
+        log_error "No packages found in manifest [$MANIFEST_FILE] for architecture : [$ARCH]"
         return 1
     fi
 
@@ -98,7 +98,7 @@ handle_custom_profile()
             SEL_COUNT=$((SEL_COUNT + 1))
         done
 
-        echo "  🛠️  ${BOLD}Custom Package Selection${RESET} ${GRAY}(Page ${YELLOW}$CURRENT_PAGE${RESET}${GRAY}/$TOTAL_PAGES | Selected: ${GREEN}$SEL_COUNT${RESET}${GRAY})${RESET}"
+        echo "  🛠️ ${BOLD}Custom Package Selection${RESET} ${GRAY}(Page ${YELLOW}$CURRENT_PAGE${RESET}${GRAY}/$TOTAL_PAGES | Selected : ${GREEN}$SEL_COUNT${RESET}${GRAY})${RESET}"
         echo "  ${GRAY}──────────────────────────────────────────────────────────${RESET}"
 
         START_IDX=$(( (CURRENT_PAGE - 1) * PAGE_SIZE + 1 ))
@@ -129,10 +129,10 @@ handle_custom_profile()
         FIRST_RENDER=0
 
         echo "  ${GRAY}──────────────────────────────────────────────────────────${RESET}"
-        echo "   ${GRAY}[${CYAN}n${RESET}${GRAY}] Next Page | [${CYAN}p${RESET}${GRAY}] Prev Page | [${YELLOW}h${RESET}${GRAY}] Help | [${GREEN}d${RESET}${GRAY}] Done${RESET}"
+        echo "  ${GRAY}[${CYAN}n${RESET}${GRAY}] Next Page | [${CYAN}p${RESET}${GRAY}] Prev Page | [${YELLOW}h${RESET}${GRAY}] Help | [${GREEN}d${RESET}${GRAY}] Done${RESET}"
         echo
 
-        printf "   ⁉️  ${YELLOW}Toggle Item${RESET} ${GRAY}(1-$((item_no - 1))) or Action (${CYAN}n${RESET}${GRAY}/${CYAN}p${RESET}${GRAY}/${YELLOW}h${RESET}${GRAY}/${GREEN}d${RESET}${GRAY}) :${RESET} "
+        printf "  ⁉️ ${YELLOW}Toggle Item${RESET} ${GRAY}(1-$((item_no - 1))) or Action (${CYAN}n${RESET}${GRAY}/${CYAN}p${RESET}${GRAY}/${YELLOW}h${RESET}${GRAY}/${GREEN}d${RESET}${GRAY}) :${RESET} "
         read -r cmd </dev/tty
 
         case "$cmd" in
@@ -147,10 +147,10 @@ handle_custom_profile()
                 ;;
             d|D)
                 if [ -z "$SELECTED_PACKAGES" ]; then
-                    log_warn "No packages selected! Please select at least one package."
+                    log_warn "No packages selected! Please select at least one package!"
                     sleep 1
                 else
-                    log_info "Custom package selection saved."
+                    log_info "Custom package selection saved!"
                     break
                 fi
                 ;;

@@ -79,7 +79,7 @@ show_full_network_info()
     # Ensure JSON parser dependency is met
     if ! command -v jq >/dev/null 2>&1; then
         PKG_CMD="${PKG_MANAGER:-opkg} install jq"
-        printf "   ${YELLOW:-}⚠️  jq is missing! Install via: %s${RESET:-}\n\n" "$PKG_CMD"
+        printf "  ${YELLOW:-}⚠️  jq is missing! Install via: %s${RESET:-}\n\n" "$PKG_CMD"
         return 0
     fi
 
@@ -103,7 +103,6 @@ EOF
         CITY_STR=""
         [ -n "$CITY" ] && CITY_STR=" ${GRAY:-}($CITY)${RESET:-}"
 
-        # printf "   Public IP   : %s\n" "$PUBLIC_IP"
         printf "\033[K   Public IP   : %s\n" "$PUBLIC_IP"
         printf "   Country     : %s %s%s\n" "$FLAG" "$COUNTRY" "${CITY_STR}"
         [ -n "$ISP" ] && printf "   ISP         : %s\n" "$ISP"
@@ -159,7 +158,7 @@ show_live_speed() {
             TX_FMT="${TX_SPEED} KB/s"
         fi
 
-        printf "\r   📥 ${GREEN:-}Down:${RESET:-} %s%-10s%s ${GRAY:-}|${RESET:-}    📤 ${YELLOW:-}Up:${RESET:-} %s%-10s%s\033[K" \
+        printf "\r  📥 ${GREEN:-}Down:${RESET:-} %s%-10s%s ${GRAY:-}|${RESET:-}    📤 ${YELLOW:-}Up:${RESET:-} %s%-10s%s\033[K" \
             "${GREEN:-}" "$RX_FMT" "${RESET:-}" \
             "${YELLOW:-}" "$TX_FMT" "${RESET:-}"
 
@@ -174,11 +173,11 @@ network_menu()
     while true; do
         show_full_network_info
         
-        printf "   📊 ${CYAN:-}1${RESET:-}) Live Speed Monitor\n"
-        printf "   🔄 ${CYAN:-}2${RESET:-}) Refresh Information\n"
-        printf "   ⬅️ ${CYAN:-}0${RESET:-}) Back to Main Menu\n\n"
+        printf "  📊 ${CYAN:-}1${RESET:-}) Live Speed Monitor\n"
+        printf "  🔄 ${CYAN:-}2${RESET:-}) Refresh Information\n"
+        printf "  ⬅️ ${CYAN:-}0${RESET:-}) Back to Main Menu\n\n"
         
-        printf "   ⁉️ ${YELLOW:-}Select${RESET:-} ${GRAY:-}:${RESET:-} "
+        printf "  ⁉️ ${YELLOW:-}Select${RESET:-} ${GRAY:-}:${RESET:-} "
         read -r net_choice </dev/tty
 
         case "$net_choice" in

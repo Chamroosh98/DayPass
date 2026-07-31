@@ -89,7 +89,7 @@ estimate_install_size()
     TEMP_OVERHEAD=$((TOTAL_REQUIRED_BYTES / 10))
     PEAK_STORAGE_REQ=$((TOTAL_REQUIRED_BYTES + TEMP_OVERHEAD))
 
-    log_info "Smart Resource Allocation Requirements:"
+    log_info "Smart Resource Allocation Requirements :"
     log_info "  ├─ Payload Download Req   : [$(human_readable_bytes "$TOTAL_REQUIRED_BYTES")]"
     log_info "  ├─ Reclaimable Storage    : [$(human_readable_bytes "$RECLAIMABLE_BYTES")]"
     log_info "  ├─ Saved Traffic (Skip)   : [$(human_readable_bytes "$TOTAL_SAVED_BYTES")]"

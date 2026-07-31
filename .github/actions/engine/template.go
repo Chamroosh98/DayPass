@@ -48,7 +48,6 @@ func generateInstallScript(outputFile string) error {
 		// 2. Hardware, OS, Maintenance & System Modules
 		"modules/zero_deps.sh",
 		"modules/version_check.sh",
-		"modules/system_info.sh",
 		"modules/network_info.sh",
 		"modules/resource_monitor.sh",
 		"modules/dns_fix.sh",
@@ -63,7 +62,8 @@ func generateInstallScript(outputFile string) error {
 		"installer/install_core.sh",
 		"installer/resource_checker.sh",
 		"installer/package_resolver.sh",
-		"installer/package_deployer.sh",
+		"installer/package_installer.sh",
+		"installer/package_updater.sh",
 
 		// 4. UI Components & Interactive Menus
 		"ui/state.sh",
