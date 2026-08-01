@@ -140,3 +140,70 @@ resource_compare()
     echo "  ────────────────────────────────────────────────────────── "
     echo
 }
+
+get_total_ram_bytes()
+{
+    if [ -f /proc/meminfo ]; then
+        mem_total=$(awk '/MemTotal:/ {print $2}' /proc/meminfo 2>/dev/null)
+        echo $(( ${mem_total:-0} * 1024 ))
+    else
+        echo 0
+    fi
+}
+
+get_total_flash_bytes()
+{
+    target_path="${1:-/overlay}"
+    if ! df "$target_path" >/dev/null 2>&1; then
+        target_path="/"
+    fi
+    total_blocks=$(df -k "$target_path" 2>/dev/null | awk 'NR==2 {print $2}')
+    echo $(( ${total_blocks:-0} * 1024 ))
+}
+
+show_system_resources_menu()
+{
+    render_persistent_header
+
+    # Fetch Architecture
+    [ -z "$ARCH" ] && command -v detect_arch >/dev/null 2>&1 && detect_arch
+
+    # Fetch OpenWrt Release & Date Details
+    OW_VER="Unknown"
+    OW_DATE=""
+    if [ -f /etc/openwrt_release ]; then
+        . /etc/openwrt_release
+        OW_VER="${DISTRIB_RELEASE:-Unknown}"
+        
+        if [ -n "$DISTRIB_REVISION" ]; then
+            OW_DATE=" ($DISTRIB_REVISION)"
+        fi
+    fi
+
+    # Fetch Memory Data
+    tot_ram_b=$(get_total_ram_bytes)
+    free_ram_b=$(get_free_ram_bytes)
+    used_ram_b=$((tot_ram_b - free_ram_b))
+
+    # Fetch Storage Data
+    tot_flash_b=$(get_total_flash_bytes "/overlay")
+    free_flash_b=$(get_free_flash_bytes "/overlay")
+    used_flash_b=$((tot_flash_b - free_flash_b))
+
+    echo "  🖥️  System Hardware & Resource Status"
+    echo "  ──────────────────────────────────────────────────────────"
+    printf "   🩻 Architecture      : ${CYAN}%s${RESET}\n" "${ARCH:-N/A}"
+    printf "   💡 OpenWrt System    : ${CYAN}%s%s [%s]${RESET}\n" "$OW_VER" "$OW_DATE" "${PKG_MANAGER:-opkg}"    echo "  ──────────────────────────────────────────────────────────"
+    printf "   🧠 Total RAM         : %s\n" "$(human_readable_bytes "$tot_ram_b")"
+    printf "   📈 Used RAM          : ${YELLOW}%s${RESET}\n" "$(human_readable_bytes "$used_ram_b")"
+    printf "   🟢 Free RAM          : ${GREEN}%s${RESET}\n" "$(human_readable_bytes "$free_ram_b")"
+    echo "  ──────────────────────────────────────────────────────────"
+    printf "   💾 Total Storage     : %s\n" "$(human_readable_bytes "$tot_flash_b")"
+    printf "   📉 Used Storage      : ${YELLOW}%s${RESET}\n" "$(human_readable_bytes "$used_flash_b")"
+    printf "   🟢 Free Storage      : ${GREEN}%s${RESET}\n" "$(human_readable_bytes "$free_flash_b")"
+    echo "  ──────────────────────────────────────────────────────────"
+    echo
+
+    printf "  ${GRAY}Press [ENTER] to return to main menu ...${RESET}"
+    read -r _ </dev/tty
+}
