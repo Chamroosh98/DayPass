@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: github-pages-deploy
+  group: github-pages-deploy-beta
   cancel-in-progress: false
 
 permissions:
@@ -44,9 +44,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .cache/downloads/v${{ matrix.ow_version }}/${{ matrix.arch }}
-          key: daypass-cache-v${{ matrix.ow_version }}-${{ matrix.arch }}-${{ hashFiles(format('config/architectures_{0}.json', matrix.ow_version)) }}
+          key: daypass-cache-beta-v${{ matrix.ow_version }}-${{ matrix.arch }}-${{ hashFiles(format('config/architectures_{0}.json', matrix.ow_version)) }}
           restore-keys: |
-            daypass-cache-v${{ matrix.ow_version }}-${{ matrix.arch }}-
+            daypass-cache-beta-v${{ matrix.ow_version }}-${{ matrix.arch }}-
 
       - name: 📥 Download Packages & Create Zip via Go Fetcher
         run: |
@@ -56,7 +56,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: beta-v${{ matrix.ow_version }}-${{ matrix.arch }}
-          path: DayPass_OW${{ matrix.ow_version }}_${{ matrix.arch }}_*_beta.zip
+          path: DayPass_*.zip
           retention-days: 1
 
       - name: 📤 Upload Raw Packages Artifact (For CDN 'packages' Branch)
@@ -150,13 +150,12 @@ jobs:
           fi
           echo "✅ All release assets passed health check successfully!"
 
-      
       - name: 🧪 Create and Upload Pre-Release Packages via GitHub CLI
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG_NAME="${{ env.VERSION }}-beta-${{ github.run_number }}"
-          RELEASE_TITLE="🧪 ${{ env.VERSION }}"
+          RELEASE_TITLE="🧪 ${{ env.VERSION }}-beta"
           
           echo "🚀 Creating release $TAG_NAME via GitHub CLI ..."
           
@@ -180,6 +179,7 @@ jobs:
           rm -f release_notes.md
 
           mkdir -p release-files
+          shopt -s nullglob
           cp merged-beta/*.zip release-files/ 2>/dev/null || true
           find build-artifacts/ -type f -name "*.sha256" -exec cp {} release-files/ \; 2>/dev/null || true
 
@@ -202,6 +202,11 @@ jobs:
           branch: gh-pages
           clean: false         
           single-commit: true
+
+      - name: 🔧 Increase Git HTTP Buffer Size
+        run: |
+          git config --global http.postBuffer 524288000
+          git config --global http.maxRequestBuffer 100M
 
       - name: 🚀 Deploy Binary Packages to 'packages' Branch
         uses: JamesIves/github-pages-deploy-action@v4
