@@ -2,6 +2,7 @@ name: 🚀 DayPass Release
 
 on:
   schedule:
+    # 🕐 اجرا به صورت اتوماتیک هر روز ساعت 00:00 UTC برای دریافت آپدیت‌های SourceForge
     - cron: '0 0 * * *'
   push:
     branches:
@@ -58,7 +59,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-v${{ matrix.ow_version }}-${{ matrix.arch }}
-          path: DayPass_*.zip
+          path: DayPass_OW${{ matrix.ow_version }}_${{ matrix.arch }}_*.zip
           retention-days: 1
 
       - name: 📤 Upload Raw Packages Artifact (For CDN 'packages' Branch)
@@ -161,6 +162,7 @@ jobs:
           
           echo "🚀 Creating release $TAG_NAME via GitHub CLI ..."
           
+          # Delete tag if partially created in a failed attempt
           gh release delete "$TAG_NAME" -y --cleanup-tag 2>/dev/null || true
 
           cat <<EOF > release_notes.md
