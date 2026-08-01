@@ -13,7 +13,8 @@ import (
 )
 
 type ArchInput struct {
-	Name string `json:"name"`
+	Name  string   `json:"name"`
+	Feeds []string `json:"feeds"`
 }
 
 type ArchitectureConfig struct {
@@ -30,8 +31,8 @@ type PackageInfo struct {
 }
 
 type ArchOutput struct {
-	Name     string        `json:"name"`
-	Packages []PackageInfo `json:"packages"`
+	Name  string                   `json:"name"`
+	Feeds map[string][]PackageInfo `json:"feeds"`
 }
 
 type ManifestOutput struct {
@@ -113,9 +114,10 @@ func GenerateManifest(archConfigPath, outputDir, owVersion string) error {
 
 	for _, arch := range config.Architectures {
 		archDir := filepath.Join(outputDir, arch.Name)
+		
 		archOut := ArchOutput{
-			Name:     arch.Name,
-			Packages: []PackageInfo{},
+			Name:  arch.Name,
+			Feeds: make(map[string][]PackageInfo),
 		}
 
 		if _, err := os.Stat(archDir); os.IsNotExist(err) {
@@ -149,13 +151,27 @@ func GenerateManifest(archConfigPath, outputDir, owVersion string) error {
 			// Parse clean package name and version
 			pkgName, pkgVersion := parsePackageNameAndVersion(fileName)
 
-			archOut.Packages = append(archOut.Packages, PackageInfo{
+			relPath, _ := filepath.Rel(archDir, path)
+			feedName := filepath.Dir(relPath)
+			if feedName == "." {
+				if strings.Contains(pkgName, "passwall2") {
+					feedName = "passwall2"
+				} else if strings.Contains(pkgName, "passwall") {
+					feedName = "passwall"
+				} else {
+					feedName = "passwall_packages"
+				}
+			}
+
+			pkgInfo := PackageInfo{
 				Package: pkgName,
 				Version: pkgVersion,
 				File:    fmt.Sprintf("%s/%s", arch.Name, fileName),
 				Sha256:  sha,
 				Size:    fileInfo.Size(),
-			})
+			}
+
+			archOut.Feeds[feedName] = append(archOut.Feeds[feedName], pkgInfo)
 
 			return nil
 		})
@@ -164,8 +180,13 @@ func GenerateManifest(archConfigPath, outputDir, owVersion string) error {
 			return fmt.Errorf("❌ Error while walking directory %s: %w", archDir, err)
 		}
 
+		totalPkgs := 0
+		for _, pkgs := range archOut.Feeds {
+			totalPkgs += len(pkgs)
+		}
+
 		manifest.Architectures = append(manifest.Architectures, archOut)
-		fmt.Printf("✅ Manifest for OpenWrt v%s [%s] generated (%d packages)\n", owVersion, arch.Name, len(archOut.Packages))
+		fmt.Printf("✅ Manifest for OpenWrt v%s [%s] generated (%d packages across %d feeds)\n", owVersion, arch.Name, totalPkgs, len(archOut.Feeds))
 	}
 
 	finalManifestPath := filepath.Join(outputDir, "manifest.json")

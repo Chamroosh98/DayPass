@@ -66,15 +66,23 @@ toggle_custom_package()
 
 handle_custom_profile()
 {
-    if [ -z "$MANIFEST_FILE" ]; then
-        if [ "${PKG_MANAGER:-opkg}" = "apk" ]; then
-            MANIFEST_FILE="config/architectures_25.json"
+    if [ -z "$MANIFEST_FILE" ] || [ ! -f "$MANIFEST_FILE" ]; then
+        if [ -f "/tmp/manifest.json" ]; then
+            MANIFEST_FILE="/tmp/manifest.json"
+        elif [ -f "manifest.json" ]; then
+            MANIFEST_FILE="manifest.json"
         else
-            MANIFEST_FILE="config/architectures_24.json"
+            OW_VER="25"
+            [ "${PKG_MANAGER:-opkg}" = "opkg" ] && OW_VER="24"
+            MANIFEST_FILE="build-artifacts/v${OW_VER}/manifest.json"
         fi
     fi
 
-    ALL_AVAILABLE_PKGS="$(jq -r --arg arch "$ARCH" '.architectures[] | select(.name==$arch) | .packages[].package' "$MANIFEST_FILE" 2>/dev/null)"
+    FEED_NAME="${SELECTED_PROFILE:-passwall2}"
+
+    ALL_AVAILABLE_PKGS="$(jq -r --arg arch "$ARCH" --arg feed "$FEED_NAME" \
+        '.architectures[] | select(.name==$arch) | .feeds | to_entries[] | select(.key | contains($feed) or contains("packages") or contains("luci")) | .value[].package' \
+        "$MANIFEST_FILE" 2>/dev/null | sort -u)"
 
     if [ -z "$ALL_AVAILABLE_PKGS" ]; then
         log_error "No packages found in manifest [$MANIFEST_FILE] for architecture : [$ARCH]"
