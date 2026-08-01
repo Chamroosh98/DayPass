@@ -2,11 +2,10 @@
 
 review_install()
 {
-    if [ "${SELECTED_MODE:-}" = "recommended" ]; then
-        resolve_packages
-    else
-        FINAL_PACKAGES="$SELECTED_PACKAGES"
-        export FINAL_PACKAGES
+    if ! resolve_packages; then
+        log_error "Failed to resolve final package list!"
+        sleep 2
+        return 1
     fi
 
     clear
@@ -16,9 +15,9 @@ review_install()
     echo "  ─────────────────────────────────────────────────────────────"
     printf "  👤 %-18s : %s\n" "Selected Profile" "${SELECTED_PROFILE:-N/A}"
     printf "  🛠️ %-18s : %s\n" "Installation Mode" "${SELECTED_MODE:-recommended}"
+    printf "  ⚙️ %-18s : %s\n" "Proxy Engine"    "${SELECTED_ENGINE:-xray}"
     
     if [ "${SELECTED_MODE:-}" = "recommended" ]; then
-        printf "  ⚙️ %-18s : %s\n" "Proxy Engine"    "${SELECTED_ENGINE:-xray}"
         printf "  🗣️ %-18s : %s\n" "Language"        "${SELECTED_LANGUAGE:-fa}"
         printf "  🌐 %-18s : %s\n" "Geo Database"     "${SELECTED_GEO:-official}"
     fi
@@ -49,6 +48,8 @@ review_install()
                 ;;
             n|N)
                 log_warn "Installation cancelled by user!"
+                FINAL_PACKAGES=""
+                export FINAL_PACKAGES
                 sleep 1
                 clear
                 return 1

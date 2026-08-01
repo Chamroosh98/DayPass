@@ -28,27 +28,29 @@ resolve_packages()
         esac
     }
 
-    CURRENT_MGR="${PKG_MANAGER:-opkg}"
-
     # 1. Low-level utilities and pre-requisites
     add_final "tcping"
     add_final "geoview"
 
     # 2. GeoIP / GeoSite databases
-    if [ "${SELECTED_GEO:-}" = "official" ]; then
+    if [ "${SELECTED_GEO:-official}" = "official" ]; then
         add_final "v2ray-geoip"
         add_final "v2ray-geosite"
     fi
 
-    # 3. Core Routing Engines
-    case "${SELECTED_ENGINE:-auto}" in
+    # 3. Core Routing Engines (Fix handling for singbox name variations)
+    case "${SELECTED_ENGINE:-xray}" in
         xray)     
             add_final "xray-core" 
             ;;
-        sing-box) 
+        singbox|sing-box) 
             add_final "sing-box" 
             ;;
-        auto|*)     
+        both)
+            add_final "xray-core"
+            add_final "sing-box"
+            ;;
+        *)     
             add_final "xray-core" 
             ;;
     esac
@@ -69,26 +71,41 @@ resolve_packages()
 
     # 5. Main Application Interface (Must be installed BEFORE translation packages)
     MAIN_APP=""
-    case "${SELECTED_PROFILE:-}" in
+    case "${SELECTED_PROFILE:-passwall2}" in
         passwall2) MAIN_APP="luci-app-passwall2" ;;
         passwall)  MAIN_APP="luci-app-passwall" ;;
     esac
 
     [ -n "$MAIN_APP" ] && add_final "$MAIN_APP"
 
-    # 6. Localization & Translation Packages (Must be installed AFTER main app)
-    if [ -n "${SELECTED_LANGUAGE:-}" ]; then
-        LANG_CODE="${SELECTED_LANGUAGE:-}"
-        APP_NAME="${SELECTED_PROFILE:-passwall2}"
+    # 6. Localization & Translation Packages
+    LANG_CODE="${SELECTED_LANGUAGE:-fa}"
+    APP_NAME="${SELECTED_PROFILE:-passwall2}"
 
-        # Resolve package name (handles edge cases across apk / opkg naming schemas)
+    if [ "$LANG_CODE" != "en" ]; then
         I18N_PKG="luci-i18n-${APP_NAME}-${LANG_CODE}"
 
-        case "$LANG_CODE" in
-            fa|zh-cn|ru)
+        if [ -z "$MANIFEST_FILE" ] || [ ! -f "$MANIFEST_FILE" ]; then
+            if [ -f "/tmp/manifest.json" ]; then
+                MANIFEST_FILE="/tmp/manifest.json"
+            elif [ -f "manifest.json" ]; then
+                MANIFEST_FILE="manifest.json"
+            fi
+        fi
+
+        if [ -n "$MANIFEST_FILE" ] && [ -f "$MANIFEST_FILE" ]; then
+            EXISTS="$(jq -r --arg arch "${ARCH:-x86_64}" --arg pkg "$I18N_PKG" '
+                .architectures[] | select(.name==$arch) | .feeds[]?[]? | select(.package==$pkg) | .package
+            ' "$MANIFEST_FILE" 2>/dev/null)"
+
+            if [ -n "$EXISTS" ]; then
                 add_final "$I18N_PKG"
-                ;;
-        esac
+            else
+                log_warn "Translation package [$I18N_PKG] is not available in feeds. Skipped."
+            fi
+        else
+            [ "$APP_NAME" = "passwall2" ] && add_final "$I18N_PKG"
+        fi
     fi
 
     # Validate non-empty final package list

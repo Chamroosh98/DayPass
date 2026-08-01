@@ -10,6 +10,7 @@ show_custom_help()
     echo "     replaces previously selected translations for clean config."
     echo "  🔹 ${YELLOW}[n] / [p]:${RESET} Navigate to Next or Previous page."
     echo "  🔹 ${YELLOW}[d]:${RESET} Save your current selection and proceed to Review."
+    echo "  🔹 ${YELLOW}[q]:${RESET} Cancel and return to main menu."
     echo "  ──────────────────────────────────────────────────────────"
     echo "  💡 ${CYAN}Pro-Tip:${RESET} Combining Sing-box and Xray together is supported,"
     echo "     but recommended mainly for powerful hardware (ARM64 / x86)."
@@ -78,11 +79,17 @@ handle_custom_profile()
         fi
     fi
 
-    FEED_NAME="${SELECTED_PROFILE:-passwall2}"
+    TARGET_PROFILE="${SELECTED_PROFILE:-passwall2}"
 
-    ALL_AVAILABLE_PKGS="$(jq -r --arg arch "$ARCH" --arg feed "$FEED_NAME" \
-        '.architectures[] | select(.name==$arch) | .feeds | to_entries[] | select(.key | contains($feed) or contains("packages") or contains("luci")) | .value[].package' \
-        "$MANIFEST_FILE" 2>/dev/null | sort -u)"
+    if [ "$TARGET_PROFILE" = "passwall" ]; then
+        ALL_AVAILABLE_PKGS="$(jq -r --arg arch "$ARCH" \
+            '.architectures[] | select(.name==$arch) | (.feeds["passwall_luci"][]?.package, .feeds["passwall_packages"][]?.package)' \
+            "$MANIFEST_FILE" 2>/dev/null | sort -u)"
+    else
+        ALL_AVAILABLE_PKGS="$(jq -r --arg arch "$ARCH" \
+            '.architectures[] | select(.name==$arch) | (.feeds["passwall2"][]?.package, .feeds["passwall_packages"][]?.package)' \
+            "$MANIFEST_FILE" 2>/dev/null | sort -u)"
+    fi
 
     if [ -z "$ALL_AVAILABLE_PKGS" ]; then
         log_error "No packages found in manifest [$MANIFEST_FILE] for architecture : [$ARCH]"
@@ -137,10 +144,10 @@ handle_custom_profile()
         FIRST_RENDER=0
 
         echo "  ${GRAY}──────────────────────────────────────────────────────────${RESET}"
-        echo "  ${GRAY}[${CYAN}n${RESET}${GRAY}] Next Page | [${CYAN}p${RESET}${GRAY}] Prev Page | [${YELLOW}h${RESET}${GRAY}] Help | [${GREEN}d${RESET}${GRAY}] Done${RESET}"
+        echo "  ${GRAY}[${CYAN}n${RESET}${GRAY}] Next | [${CYAN}p${RESET}${GRAY}] Prev | [${YELLOW}h${RESET}${GRAY}] Help | [${RED}q${RESET}${GRAY}] Cancel | [${GREEN}d${RESET}${GRAY}] Save & Done${RESET}"
         echo
 
-        printf "  ⁉️ ${YELLOW}Toggle Item${RESET} ${GRAY}(1-$((item_no - 1))) or Action (${CYAN}n${RESET}${GRAY}/${CYAN}p${RESET}${GRAY}/${YELLOW}h${RESET}${GRAY}/${GREEN}d${RESET}${GRAY}) :${RESET} "
+        printf "  ⁉️ ${YELLOW}Toggle Item${RESET} ${GRAY}(1-$((item_no - 1))) or Action (${CYAN}n${RESET}${GRAY}/${CYAN}p${RESET}${GRAY}/${YELLOW}h${RESET}${GRAY}/${RED}q${RESET}${GRAY}/${GREEN}d${RESET}${GRAY}) :${RESET} "
         read -r cmd </dev/tty
 
         case "$cmd" in
@@ -152,6 +159,11 @@ handle_custom_profile()
                 ;;
             h|H)
                 show_custom_help
+                ;;
+            q|Q)
+                log_warn "Custom selection cancelled."
+                SELECTED_PACKAGES=""
+                return 1
                 ;;
             d|D)
                 if [ -z "$SELECTED_PACKAGES" ]; then
