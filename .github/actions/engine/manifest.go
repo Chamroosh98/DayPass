@@ -57,7 +57,7 @@ func calculateSHA256(filePath string) (string, error) {
 }
 
 // Extract base package name and version string safely
-// Example: "luci-app-passwall2-26.7.16-r1.apk" -> pkg="luci-app-passwall2", ver="26.7.16-r1"
+// Handles both OpenWrt 24 (.ipk: name_ver_arch.ipk) and OpenWrt 25 (.apk: name-ver.apk)
 func parsePackageNameAndVersion(fileName string) (string, string) {
 	cleanName := fileName
 	for _, ext := range []string{".apk", ".ipk"} {
@@ -67,8 +67,15 @@ func parsePackageNameAndVersion(fileName string) (string, string) {
 		}
 	}
 
-	// Regex pattern for Alpine/OpenWrt package naming standard: <name>-<version_revision>
-	// Matches: (package-name)-(digits.*)
+	if strings.Contains(cleanName, "_") {
+		parts := strings.Split(cleanName, "_")
+		if len(parts) >= 2 {
+			pkgName := parts[0]
+			pkgVersion := parts[1]
+			return pkgName, pkgVersion
+		}
+	}
+
 	re := regexp.MustCompile(`^(.+?)-(\d+.*)$`)
 	matches := re.FindStringSubmatch(cleanName)
 
@@ -76,7 +83,6 @@ func parsePackageNameAndVersion(fileName string) (string, string) {
 		return matches[1], matches[2]
 	}
 
-	// Fallback if version pattern didn't match
 	return cleanName, "Latest"
 }
 
