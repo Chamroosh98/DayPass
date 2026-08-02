@@ -51,8 +51,8 @@ resource_snapshot()
     BEFORE_FREE_FLASH=$(get_free_flash_bytes "/overlay")
 
     log_info "System Memory Snapshot :"
-    log_info "  ├─ Available RAM        : [$(human_readable_bytes "$BEFORE_FREE_RAM")]"
-    log_info "  └─ Free Flash Space     : [$(human_readable_bytes "$BEFORE_FREE_FLASH")]"
+    log_info "  ├─ Available RAM          : [$(human_readable_bytes "$BEFORE_FREE_RAM")]"
+    log_info "  └─ Free Flash Space       : [$(human_readable_bytes "$BEFORE_FREE_FLASH")]"
 }
 
 # Smart estimation: Calculates REAL net storage expansion

@@ -3,13 +3,14 @@
 deploy_system_dependencies()
 {
     detect_package_manager
+    [ -z "${OW_MAJOR_VER:-}" ] && detect_system_architecture
 
     COMMON_DEPS="ca-bundle ca-certificates curl jq libnetfilter-conntrack"
     OW24_EXTRA_DEPS="coreutils coreutils-base64 coreutils-nohup coreutils-timeout ip-full unzip resolveip lua libuci-lua luci-compat luci-lib-jsonc luci-lua-runtime lyaml"
 
     TARGET_PACKAGES="$COMMON_DEPS"
 
-    if [ "$PKG_MANAGER" = "opkg" ] || [ "${OPENWRT_MAJOR:-24}" = "24" ]; then
+    if [ "$PKG_MANAGER" = "opkg" ] || [ "${OW_MAJOR_VER:-24}" = "24" ]; then
         TARGET_PACKAGES="$TARGET_PACKAGES $OW24_EXTRA_DEPS"
     fi
 
