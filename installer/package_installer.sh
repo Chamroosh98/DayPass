@@ -5,6 +5,7 @@ manifest_lookup()
     field="$1"
     package="$2"
 
+    # جستجوی پویا در تمام Feedها به جای .packages[]
     val=$(jq -r \
         --arg pkg "$package" \
         --arg arch "$ARCH" \
@@ -12,7 +13,7 @@ manifest_lookup()
 '
 .architectures[]?
 | select(.name == $arch)
-| .packages[]?
+| .feeds[]?[]?
 | select(
     (.package == $pkg)
     or
@@ -40,7 +41,7 @@ manifest_lookup()
 '
 .architectures[]?
 | select(.name == $arch)
-| .packages[]?
+| .feeds[]?[]?
 | select(
     (.package == $pkg)
     or
