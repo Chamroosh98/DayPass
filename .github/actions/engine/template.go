@@ -45,7 +45,11 @@ func generateInstallScript(outputFile string) error {
 		"ui/lib/progress.sh",
 		"ui/banner.sh",
 
-		// 2. Hardware, OS, Maintenance & System Modules
+		// 2. Low-Level System Detection & Package Management (باید قبل از zero_deps سورس شوند)
+		"installer/arch_detector.sh",
+		"installer/package_manager.sh",
+
+		// 3. Hardware, OS, Maintenance & System Modules
 		"modules/zero_deps.sh",
 		"modules/version_check.sh",
 		"modules/network_info.sh",
@@ -55,17 +59,15 @@ func generateInstallScript(outputFile string) error {
 		"modules/maintenance.sh",
 		"modules/service_manager.sh",
 
-		// 3. Core Installer Logic & Package Management
+		// 4. Core Installer Logic & Package Processing
 		"installer/network_checker.sh",
-		"installer/arch_detector.sh",
-		"installer/package_manager.sh", 
 		"installer/install_core.sh",
 		"installer/resource_checker.sh",
 		"installer/package_resolver.sh",
 		"installer/package_installer.sh",
 		"installer/package_updater.sh",
 
-		// 4. UI Components & Interactive Menus
+		// 5. UI Components & Interactive Menus
 		"ui/state.sh",
 		"ui/menu_custom.sh",
 		"ui/menu_mode.sh",
@@ -89,7 +91,7 @@ func generateInstallScript(outputFile string) error {
 		lines := strings.Split(string(data), "\n")
 		for _, line := range lines {
 			// Strip duplicate shebangs from individual modules
-			if !strings.HasPrefix(line, "#!") {
+			if !strings.Prefix(line, "#!") {
 				scriptBuilder.WriteString(line + "\n")
 			}
 		}

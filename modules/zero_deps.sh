@@ -3,14 +3,21 @@
 deploy_system_dependencies()
 {
     detect_package_manager
-    [ -z "${OW_MAJOR_VER:-}" ] && detect_system_architecture
+    
+    if [ -z "$OW_MAJOR_VER" ]; then
+        if [ "$PKG_MANAGER" = "apk" ]; then
+            OW_MAJOR_VER="25"
+        else
+            OW_MAJOR_VER="24"
+        fi
+    fi
 
     COMMON_DEPS="ca-bundle ca-certificates curl jq libnetfilter-conntrack"
     OW24_EXTRA_DEPS="coreutils coreutils-base64 coreutils-nohup coreutils-timeout ip-full unzip resolveip lua libuci-lua luci-compat luci-lib-jsonc luci-lua-runtime lyaml"
 
     TARGET_PACKAGES="$COMMON_DEPS"
 
-    if [ "$PKG_MANAGER" = "opkg" ] || [ "${OW_MAJOR_VER:-24}" = "24" ]; then
+    if [ "$OW_MAJOR_VER" = "24" ] && [ "$PKG_MANAGER" = "opkg" ]; then
         TARGET_PACKAGES="$TARGET_PACKAGES $OW24_EXTRA_DEPS"
     fi
 
@@ -45,7 +52,7 @@ deploy_system_dependencies()
         return 0
     fi
 
-    log_info "Setting up required system components for DayPass..."
+    log_info "Setting up required system components for DayPass (OpenWrt v$OW_MAJOR_VER)..."
 
     (pkg_update >/dev/null 2>&1) &
     BG_PID=$!
