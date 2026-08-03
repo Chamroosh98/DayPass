@@ -91,8 +91,9 @@ func generateInstallScript(outputFile string) error {
 		lines := strings.Split(string(data), "\n")
 		for _, line := range lines {
 			// Strip duplicate shebangs from individual modules
-			if !strings.Prefix(line, "#!") {
-				scriptBuilder.WriteString(line + "\n")
+			if !strings.HasPrefix(line, "#!") {
+				scriptBuilder.WriteString(line)
+				scriptBuilder.WriteByte('\n')
 			}
 		}
 		fmt.Printf("✅ [%s] appended dynamically!\n", filepath.Base(file))
