@@ -1,9 +1,9 @@
 <br>
 
 <div align="center">
-  <img src="ui/ico/dp.svg" alt="DayLock Logo" width="77" height="77" style="vertical-align: middle; margin-right: 8px;">
+  <img src="ui/ico/dp.svg" alt="DayPass Logo" width="77" height="77" style="vertical-align: middle; margin-right: 8px;">
   <h1>
-    <span style="vertical-align: middle;">DayLock</span>
+    <span style="vertical-align: middle;">DayPass</span>
   </h1>
 </div>
 
@@ -11,18 +11,16 @@
   <strong>🕊️ Remembering the IRAN Massacre on Jan 8-9, 2026 (18-19 Dey 1404)</strong>
 </p>
 
+<p align="center">
+  <a href="https://github.com/Chamroosh98/DayPass/releases"><img src="https://img.shields.io/github/v/release/Chamroosh98/DayPass?style=for-the-badge&color=8A2BE2" alt="Release"></a>
+  <a href="https://openwrt.org"><img src="https://img.shields.io/badge/Shell-POSIX_ash-1D63ED?style=for-the-badge&logo=gnu-bash&logoColor=white" alt="Shell"></a>
+  <a href="https://openwrt.org"><img src="https://img.shields.io/badge/Platform-OpenWrt-008080?style=for-the-badge&logo=openwrt&logoColor=white" alt="Platform"></a>
+  <a href="https://github.com/Chamroosh98/DayPass/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License"></a>
+</p>
+
 ---
 
-
-[![release](https://img.shields.io/badge/release-latest-purple?style=flat-square)](https://github.com/Chamroosh98/DayPass/releases)
-[![shell](https://img.shields.io/badge/shell-POSIX%20ash-blue?style=flat-square&logo=gnu-bash)](https://www.openwrt.org)
-[![platform](https://img.shields.io/badge/platform-OpenWrt-darkgreen?style=flat-square&logo=openwrt)](https://openwrt.org)
-
----
-
-</div>
-
-> 💡 **Note:** The main documentation is in English. For the full Persian guide, please visit [**🦁☀️ راهنمای پارسی**](./README_Fa.md).
+> 💡 **Note:** The main documentation is in English. For the full Persian guide, please visit [**راهنمای پارسی 🦁☀️**](docs/i18n/README_FA.md).
 
 ---
 
