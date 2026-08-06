@@ -11,7 +11,7 @@
   <strong>🕊️ Remembering the IRAN Massacre on Jan 8-9, 2026 (18-19 Dey 1404)</strong>
 </p>
 
-*A Minimalist & High-Performance Network & System Utility for OpenWrt*
+---
 
 
 [![release](https://img.shields.io/badge/release-latest-purple?style=flat-square)](https://github.com/Chamroosh98/DayPass/releases)
