@@ -1,8 +1,15 @@
+<br>
+
 <div align="center">
+  <img src="ui/ico/dp.svg" alt="DayLock Logo" width="77" height="77" style="vertical-align: middle; margin-right: 8px;">
+  <h1>
+    <span style="vertical-align: middle;">DayLock</span>
+  </h1>
+</div>
 
-# DayPass
-
-**🕊️ Remembering the IRAN Massacre on Jan 8-9, 2026**
+<p align="center">
+  <strong>🕊️ Remembering the IRAN Massacre on Jan 8-9, 2026 (18-19 Dey 1404)</strong>
+</p>
 
 *A Minimalist & High-Performance Network & System Utility for OpenWrt*
 
@@ -20,12 +27,11 @@
 ---
 
 
-- [DayPass](#daypass)
-  - [🚀 What is this?](#-what-is-this)
-  - [✨ Key Features](#-key-features)
-  - [⚡ Quick Start](#-quick-start)
-    - [🟢 Stable version](#-stable-version)
-    - [🟠 Beta version](#-beta-version)
+- [🚀 What is this?](#-what-is-this)
+- [✨ Key Features](#-key-features)
+- [⚡ Quick Start](#-quick-start)
+  - [🟢 Stable version](#-stable-version)
+  - [🟠 Beta version](#-beta-version)
 
 ---
 
