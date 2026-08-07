@@ -8,8 +8,10 @@
 </div>
 
 <p align="center">
-  <strong>🕊️ Remembering the IRAN Massacre on Jan 8-9, 2026 (18-19 Dey 1404)</strong>
+  <strong>🕊️ Remembering the IRAN Massacre on Jan 8-9, 2026 (18-19 Day 1404)</strong>
 </p>
+
+---
 
 <p align="center">
   <a href="https://github.com/Chamroosh98/DayPass/releases"><img src="https://img.shields.io/github/v/release/Chamroosh98/DayPass?style=for-the-badge&color=8A2BE2" alt="Release"></a>
