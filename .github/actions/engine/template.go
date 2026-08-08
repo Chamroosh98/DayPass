@@ -45,16 +45,19 @@ func generateInstallScript(outputFile string) error {
 		"ui/lib/progress.sh",
 		"ui/banner.sh",
 
-		// 2. Low-Level System Detection & Package Management (باید قبل از zero_deps سورس شوند)
+		// 2. Low-Level System Detection & Package Management
 		"installer/arch_detector.sh",
 		"installer/package_manager.sh",
 
-		// 3. Hardware, OS, Maintenance & System Modules
+		// 3. Hardware, OS, Network, WiFi & System Modules
 		"modules/zero_deps.sh",
 		"modules/version_check.sh",
 		"modules/network_info.sh",
 		"modules/resource_monitor.sh",
 		"modules/dns_fix.sh",
+		"modules/wifi_setup.sh",    
+		"modules/lan_ip.sh",         
+		"modules/load_balancer.sh",  
 		"modules/backup_restore.sh",
 		"modules/maintenance.sh",
 		"modules/service_manager.sh",
