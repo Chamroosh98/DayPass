@@ -267,7 +267,7 @@ wifi_menu()
     esac
 
     # Section 5: Reload Subsystems
-    log_info "Reloading Wireless Network Subsystem..."
+    log_info "Reloading Wireless Network Subsystem ..."
     wifi reload 2>/dev/null || /etc/init.d/network restart >/dev/null 2>&1
 
     echo

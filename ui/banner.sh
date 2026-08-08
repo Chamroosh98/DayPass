@@ -4,7 +4,7 @@ show_banner()
 {
     W_LOGO="${BOLD}${WHITE}"
     R_LOGO="${BOLD}${RED}"
-    VERSION="v2.1.0-beta" 
+    VERSION="v2.1.0" 
 
     echo
 
