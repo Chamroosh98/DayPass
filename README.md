@@ -46,7 +46,7 @@
 * **🖥 System Overview:** Instant view of architecture, OpenWrt release version, RAM usage, and overlay storage with visual progress bars.
 * **🌐 Network Diagnostics:** Detailed public IP discovery, geolocation lookup, ISP name, and ASN identifier using fast failover APIs.
 * **🔎 Health Checker:** Concurrent DNS resolution, Ping loss evaluation, and HTTPS latency testing across major edge nodes (`google.com`, `cloudflare.com`, etc.).
-* **📊 Live Speed Monitor:** Real-time WAN interface bandwidth monitoring (`KB/s` / `MB/s`) with zero terminal flickering.
+* **📊 Live Speed Monitor:** Real-time WAN interface bandwidth monitoring with zero terminal flickering.
 * **🧰 Package Manager Integration:** Interactive CLI menu to streamline custom package installations.
 
 ---
