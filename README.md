@@ -28,9 +28,7 @@
 
 
 - [🚀 What is this?](#-what-is-this)
-- [⬆ Back to Top](#-back-to-top)
 - [✨ Key Features](#-key-features)
-- [⬆ Back to Top](#-back-to-top-1)
 - [⚡ Quick Start](#-quick-start)
   - [🟢 Stable version](#-stable-version)
   - [🟠 Beta version](#-beta-version)
@@ -43,7 +41,6 @@
 
 ---
 
-
 ## ✨ Key Features
 
 * **🖥 System Overview:** Instant view of architecture, OpenWrt release version, RAM usage, and overlay storage with visual progress bars.
@@ -53,7 +50,6 @@
 * **🧰 Package Manager Integration:** Interactive CLI menu to streamline custom package installations.
 
 ---
-[⬆ Back to Top](#daylock)
 
 ## ⚡ Quick Start
 
@@ -81,4 +77,3 @@ curl -sL https://chamroosh98.github.io/DayPass/beta/install.sh | sh
 ```bash
 wget -qO- https://chamroosh98.github.io/DayPass/beta/install.sh | sh
 ```
-[⬆ Back to Top](#daylock)
