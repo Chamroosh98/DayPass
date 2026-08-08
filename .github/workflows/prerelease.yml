@@ -225,7 +225,7 @@ jobs:
         uses: dev-drprasad/delete-older-releases@v0.3.4
         if: success()
         with:
-          keep_latest: 2
+          keep_latest: 107
           delete_tags: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -2,7 +2,7 @@
 
 install_mwan3_deps()
 {
-    log_info "Installing Load Balancer & USB Tethering dependencies..."
+    log_info "Installing Load Balancer & USB Tethering dependencies ..."
 
     PKGS_OPKG="mwan3 luci-app-mwan3 bmon kmod-usb-net-rndis kmod-usb-net-cdc-ncm kmod-nls-base kmod-usb-core kmod-usb-net kmod-usb-net-cdc-ether kmod-usb2 kmod-usb-net-ipheth usbmuxd libimobiledevice usbutils"
     PKGS_APK="mwan3 luci-app-mwan3 bmon kmod-usb-net-rndis kmod-usb-net-cdc-ncm kmod-nls-base kmod-usb-core kmod-usb-net kmod-usb-net-cdc-ether kmod-usb2 kmod-usb-net-ipheth usbmuxd libimobiledevice usbutils"
@@ -32,7 +32,7 @@ install_mwan3_deps()
 
 setup_usb_tethering_interface()
 {
-    log_info "Setting up USB Tethering WAN Interface (wan_usb)..."
+    log_info "Setting up USB Tethering WAN Interface (wan_usb) ..."
     
     # Check for usb0 device
     USB_DEV=""
@@ -64,7 +64,7 @@ setup_usb_tethering_interface()
 setup_wifi_wwan_interface()
 {
     render_persistent_header 2>/dev/null || clear
-    echo "    📡 Setup Wi-Fi Repeater / Hotspot (WWAN)                  "
+    echo "  📡 Setup Wi-Fi Repeater / Hotspot (WWAN)                  "
     echo "  ───────────────────────────────────────────────────────────"
 
     RADIO=$(uci show wireless 2>/dev/null | grep "=wifi-device" | head -n1 | cut -d'.' -f2 | cut -d'=' -f1)
@@ -73,11 +73,11 @@ setup_wifi_wwan_interface()
         return 1
     fi
 
-    printf "  ✏️ Enter Target Wi-Fi SSID (Hotspot Name): "
+    printf "  ✏️ Enter Target Wi-Fi SSID (Hotspot Name) : "
     read -r target_ssid </dev/tty
     [ -z "$target_ssid" ] && return 1
 
-    printf "  🔑 Enter Target Wi-Fi Password: "
+    printf "  🔑 Enter Target Wi-Fi Password : "
     read -r target_pass </dev/tty
 
     # Setup Wireless Station (Client)
@@ -179,13 +179,13 @@ load_balancer_menu()
 {
     render_persistent_header 2>/dev/null || clear
 
-    echo "    ⚖️ Multi-WAN Load Balancer Setup (mwan3)                 "
+    echo "  ⚖️ Multi-WAN Load Balancer Setup (mwan3)                 "
     echo "  ───────────────────────────────────────────────────────────"
-    echo "    1) 📦 Install Dependencies (mwan3, USB Tethering drivers) "
-    echo "    2) 📱 Configure USB Tethering WAN (Android / iPhone)      "
-    echo "    3) 📡 Configure Wi-Fi Hotspot WAN (WWAN Client Mode)      "
-    echo "    4) ⚡ Auto-Setup Combined Load Balancing (Balanced Policy)"
-    echo "    5) 📊 Show Live WAN Status & Monitor                       "
+    echo "  1) 📦 Install Dependencies (mwan3, USB Tethering drivers) "
+    echo "  2) 📱 Configure USB Tethering WAN (Android / iPhone)      "
+    echo "  3) 📡 Configure Wi-Fi Hotspot WAN (WWAN Client Mode)      "
+    echo "  4) ⚡ Auto-Setup Combined Load Balancing (Balanced Policy)"
+    echo "  5) 📊 Show Live WAN Status & Monitor                       "
     echo "  ───────────────────────────────────────────────────────────"
     echo
 

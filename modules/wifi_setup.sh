@@ -56,7 +56,7 @@ wifi_menu()
 {
     render_persistent_header 2>/dev/null || clear
 
-    echo "    📶 Advanced WiFi & Guest Network Setup                    "
+    echo "   🛜 Advanced WiFi & Guest Network Setup                    "
     echo "  ───────────────────────────────────────────────────────────"
 
     RADIOS=""
@@ -77,8 +77,8 @@ wifi_menu()
 
     # UX Improvement: Ask SSID Strategy
     echo "  ⚙️ How do you want to configure your Main WiFi SSIDs?"
-    echo "     1) Single SSID for All Bands (Smart Connect / Unified Name)"
-    echo "     2) Custom SSID per Band (e.g., Home_2.4G and Home_5G)"
+    echo "   1) Single SSID for All Bands (Smart Connect / Unified Name)"
+    echo "   2) Custom SSID per Band (e.g., Home_2.4G and Home_5G)"
     echo "  ───────────────────────────────────────────────────────────"
     printf "  Select Option [1/2] : "
     read -r ssid_mode </dev/tty
