@@ -14,10 +14,10 @@
 ---
 
 <p align="center">
-  <a href="https://github.com/Chamroosh98/DayPass/releases"><img src="https://img.shields.io/github/v/release/Chamroosh98/DayPass?style=for-the-badge&color=8A2BE2" alt="Release"></a>
-  <a href="https://openwrt.org"><img src="https://img.shields.io/badge/Shell-POSIX_ash-1D63ED?style=for-the-badge&logo=gnu-bash&logoColor=white" alt="Shell"></a>
-  <a href="https://openwrt.org"><img src="https://img.shields.io/badge/Platform-OpenWrt-008080?style=for-the-badge&logo=openwrt&logoColor=white" alt="Platform"></a>
-  <a href="https://github.com/Chamroosh98/DayPass/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License"></a>
+  <a href="https://github.com/Chamroosh98/DayPass/releases"><img src="https://img.shields.io/github/v/release/Chamroosh98/DayPass?style=for-the-badge&label=&color=8A2BE2&logo=github&logoColor=white" alt="Release"></a>
+  <a href="https://openwrt.org"><img src="https://img.shields.io/badge/POSIX_ash-4E9A06?style=for-the-badge&logo=gnu-bash&logoColor=white" alt="POSIX ash"></a>
+  <a href="https://openwrt.org"><img src="https://img.shields.io/badge/OpenWrt-0066CC?style=for-the-badge&logo=openwrt&logoColor=white" alt="OpenWrt"></a>
+  <a href="https://github.com/Chamroosh98/DayPass/blob/main/LICENSE"><img src="https://img.shields.io/badge/MIT-4C1D95?style=for-the-badge" alt="MIT License"></a>
 </p>
 
 ---
