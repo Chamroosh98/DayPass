@@ -14,7 +14,7 @@
 ---
 
 <p align="center">
-  <a href="https://github.com/Chamroosh98/DayPass/releases"><img src="https://img.shields.io/github/v/release/Chamroosh98/DayPass?style=for-the-badge&label=&color=8A2BE2&logo=github&logoColor=white" alt="Release"></a>
+  <a href="https://github.com/Chamroosh98/DayPass/releases"><img src="https://img.shields.io/github/v/release/Chamroosh98/DayPass?style=for-the-badge&label=&color=1D63ED&logo=github&logoColor=white" alt="Release"></a>
   <a href="https://openwrt.org"><img src="https://img.shields.io/badge/POSIX_ash-4E9A06?style=for-the-badge&logo=gnu-bash&logoColor=white" alt="POSIX ash"></a>
   <a href="https://openwrt.org"><img src="https://img.shields.io/badge/OpenWrt-0066CC?style=for-the-badge&logo=openwrt&logoColor=white" alt="OpenWrt"></a>
   <a href="https://github.com/Chamroosh98/DayPass/blob/main/LICENSE"><img src="https://img.shields.io/badge/MIT-4C1D95?style=for-the-badge" alt="MIT License"></a>
@@ -28,7 +28,9 @@
 
 
 - [🚀 What is this?](#-what-is-this)
+- [⬆ Back to Top](#-back-to-top)
 - [✨ Key Features](#-key-features)
+- [⬆ Back to Top](#-back-to-top-1)
 - [⚡ Quick Start](#-quick-start)
   - [🟢 Stable version](#-stable-version)
   - [🟠 Beta version](#-beta-version)
@@ -39,6 +41,7 @@
 
 **DayPass** is a lightweight, responsive terminal interface designed specifically for OpenWrt routers and embedded Linux systems. It provides real-time system diagnostics, ISP network details, DNS/latency health checking, and live speed monitoring—all wrapped in a clean, ANSI-aligned terminal UI without the bloat of heavy external dependencies.
 
+[⬆ Back to Top](#daylock)
 ---
 
 ## ✨ Key Features
@@ -49,6 +52,7 @@
 * **📊 Live Speed Monitor:** Real-time WAN interface bandwidth monitoring (`KB/s` / `MB/s`) with zero terminal flickering.
 * **🧰 Package Manager Integration:** Interactive CLI menu to streamline custom package installations.
 
+[⬆ Back to Top](#daylock)
 ---
 
 ## ⚡ Quick Start
@@ -77,3 +81,4 @@ curl -sL https://chamroosh98.github.io/DayPass/beta/install.sh | sh
 ```bash
 wget -qO- https://chamroosh98.github.io/DayPass/beta/install.sh | sh
 ```
+[⬆ Back to Top](#daylock)

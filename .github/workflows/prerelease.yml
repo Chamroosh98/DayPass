@@ -101,7 +101,7 @@ jobs:
           path: merged-beta/
           merge-multiple: true
 
-      - name: 📥 Download All Raw Packages Artifacts (For CDN)
+      - name: 📥 Download All Raw Packages Artifacts (For jsDeliver CDN)
         uses: actions/download-artifact@v4
         with:
           pattern: raw-beta-*
