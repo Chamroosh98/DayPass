@@ -28,9 +28,8 @@
 
 
 - [🚀 What is this?](#-what-is-this)
-- [⬆ Back to Top](#-back-to-top)
+- [**DayPass** is a lightweight, responsive terminal interface designed specifically for OpenWrt routers and embedded Linux systems. It provides real-time system diagnostics, ISP network details, DNS/latency health checking, and live speed monitoring—all wrapped in a clean, ANSI-aligned terminal UI without the bloat of heavy external dependencies.](#daypass-is-a-lightweight-responsive-terminal-interface-designed-specifically-for-openwrt-routers-and-embedded-linux-systems-it-provides-real-time-system-diagnostics-isp-network-details-dnslatency-health-checking-and-live-speed-monitoringall-wrapped-in-a-clean-ansi-aligned-terminal-ui-without-the-bloat-of-heavy-external-dependencies)
 - [✨ Key Features](#-key-features)
-- [⬆ Back to Top](#-back-to-top-1)
 - [⚡ Quick Start](#-quick-start)
   - [🟢 Stable version](#-stable-version)
   - [🟠 Beta version](#-beta-version)
@@ -40,8 +39,6 @@
 ## 🚀 What is this?
 
 **DayPass** is a lightweight, responsive terminal interface designed specifically for OpenWrt routers and embedded Linux systems. It provides real-time system diagnostics, ISP network details, DNS/latency health checking, and live speed monitoring—all wrapped in a clean, ANSI-aligned terminal UI without the bloat of heavy external dependencies.
-
-[⬆ Back to Top](#daylock)
 ---
 
 ## ✨ Key Features
@@ -52,7 +49,6 @@
 * **📊 Live Speed Monitor:** Real-time WAN interface bandwidth monitoring (`KB/s` / `MB/s`) with zero terminal flickering.
 * **🧰 Package Manager Integration:** Interactive CLI menu to streamline custom package installations.
 
-[⬆ Back to Top](#daylock)
 ---
 
 ## ⚡ Quick Start
@@ -81,4 +77,3 @@ curl -sL https://chamroosh98.github.io/DayPass/beta/install.sh | sh
 ```bash
 wget -qO- https://chamroosh98.github.io/DayPass/beta/install.sh | sh
 ```
-[⬆ Back to Top](#daylock)
