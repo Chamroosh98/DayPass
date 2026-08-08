@@ -40,8 +40,8 @@
 ## 🚀 What is this?
 
 **DayPass** is a lightweight, responsive terminal interface designed specifically for OpenWrt routers and embedded Linux systems. It provides real-time system diagnostics, ISP network details, DNS/latency health checking, and live speed monitoring—all wrapped in a clean, ANSI-aligned terminal UI without the bloat of heavy external dependencies.
+
 ---
-[⬆ Back to Top](#daylock)
 
 
 ## ✨ Key Features
@@ -52,8 +52,8 @@
 * **📊 Live Speed Monitor:** Real-time WAN interface bandwidth monitoring (`KB/s` / `MB/s`) with zero terminal flickering.
 * **🧰 Package Manager Integration:** Interactive CLI menu to streamline custom package installations.
 
-[⬆ Back to Top](#daylock)
 ---
+[⬆ Back to Top](#daylock)
 
 ## ⚡ Quick Start
 
