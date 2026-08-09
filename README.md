@@ -20,15 +20,14 @@
   <a href="https://github.com/Chamroosh98/DayPass/blob/main/LICENSE"><img src="https://img.shields.io/badge/MIT-4C1D95?style=for-the-badge" alt="MIT License"></a>
 </p>
 
+<p align="center">
+  <a href="docs/i18n/README_FA.md"><strong>🦁☀️ راهنمای پارسی</strong></a>
+</p>
+
 ---
 
-> 💡 **Note:** The main documentation is in English. For the full Persian guide, please visit [**راهنمای پارسی 🦁☀️**](docs/i18n/README_FA.md).
 
----
-
-
-- [🚀 What is this?](#-what-is-this)
-- [**DayPass** is a lightweight, responsive terminal interface designed specifically for OpenWrt routers and embedded Linux systems. It provides real-time system diagnostics, ISP network details, DNS/latency health checking, and live speed monitoring—all wrapped in a clean, ANSI-aligned terminal UI without the bloat of heavy external dependencies.](#daypass-is-a-lightweight-responsive-terminal-interface-designed-specifically-for-openwrt-routers-and-embedded-linux-systems-it-provides-real-time-system-diagnostics-isp-network-details-dnslatency-health-checking-and-live-speed-monitoringall-wrapped-in-a-clean-ansi-aligned-terminal-ui-without-the-bloat-of-heavy-external-dependencies)
+- [🚀 What is DayPass?](#-what-is-daypass)
 - [✨ Key Features](#-key-features)
 - [⚡ Quick Start](#-quick-start)
   - [🟢 Stable version](#-stable-version)
@@ -36,9 +35,10 @@
 
 ---
 
-## 🚀 What is this?
+## 🚀 What is DayPass?
 
 **DayPass** is a lightweight, responsive terminal interface designed specifically for OpenWrt routers and embedded Linux systems. It provides real-time system diagnostics, ISP network details, DNS/latency health checking, and live speed monitoring—all wrapped in a clean, ANSI-aligned terminal UI without the bloat of heavy external dependencies.
+
 ---
 
 ## ✨ Key Features
