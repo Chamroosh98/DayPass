@@ -19,10 +19,10 @@ purge_daypass_packages()
     fi
 
     echo
-    printf "  ${YELLOW}⚠️ The following packages will be REMOVED:${RESET}\n"
+    printf "  ${YELLOW}⚠️ The following packages will be REMOVED :${RESET}\n"
     printf "  ${CYAN}%s${RESET}\n\n" "$INSTALLED_PKGS"
 
-    printf "  Are you sure you want to purge these packages? [y/N]: "
+    printf "  ⁉️ Are you sure you want to purge these packages? [y/N]: "
     read -r confirm </dev/tty
     case "$confirm" in
         [yY][eE][sS]|[yY])
@@ -66,7 +66,7 @@ factory_reset_system()
             log_error "Command 'firstboot' not found on this system!"
         fi
     else
-        log_info "Factory reset aborted."
+        log_info "Factory reset aborted!"
     fi
 }
 

@@ -56,12 +56,12 @@ change_lan_ip_menu()
         if validate_ip "$NEW_IP"; then
             break
         else
-            log_error "Invalid IP address format! Please try again."
+            log_error "Invalid IP address format! Please try again!"
         fi
     done
 
     if [ "$NEW_IP" = "$CURRENT_IP" ]; then
-        log_warn "New IP is identical to current IP. Nothing changed."
+        log_warn "New IP is identical to current IP. Nothing changed!"
         sleep 2
         return 0
     fi
@@ -113,12 +113,12 @@ change_lan_ip_menu()
 
             log_success "LAN IP updated to $NEW_IP"
             log_success "DHCP pool set to ${PREFIX}.100 - ${PREFIX}.249"
-            log_warn "Please reconnect your devices to get new IPv4 address."
+            log_warn "Please reconnect your devices to get new IPv4 address!"
             exit 0
             ;;
         *)
             log_warn "Changes saved to UCI, but services were not restarted!"
-            log_info "You can apply later with: /etc/init.d/network restart"
+            log_info "You can apply later with ==> /etc/init.d/network restart"
             sleep 2
             ;;
     esac

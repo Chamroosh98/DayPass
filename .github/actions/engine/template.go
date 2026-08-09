@@ -52,12 +52,22 @@ func generateInstallScript(outputFile string) error {
 		// 3. Hardware, OS, Network, WiFi & System Modules
 		"modules/zero_deps.sh",
 		"modules/version_check.sh",
-		"modules/network_info.sh",
 		"modules/resource_monitor.sh",
-		"modules/dns_fix.sh",
-		"modules/wifi_setup.sh",    
-		"modules/lan_ip.sh",         
-		"modules/load_balancer.sh",  
+
+		// Network - Host
+		"modules/network/host/network_info.sh",
+		"modules/network/host/dns_fix.sh",
+		"modules/network/host/lan_ip.sh",
+		"modules/network/host/usb_wan.sh",
+		"modules/network/host/wifi_wan.sh",
+		"modules/network/host/wifi_ap.sh",
+		"modules/network/host/load_balancer.sh",
+		"modules/network/host/network_checker.sh",
+
+		// Network - Guest
+		"modules/network/guest/network.sh",
+		"modules/network/guest/qos.sh",
+
 		"modules/backup_restore.sh",
 		"modules/maintenance.sh",
 		"modules/service_manager.sh",

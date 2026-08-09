@@ -10,9 +10,9 @@ show_banner()
 
     printf "${W_LOGO}          .=:   :-+++=-.${RESET}\n"
     printf "${W_LOGO}      .-+*##- :*##+==*##=${RESET}\n"
-    printf "${W_LOGO}      =#*###:.##+     =*#-    ${RED}____              ${GRAY}____${YELLOW} %s${RESET}\n" "$VERSION"
+    printf "${W_LOGO}      =#*###:.##+     =*#-    ${RED} ____              ${GRAY}____${YELLOW} %s${RESET}\n" "$VERSION"
     printf "${W_LOGO}      .  **#: ***:   .+#*.    ${RED}|  _ \  __ _ _   _${GRAY}|  _ \  __ _ ___ ___${RESET}\n"
-    printf "${R_LOGO}        .**#: .+***++*+=.     ${RED}| | | |/ _\` | | | |${GRAY}| |_) / _\` / __/ __|${RESET}\n"
+    printf "${R_LOGO}        .**#: .+***++*+=.     ${RED}| | | |/ _\` || | |${GRAY}| |_) / _\` / __/ __|${RESET}\n"
     printf "${R_LOGO}        .***:.+**+=-::::-:    ${RED}| |_| | (_| | |_| |${GRAY}|  __/ (_| \__ \__ \\\\${RESET}\n"
     printf "${R_LOGO}        .***:=+=:      :--.   ${RED}|____/ \__,_|\__, |${GRAY}|_|   \__,_|___/___/${RESET}\n"
     printf "${R_LOGO}        .***::-:       :--.   ${RED}             |___/${RESET}\n"
