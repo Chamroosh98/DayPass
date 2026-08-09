@@ -1,7 +1,7 @@
 .git
-docs
 
 temp/
+test/
 cache/
 *.log
 .DS_Store

@@ -155,7 +155,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG_NAME="${{ env.VERSION }}-beta-${{ github.run_number }}"
+          TAG_NAME="${{ env.VERSION }}-beta"
           RELEASE_TITLE="🧪 ${{ env.VERSION }}"
           
           echo "🚀 Creating release $TAG_NAME via GitHub CLI ..."
