@@ -79,7 +79,7 @@ dns_fix_menu()
     echo "  ───────────────────────────────────────────────────────────"
     echo
 
-    printf "  ⁉️  Select option [1-%s] (Default: 1) : " "$MAX_OPT"
+    printf "  ⁉️ Select option [1-%s] (Default: 1) : " "$MAX_OPT"
     read -r dns_choice </dev/tty
 
     case "$dns_choice" in

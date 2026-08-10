@@ -79,7 +79,7 @@ show_full_network_info()
     # Ensure JSON parser dependency is met
     if ! command -v jq >/dev/null 2>&1; then
         PKG_CMD="${PKG_MANAGER:-opkg} install jq"
-        printf "  ${YELLOW:-}⚠️  jq is missing! Install via: %s${RESET:-}\n\n" "$PKG_CMD"
+        printf "  ${YELLOW:-}⚠️  jq is missing! Install via : %s${RESET:-}\n\n" "$PKG_CMD"
         return 0
     fi
 
@@ -175,7 +175,7 @@ network_menu()
         
         printf "  📊 ${CYAN:-}1${RESET:-}) Live Speed Monitor\n"
         printf "  🔄 ${CYAN:-}2${RESET:-}) Refresh Information\n"
-        printf "  ⬅️ ${CYAN:-}0${RESET:-}) Back to Main Menu\n\n"
+        printf "  🚪 ${CYAN:-}0${RESET:-}) Back to Main Menu\n\n"
         
         printf "  ⁉️ ${YELLOW:-}Select${RESET:-} ${GRAY:-}:${RESET:-} "
         read -r net_choice </dev/tty

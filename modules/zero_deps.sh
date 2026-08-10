@@ -52,7 +52,7 @@ deploy_system_dependencies()
         return 0
     fi
 
-    log_info "Setting up required system components for DayPass (OpenWrt v$OW_MAJOR_VER)..."
+    log_info "Setting up required system components for DayPass (OpenWrt v$OW_MAJOR_VER) ..."
 
     (pkg_update >/dev/null 2>&1) &
     BG_PID=$!

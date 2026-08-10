@@ -1,35 +1,47 @@
+<br>
 
-<div align="center" dir="rtl">
+<div align="center">
+  <img src="../../ui/ico/dp.svg" alt="DayPass Logo" width="77" height="77" style="vertical-align: middle; margin-right: 8px;">
+  <h1>
+    <span style="vertical-align: middle;">DayPass</span>
+  </h1>
+</div>
 
-# DayPass
-
-**🕊️ یادبود کشتار فجیعانه ایران در ۱۸-۱۹ دی ماه خونین ۱۴۰۴**
-
-*ابزار مدیریت و عیب‌یابی شبکه و سیستم برای OpenWrt با کارایی بالا و مینیمال*
-
-[![release](https://img.shields.io/badge/release-latest-purple?style=flat-square)](https://github.com/Chamroosh98/DayPass/releases)
-[![shell](https://img.shields.io/badge/shell-POSIX%20ash-blue?style=flat-square&logo=gnu-bash)](https://www.openwrt.org)
-[![platform](https://img.shields.io/badge/platform-OpenWrt-darkgreen?style=flat-square&logo=openwrt)](https://openwrt.org)
+<p align="center">
+  <strong>🕊️ یادبود کشتار فجیعانه ایران در ۱۸-۱۹ دی ماه خونین ۱۴۰۴</strong>
+</p>
 
 ---
+
+<p align="center">
+  <a href="https://github.com/Chamroosh98/DayPass/releases"><img src="https://img.shields.io/github/v/release/Chamroosh98/DayPass?style=for-the-badge&label=&color=1D63ED&logo=github&logoColor=white" alt="Release"></a>
+  <a href="https://openwrt.org"><img src="https://img.shields.io/badge/POSIX_ash-4E9A06?style=for-the-badge&logo=gnu-bash&logoColor=white" alt="POSIX ash"></a>
+  <a href="https://openwrt.org"><img src="https://img.shields.io/badge/OpenWrt-0066CC?style=for-the-badge&logo=openwrt&logoColor=white" alt="OpenWrt"></a>
+  <a href="https://github.com/Chamroosh98/DayPass/blob/main/LICENSE"><img src="https://img.shields.io/badge/MIT-4C1D95?style=for-the-badge" alt="MIT License"></a>
+</p>
+
+<p align="center">
+  <a href="../../README_FA.md"><strong>English Guide</strong></a>
+</p>
+
+---
+
 
 </div>
 
 <div dir="rtl">
-    
-> [**English Guide**](./README.md)
 
 -
-  - [🚀 daypass](#-daypass)
+  - [🚀  ابزار DayPass چیست؟](#-ابزار-DayPass-چیست)
   - [✨ ویژگی ها](#ویژگی-ها)
   - [⚡ استارت فوری](#استارت-فوری)
     - [🟢 ورژن پایدار](#-ورژن-پایدار)
     - [🟠 ورژن آزمایشی](#-ورژن-آزمایشی)
 ---
 
-## 🚀 daypass
+## 🚀 ابزار DayPass چیست؟
 
-**DayPass** یک رابط ترمینال سبک و پاسخ‌گوست که اختصاصاً برای روترهای OpenWrt و سیستم‌های لینوکس تعبیه‌شده طراحی شده. این ابزار عیب‌یابی زمان‌واقعی سیستم، جزئیات شبکه ISP، بررسی سلامت DNS/تأخیر و مانیتورینگ زنده سرعت را ارائه می‌ده —همه در یک رابط ترمینالی تمیز و هم‌تراز شده با ANSI، بدون وابستگی‌های سنگین خارجی.
+ابزار **DayPass** یک رابط ترمینال سبک و پاسخ‌گوست که اختصاصاً برای روترهای OpenWrt و سیستم‌های لینوکس تعبیه‌شده طراحی شده. این ابزار عیب‌یابی زمان‌واقعی سیستم، جزئیات شبکه ISP، بررسی سلامت DNS/تأخیر و مانیتورینگ زنده سرعت را ارائه می‌ده —همه در یک رابط ترمینالی تمیز و هم‌تراز شده با ANSI، بدون وابستگی‌های سنگین خارجی.
 
 ---
 
