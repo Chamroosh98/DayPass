@@ -1,7 +1,7 @@
 <br>
 
 <div align="center">
-  <img src="ui/ico/dp.svg" alt="DayPass Logo" width="77" height="77" style="vertical-align: middle; margin-right: 8px;">
+  <img src="../ui/ico/daypass.svg" alt="DayPass Logo" width="107" height="107" style="vertical-align: middle; margin-right: 8px;">
   <h1>
     <span style="vertical-align: middle;">DayPass</span>
   </h1>
@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <a href="docs/i18n/README_FA.md"><strong>🦁☀️ راهنمای پارسی</strong></a>
+  <a href="i18n/README_Fa.md"><strong>راهنمای پارسی 🦁☀️</strong></a>
 </p>
 
 ---

@@ -1,7 +1,7 @@
 <br>
 
 <div align="center">
-  <img src="../../ui/ico/dp.svg" alt="DayPass Logo" width="77" height="77" style="vertical-align: middle; margin-right: 8px;">
+  <img src="../../ui/ico/daypass.svg" alt="DayPass Logo" width="107" height="107" style="vertical-align: middle; margin-right: 8px;">
   <h1>
     <span style="vertical-align: middle;">DayPass</span>
   </h1>
@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <a href="../../README_FA.md"><strong>English Guide</strong></a>
+  <a href="../README.md"><strong>English Guide</strong></a>
 </p>
 
 ---
@@ -32,14 +32,14 @@
 <div dir="rtl">
 
 -
-  - [🚀  ابزار DayPass چیست؟](#-ابزار-DayPass-چیست)
+  - [🚀  ابزار DayPass چیه؟](#-ابزار-DayPass-چیه)
   - [✨ ویژگی ها](#ویژگی-ها)
   - [⚡ استارت فوری](#استارت-فوری)
     - [🟢 ورژن پایدار](#-ورژن-پایدار)
     - [🟠 ورژن آزمایشی](#-ورژن-آزمایشی)
 ---
 
-## 🚀 ابزار DayPass چیست؟
+## 🚀 ابزار DayPass چیه؟
 
 ابزار **DayPass** یک رابط ترمینال سبک و پاسخ‌گوست که اختصاصاً برای روترهای OpenWrt و سیستم‌های لینوکس تعبیه‌شده طراحی شده. این ابزار عیب‌یابی زمان‌واقعی سیستم، جزئیات شبکه ISP، بررسی سلامت DNS/تأخیر و مانیتورینگ زنده سرعت را ارائه می‌ده —همه در یک رابط ترمینالی تمیز و هم‌تراز شده با ANSI، بدون وابستگی‌های سنگین خارجی.
 
