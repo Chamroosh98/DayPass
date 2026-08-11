@@ -19,7 +19,7 @@ purge_daypass_packages()
     fi
 
     echo
-    printf "  ${YELLOW}⚠️ The following packages will be REMOVED :${RESET}\n"
+    printf "  ${YELLOW}⚠️ The following packages will be REMOVED : ${RESET}\n"
     printf "  ${CYAN}%s${RESET}\n\n" "$INSTALLED_PKGS"
 
     printf "  ⁉️ Are you sure you want to purge these packages? [y/N]: "
@@ -96,7 +96,7 @@ maintenance_menu()
     while true; do
         render_persistent_header
         
-        printf "  🛠️  ${BOLD}DayPass Maintenance & Recovery${RESET}\n"
+        printf "  🛠️ ${BOLD}DayPass Maintenance & Recovery${RESET}\n"
         printf "  ──────────────────────────────────────────────────\n"
         printf "  🧹 1) Purge DayPass Installed Packages\n"
         printf "  🗑️ 2) Clean Temporary Cache & Downloads\n"

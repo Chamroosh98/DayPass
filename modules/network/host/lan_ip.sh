@@ -28,11 +28,11 @@ change_lan_ip_menu()
 
     echo "  🌐 Local LAN IP Subnet Configuration"
     echo "  ───────────────────────────────────────────────────────────"
-    echo "  📌 Current Router LAN IP : ${CYAN}${CURRENT_IP}${RESET}"
-    echo "  📌 Current Netmask       : ${CYAN}${CURRENT_NETMASK}${RESET}"
+    echo "  ➡️ Current Router LAN IP : ${CYAN}${CURRENT_IP}${RESET}"
+    echo "  ➡️ Current Netmask       : ${CYAN}${CURRENT_NETMASK}${RESET}"
     echo "  ───────────────────────────────────────────────────────────"
-    echo "  💡 Note : Changing LAN IP prevents IP Conflicts if your"
-    echo "     upstream ISP Modem is also using 192.168.1.1."
+    echo "  ${GRAY}💡 Note : Changing LAN IP prevents IP Conflicts if your${RESET}"
+    echo "  ${GRAY}upstream ISP Modem is also using 192.168.1.1 .${RESET}"
     echo "  ───────────────────────────────────────────────────────────"
     echo
 
@@ -118,7 +118,7 @@ change_lan_ip_menu()
             ;;
         *)
             log_warn "Changes saved to UCI, but services were not restarted!"
-            log_info "You can apply later with ==> /etc/init.d/network restart"
+            log_info "You can apply later with ==> /etc/init.d/network restart!"
             sleep 2
             ;;
     esac

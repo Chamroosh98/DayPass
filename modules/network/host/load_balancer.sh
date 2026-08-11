@@ -4,7 +4,7 @@
 # ============================================================
 
 configure_mwan3_engine() {
-    log_info "Configuring mwan3 engine..."
+    log_info "Configuring mwan3 engine ..."
 
     uci set mwan3.globals=globals
     uci set mwan3.globals.mmx_mask='0x3f00'
@@ -67,16 +67,16 @@ configure_mwan3_engine() {
 load_balancer_menu() {
     while true; do
         render_persistent_header 2>/dev/null || clear
-        echo "  ⚖️  Multi-WAN Load Balancer"
+        echo "  ⚖️ Multi-WAN Load Balancer"
         echo "  ───────────────────────────────────────────────────────────"
-        echo "  1) Install Dependencies"
-        echo "  2) Setup USB Tethering WAN"
-        echo "  3) Setup Wi-Fi Hotspot WAN"
-        echo "  4) Apply mwan3 Load Balancing"
-        echo "  5) Show mwan3 Status"
-        echo "  0) Back"
+        echo "  📌 1) Install Dependencies"
+        echo "  📲 2) Setup USB Tethering WAN"
+        echo "  📶 3) Setup Wi-Fi Hotspot WAN"
+        echo "  ⚖️ 4) Apply mwan3 Load Balancing"
+        echo "  👀 5) Show mwan3 Status"
+        echo "  🚪 0) Back"
         echo "  ───────────────────────────────────────────────────────────"
-        printf "  ⁉️ Select : "
+        printf "  ⁉️ Select option [0-5] : "
         read -r c </dev/tty
 
         case "$c" in
@@ -84,13 +84,13 @@ load_balancer_menu() {
             2) setup_usb_wan 2>/dev/null || log_warn "USB module not loaded." ;;
             3) setup_wifi_wan 2>/dev/null || log_warn "Wi-Fi WAN module not loaded." ;;
             4) configure_mwan3_engine ;;
-            5) command -v mwan3 >/dev/null && mwan3 status || log_error "mwan3 not installed." ;;
+            5) command -v mwan3 >/dev/null && mwan3 status || log_error "mwan3 not installed!" ;;
             0) return 0 ;;
             *) log_warn "Invalid option!" ;;
         esac
 
         echo
-        printf "\n  ${GRAY}Press ENTER ...${RESET}"
+        printf "  ${GRAY:-}Press [Enter] to continue ... ${RESET:-}\n"
         read -r _ </dev/tty
     done
 }

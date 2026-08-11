@@ -68,7 +68,7 @@ network_menu() {
         echo "  ───────────────────────────────────────────────────────────"
         echo "  📡 1) Wi-Fi Access Point (Home WiFi)"
         echo "  👥 2) Guest Network & Bandwidth Control"
-        echo "  🖧 3) Change Local Router LAN IP"
+        echo "  🏠 3) Change Local Router LAN IP"
         echo "  ⚖️ 4) Multi-WAN Load Balancer"
         echo "  📊 5) Network Info & Speed Monitor"
         echo "  🚪 0) Back to Main Menu"

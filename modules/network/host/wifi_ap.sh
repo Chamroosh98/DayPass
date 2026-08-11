@@ -175,22 +175,22 @@ wifi_ap_menu() {
 
         echo "  📡 Wi-Fi Access Point Manager"
         echo "  ───────────────────────────────────────────────────────────"
-        echo "  1) Show current AP status"
-        echo "  2) Create / Update Access Point"
-        echo "  0) Back"
+        echo "  👀 1) Show current AP status"
+        echo "  🛜 2) Create / Update Access Point"
+        echo "  🚪 0) Back"
         echo "  ───────────────────────────────────────────────────────────"
-        printf "  ⁉️ Select : "
+        printf "  ⁉️ Select option [0-2] : "
         read -r choice </dev/tty
 
         case "$choice" in
             1)
                 show_ap_status
-                printf "\n  ${GRAY}Press ENTER ...${RESET}"
+                printf "  ${GRAY:-}Press [Enter] to continue ... ${RESET:-}\n"
                 read -r _ </dev/tty
                 ;;
             2)
                 setup_wifi_ap
-                printf "\n  ${GRAY}Press ENTER ...${RESET}"
+                printf "  ${GRAY:-}Press [Enter] to continue ... ${RESET:-}\n"
                 read -r _ </dev/tty
                 ;;
             0) return 0 ;;
