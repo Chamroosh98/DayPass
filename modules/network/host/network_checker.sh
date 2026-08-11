@@ -205,7 +205,7 @@ network_check()
         if command -v log_warn >/dev/null 2>&1; then
             log_warn "Network is active but experiencing high packet loss/latency (>2s)."
         else
-            printf "⚠️${YELLOW:-}High latency or degraded response time detected.${RESET:-}\n"
+            printf "⚠️${YELLOW:-}High latency or degraded response time detected!${RESET:-}\n"
         fi
     else
         if command -v log_success >/dev/null 2>&1; then

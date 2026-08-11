@@ -35,6 +35,6 @@ check_version() {
     if [ -z "$OPENWRT_VERSION" ]; then
         log_warn "Unable to detect exact OpenWrt version!"
     else
-        log_info "OpenWrt Version : ${OPENWRT_VERSION} (Engine: ${PKG_MANAGER})"
+        log_info "OpenWrt Version : ${OPENWRT_VERSION} (Engine : ${PKG_MANAGER})"
     fi
 }
