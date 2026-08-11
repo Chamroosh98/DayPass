@@ -64,9 +64,9 @@ dns_fix_menu()
     echo "  ───────────────────────────────────────────────────────────"
     echo "   📡 DNS Resolution Recovery                                "
     echo "  ───────────────────────────────────────────────────────────"
-    echo "   1) ☁️ Cloudflare DNS   (1.1.1.1)                          "
-    echo "   2) 🔍 Google DNS       (8.8.8.8)                          "
-    echo "   3) 🛡️ Quad9 DNS        (9.9.9.9)                          "
+    echo "   ☁️ 1) Cloudflare DNS   (1.1.1.1)                          "
+    echo "   🔍 2) Google DNS       (8.8.8.8)                          "
+    echo "   🛡️ 3) Quad9 DNS        (9.9.9.9)                          "
     
     if [ -f "$BACKUP_DNS_FILE" ]; then
         echo "   4) 🔄 Restore Original DNS                           "
@@ -96,11 +96,11 @@ dns_fix_menu()
             if [ -f "$BACKUP_DNS_FILE" ]; then
                 restore_dns
             else
-                log_info "Skipping DNS fix."
+                log_info "Skipping DNS fix!"
             fi
             ;;
         *)
-            log_info "Skipping DNS fix."
+            log_info "Skipping DNS fix!"
             ;;
     esac
 }

@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <a href="i18n/README_Fa.md"><strong>راهنمای پارسی 🦁☀️</strong></a>
+  <a href="i18n/README_Fa.md"><strong>Persian</strong></a>
 </p>
 
 ---

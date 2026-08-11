@@ -28,8 +28,8 @@ change_lan_ip_menu()
 
     echo "  🌐 Local LAN IP Subnet Configuration"
     echo "  ───────────────────────────────────────────────────────────"
-    echo "  📌 Current Router LAN IP : ${CYAN}${CURRENT_IP}${RESET}"
-    echo "  📌 Current Netmask       : ${CYAN}${CURRENT_NETMASK}${RESET}"
+    echo "  ➡️ Current Router LAN IP : ${CYAN}${CURRENT_IP}${RESET}"
+    echo "  ➡️ Current Netmask       : ${CYAN}${CURRENT_NETMASK}${RESET}"
     echo "  ───────────────────────────────────────────────────────────"
     echo "  💡 Note : Changing LAN IP prevents IP Conflicts if your"
     echo "     upstream ISP Modem is also using 192.168.1.1."

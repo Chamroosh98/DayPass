@@ -173,17 +173,17 @@ network_menu()
     while true; do
         show_full_network_info
         
-        printf "  📊 ${CYAN:-}1${RESET:-}) Live Speed Monitor\n"
-        printf "  🔄 ${CYAN:-}2${RESET:-}) Refresh Information\n"
-        printf "  🚪 ${CYAN:-}0${RESET:-}) Back to Main Menu\n\n"
+        printf "  📊 1) Live Speed Monitor\n"
+        printf "  🔄 2) Refresh Information\n"
+        printf "  🚪 0) Back to Main Menu\n\n"
         
-        printf "  ⁉️ ${YELLOW:-}Select${RESET:-} ${GRAY:-}:${RESET:-} "
+        printf "  ⁉️ Select option [0-2]:"
         read -r net_choice </dev/tty
 
         case "$net_choice" in
             1) show_live_speed ;;
             2) continue ;;
-            0) echo "   ${GRAY}  Exiting ...${RESET}"
+            0) echo "   ${GRAY}  Exiting ... ${RESET}"
                 sleep 1
                 clear
                 break 

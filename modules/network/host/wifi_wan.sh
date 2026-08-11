@@ -10,8 +10,8 @@ setup_wifi_wan() {
 
     echo "  📡 Wi-Fi WAN (Station Mode)"
     echo "  ───────────────────────────────────────────────────────────"
-    echo "  Connect this router to a phone hotspot or another Wi-Fi"
-    echo "  network to use it as an internet source (WWAN)."
+    echo "  ${GRAY} Connect this router to a phone hotspot or another Wi-Fi ${RESET}"
+    echo "  ${GRAY} network to use it as an internet source (WWAN). ${RESET}"
     echo "  ───────────────────────────────────────────────────────────"
     echo
 
@@ -20,7 +20,7 @@ setup_wifi_wan() {
     radios=$(uci show wireless 2>/dev/null | grep "=wifi-device" | cut -d'.' -f2 | cut -d'=' -f1)
 
     if [ -z "$radios" ]; then
-        log_error "No wireless radio found."
+        log_error "No wireless radio found!"
         return 1
     fi
 
@@ -87,5 +87,5 @@ setup_wifi_wan() {
     fi
 
     wifi reload >/dev/null 2>&1
-    log_success "Wi-Fi WAN connected to [$ssid] on radio [$chosen]."
+    log_success "Wi-Fi WAN connected to [$ssid] on radio [$chosen]!"
 }

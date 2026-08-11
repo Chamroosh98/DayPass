@@ -65,7 +65,7 @@ setup_wifi_ap() {
     fi
 
     if [ -z "$RADIOS" ]; then
-        log_error "No wireless radio detected on this device."
+        log_error "No wireless radio detected on this device!"
         return 1
     fi
 
@@ -83,7 +83,7 @@ setup_wifi_ap() {
         case "$reconf" in
             y|Y) ;;
             *)
-                printf "  ${GRAY}>> Keeping current AP settings.${RESET}\n"
+                printf "  ${GRAY}>> Keeping current AP settings :)${RESET}\n"
                 sleep 1
                 return 0
                 ;;
@@ -92,11 +92,12 @@ setup_wifi_ap() {
 
     # SSID Strategy
     echo
-    echo "  ⚙️ SSID Naming Strategy :"
-    echo "     1) Unified SSID for all bands (Smart Connect)"
-    echo "     2) Separate SSID per band (2.4G + 5G)"
+    echo "  ⚙️ SSID Naming Strategy "
     echo "  ───────────────────────────────────────────────────────────"
-    printf "  ⁉️ Select [1/2] (default: 1) : "
+    echo "  👤 1) Unified SSID for all bands (Smart Connect)"
+    echo "  👥 2) Separate SSID per band (2.4G + 5G)"
+    echo "  ───────────────────────────────────────────────────────────"
+    printf "  ⁉️ Select option [1/2] (default: 1) : "
     read -r ssid_mode </dev/tty
     [ -z "$ssid_mode" ] && ssid_mode=1
 
@@ -126,7 +127,7 @@ setup_wifi_ap() {
         if [ ${#password} -ge 8 ]; then
             break
         fi
-        log_error "Password must be at least 8 characters."
+        log_error "Password must be at least 8 characters!!"
     done
 
     # Apply configuration to all radios
@@ -150,11 +151,11 @@ setup_wifi_ap() {
         case "$band" in
             *5g*|*a*|*ac*|*ax*) 
                 uci set wireless.$iface.ssid="$SSID_5G"
-                log_success "Configured 5GHz AP on $radio → $SSID_5G"
+                log_success "Configured 5GHz AP on [$radio] → [$SSID_5G]"
                 ;;
             *)
                 uci set wireless.$iface.ssid="$SSID_2G"
-                log_success "Configured 2.4GHz AP on $radio → $SSID_2G"
+                log_success "Configured 2.4GHz AP on [$radio] → [$SSID_2G]"
                 ;;
         esac
     done
@@ -175,22 +176,22 @@ wifi_ap_menu() {
 
         echo "  📡 Wi-Fi Access Point Manager"
         echo "  ───────────────────────────────────────────────────────────"
-        echo "  1) Show current AP status"
-        echo "  2) Create / Update Access Point"
-        echo "  0) Back"
+        echo "  👀 1) Show current AP status"
+        echo "  🪏 2) Create / Update Access Point"
+        echo "  🚪 0) Back"
         echo "  ───────────────────────────────────────────────────────────"
-        printf "  ⁉️ Select : "
+        printf "  ⁉️ Select option [0-2] : "
         read -r choice </dev/tty
 
         case "$choice" in
             1)
                 show_ap_status
-                printf "\n  ${GRAY}Press ENTER ...${RESET}"
+                printf "\n  ${GRAY}Press [ENTER] to return to main menu ... ${RESET}"
                 read -r _ </dev/tty
                 ;;
             2)
                 setup_wifi_ap
-                printf "\n  ${GRAY}Press ENTER ...${RESET}"
+                printf "\n  ${GRAY}Press [ENTER] to return to main menu ... ${RESET}"
                 read -r _ </dev/tty
                 ;;
             0) return 0 ;;

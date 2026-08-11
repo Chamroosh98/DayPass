@@ -23,8 +23,8 @@ setup_usb_wan() {
     usb_dev=$(detect_usb_device)
 
     if [ -z "$usb_dev" ]; then
-        log_warn "No USB tethering device detected."
-        log_warn "Connect your phone and enable USB Tethering first."
+        log_warn "No USB tethering device detected!"
+        log_warn "Connect your phone and enable USB Tethering first!"
         usb_dev="usb0"
     else
         log_success "Detected USB device : $usb_dev"

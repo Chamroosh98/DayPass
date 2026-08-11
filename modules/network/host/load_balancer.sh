@@ -61,7 +61,7 @@ configure_mwan3_engine() {
     /etc/init.d/mwan3 enable >/dev/null 2>&1
     /etc/init.d/mwan3 restart >/dev/null 2>&1
 
-    log_success "mwan3 engine configured (Balanced + Failover)."
+    log_success "mwan3 engine configured (Balanced + Failover)!"
 }
 
 load_balancer_menu() {
@@ -69,28 +69,28 @@ load_balancer_menu() {
         render_persistent_header 2>/dev/null || clear
         echo "  ⚖️  Multi-WAN Load Balancer"
         echo "  ───────────────────────────────────────────────────────────"
-        echo "  1) Install Dependencies"
-        echo "  2) Setup USB Tethering WAN"
-        echo "  3) Setup Wi-Fi Hotspot WAN"
-        echo "  4) Apply mwan3 Load Balancing"
-        echo "  5) Show mwan3 Status"
-        echo "  0) Back"
+        echo "  📌 1) Install Dependencies"
+        echo "  📱 2) Setup USB Tethering WAN"
+        echo "  📶 3) Setup Wi-Fi Hotspot WAN"
+        echo "  ⚖️ 4) Apply mwan3 Load Balancing"
+        echo "  📊 5) Show mwan3 Status"
+        echo "  🚪 0) Back"
         echo "  ───────────────────────────────────────────────────────────"
         printf "  ⁉️ Select : "
         read -r c </dev/tty
 
         case "$c" in
-            1) install_mwan3_deps 2>/dev/null || log_warn "Dependency installer not found." ;;
-            2) setup_usb_wan 2>/dev/null || log_warn "USB module not loaded." ;;
-            3) setup_wifi_wan 2>/dev/null || log_warn "Wi-Fi WAN module not loaded." ;;
+            1) install_mwan3_deps 2>/dev/null || log_warn "Dependency installer not found!" ;;
+            2) setup_usb_wan 2>/dev/null || log_warn "USB module not loaded!" ;;
+            3) setup_wifi_wan 2>/dev/null || log_warn "Wi-Fi WAN module not loaded!" ;;
             4) configure_mwan3_engine ;;
-            5) command -v mwan3 >/dev/null && mwan3 status || log_error "mwan3 not installed." ;;
+            5) command -v mwan3 >/dev/null && mwan3 status || log_error "mwan3 not installed!" ;;
             0) return 0 ;;
             *) log_warn "Invalid option!" ;;
         esac
 
         echo
-        printf "\n  ${GRAY}Press ENTER ...${RESET}"
+        printf "\n  ${GRAY}Press [ENTER] to return to main menu ... ${RESET}"
         read -r _ </dev/tty
     done
 }

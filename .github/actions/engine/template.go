@@ -35,6 +35,7 @@ func generateInstallScript(outputFile string) error {
 	scriptBuilder.WriteString("fi\n")
 	scriptBuilder.WriteString("export REPO_URL\n\n")
 
+	
 	// Cleaned & strict dependency-aware sourcing sequence
 	installerFiles := []string{
 		// 1. Core Globals, UI Base Libraries & Styles
@@ -49,12 +50,12 @@ func generateInstallScript(outputFile string) error {
 		"installer/arch_detector.sh",
 		"installer/package_manager.sh",
 
-		// 3. Hardware, OS, Network, WiFi & System Modules
+		// 3. Core System Modules
 		"modules/zero_deps.sh",
 		"modules/version_check.sh",
 		"modules/resource_monitor.sh",
 
-		// Network - Host
+		// 4. Network - Host
 		"modules/network/host/network_info.sh",
 		"modules/network/host/dns_fix.sh",
 		"modules/network/host/lan_ip.sh",
@@ -64,23 +65,23 @@ func generateInstallScript(outputFile string) error {
 		"modules/network/host/load_balancer.sh",
 		"modules/network/host/network_checker.sh",
 
-		// Network - Guest
+		// 5. Network - Guest
 		"modules/network/guest/network.sh",
 		"modules/network/guest/qos.sh",
 
+		// 6. Other Modules
 		"modules/backup_restore.sh",
 		"modules/maintenance.sh",
 		"modules/service_manager.sh",
 
-		// 4. Core Installer Logic & Package Processing
-		"installer/network_checker.sh",
+		// 7. Core Installer Logic & Package Processing
 		"installer/install_core.sh",
 		"installer/resource_checker.sh",
 		"installer/package_resolver.sh",
 		"installer/package_installer.sh",
 		"installer/package_updater.sh",
 
-		// 5. UI Components & Interactive Menus
+		// 8. UI Components & Interactive Menus
 		"ui/state.sh",
 		"ui/menu_custom.sh",
 		"ui/menu_mode.sh",
@@ -89,9 +90,11 @@ func generateInstallScript(outputFile string) error {
 		"ui/menu_geo.sh",
 		"ui/review.sh",
 		"ui/menu_package.sh",
+		"ui/network_menu.sh",      // ← Network Orchestrator (جدید)
 		"ui/main_menu.sh",
 		"ui/installer_ui.sh",
 	}
+
 
 	for _, file := range installerFiles {
 		data, err := os.ReadFile(file)

@@ -87,9 +87,9 @@ service_is_running()
 post_install_services_init()
 {
     echo
-    log_info "=================================================="
+    log_info "─────────────────────────────────────────────────────────── "
     log_info "Initiating Post-Install Service Operations"
-    log_info "=================================================="
+    log_info "─────────────────────────────────────────────────────────── "
     echo
 
     # 1. Start core proxy profiles if selected
@@ -108,14 +108,14 @@ post_install_services_init()
     if service_exists "dnsmasq"; then
         log_info "Reloading dnsmasq configuration ..."
         /etc/init.d/dnsmasq reload >/dev/null 2>&1 || /etc/init.d/dnsmasq restart >/dev/null 2>&1
-        log_success "DNS subsystem reloaded."
+        log_success "DNS subsystem reloaded!"
     fi
 
     # 3. Reload firewall rules
     if service_exists "firewall"; then
         log_info "Reloading system firewall rules ..."
         /etc/init.d/firewall reload >/dev/null 2>&1
-        log_success "Firewall rules updated."
+        log_success "Firewall rules updated!"
     fi
 
     echo
