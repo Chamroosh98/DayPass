@@ -126,7 +126,7 @@ setup_wifi_ap() {
         if [ ${#password} -ge 8 ]; then
             break
         fi
-        log_error "Password must be at least 8 characters."
+        log_error "Password must be at least 8 characters!"
     done
 
     # Apply configuration to all radios
@@ -176,7 +176,7 @@ wifi_ap_menu() {
         echo "  📡 Wi-Fi Access Point Manager"
         echo "  ───────────────────────────────────────────────────────────"
         echo "  👀 1) Show current AP status"
-        echo "  🛜 2) Create / Update Access Point"
+        echo "  🛜 2) Create / Update Access Point (AP)"
         echo "  🚪 0) Back"
         echo "  ───────────────────────────────────────────────────────────"
         printf "  ⁉️ Select option [0-2] : "
