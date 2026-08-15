@@ -47,7 +47,7 @@ func generateInstallScript(outputFile string) error {
 
 		// 2. Low-Level System Detection & Package Management
 		"installer/arch_detector.sh",
-		"installer/package/manager.sh",
+		"installer/pkg/manager.sh",
 
 		// 3. Core System Modules
 		"modules/zero_deps.sh",
@@ -68,26 +68,31 @@ func generateInstallScript(outputFile string) error {
 		"modules/network/guest/network.sh",
 		"modules/network/guest/qos.sh",
 
-		// 6. Proxy Modules (New)
-		"modules/proxy/config_manager.sh",
+		// 6. Proxy - Config Management
+		"modules/proxy/config/config_storage.sh",
+		"modules/proxy/config/subscription.sh",
+		"modules/proxy/config/passwall_bridge.sh",
+		"modules/proxy/config/config_manager.sh",
+
+		// 7. Proxy - Other Modules
 		"modules/proxy/routing.sh",
 		"modules/proxy/node_balancer.sh",
 		"modules/proxy/health_checker.sh",
 		"modules/proxy/profile_manager.sh",
 
-		// 7. Other Modules
+		// 8. Other Modules
 		"modules/backup_restore.sh",
 		"modules/maintenance.sh",
 		"modules/service_manager.sh",
 
-		// 8. Core Installer Logic & Package Processing
+		// 9. Core Installer Logic & Package Processing
 		"installer/install_core.sh",
 		"installer/resource_checker.sh",
-		"installer/package/resolver.sh",
-		"installer/package/installer.sh",
-		"installer/package/updater.sh",
+		"installer/pkg/resolver.sh",
+		"installer/pkg/installer.sh",
+		"installer/pkg/updater.sh",
 
-		// 9. UI Components & Interactive Menus
+		// 10. UI Components & Interactive Menus
 		"ui/state.sh",
 		"ui/menu_custom.sh",
 		"ui/menu_mode.sh",

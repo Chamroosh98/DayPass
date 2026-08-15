@@ -131,7 +131,7 @@ resource_compare()
     [ "$BEFORE_FREE_FLASH" -gt "$AFTER_FREE_FLASH" ] && USED_FLASH=$((BEFORE_FREE_FLASH - AFTER_FREE_FLASH)) || USED_FLASH=0
 
     echo
-    echo "  📊 DayPass Deployment Efficiency Summary"
+    echo "  🤌🏻 DayPass Deployment Efficiency Summary"
     echo "  ────────────────────────────────────────────────────────── "
     echo "    ├─ Total Downloaded Payload     : $(human_readable_bytes "$TOTAL_REQUIRED_BYTES")"
     echo "    ├─ Total Network Traffic Saved  : $(human_readable_bytes "$TOTAL_SAVED_BYTES") "
@@ -196,12 +196,12 @@ show_system_resources_menu()
     printf "  💡 OpenWrt System    : ${CYAN}%s [%s]${RESET}\n" "$OW_VER" "${PKG_MANAGER:-opkg}"
     echo "  ──────────────────────────────────────────────────────────"
     printf "  🧠 Total RAM         : %s\n" "$(human_readable_bytes "$tot_ram_b")"
-    printf "    🟠 Used RAM          : ${YELLOW}%s${RESET}\n" "$(human_readable_bytes "$used_ram_b")"
-    printf "    🟢 Free RAM          : ${GREEN}%s${RESET}\n" "$(human_readable_bytes "$free_ram_b")"
+    printf "     🟠 Used RAM          : ${YELLOW}%s${RESET}\n" "$(human_readable_bytes "$used_ram_b")"
+    printf "     🟢 Free RAM          : ${GREEN}%s${RESET}\n" "$(human_readable_bytes "$free_ram_b")"
     echo "  ──────────────────────────────────────────────────────────"
     printf "  💾 Total Storage     : %s\n" "$(human_readable_bytes "$tot_flash_b")"
-    printf "    🟠 Used Storage      : ${YELLOW}%s${RESET}\n" "$(human_readable_bytes "$used_flash_b")"
-    printf "    🟢 Free Storage      : ${GREEN}%s${RESET}\n" "$(human_readable_bytes "$free_flash_b")"
+    printf "     🟠 Used Storage      : ${YELLOW}%s${RESET}\n" "$(human_readable_bytes "$used_flash_b")"
+    printf "     🟢 Free Storage      : ${GREEN}%s${RESET}\n" "$(human_readable_bytes "$free_flash_b")"
     echo "  ──────────────────────────────────────────────────────────"
     echo
 

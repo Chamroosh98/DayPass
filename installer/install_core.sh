@@ -8,7 +8,7 @@ cleanup_and_exit() {
     if command -v log_warn >/dev/null 2>&1; then
         log_warn "Installation cancelled by user. Exiting DayPass ..."
     else
-        echo "⚠️ Installation cancelled by user. Exiting ..."
+        echo "  ⚠️ Installation cancelled by user. Exiting ..."
     fi
 
     stty echo 2>/dev/null
@@ -44,7 +44,7 @@ initialize_installer()
 
     # 3. Validate base repository URL
     if [ -z "${REPO_URL:-}" ]; then
-        log_error "REPO_URL environment variable is not defined!"
+        log_error "[REPO_URL] environment variable is not defined!"
         exit 1
     fi
 
@@ -76,7 +76,7 @@ initialize_installer()
 
     # 5. Verify downloaded file presence and size
     if [ "$DOWNLOAD_SUCCESS" -ne 1 ] || [ ! -s "$MANIFEST_FILE" ]; then
-        log_error "Failed to download or received empty manifest from [$MANIFEST_TARGET_URL]"
+        log_error "Failed to download or received empty manifest from : [$MANIFEST_TARGET_URL]"
         exit 1
     fi
 
@@ -119,7 +119,7 @@ initialize_installer()
     # 8. Extract release metadata for diagnostic logs
     MANIFEST_REL=$(jq -r '.release // "unknown"' "$MANIFEST_FILE" 2>/dev/null)
     MANIFEST_GEN=$(jq -r '.generated_at // "unknown"' "$MANIFEST_FILE" 2>/dev/null)
-    log_info "Manifest Metadata -> Release: [$MANIFEST_REL] | Generated At: [$MANIFEST_GEN]"
+    log_info "Manifest Metadata -> Release : [$MANIFEST_REL] | Generated At : [$MANIFEST_GEN]"
 
     # 9. Query architecture support in manifest
     FOUND_ARCH=$(jq -r --arg arch "$ARCH" '.architectures[]? | select(.name == $arch) | .name' "$MANIFEST_FILE" 2>/dev/null | head -n1)
