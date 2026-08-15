@@ -101,7 +101,7 @@ pkg_install()
         fi
 
         # 2. Fallback attempt using IPv4 explicit routing if network fails
-        log_warn "Standard APK installation failed for [$PACKAGE_NAME]. Trying IPv4 fallback..." 2>/dev/null
+        log_warn "Standard APK installation failed for [$PACKAGE_NAME]. Trying IPv4 fallback ..." 2>/dev/null
         if apk add --force-ipv4 --no-cache --allow-untrusted "$PACKAGE_NAME" >/dev/null 2>&1; then
             log_success "Package [$PACKAGE_NAME] installed successfully via APK (IPv4 fallback)." 2>/dev/null
             return 0
@@ -113,7 +113,7 @@ pkg_install()
     elif [ "$PKG_MANAGER" = "opkg" ]; then
         # Install with opkg bypassing unverified signature warnings
         if opkg install --force-checksum "$PACKAGE_NAME" >/dev/null 2>&1; then
-            log_success "Package [$PACKAGE_NAME] installed successfully via OPKG." 2>/dev/null
+            log_success "Package [$PACKAGE_NAME] installed successfully via OPKG!" 2>/dev/null
             return 0
         fi
 

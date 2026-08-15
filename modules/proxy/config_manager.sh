@@ -15,7 +15,7 @@ mkdir -p "$CONFIG_DIR"
 # List existing configs
 # ------------------------------------------------------------
 list_configs() {
-    echo "  📋 Available Configs :"
+    echo "  📋 Available Configs : \n"
 
     local count=0
     for file in "$CONFIG_DIR"/*.json; do
@@ -102,8 +102,24 @@ update_subscription() {
     log_info "Updating subscription: $sub_name ..."
 
     local tmp_file=$(mktemp)
+    local download_ok=0
 
-    if ! wget -q -O "$tmp_file" "$sub_url" --timeout=15 2>/dev/null; then
+    # Prefer curl, fallback to wget
+    if command -v curl >/dev/null 2>&1; then
+        if curl -fsSL --connect-timeout 15 --max-time 30 -o "$tmp_file" "$sub_url" 2>/dev/null; then
+            download_ok=1
+        fi
+    elif command -v wget >/dev/null 2>&1; then
+        if wget -q -O "$tmp_file" "$sub_url" --timeout=15 2>/dev/null; then
+            download_ok=1
+        fi
+    else
+        log_error "Neither curl nor wget is available!"
+        rm -f "$tmp_file"
+        return 1
+    fi
+
+    if [ "$download_ok" -ne 1 ]; then
         log_error "Failed to download subscription: $sub_name"
         rm -f "$tmp_file"
         return 1
@@ -154,7 +170,7 @@ EOF
 # ------------------------------------------------------------
 update_all_subscriptions() {
     if [ ! -f "$SUBS_FILE" ]; then
-        log_warn "No subscriptions found."
+        log_warn "No subscriptions found!"
         return 1
     fi
 
@@ -190,7 +206,7 @@ config_manager_menu() {
         echo "  🤏 2) Add Manual Config"
         echo "  🫰 3) Add Subscription"
         echo "  🔄 4) Update All Subscriptions"
-        echo "  🗑️  5) Remove Config"
+        echo "  🗑️ 5) Remove Config"
         echo "  🚪 0) Back"
         echo "  ───────────────────────────────────────────────────────────"
         echo

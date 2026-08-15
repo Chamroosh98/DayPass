@@ -15,7 +15,6 @@ mkdir -p "$ROUTING_DIR"
 # ------------------------------------------------------------
 show_routing_status() {
     echo "  🚦 Current Routing Status"
-    echo "  ───────────────────────────────────────────────────────────"
 
     if [ -f "$ROUTING_DIR/current_mode" ]; then
         mode=$(cat "$ROUTING_DIR/current_mode")
@@ -24,7 +23,7 @@ show_routing_status() {
         echo "  🫀 Active Mode : ${GRAY}Not configured${RESET}"
     fi
 
-    echo "  ───────────────────────────────────────────────────────────"
+    echo ""
 }
 
 # ------------------------------------------------------------

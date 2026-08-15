@@ -87,7 +87,7 @@ test_all_nodes() {
         fi
     done
 
-    echo "  Result : ${GREEN}$ok${RESET} / $total nodes are reachable"
+    echo "  Result : ${GREEN}$ok${RESET} / [$total] nodes are reachable!"
     echo
 }
 
@@ -109,7 +109,7 @@ test_selected_nodes() {
     done
 
     if [ "$i" -eq 1 ]; then
-        log_warn "No configs found."
+        log_warn "No configs found!"
         return 1
     fi
 

@@ -16,7 +16,6 @@ mkdir -p "$BALANCER_DIR"
 # ------------------------------------------------------------
 show_balancer_status() {
     echo "  ⚖️ Current Node Balancer Status"
-    echo "  ───────────────────────────────────────────────────────────"
 
     if [ -f "$BALANCER_DIR/mode" ]; then
         mode=$(cat "$BALANCER_DIR/mode")
@@ -32,7 +31,7 @@ show_balancer_status() {
         echo "  🧠 Active Nodes : 0"
     fi
 
-    echo "  ───────────────────────────────────────────────────────────"
+    echo ""
 }
 
 # ------------------------------------------------------------
@@ -41,7 +40,6 @@ show_balancer_status() {
 select_nodes() {
     echo
     echo "  📋 Available Configs :"
-    echo "  ───────────────────────────────────────────────────────────"
 
     local configs=""
     local i=1

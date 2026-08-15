@@ -47,7 +47,7 @@ func generateInstallScript(outputFile string) error {
 
 		// 2. Low-Level System Detection & Package Management
 		"installer/arch_detector.sh",
-		"installer/package_manager.sh",
+		"installer/package/manager.sh",
 
 		// 3. Core System Modules
 		"modules/zero_deps.sh",
@@ -83,9 +83,9 @@ func generateInstallScript(outputFile string) error {
 		// 8. Core Installer Logic & Package Processing
 		"installer/install_core.sh",
 		"installer/resource_checker.sh",
-		"installer/package_resolver.sh",
-		"installer/package_installer.sh",
-		"installer/package_updater.sh",
+		"installer/package/resolver.sh",
+		"installer/package/installer.sh",
+		"installer/package/updater.sh",
 
 		// 9. UI Components & Interactive Menus
 		"ui/state.sh",

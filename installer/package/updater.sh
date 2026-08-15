@@ -55,7 +55,7 @@ inspect_and_confirm_updates()
     done
 
     echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
-    printf "   Summary: %d to install, %d to upgrade, %d skipped!\n" "$INSTALL_COUNT" "$UPGRADE_COUNT" "$SKIP_COUNT"
+    printf "   Summary : %d to install, %d to upgrade, %d skipped!\n" "$INSTALL_COUNT" "$UPGRADE_COUNT" "$SKIP_COUNT"
     echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
     echo
 
@@ -83,7 +83,7 @@ inspect_and_confirm_updates()
     return 0
 }
 
-# منوی اصلی ورود به آپدیت
+
 update_packages_menu()
 {
     render_persistent_header

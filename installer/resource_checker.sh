@@ -190,18 +190,18 @@ show_system_resources_menu()
     free_flash_b=$(get_free_flash_bytes "/overlay")
     used_flash_b=$((tot_flash_b - free_flash_b))
 
-    echo "  🖥️  System Hardware & Resource Status"
+    echo "  🖥️ System Hardware & Resource Status"
     echo "  ──────────────────────────────────────────────────────────"
-    printf "   🩻 Architecture      : ${CYAN}%s${RESET}\n" "${ARCH:-N/A}"
-    printf "   💡 OpenWrt System    : ${CYAN}%s%s [%s]${RESET}\n" "$OW_VER" "$OW_DATE" "${PKG_MANAGER:-opkg}"
+    printf "  🩻 Architecture      : ${CYAN}%s${RESET}\n" "${ARCH:-N/A}"
+    printf "  💡 OpenWrt System    : ${CYAN}%s [%s]${RESET}\n" "$OW_VER" "${PKG_MANAGER:-opkg}"
     echo "  ──────────────────────────────────────────────────────────"
-    printf "   🧠 Total RAM         : %s\n" "$(human_readable_bytes "$tot_ram_b")"
-    printf "   📈 Used RAM          : ${YELLOW}%s${RESET}\n" "$(human_readable_bytes "$used_ram_b")"
-    printf "   🟢 Free RAM          : ${GREEN}%s${RESET}\n" "$(human_readable_bytes "$free_ram_b")"
+    printf "  🧠 Total RAM         : %s\n" "$(human_readable_bytes "$tot_ram_b")"
+    printf "    🟠 Used RAM          : ${YELLOW}%s${RESET}\n" "$(human_readable_bytes "$used_ram_b")"
+    printf "    🟢 Free RAM          : ${GREEN}%s${RESET}\n" "$(human_readable_bytes "$free_ram_b")"
     echo "  ──────────────────────────────────────────────────────────"
-    printf "   💾 Total Storage     : %s\n" "$(human_readable_bytes "$tot_flash_b")"
-    printf "   📉 Used Storage      : ${YELLOW}%s${RESET}\n" "$(human_readable_bytes "$used_flash_b")"
-    printf "   🟢 Free Storage      : ${GREEN}%s${RESET}\n" "$(human_readable_bytes "$free_flash_b")"
+    printf "  💾 Total Storage     : %s\n" "$(human_readable_bytes "$tot_flash_b")"
+    printf "    🟠 Used Storage      : ${YELLOW}%s${RESET}\n" "$(human_readable_bytes "$used_flash_b")"
+    printf "    🟢 Free Storage      : ${GREEN}%s${RESET}\n" "$(human_readable_bytes "$free_flash_b")"
     echo "  ──────────────────────────────────────────────────────────"
     echo
 
