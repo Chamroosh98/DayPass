@@ -35,7 +35,6 @@ func generateInstallScript(outputFile string) error {
 	scriptBuilder.WriteString("fi\n")
 	scriptBuilder.WriteString("export REPO_URL\n\n")
 
-
 	// Cleaned & strict dependency-aware sourcing sequence
 	installerFiles := []string{
 		// 1. Core Globals, UI Base Libraries & Styles
@@ -69,19 +68,26 @@ func generateInstallScript(outputFile string) error {
 		"modules/network/guest/network.sh",
 		"modules/network/guest/qos.sh",
 
-		// 6. Other Modules
+		// 6. Proxy Modules (New)
+		"modules/proxy/config_manager.sh",
+		"modules/proxy/routing.sh",
+		"modules/proxy/node_balancer.sh",
+		"modules/proxy/health_checker.sh",
+		"modules/proxy/profile_manager.sh",
+
+		// 7. Other Modules
 		"modules/backup_restore.sh",
 		"modules/maintenance.sh",
 		"modules/service_manager.sh",
 
-		// 7. Core Installer Logic & Package Processing
+		// 8. Core Installer Logic & Package Processing
 		"installer/install_core.sh",
 		"installer/resource_checker.sh",
 		"installer/package_resolver.sh",
 		"installer/package_installer.sh",
 		"installer/package_updater.sh",
 
-		// 8. UI Components & Interactive Menus
+		// 9. UI Components & Interactive Menus
 		"ui/state.sh",
 		"ui/menu_custom.sh",
 		"ui/menu_mode.sh",
@@ -90,7 +96,8 @@ func generateInstallScript(outputFile string) error {
 		"ui/menu_geo.sh",
 		"ui/review.sh",
 		"ui/menu_package.sh",
-		"ui/menu_network.sh",      
+		"ui/menu_network.sh",
+		"ui/menu_proxy.sh",       
 		"ui/main_menu.sh",
 		"ui/installer_ui.sh",
 	}
