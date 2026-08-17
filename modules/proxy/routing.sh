@@ -201,9 +201,9 @@ routing_menu() {
                 echo
                 if [ -f "$ROUTING_DIR/current_mode" ]; then
                     mode=$(cat "$ROUTING_DIR/current_mode")
-                    echo "  ⭡ Current mode : $mode"
+                    echo "  ⬆️  Current mode : $mode"
                     echo
-                    cat "$ROUTING_DIR/${mode}.rules" 2>/dev/null || echo "  No detailed rules file."
+                    cat "$ROUTING_DIR/${mode}.rules" 2>/dev/null || echo "  ${GRAY}No detailed rules file.${RESET}"
                 else
                     echo "  💅🏻 No routing mode configured yet!"
                 fi

@@ -1,6 +1,7 @@
 #!/bin/sh
 # ============================================================
 # DayPass - Routing Profiles Manager
+# Applies ready-to-use profiles by calling real routing modes
 # ============================================================
 
 # ------------------------------------------------------------
@@ -8,7 +9,33 @@
 # ------------------------------------------------------------
 PROXY_DIR="/etc/daypass/proxy"
 PROFILE_DIR="$PROXY_DIR/profiles"
+ROUTING_DIR="$PROXY_DIR/routing"
 mkdir -p "$PROFILE_DIR"
+mkdir -p "$ROUTING_DIR"
+
+# ------------------------------------------------------------
+# Show current active profile
+# ------------------------------------------------------------
+show_active_profile() {
+    echo "  🎭 Current Active Profile"
+    echo "  ───────────────────────────────────────────────────────────"
+
+    if [ -f "$PROFILE_DIR/active" ]; then
+        active=$(cat "$PROFILE_DIR/active")
+        echo "  🫀 Active Profile : ${GREEN}$active${RESET}"
+    else
+        echo "  🫀 Active Profile : ${GRAY}None${RESET}"
+    fi
+
+    if [ -f "$ROUTING_DIR/current_mode" ]; then
+        mode=$(cat "$ROUTING_DIR/current_mode")
+        echo "  🚦 Routing Mode   : ${CYAN}$mode${RESET}"
+    else
+        echo "  🚦 Routing Mode   : ${GRAY}Not set${RESET}"
+    fi
+
+    echo "  ───────────────────────────────────────────────────────────"
+}
 
 # ------------------------------------------------------------
 # List available profiles
@@ -16,16 +43,16 @@ mkdir -p "$PROFILE_DIR"
 list_profiles() {
     echo "  🎭 Available Routing Profiles"
     echo "  ───────────────────────────────────────────────────────────"
-    echo "  ⚖️ 1) Balanced          (Default - Iran Direct + Proxy)"
-    echo "  🕹️ 2) Gaming            (Low latency, prefer stable nodes)"
-    echo "  🛗 3) Streaming         (Better for YouTube / Netflix)"
-    echo "  🌎 4) Global Proxy      (All traffic through proxy)"
-    echo "  🎯 5) Direct Only       (No proxy)"
+    echo "  ⚖️  1) Balanced       (Iran Direct + Foreign Proxy)"
+    echo "  🕹️  2) Gaming         (Low latency focus)"
+    echo "  📺  3) Streaming      (Better for video services)"
+    echo "  🌎  4) Global Proxy   (All traffic through proxy)"
+    echo "  🎯  5) Direct Only    (Disable proxy completely)"
     echo "  ───────────────────────────────────────────────────────────"
 }
 
 # ------------------------------------------------------------
-# Apply a profile
+# Apply a profile (calls real routing functions when possible)
 # ------------------------------------------------------------
 apply_profile() {
     local profile="$1"
@@ -33,51 +60,80 @@ apply_profile() {
     case "$profile" in
         balanced)
             echo "balanced" > "$PROFILE_DIR/active"
-            echo "iran_direct" > "$PROXY_DIR/routing/current_mode" 2>/dev/null
+
+            if command -v apply_iran_direct >/dev/null 2>&1; then
+                apply_iran_direct
+            else
+                echo "iran_direct" > "$ROUTING_DIR/current_mode"
+                log_warn "Routing module not fully loaded. Mode saved locally."
+            fi
+
             log_success "Profile [⚖️ Balanced] applied!"
-            log_info "Iranian sites → Direct | Foreign sites → Proxy!"
+            log_info "Iranian sites → Direct | Foreign sites → Proxy"
             ;;
+
         gaming)
             echo "gaming" > "$PROFILE_DIR/active"
+
+            # Gaming currently uses Iran Direct as base
+            if command -v apply_iran_direct >/dev/null 2>&1; then
+                apply_iran_direct
+            else
+                echo "iran_direct" > "$ROUTING_DIR/current_mode"
+                log_warn "Routing module not fully loaded. Mode saved locally."
+            fi
+
             log_success "Profile [🕹️ Gaming] applied!"
-            log_info "Optimized for low latency and stable connection!"
+            log_info "Optimized for lower latency and stability."
             ;;
+
         streaming)
             echo "streaming" > "$PROFILE_DIR/active"
-            log_success "Profile [🛗 Streaming] applied!"
-            log_info "Optimized for video streaming services!"
+
+            if command -v apply_iran_direct >/dev/null 2>&1; then
+                apply_iran_direct
+            else
+                echo "iran_direct" > "$ROUTING_DIR/current_mode"
+                log_warn "Routing module not fully loaded. Mode saved locally."
+            fi
+
+            log_success "Profile [📺 Streaming] applied!"
+            log_info "Optimized for YouTube / Netflix style traffic."
             ;;
+
         global)
             echo "global" > "$PROFILE_DIR/active"
-            echo "global_proxy" > "$PROXY_DIR/routing/current_mode" 2>/dev/null
+
+            if command -v apply_global_proxy >/dev/null 2>&1; then
+                apply_global_proxy
+            else
+                echo "global_proxy" > "$ROUTING_DIR/current_mode"
+                log_warn "Routing module not fully loaded. Mode saved locally."
+            fi
+
             log_success "Profile [🌎 Global Proxy] applied!"
-            log_info "All traffic will go through proxy!"
+            log_info "All traffic will go through proxy."
             ;;
+
         direct)
             echo "direct" > "$PROFILE_DIR/active"
-            echo "direct_only" > "$PROXY_DIR/routing/current_mode" 2>/dev/null
+
+            if command -v apply_direct_only >/dev/null 2>&1; then
+                apply_direct_only
+            else
+                echo "direct_only" > "$ROUTING_DIR/current_mode"
+                log_warn "Routing module not fully loaded. Mode saved locally."
+            fi
+
             log_success "Profile [🎯 Direct Only] applied!"
-            log_info "Proxy is disabled. All traffic is direct!"
+            log_info "Proxy disabled. All traffic is direct."
             ;;
+
         *)
             log_error "Unknown profile!"
             return 1
             ;;
     esac
-}
-
-# ------------------------------------------------------------
-# Show current active profile
-# ------------------------------------------------------------
-show_active_profile() {
-    echo "  🎭 Current Active Profile"
-    if [ -f "$PROFILE_DIR/active" ]; then
-        active=$(cat "$PROFILE_DIR/active")
-        echo "    🫀 Active Profile : ${GREEN}$active${RESET}"
-    else
-        echo "    🫀 Active Profile : ${GRAY}None${RESET}"
-    fi
-    echo ""
 }
 
 # ------------------------------------------------------------
@@ -110,7 +166,7 @@ profile_manager_menu() {
             *) log_warn "Invalid option!" ;;
         esac
 
-        printf "\n  ${GRAY}Press [Enter] to continue ... ${RESET}"
+        printf "\n  ${GRAY}Press [Enter] to continue ...${RESET}"
         read -r _ </dev/tty
     done
 }

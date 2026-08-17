@@ -1,7 +1,7 @@
 <br>
 
 <div align="center">
-  <img src="ui/ico/dp.svg" alt="DayPass Logo" width="77" height="77" style="vertical-align: middle; margin-right: 8px;">
+  <img src="../ui/ico/dp.svg" alt="DayPass Logo" width="77" height="77" style="vertical-align: middle; margin-right: 8px;">
   <h1>
     <span style="vertical-align: middle;">DayPass</span>
   </h1>
