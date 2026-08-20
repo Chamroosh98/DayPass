@@ -2,25 +2,29 @@
 
 show_banner()
 {
-    W_LOGO="${BOLD}${WHITE}"
-    R_LOGO="${BOLD}${RED}"
-    VERSION="v2.1.0"
+    # Color Definitions
+    BOLD="\033[1m"
+    RED="\033[31m"
+    WHITE="\033[37m"
+    GRAY="\033[90m"
+    CYAN="\033[36m"
+    RESET="\033[0m"
+
+    VERSION="v1.2.0"
+    GITHUB="github.com/Chamroosh98"
 
     echo
-
-    printf "%b          .=:   :-+++=-.%b\n" "${W_LOGO}" "${RESET}"
-    printf "%b      .-+*##- :*##+==*##=%b\n" "${W_LOGO}" "${RESET}"
-    printf "%b      =#*###:.##+     =*#-    %b ____              %b____%b %s%b\n" "${W_LOGO}" "${RED}" "${GRAY}" "${YELLOW}" "$VERSION" "${RESET}"
-    printf "%b      .  **#: ***:   .+#*.    %b|  _ \\  __ _ _   _%b|  _ \\  __ _ ___ ___%b\n" "${W_LOGO}" "${RED}" "${GRAY}" "${RESET}"
-    printf "%b        .**#: .+***++*+=.     %b| | | |/ _\` || | |%b| |_) / _\` / __/ __|%b\n" "${R_LOGO}" "${RED}" "${GRAY}" "${RESET}"
-    printf "%b        .***:.+**+=-::::-:    %b| |_| | (_| | |_| |%b|  __/ (_| \\__ \\__ \\\\%b\n" "${R_LOGO}" "${RED}" "${GRAY}" "${RESET}"
-    printf "%b        .***:=+=:      :--.   %b|____/ \\__,_|\\__, |%b|_|   \\__,_|___/___/%b\n" "${R_LOGO}" "${RED}" "${GRAY}" "${RESET}"
-    printf "%b        .***::-:       :--.   %b             |___/%b\n" "${R_LOGO}" "${RED}" "${RESET}"
-    printf "%b        .++*. :--:....:--:    %b🐱 github.com/Chamroosh98%b\n" "${R_LOGO}" "${WHITE}" "${RESET}"
-    printf "%b        .+++:  .::::::--:     %b\n" "${R_LOGO}" "${RESET}"
-    printf "%b       =+++++=     .:::.      %b\n" "${R_LOGO}" "${RESET}"
-    printf "%b       .......  .::::.        %b\n" "${R_LOGO}" "${RESET}"
-
+    printf "  %b____              %b____%b                     %b%s%b\n" "${BOLD}${RED}" "${BOLD}${WHITE}" "${RESET}" "${GRAY}" "$VERSION" "${RESET}"
+    printf "  %b|  _ \\  __ _ _   _%b|  _ \\  __ _ ___ ___%b\n" "${BOLD}${RED}" "${BOLD}${WHITE}" "${RESET}"
+    printf "  %b| | | |/ _\` | | | |%b| |_) / _\` / __/ __|%b\n" "${BOLD}${RED}" "${BOLD}${WHITE}" "${RESET}"
+    printf "  %b| |_| | (_| | |_| |%b|  __/ (_| \\__ \\__ \\%b\n" "${BOLD}${RED}" "${BOLD}${WHITE}" "${RESET}"
+    printf "  %b|____/ \\__, |\\__, |%b|_|   \\__,_|___/___/%b\n" "${BOLD}${RED}" "${BOLD}${WHITE}" "${RESET}"
+    printf "  %b       |___/ |___/%b\n" "${BOLD}${RED}" "${RESET}"
+    echo
+    printf "  %b🔗 GitHub: %bhttps://%s%b\n" "${WHITE}" "${CYAN}" "${GITHUB}" "${RESET}"
     echo
     printf "  %b───────────────────── 🕊️ Remembering the IRAN Massacre on Jan 8-9, 2026 ─────────────────────%b\n" "${GRAY}" "${RESET}"
+    echo
 }
+
+show_banner
