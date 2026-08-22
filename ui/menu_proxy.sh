@@ -1,21 +1,25 @@
 #!/bin/sh
+# ============================================================
+# DayPass - Proxy & Routing Manager Menu
+# ============================================================
 
 proxy_menu() {
     while true; do
         render_persistent_header 2>/dev/null || clear
 
-        echo "  🛡️ Proxy & Routing Manager"
+        echo "  🛡️  Proxy & Routing Manager"
         echo "  ───────────────────────────────────────────────────────────"
         echo "  🧶 1) Config Manager (Nodes & Subscriptions)"
         echo "  🚦 2) Traffic Routing / Shunt Rules"
-        echo "  ⚖️ 3) Node Load Balancing"
+        echo "  ⚖️  3) Node Load Balancing"
         echo "  🩺 4) Node Health Checker"
         echo "  🎭 5) Routing Profiles"
+        echo "  🧼 6) Clean IP Manager"
         echo "  🚪 0) Back to Main Menu"
         echo "  ───────────────────────────────────────────────────────────"
         echo
 
-        printf "  ⁉️ Select option [0-5] : "
+        printf "  ⁉️ Select option [0-6] : "
         read -r choice </dev/tty
 
         case "$choice" in
@@ -56,6 +60,14 @@ proxy_menu() {
                     profile_manager_menu
                 else
                     log_error "Profile Manager module not found!"
+                    sleep 2
+                fi
+                ;;
+            6)
+                if command -v clean_ip_menu >/dev/null 2>&1; then
+                    clean_ip_menu
+                else
+                    log_error "Clean IP module not found!"
                     sleep 2
                 fi
                 ;;

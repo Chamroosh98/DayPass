@@ -10,10 +10,10 @@ menu_mode()
 {
     render_persistent_header
 
-    echo "    🕵️‍♀️ Select Installation Mode                              "
+    echo "  🕵️‍♀️ Select Installation Mode                                "
     echo "  ───────────────────────────────────────────────────────────"
-    echo "    1) ⚡ Recommended (Quick & Pre-configured for users)     "
-    echo "    2) 🛠️ Custom      (Advanced package selection)           "
+    echo "  1) ⚡ Recommended (Quick & Pre-configured for users)       "
+    echo "  2) 🛠️ Custom      (Advanced package selection)             "
     echo "  ───────────────────────────────────────────────────────────"
     echo
 

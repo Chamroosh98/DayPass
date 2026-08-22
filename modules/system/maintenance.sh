@@ -97,13 +97,13 @@ maintenance_menu()
         render_persistent_header
         
         printf "  🛠️ ${BOLD}DayPass Maintenance & Recovery${RESET}\n"
-        printf "  ──────────────────────────────────────────────────\n"
+        printf "  ─────────────────────────────────────────────────────────── \n"
         printf "  🧹 1) Purge DayPass Installed Packages\n"
         printf "  🗑️ 2) Clean Temporary Cache & Downloads\n"
         printf "  💾 3) Backup System Configuration\n"
         printf "  🚨 4) Factory Reset OpenWrt (Firstboot)\n"
         printf "  🚪 0) Back to Main Menu\n\n"
-
+        printf "  ─────────────────────────────────────────────────────────── \n"
         printf "  ⁉️ Select option [0-4] : "
         read -r choice </dev/tty
 

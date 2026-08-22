@@ -38,7 +38,7 @@ func generateInstallScript(outputFile string) error {
 	// Cleaned & strict dependency-aware sourcing sequence
 	installerFiles := []string{
 		// 1. Core Globals, UI Base Libraries & Styles
-		"installer/globals.sh",
+		"installer/init/globals.sh",
 		"ui/lib/styles.sh",
 		"ui/lib/box_utils.sh",
 		"ui/lib/header.sh",
@@ -46,12 +46,12 @@ func generateInstallScript(outputFile string) error {
 		"ui/banner.sh",
 
 		// 2. Low-Level System Detection & Package Management
-		"installer/arch_detector.sh",
+		"installer/init/arch_detector.sh",
 		"installer/pkg/manager.sh",
 
 		// 3. Core System Modules
-		"modules/zero_deps.sh",
-		"modules/version_check.sh",
+		"installer/init/zero_deps.sh",
+		"modules/system/arch_check.sh",
 		"modules/resource_monitor.sh",
 
 		// 4. Network - Host
@@ -79,20 +79,27 @@ func generateInstallScript(outputFile string) error {
 		"modules/proxy/node_balancer.sh",
 		"modules/proxy/health_checker.sh",
 		"modules/proxy/profile_manager.sh",
+		
+		// 8. Proxy - Cloudflare Clean IP
+		"modules/proxy/cloudflare/core.sh",
+		"modules/proxy/cloudflare/link_utils.sh",
+		"modules/proxy/cloudflare/scanner.sh",
+		"modules/proxy/cloudflare/applier.sh",
+		"modules/proxy/cloudflare/menu.sh",
 
-		// 8. Other Modules
-		"modules/backup_restore.sh",
-		"modules/maintenance.sh",
-		"modules/service_manager.sh",
+		// 9. Other Modules
+		"modules/system/backup_restore.sh",
+		"modules/system/maintenance.sh",
+		"modules/service/service_manager.sh",
 
-		// 9. Core Installer Logic & Package Processing
-		"installer/install_core.sh",
-		"installer/resource_checker.sh",
+		// 10. Core Installer Logic & Package Processing
+		"installer/init/install_core.sh",
+		"installer/system/resource_checker.sh",
 		"installer/pkg/resolver.sh",
 		"installer/pkg/installer.sh",
 		"installer/pkg/updater.sh",
 
-		// 10. UI Components & Interactive Menus
+		// 11. UI Components & Interactive Menus
 		"ui/state.sh",
 		"ui/menu_custom.sh",
 		"ui/menu_mode.sh",

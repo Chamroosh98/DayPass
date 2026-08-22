@@ -1,6 +1,5 @@
 #!/bin/sh
 
-# 🛑 SIGINT / SIGTERM Handler
 cleanup_and_exit() {
     printf "\r\033[K"
     echo ""
