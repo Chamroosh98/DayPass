@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://github.com/Chamroosh98/DayPass/releases">
-    <img src="https://img.shields.io/badge/Release-181717?style=for-the-badge&logo=github&logoColor=white" alt="Release">
+    <img src="https://img.shields.io/github/v/release/Chamroosh98/DayPass?style=for-the-badge&label=&color=181717&logo=github&logoColor=white" alt="Release">
   </a>
   <a href="https://openwrt.org/">
     <img src="https://img.shields.io/badge/OpenWrt-00C7B7?style=for-the-badge&logo=openwrt&logoColor=white" alt="OpenWrt">
