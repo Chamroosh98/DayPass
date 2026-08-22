@@ -4,10 +4,10 @@ package_menu()
 {
     render_persistent_header
 
-    echo "    🕵️‍♀️ Select Package Type                                   "
+    echo "  🕵️‍♀️ Select Package Type                                   "
     echo "  ───────────────────────────────────────────────────────────"
-    echo "    🔒 1) Passwall-1  (Legacy Stable Release)                "
-    echo "    🔒 2) Passwall-2  (Modern Release - Recommended)         "
+    echo "  🔒 1) Passwall-1  (Legacy Stable Release)                "
+    echo "  🔒 2) Passwall-2  (Modern Release - Recommended)         "
     echo "  ───────────────────────────────────────────────────────────"
     echo
 

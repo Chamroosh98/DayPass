@@ -7,13 +7,13 @@ guest_menu() {
         render_persistent_header 2>/dev/null || clear
 
         echo "  👥 Guest Network Management"
-        echo "  ───────────────────────────────────────────────────────────"
+        echo "  ─────────────────────────────────────────────────────────── "
         echo "  🍚 1) Setup Guest Network (Interface + Firewall)"
         echo "  🛜 2) Setup Guest WiFi"
         echo "  🛣️ 3) Bandwidth Control (QoS)"
         echo "  ❌ 4) Remove Guest Network"
         echo "  🚪 0) Back"
-        echo "  ───────────────────────────────────────────────────────────"
+        echo "  ─────────────────────────────────────────────────────────── "
         echo
 
         printf "  ⁉️ Select option [0-4] : "

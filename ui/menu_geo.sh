@@ -4,13 +4,13 @@ geo_menu()
 {
     render_persistent_header
 
-    echo "    🕵️‍♀️ Select Geo Database                                   "
-    echo "  ───────────────────────────────────────────────────────────"
-    echo "    1) Skip       (Do not install Geo databases)             "
-    echo "    2) Official   (Standard official release packages)       "
-    echo "    3) Iran Full  (Custom ruleset - Full database)           "
-    echo "    4) Iran Lite  (Custom ruleset - Compact database)        "
-    echo "  ───────────────────────────────────────────────────────────"
+    echo "  🕵️‍♀️ Select Geo Database                                     "
+    echo "  ─────────────────────────────────────────────────────────── "
+    echo "  🫸🏻 1) Skip       (Do not install Geo databases)             "
+    echo "  👔 2) Official   (Standard official release packages)       "
+    echo "  🍺 3) Iran Full  (Custom ruleset - Full database)           "
+    echo "  🍷 4) Iran Lite  (Custom ruleset - Compact database)        "
+    echo "  ─────────────────────────────────────────────────────────── "
     echo
 
     printf "  ⁉️ Select option [1-4] (Default: 1) : "
@@ -44,7 +44,7 @@ geo_menu()
             GEOSITE_URL="https://raw.githubusercontent.com/Chocolate4U/Iran-v2ray-rules/release/geosite-lite.dat"
             ;;
         *)
-            log_warn "Invalid choice! Defaulting to Skip."
+            log_warn "Invalid choice! Defaulting to Skip!"
             SELECTED_GEO="none"
             ;;
     esac

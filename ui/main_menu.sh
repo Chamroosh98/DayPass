@@ -8,11 +8,12 @@ main_menu()
         printf "  📦 1) Install Package Profile\n"
         printf "  🔄 2) Check & Update Packages\n"
         printf "  🌐 3) Network Settings\n"
-        printf "  📊 4) System Resources & Hardware Info\n"
-        printf "  🛠️ 5) Maintenance & Recovery\n"
+        printf "  🛡️ 4) Proxy & Routing Manager\n"
+        printf "  🖥️ 5) System Resources & Hardware Info\n"
+        printf "  🛠️ 6) Maintenance & Recovery\n"
         printf "  🚪 0) Exit\n\n"
 
-        printf "  ⁉️ Select option [0-5] : "
+        printf "  ⁉️ Select option [0-6] : "
         read -r choice </dev/tty
 
         case "$choice" in
@@ -41,6 +42,15 @@ main_menu()
                 fi
                 ;;
             4)
+                if command -v proxy_menu >/dev/null 2>&1; then
+                    proxy_menu || true
+                else
+                    log_error "Proxy menu not found!"
+                    sleep 2
+                fi
+                ;;
+            
+            5)
                 if command -v show_system_resources_menu >/dev/null 2>&1; then
                     show_system_resources_menu || true
                 else
@@ -48,7 +58,7 @@ main_menu()
                     sleep 2
                 fi
                 ;;
-            5)
+            6)
                 if command -v maintenance_menu >/dev/null 2>&1; then
                     maintenance_menu || true
                 else

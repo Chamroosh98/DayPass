@@ -3,9 +3,9 @@
 inspect_and_confirm_updates()
 {
     echo "  📦 DayPass Package Inspection Table"
-    echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
+    echo "  ─────────────────────────────────────────────────────────── "
     printf "   %-28s %-16s %-16s %-12s\n" "Package" "Installed" "Manifest Ver" "Action"
-    echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
+    echo "  ─────────────────────────────────────────────────────────── "
 
     PACKAGES_TO_PROCESS=""
     UPGRADE_COUNT=0
@@ -54,9 +54,9 @@ inspect_and_confirm_updates()
             "$pkg" "$inst_ver_fmt" "$manif_ver_fmt" "$ACTION_STR"
     done
 
-    echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
-    printf "   Summary: %d to install, %d to upgrade, %d skipped!\n" "$INSTALL_COUNT" "$UPGRADE_COUNT" "$SKIP_COUNT"
-    echo "  ──────────────────────────────────────────────────────────────────────────────────────────"
+    echo "  ─────────────────────────────────────────────────────────── "
+    printf "   Summary : %d to install, %d to upgrade, %d skipped!\n" "$INSTALL_COUNT" "$UPGRADE_COUNT" "$SKIP_COUNT"
+    echo "  ─────────────────────────────────────────────────────────── "
     echo
 
     if [ -z "$PACKAGES_TO_PROCESS" ]; then
@@ -83,7 +83,7 @@ inspect_and_confirm_updates()
     return 0
 }
 
-# منوی اصلی ورود به آپدیت
+
 update_packages_menu()
 {
     render_persistent_header

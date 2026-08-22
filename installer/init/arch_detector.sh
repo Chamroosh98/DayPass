@@ -29,7 +29,7 @@ detect_system_architecture()
     # 3. Final Fallback
     if [ -z "$ARCH" ]; then
         ARCH=$(uname -m)
-        log_warn "Standard OpenWrt release file unreadable. Fallback architecture : [$ARCH]"
+        log_warn "Standard OpenWrt release file unreadable! Fallback architecture : [$ARCH]"
     fi
 
     # 4. Extract MAJOR Version (24 vs 25)

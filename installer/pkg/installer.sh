@@ -5,7 +5,6 @@ manifest_lookup()
     field="$1"
     package="$2"
 
-    # جستجوی پویا در تمام Feedها به جای .packages[]
     val=$(jq -r \
         --arg pkg "$package" \
         --arg arch "$ARCH" \
@@ -141,7 +140,7 @@ deploy_targeted_packages()
     echo "  🔍 Executing Pre-Flight System Resource Validation ..."
     resource_snapshot
     if ! estimate_install_size; then
-        log_error "Installation aborted due to system resource limits."
+        log_error "Installation aborted due to system resource limits!"
         return 1
     fi
 
@@ -163,7 +162,7 @@ deploy_targeted_packages()
         if command -v show_ascii_progress >/dev/null 2>&1; then
             show_ascii_progress "Downloading ($pkg) [Free RAM: ${curr_ram_fmt:-N/A}]" "$current_idx" "$total_pkgs"
         else
-            echo "  📦 [$current_idx/$total_pkgs] Downloading $pkg... (Free RAM: ${curr_ram_fmt:-N/A})"
+            echo "  📦 [$current_idx/$total_pkgs] Downloading $pkg ... (Free RAM: ${curr_ram_fmt:-N/A})"
         fi
 
         if ! download_package "$pkg"; then
@@ -236,18 +235,16 @@ deploy_targeted_packages()
 rollback_failed_install()
 {
     echo
-    log_warn "=================================================="
     log_warn "Initiating Selective Atomic Rollback Procedures ..."
-    log_warn "=================================================="
     echo
 
     rm -f "$TMP_DIR"/*.part "$TMP_DIR"/*.apk "$TMP_DIR"/*.ipk 2>/dev/null
 
     if [ -s "$TRANSACTION_LOG" ]; then
-        log_info "Rolling back modified packages from current session..."
+        log_info "Rolling back modified packages from current session ..."
         while read -r pkg; do
             [ -z "$pkg" ] && continue
-            log_info "Rollback: Removing package [$pkg] ..."
+            log_info "Rollback : Removing package [$pkg] ..."
             
             case "${PKG_MANAGER:-opkg}" in
                 apk)  apk del "$pkg" >/dev/null 2>&1 || true ;;
@@ -255,7 +252,7 @@ rollback_failed_install()
             esac
         done < "$TRANSACTION_LOG"
     else
-        log_info "No system packages were installed in this session. Skipping removal."
+        log_info "No system packages were installed in this session. Skipping removal!"
     fi
 
     rm -f "$TRANSACTION_LOG"

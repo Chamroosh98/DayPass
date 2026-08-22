@@ -4,12 +4,12 @@ engine_menu()
 {
     render_persistent_header
 
-    echo "    🕵️‍♀️  Select Proxy Engine                                  "
-    echo "  ───────────────────────────────────────────────────────────"
-    echo "    1) ⚡ Auto      (Recommended)                            "
-    echo "    2) ✖️ Xray      (Xray-core proxy engine)                 "
-    echo "    3) 📦 Sing-box  (Sing-box proxy engine)                  "
-    echo "  ───────────────────────────────────────────────────────────"
+    echo "  🕵️‍♀️ Select Proxy Engine                                    "
+    echo "  ───────────────────────────────────────────────────────── "
+    echo "  1) ⚡ Auto      (Recommended)                             "
+    echo "  2) ✖️ Xray      (Xray-core proxy engine)                  "
+    echo "  3) 📦 Sing-box  (Sing-box proxy engine)                   "
+    echo "  ───────────────────────────────────────────────────────── "
     echo
 
     printf "  ⁉️ Select option [1-3] (Default: 1) : "
@@ -36,13 +36,13 @@ engine_menu()
                     add_selected_package "sing-box"
                     ;;
                 *)
-                    log_info "Reverting Proxy Engine selection to Auto."
+                    log_info "Reverting Proxy Engine selection to Auto!"
                     SELECTED_ENGINE="auto"
                     ;;
             esac
             ;;
         *)
-            log_warn "Invalid choice! Defaulting to Auto engine."
+            log_warn "Invalid choice! Defaulting to Auto engine!"
             SELECTED_ENGINE="auto"
             ;;
     esac
