@@ -53,16 +53,16 @@
 
 ## 🚀 什么是 DayPass？
 
-**DayPass** 是一个轻量、自动化、模块化的框架，专为 **OpenWrt** 路由器设计，将网络管理、代理和路由功能整合在一起，让一切变得简单！
+**DayPass** 是一款轻量、自动化、模块化的工具，专为 **OpenWrt** 路由器打造。它把网络管理、代理和智能路由整合在一起，让一切变得简单高效。
 
-它支持 **Passwall**、**Multi-WAN**、**Guest Network** 和 **Clean IP**，即使在严格的网络过滤环境下，也能帮助你获得更稳定、更智能的互联网访问。从节点选择、流量分流，到替换 Cloudflare IP 以及使用现成的路由配置文件——它几乎覆盖了所有需求。
+内置支持 **Passwall**、**Multi-WAN**、**Guest Network** 和 **Clean IP**，即使在严格的网络审查环境下，也能帮你保持更稳定、更智能的网络访问。从优选节点、流量分流，到替换 Cloudflare IP、使用现成的路由配置文件，DayPass 几乎覆盖了完整工作流。
 
-DayPass 完全兼容新版 OpenWrt 使用的两种软件包管理器：
+它完美兼容新版 OpenWrt 的两种包管理器：
 
-- **OpenWrt 24.x** 使用 `opkg`
-- **OpenWrt 25.x** 使用 `apk`
+- **OpenWrt 24.x** → `opkg`
+- **OpenWrt 25.x** → `apk`
 
-软件包会根据你的 OpenWrt 版本和路由器硬件架构进行下载和安装。
+软件包会根据你的 OpenWrt 版本和路由器硬件架构自动下载并安装。
 
 ---
 

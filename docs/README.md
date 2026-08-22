@@ -57,16 +57,16 @@
 
 ## 🚀 What is DayPass?
 
-**DayPass** is a lightweight, automated, and modular framework for **OpenWrt** routers that simplifies network management, proxy, and routing all in one place!
+**DayPass** is a lightweight, automated, and modular toolkit built for **OpenWrt** routers. It brings network management, proxy tools, and smart routing together in one place.
 
-With support for **Passwall**, **Multi-WAN**, **Guest Network**, and **Clean IP**, it helps you maintain more stable and smarter internet access even under heavy filtering. From node selection and traffic shunting to replacing Cloudflare IPs and ready-to-use routing profiles — it covers everything.
+With built-in support for **Passwall**, **Multi-WAN**, **Guest Network**, and **Clean IP**, it helps you stay online more reliably — even under heavy internet censorship. From selecting the best nodes and splitting traffic, to swapping Cloudflare IPs and applying ready-made routing profiles, DayPass covers the whole workflow.
 
-DayPass is fully compatible with both package managers used in recent OpenWrt versions:
+It works seamlessly with both package managers used in recent OpenWrt releases:
 
-- **OpenWrt 24.x** with `opkg`
-- **OpenWrt 25.x** with `apk`
+- **OpenWrt 24.x** → `opkg`
+- **OpenWrt 25.x** → `apk`
 
-Packages are fetched and installed based on your OpenWrt version and the hardware architecture of the router.
+Packages are automatically downloaded and installed according to your OpenWrt version and the router’s hardware architecture.
 
 ---
 
