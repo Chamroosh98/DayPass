@@ -94,7 +94,7 @@ func generateInstallScript(outputFile string) error {
 
 		// 10. Core Installer Logic & Package Processing
 		"installer/init/install_core.sh",
-		"installer/system/resource_checker.sh",
+		"modules/system/resource_checker.sh",
 		"installer/pkg/resolver.sh",
 		"installer/pkg/installer.sh",
 		"installer/pkg/updater.sh",
