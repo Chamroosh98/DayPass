@@ -2,7 +2,6 @@ name: 🚀 DayPass Release
 
 on:
   schedule:
-    # 🕐 اجرا به صورت اتوماتیک هر روز ساعت 00:00 UTC برای دریافت آپدیت‌های SourceForge
     - cron: '0 0 * * *'
   push:
     branches:
@@ -119,7 +118,7 @@ jobs:
               raw_name="${dir#raw-release-}"
               ver="${raw_name%%-*}"
               arch="${raw_name#*-}"
-              
+
               mkdir -p "$ver"
               mv "$dir" "$ver/$arch"
               echo "✅ Restructured CDN Directory : 📂 $dir -> ⛏️ $ver/$arch"
@@ -159,16 +158,16 @@ jobs:
         run: |
           TAG_NAME="${{ env.VERSION }}"
           RELEASE_TITLE="🚀 ${{ env.VERSION }}"
-          
+
           echo "🚀 Creating release $TAG_NAME via GitHub CLI ..."
-          
+
           # Delete tag if partially created in a failed attempt
           gh release delete "$TAG_NAME" -y --cleanup-tag 2>/dev/null || true
 
           cat <<EOF > release_notes.md
           ## 🚀 DayPass Production Release
           🔥 Stable, optimized and production-ready build!
-          
+
           📅 **Date** : \`${{ env.VERSION }}\`
           ⚡ **Build Number** : \`${{ github.run_number }}\`
 
@@ -193,7 +192,7 @@ jobs:
 
           echo "📤 Uploading assets to GitHub Release ..."
           gh release upload "$TAG_NAME" release-files/* --clobber
-          
+
           echo "✅ Release uploaded successfully!"
 
       - name: 🕵️‍♀️ Prepare GitHub Pages Assets for Release
