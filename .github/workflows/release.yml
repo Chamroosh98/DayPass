@@ -118,7 +118,7 @@ jobs:
               raw_name="${dir#raw-release-}"
               ver="${raw_name%%-*}"
               arch="${raw_name#*-}"
-              
+
               mkdir -p "$ver"
               mv "$dir" "$ver/$arch"
               echo "✅ Restructured CDN Directory : 📂 $dir -> ⛏️ $ver/$arch"
