@@ -1,7 +1,4 @@
 #!/bin/sh
-# ============================================================
-# DayPass - Proxy & Routing Manager Menu
-# ============================================================
 
 proxy_menu() {
     while true; do
@@ -11,7 +8,7 @@ proxy_menu() {
         echo "  ───────────────────────────────────────────────────────────"
         echo "  🧶 1) Config Manager (Nodes & Subscriptions)"
         echo "  🚦 2) Traffic Routing / Shunt Rules"
-        echo "  ⚖️  3) Node Load Balancing"
+        echo "  ⚖️ 3) Node Load Balancing"
         echo "  🩺 4) Node Health Checker"
         echo "  🎭 5) Routing Profiles"
         echo "  🧼 6) Clean IP Manager"

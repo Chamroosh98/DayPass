@@ -101,16 +101,16 @@ func generateInstallScript(outputFile string) error {
 
 		// 11. UI Components & Interactive Menus
 		"ui/state.sh",
-		"ui/menu_custom.sh",
-		"ui/menu_mode.sh",
-		"ui/engine_menu.sh",
-		"ui/menu_language.sh",
-		"ui/menu_geo.sh",
+		"ui/menu/custom.sh",
+		"ui/menu/mode.sh",
+		"ui/menu/engine.sh",
+		"ui/menu/language.sh",
+		"ui/menu/geo.sh",
 		"ui/review.sh",
-		"ui/menu_package.sh",
-		"ui/menu_network.sh",
-		"ui/menu_proxy.sh",       
-		"ui/main_menu.sh",
+		"ui/menu/passwall.sh",
+		"ui/menu/network.sh",
+		"ui/menu/proxy.sh",       
+		"ui/menu/main.sh",
 		"ui/installer_ui.sh",
 	}
 

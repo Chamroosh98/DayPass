@@ -1,20 +1,19 @@
 #!/bin/sh
-# ============================================================
-# DayPass - Node Health Checker
+
 # Tests reachability + approximate latency of proxy nodes
 # ============================================================
 
-# ------------------------------------------------------------
+
 # Paths
-# ------------------------------------------------------------
+
 PROXY_DIR="/etc/daypass/proxy"
 CONFIG_DIR="$PROXY_DIR/configs"
 HEALTH_DIR="$PROXY_DIR/health"
 mkdir -p "$HEALTH_DIR"
 
-# ------------------------------------------------------------
+
 # Extract host and port from share link
-# ------------------------------------------------------------
+
 extract_host_port() {
     local link="$1"
     HOST=""
@@ -36,9 +35,9 @@ extract_host_port() {
     fi
 }
 
-# ------------------------------------------------------------
+
 # Test a single node (TCP + latency)
-# ------------------------------------------------------------
+
 test_node() {
     local name="$1"
     local file="$CONFIG_DIR/${name}.json"
@@ -60,14 +59,14 @@ test_node() {
     share_link=$(jq -r '.share_link // empty' "$file" 2>/dev/null)
 
     if [ -z "$share_link" ]; then
-        log_error "$name → no share link"
+        log_error "[$name] → no share link"
         return 1
     fi
 
     extract_host_port "$share_link"
 
     if [ -z "$HOST" ] || [ -z "$PORT" ]; then
-        log_warn "$name → could not parse address"
+        log_warn "[$name] → could not parse address"
         return 1
     fi
 
@@ -104,12 +103,12 @@ test_node() {
     fi
 }
 
-# ------------------------------------------------------------
+
 # Test all nodes
-# ------------------------------------------------------------
+
 test_all_nodes() {
     echo
-    echo "  🩺 Testing all nodes ..."
+    echo "  🩺 Checking all nodes ..."
     echo "  ───────────────────────────────────────────────────────────"
 
     local total=0
@@ -139,12 +138,12 @@ test_all_nodes() {
     echo
 }
 
-# ------------------------------------------------------------
+
 # Test selected nodes only
-# ------------------------------------------------------------
+
 test_selected_nodes() {
     echo
-    echo "  📋 Available Configs:"
+    echo "  📋 Available Configs :"
     echo "  ───────────────────────────────────────────────────────────"
 
     local configs=""
@@ -181,7 +180,7 @@ test_selected_nodes() {
     fi
 
     echo
-    echo "  🩺 Testing selected nodes ..."
+    echo "  🩺 Checking selected nodes ..."
     echo "  ───────────────────────────────────────────────────────────"
 
     local idx=1
@@ -197,9 +196,9 @@ test_selected_nodes() {
     echo "  ───────────────────────────────────────────────────────────"
 }
 
-# ------------------------------------------------------------
+
 # Main Menu
-# ------------------------------------------------------------
+
 health_checker_menu() {
     while true; do
         render_persistent_header 2>/dev/null || clear

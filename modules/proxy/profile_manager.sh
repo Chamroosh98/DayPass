@@ -1,21 +1,20 @@
 #!/bin/sh
-# ============================================================
-# DayPass - Routing Profiles Manager
+
 # Applies ready-to-use profiles by calling real routing modes
 # ============================================================
 
-# ------------------------------------------------------------
+
 # Paths
-# ------------------------------------------------------------
+
 PROXY_DIR="/etc/daypass/proxy"
 PROFILE_DIR="$PROXY_DIR/profiles"
 ROUTING_DIR="$PROXY_DIR/routing"
 mkdir -p "$PROFILE_DIR"
 mkdir -p "$ROUTING_DIR"
 
-# ------------------------------------------------------------
+
 # Show current active profile
-# ------------------------------------------------------------
+
 show_active_profile() {
     echo "  🎭 Current Active Profile"
     echo "  ───────────────────────────────────────────────────────────"
@@ -37,9 +36,9 @@ show_active_profile() {
     echo "  ───────────────────────────────────────────────────────────"
 }
 
-# ------------------------------------------------------------
+
 # List available profiles
-# ------------------------------------------------------------
+
 list_profiles() {
     echo "  🎭 Available Routing Profiles"
     echo "  ───────────────────────────────────────────────────────────"
@@ -51,9 +50,9 @@ list_profiles() {
     echo "  ───────────────────────────────────────────────────────────"
 }
 
-# ------------------------------------------------------------
+
 # Apply a profile (calls real routing functions when possible)
-# ------------------------------------------------------------
+
 apply_profile() {
     local profile="$1"
 
@@ -136,9 +135,9 @@ apply_profile() {
     esac
 }
 
-# ------------------------------------------------------------
+
 # Main Menu
-# ------------------------------------------------------------
+
 profile_manager_menu() {
     while true; do
         render_persistent_header 2>/dev/null || clear
