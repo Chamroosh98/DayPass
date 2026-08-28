@@ -2,7 +2,6 @@ name: 🚀 DayPass Release
 
 on:
   schedule:
-    # 🕐 اجرا به صورت اتوماتیک هر روز ساعت 00:00 UTC برای دریافت آپدیت‌های SourceForge
     - cron: '0 0 * * *'
   push:
     branches:
@@ -157,11 +156,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
+
           TAG_NAME="${{ env.VERSION }}"
           RELEASE_TITLE="🚀 ${{ env.VERSION }}"
-          
+
           echo "🚀 Creating release $TAG_NAME via GitHub CLI ..."
-          
+
           # Delete tag if partially created in a failed attempt
           gh release delete "$TAG_NAME" -y --cleanup-tag 2>/dev/null || true
 
@@ -184,18 +185,36 @@ jobs:
           rm -f release_notes.md
 
           mkdir -p release-files
-          shopt -s nullglob
-          cp merged-release/*.zip release-files/ 2>/dev/null || true
-          find build-artifacts/ -type f -name "*.sha256" -exec cp {} release-files/ \; 2>/dev/null || true
 
-          echo "📁 Checking assets in release-files directory:"
-          ls -la release-files/
+          echo "📁 Collecting release assets ..."
+          find merged-release -type f -name "*.zip" -exec cp -v {} release-files/ \;
+          find build-artifacts -type f -name "*.sha256" -exec cp -v {} release-files/ \;
+
+          echo "📦 Contents of release-files:"
+          ls -lah release-files || true
+
+          # Guardrail: refuse empty upload
+          if [ -z "$(ls -A release-files 2>/dev/null)" ]; then
+            echo "❌ Guardrail failed: no files found in release-files/"
+            echo "---- merged-release tree ----"
+            find merged-release -type f | head -n 100 || true
+            echo "---- build-artifacts tree ----"
+            find build-artifacts -type f | head -n 100 || true
+            exit 1
+          fi
+
+          # Guardrail: refuse zero-byte assets
+          if find release-files -type f -empty | grep -q .; then
+            echo "❌ Guardrail failed: zero-byte files detected in release-files/"
+            find release-files -type f -empty
+            exit 1
+          fi
 
           echo "📤 Uploading assets to GitHub Release ..."
           gh release upload "$TAG_NAME" release-files/* --clobber
-          
-          echo "✅ Release uploaded successfully!"
 
+          echo "✅ Release uploaded successfully!"
+          
       - name: 🕵️‍♀️ Prepare GitHub Pages Assets for Release
         run: |
           mkdir -p github-pages-content

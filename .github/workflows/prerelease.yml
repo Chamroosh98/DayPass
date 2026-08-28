@@ -151,15 +151,18 @@ jobs:
           echo "✅ All release assets passed health check successfully!"
 
       
+      
       - name: 🧪 Create and Upload Pre-Release Packages via GitHub CLI
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
+
           TAG_NAME="${{ env.VERSION }}-beta"
           RELEASE_TITLE="🧪 ${{ env.VERSION }}"
-          
+
           echo "🚀 Creating release $TAG_NAME via GitHub CLI ..."
-          
+
           gh release delete "$TAG_NAME" -y --cleanup-tag 2>/dev/null || true
 
           cat <<EOF > release_notes.md
@@ -180,12 +183,34 @@ jobs:
           rm -f release_notes.md
 
           mkdir -p release-files
-          cp merged-beta/*.zip release-files/ 2>/dev/null || true
-          find build-artifacts/ -type f -name "*.sha256" -exec cp {} release-files/ \; 2>/dev/null || true
+
+          echo "📁 Collecting release assets ..."
+          find merged-beta -type f -name "*.zip" -exec cp -v {} release-files/ \;
+          find build-artifacts -type f -name "*.sha256" -exec cp -v {} release-files/ \;
+
+          echo "📦 Contents of release-files:"
+          ls -lah release-files || true
+
+          # Guardrail: refuse empty upload
+          if [ -z "$(ls -A release-files 2>/dev/null)" ]; then
+            echo "❌ Guardrail failed: no files found in release-files/"
+            echo "---- merged-beta tree ----"
+            find merged-beta -type f | head -n 100 || true
+            echo "---- build-artifacts tree ----"
+            find build-artifacts -type f | head -n 100 || true
+            exit 1
+          fi
+
+          # Guardrail: refuse zero-byte assets
+          if find release-files -type f -empty | grep -q .; then
+            echo "❌ Guardrail failed: zero-byte files detected in release-files/"
+            find release-files -type f -empty
+            exit 1
+          fi
 
           echo "📤 Uploading assets to GitHub Release ..."
           gh release upload "$TAG_NAME" release-files/* --clobber
-          
+
           echo "✅ Pre-release uploaded successfully via GitHub CLI!"
 
       - name: 🕵️‍♀️ Prepare GitHub Pages Assets
