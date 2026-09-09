@@ -253,7 +253,16 @@ jobs:
           curl -s "https://purge.jsdelivr.net/gh/Chamroosh98/DayPass@gh-pages/install.sh" | jq .
           echo "✅ Release CDN cache purged successfully!"
 
-      - name: 🧹 Delete Temporary Build Artifacts
+      - name: 🧼 Cleanup old stable releases
+        uses: dev-drprasad/delete-older-releases@v0.3.4
+        if: success()
+        with:
+          keep_latest: 7
+          delete_tags: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🫧 Delete Temporary Build Artifacts
         uses: geekyeggo/delete-artifact@v5
         if: always()
         with:
