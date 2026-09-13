@@ -1,7 +1,7 @@
 #!/bin/sh
-# ------------------------------------------------------------
+
 # Guest Sub-Menu (Network + QoS)
-# ------------------------------------------------------------
+
 guest_menu() {
     while true; do
         render_persistent_header 2>/dev/null || clear
@@ -52,14 +52,13 @@ guest_menu() {
             *) log_warn "Invalid option!" ;;
         esac
 
-        printf "\n  ${GRAY}Press [ENTER] to return to main menu ... ${RESET}"
+        printf "\n  ${GRAY}Press [ENTER] to return ... ${RESET}"
         read -r _ </dev/tty
     done
 }
 
-# ------------------------------------------------------------
 # Main Network Menu
-# ------------------------------------------------------------
+
 network_menu() {
     while true; do
         render_persistent_header 2>/dev/null || clear
@@ -71,11 +70,12 @@ network_menu() {
         echo "  🏠 3) Change Local Router LAN IP"
         echo "  ⚖️ 4) Multi-WAN Load Balancer"
         echo "  📊 5) Network Info & Speed Monitor"
+        echo "  🧭 6) DNS Manager"
         echo "  🚪 0) Back to Main Menu"
         echo "  ───────────────────────────────────────────────────────────"
         echo
 
-        printf "  ⁉️ Select option [0-5] : "
+        printf "  ⁉️ Select option [0-6] : "
         read -r choice </dev/tty
 
         case "$choice" in
@@ -111,6 +111,14 @@ network_menu() {
                     network_info_menu
                 else
                     log_error "Network Info module not found!"
+                    sleep 2
+                fi
+                ;;
+            6)
+                if command -v dns_menu >/dev/null 2>&1; then
+                    dns_menu
+                else
+                    log_error "DNS module not found!"
                     sleep 2
                 fi
                 ;;

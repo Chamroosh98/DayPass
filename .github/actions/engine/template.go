@@ -52,7 +52,6 @@ func generateInstallScript(outputFile string) error {
 		// 3. Core System Modules
 		"installer/init/zero_deps.sh",
 		"modules/system/arch_check.sh",
-		"modules/resource_monitor.sh",
 
 		// 4. Network - Host
 		"modules/network/host/network_info.sh",
@@ -68,38 +67,47 @@ func generateInstallScript(outputFile string) error {
 		"modules/network/guest/network.sh",
 		"modules/network/guest/qos.sh",
 
-		// 6. Proxy - Config Management
+		// 6. Network - DNS
+		"modules/network/dns/core.sh",
+		"modules/network/dns/mode_system.sh",
+		"modules/network/dns/mode_secure.sh",
+		"modules/network/dns/mode_tunnel.sh",
+		"modules/network/dns/mode_hybrid.sh",
+		"modules/network/dns/apply.sh",
+		"modules/network/dns/menu.sh",
+
+		// 7. Proxy - Config Management
 		"modules/proxy/config/config_storage.sh",
 		"modules/proxy/config/subscription.sh",
 		"modules/proxy/config/passwall_bridge.sh",
 		"modules/proxy/config/config_manager.sh",
 
-		// 7. Proxy - Other Modules
+		// 8. Proxy - Other Modules
 		"modules/proxy/routing.sh",
 		"modules/proxy/node_balancer.sh",
 		"modules/proxy/health_checker.sh",
 		"modules/proxy/profile_manager.sh",
 		
-		// 8. Proxy - Cloudflare Clean IP
+		// 9. Proxy - Cloudflare Clean IP
 		"modules/proxy/cloudflare/core.sh",
 		"modules/proxy/cloudflare/link_utils.sh",
 		"modules/proxy/cloudflare/scanner.sh",
 		"modules/proxy/cloudflare/applier.sh",
 		"modules/proxy/cloudflare/menu.sh",
 
-		// 9. Other Modules
+		// 10. Other Modules
 		"modules/system/backup_restore.sh",
 		"modules/system/maintenance.sh",
 		"modules/service/service_manager.sh",
 
-		// 10. Core Installer Logic & Package Processing
+		// 11. Core Installer Logic & Package Processing
 		"installer/init/install_core.sh",
 		"modules/system/resource_checker.sh",
 		"installer/pkg/resolver.sh",
 		"installer/pkg/installer.sh",
 		"installer/pkg/updater.sh",
 
-		// 11. UI Components & Interactive Menus
+		// 12. UI Components & Interactive Menus
 		"ui/state.sh",
 		"ui/menu/custom.sh",
 		"ui/menu/mode.sh",
