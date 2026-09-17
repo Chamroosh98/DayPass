@@ -1,4 +1,3 @@
-
 <div align="center">
   <img src="../../ui/ico/dp.svg" alt="DayPass Logo" width="77" height="77" style="vertical-align: middle; margin-right: 8px;">
   <h1>
@@ -22,295 +21,212 @@
 </p>
 
 <p align="center">
-  <a href="../README.md"><strong>English</strong></a> |
-  <a href="README_Fa.md"><strong>Persian</strong></a> |
-  <a href="README_Ru.md"><strong>Русский</strong></a>
+  <a href="../README.md"><strong>English</strong></a>
 </p>
 
 ---
 
 - [🚀 什么是 DayPass？](#-什么是-daypass)
 - [✨ 功能特点](#-功能特点)
-- [📋 运行要求](#-运行要求)
-- [📦 依赖](#-依赖)
-  - [路由器上的启动条件](#路由器上的启动条件)
-  - [首次运行自动安装](#首次运行自动安装)
-  - [Passwall 配置文件相关包](#passwall-配置文件相关包)
-  - [按功能安装的包](#按功能安装的包)
-  - [CI / 维护者工具](#ci--维护者工具)
 - [🖥️ 硬件兼容性](#️-硬件兼容性)
 - [🚀 安装](#-安装)
   - [🟢 稳定版](#-稳定版)
   - [🟠 测试版](#-测试版)
-- [🧭 交互菜单](#-交互菜单)
-- [📦 软件包配置](#-软件包配置)
-- [🌐 网络设置](#-网络设置)
-  - [🔀 Multi-WAN 与负载均衡](#-multi-wan-与负载均衡)
-  - [🔌 带 USB 的路由器](#-带-usb-的路由器)
-  - [🌐 Wi-Fi 管理与隔离](#-wi-fi-管理与隔离)
-  - [👥 访客网络与 QoS](#-访客网络与-qos)
-  - [🧭 DNS 管理器](#-dns-管理器)
-  - [🏠 LAN IP 与诊断](#-lan-ip-与诊断)
-- [🛡️ 代理与路由](#️-代理与路由)
-- [🧼 Cloudflare Clean IP](#-cloudflare-clean-ip)
-- [🛠️ 维护与恢复](#️-维护与恢复)
+- [🔀 Multi-WAN 与负载均衡](#-multi-wan-与负载均衡)
+  - [🔌 带 USB 接口的路由器（支持 USB WAN）](#-带-usb-接口的路由器支持-usb-wan)
+- [🌐 Wi-Fi 管理与隔离](#-wi-fi-管理与隔离)
+- [🧭 DNS 管理器](#-dns-管理器)
+- [🧼 Cloudflare Clean IP 管理](#-cloudflare-clean-ip-管理)
+  - [❓ 它能做什么？](#-它能做什么)
 - [⚙️ 每日软件包更新](#️-每日软件包更新)
-- [🗂️ 项目结构](#️-项目结构)
-- [💾 路由器上的数据](#-路由器上的数据)
 
 ---
 
 ## 🚀 什么是 DayPass？
 
-**DayPass** 是面向 **OpenWrt** 路由器的轻量模块化工具：把网络管理、代理、DNS 和智能路由放进同一个 POSIX Shell 菜单。
+**DayPass** 是一款轻量、自动化、模块化的工具，专为 **OpenWrt** 路由器打造。它把网络管理、代理和智能路由整合在一起，让一切变得简单高效。
 
-内置 **Passwall / Passwall2**、**Multi-WAN**、**访客网络**、**DNS 管理器** 和 **Clean IP**，即使在严格审查下也能更稳定地访问网络：选节点、分流、替换 Cloudflare IP、套用现成路由配置。
+内置支持 **Passwall**、**Multi-WAN**、**Guest Network**、**DNS Manager** 和 **Clean IP**，即使在严格的网络审查环境下，也能帮你保持更稳定、更智能的网络访问。从优选节点、流量分流，到替换 Cloudflare IP、使用现成的路由配置文件，DayPass 几乎覆盖了完整工作流。
 
-兼容两种包管理器：
+它完美兼容新版 OpenWrt 的两种包管理器：
 
-- **OpenWrt 24.x**（`24.10` 源）→ `opkg`
-- **OpenWrt 25.x**（`25.12` 源）→ `apk`
+- **OpenWrt 24.x** → `opkg`
+- **OpenWrt 25.x** → `apk`
 
-软件包来自 SourceForge 上的 Passwall 构建（而不是经常无法访问的官方 OpenWrt 源），并按 OpenWrt 版本和 CPU 架构安装。
-
-路由器上运行的是生成后的单一 `install.sh`。CI 里的 Go 引擎拼接 shell 模块、按架构打包 zip，并把清单发布到 GitHub Pages / jsDelivr。
+软件包会根据你的 OpenWrt 版本和路由器硬件架构自动下载并安装。
 
 ---
 
 ## ✨ 功能特点
 
-- 📦 每日同步 Passwall 相关包：9 种架构 × 两条 OpenWrt 线。
-- 🔒 Passwall 1 / 2：推荐配置（Xray + 波斯语）或自定义引擎 / 语言 / Geo。
-- 🧶 配置管理：节点、订阅、推送到 Passwall。
-- 🚦 分流：伊朗直连 + 境外代理、全局代理、仅直连。
-- ⚖️ 节点负载均衡与健康检查。
-- 🧼 Cloudflare Clean IP。
-- 🔀 Multi-WAN：有线 WAN、USB 共享（`wan_usb`）、Wi-Fi 客户端（`wwan`），由 `mwan3` 调度。
-- 📡 家庭 AP 与 WWAN 隔离。
-- 👥 访客网络与限速（`tc` 或 SQM/CAKE）。
-- 🧭 DNS：系统、安全（DoT/DoH）、Passwall 隧道、混合。
-- 🏠 修改 LAN IP、DHCP、清理租约。
-- 🖥️ 硬件与资源信息。
-- 🛠️ 卸载 DayPass 包、清缓存、`sysupgrade` 备份、恢复出厂。
+- 📦 **每日软件包同步（Daily Sync）**  
+  自动下载所需软件包的更新，无需依赖官方 OpenWrt 软件源（在受制裁国家通常无法访问）。
 
----
+- 🔀 **智能 Multi-WAN 管理**  
+  可同时组合和管理多条互联网连接：包括有线/光纤（`WAN`）、手机共享和 USB 调制解调器（`USB WAN`），以及 Wi-Fi 客户端模式（`WWAN`），基于 `mwan3` 实现。
 
-## 📋 运行要求
+- 📡 **Wi-Fi 隔离与管理**  
+  将路由器的接入点（Access Point）配置与客户端（Client/Station）模式完全分离，避免两者互相干扰，防止 Wi-Fi 意外断开。
 
-| 项目 | 说明 |
-| :--- | :--- |
-| **系统** | OpenWrt **24.x** 或 **25.x** |
-| **Shell** | POSIX `sh`（BusyBox ash） |
-| **权限** | 路由器 root |
-| **网络** | 可用 WAN，用于下载脚本和 zip |
-| **存储/内存** | overlay 需能放下 Passwall + Xray 或 Sing-box。Sing-box 更吃内存；弱 MIPS 不要同时装两个引擎 |
-| **启动工具** | 固件里已有 `wget` **或** `curl` |
+- 🔄 **自动同步内部网络**  
+  自动修改内部网络 IP、调整 DHCP 地址范围，并清理 `dhcp.leases` 文件中的旧租约记录。
 
-路由器上不需要 Go、Git 或 GitHub Actions。
+- 🧭 **DNS 管理器**  
+  可选择路由器解析域名的方式：系统默认、可用时的安全 DoT/DoH、经 Passwall 隧道的 DNS，或带回退的混合模式。
 
----
-
-## 📦 依赖
-
-### 路由器上的启动条件
-
-`wget` 或 `curl`、`sh`、`uci`。
-
-### 首次运行自动安装
-
-补齐缺失依赖，并把普通 `dnsmasq` 换成 **`dnsmasq-full`**。
-
-**所有版本：** `ca-bundle`、`ca-certificates`、`curl`、`jq`、`libnetfilter-conntrack`、`dnsmasq-full`
-
-**OpenWrt 24.x（`opkg`）额外：** `coreutils`、`coreutils-base64`、`coreutils-nohup`、`coreutils-timeout`、`ip-full`、`unzip`、`resolveip`、`lua`、`libuci-lua`、`luci-compat`、`luci-lib-jsonc`、`luci-lua-runtime`、`lyaml`
-
-### Passwall 配置文件相关包
-
-| 软件包 | 时机 |
-| :--- | :--- |
-| `luci-app-passwall` | Passwall 1 |
-| `luci-app-passwall2` | Passwall 2（推荐） |
-| `luci-i18n-passwall2-fa` / `-zh-cn` / `-ru` | Passwall 2 界面语言 |
-| `xray-core` | 默认 / 推荐引擎 |
-| `sing-box` | 自定义（更占内存） |
-| `tcping`、`geoview` | 探测 / Geo 查看 |
-| `v2ray-geoip` / `v2ray-geosite` | 官方 Geo（部分 apk 源名为 `geoip` / `geosite`） |
-
-自定义模式下的伊朗规则集来自 [Chocolate4U/Iran-v2ray-rules](https://github.com/Chocolate4U/Iran-v2ray-rules)。
-
-**推荐配置：** Passwall 2 + Xray + 语言 **fa** + 官方 Geo。
-
-### 按功能安装的包
-
-| 功能 | 软件包 |
-| :--- | :--- |
-| Multi-WAN | `mwan3`（可选 `luci-app-mwan3`） |
-| 访客简易 QoS | `tc`、`kmod-sched` |
-| SQM | `sqm-scripts`；24.x 通常还有 `luci-app-sqm` |
-| USB 共享 | 内核模块（`kmod-usb-net-rndis`、`kmod-usb-net-cdc-ether` 等） |
-| 安全 DNS | 可选 `stubby` 或 `https-dns-proxy`；否则用 Passwall DoH；最后才是 `1.1.1.1` / `8.8.8.8` |
-
-### CI / 维护者工具
-
-Go（`fetch.go` 与引擎）、运行器上的 `curl`、GitHub Actions（24/25 × 9 架构、`gh-pages`、jsDelivr 刷新）。上游：SourceForge `openwrt-passwall-build`。
+- 🌐 **广泛的 OpenWrt 版本兼容性**  
+  支持 OpenWrt 24.x（`opkg`）和 OpenWrt 25.x（`apk`），覆盖超过 9 种硬件架构。
 
 ---
 
 ## 🖥️ 硬件兼容性
 
-| 处理器架构 | 兼容硬件与路由器示例 |
-| :--- | :--- |
-| **`aarch64_cortex-a53` / `aarch64_generic`** | **Raspberry Pi：** 3B、3B+、4B<br>**FriendlyELEC：** NanoPi R2S、R4S、R5S<br>**GL.iNet：** Flint（GL-AX1800）、Slate AX（GL-AXT1800）<br>**Xiaomi：** AX3000T、AX6000 |
-| **`aarch64_cortex-a72` / `aarch64_cortex-a76`** | **Raspberry Pi：** 4B、5<br>**SBC：** Rockchip RK3399、RK3588（NanoPi R6S、Orange Pi 5） |
-| **`arm_cortex-a7_neon-vfpv4` / `arm_cortex-a9`** | **Linksys：** EA8300、MR8300<br>**Netgear：** R7000、R7800、R8000<br>**ASUS：** RT-AC68U、RT-AC87U<br>**GL.iNet：** B1300（ConnextDrive） |
-| **`mipsel_24kc`** | **Xiaomi：** Mi Router 3G、4A Gigabit<br>**TP-Link：** Archer C50、C6、C7、TL-WR841N<br>**Ubiquiti：** EdgeRouter X（ER-X）<br>**GL.iNet：** Mango（GL-MT300N-V2）、Shadow（GL-AR300M） |
-| **`x86_64` / `i386_pentium4`** | **迷你电脑与迷你服务器：** Intel N100、N5105、J4125<br>**工业硬件：** Protectli Vault、Qotom、Topton（配备 Intel i225/i226 网口）<br>**虚拟机：** VMware、Proxmox VE、KVM、VirtualBox |
-
-清单中的九个架构名：`aarch64_cortex-a53`、`aarch64_cortex-a72`、`aarch64_cortex-a76`、`aarch64_generic`、`arm_cortex-a7_neon-vfpv4`、`arm_cortex-a9_vfpv3-d16`、`mipsel_24kc`、`i386_pentium4`、`x86_64`。
+| 处理器架构                                       | 兼容硬件与路由器示例                                                                                                                                                                    |
+| :----------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`aarch64_cortex-a53` / `aarch64_generic`**     | **Raspberry Pi：** 3B、3B+、4B<br>**FriendlyELEC：** NanoPi R2S、R4S、R5S<br>**GL.iNet：** Flint（GL-AX1800）、Slate AX（GL-AXT1800）<br>**Xiaomi：** AX3000T、AX6000                   |
+| **`aarch64_cortex-a72` / `aarch64_cortex-a76`**  | **Raspberry Pi：** 4B、5<br>**SBC：** Rockchip RK3399、RK3588（NanoPi R6S、Orange Pi 5）                                                                                                |
+| **`arm_cortex-a7_neon-vfpv4` / `arm_cortex-a9`** | **Linksys：** EA8300、MR8300<br>**Netgear：** R7000、R7800、R8000<br>**ASUS：** RT-AC68U、RT-AC87U<br>**GL.iNet：** B1300（ConnextDrive）                                               |
+| **`mipsel_24kc`**                                | **Xiaomi：** Mi Router 3G、4A Gigabit<br>**TP-Link：** Archer C50、C6、C7、TL-WR841N<br>**Ubiquiti：** EdgeRouter X（ER-X）<br>**GL.iNet：** Mango（GL-MT300N-V2）、Shadow（GL-AR300M） |
+| **`x86_64` / `i386_pentium4`**                   | **迷你电脑与迷你服务器：** Intel N100、N5105、J4125<br>**工业硬件：** Protectli Vault、Qotom、Topton（配备 Intel i225/i226 网口）<br>**虚拟机：** VMware、Proxmox VE、KVM、VirtualBox   |
 
 ---
 
 ## 🚀 安装
 
-- **稳定版（`main`）** — `https://chamroosh98.github.io/DayPass/`
-- **测试版（`beta`）** — 含较新菜单（含 DNS 管理器）— `.../DayPass/beta/`
+DayPass 仍在持续开发中，不断为不同架构添加新功能。因此提供两个版本：
 
-> **‼️ 注意：** 测试版适合能自行救砖并反馈问题的用户。
+- **稳定版** —— 功能较少，但非常稳定可靠。
+- **测试版** —— 几乎每天更新，功能更多，但可能存在 bug。
+
+> **‼️ 注意：** 测试版仅推荐给具备基本相关知识、能够自行调试并提交反馈的用户。新手建议使用稳定版。
+
+---
 
 ### 🟢 稳定版
+
+在路由器终端中执行以下命令：
 
 ```bash
 wget -qO- https://chamroosh98.github.io/DayPass/install.sh | sh
 ```
 
+如果路由器上已经安装了 `curl`，可以使用以下命令：
+
 ```bash
 curl -sSL https://chamroosh98.github.io/DayPass/install.sh | sh
 ```
 
+---
+
 ### 🟠 测试版
+
+安装测试版：
 
 ```bash
 wget -qO- https://chamroosh98.github.io/DayPass/beta/install.sh | sh
 ```
 
+或：
+
 ```bash
 curl -sSL https://chamroosh98.github.io/DayPass/beta/install.sh | sh
 ```
 
-脚本会检查网络、识别架构、安装核心依赖、尽量备份 Passwall/Xray/Sing-box 的 UCI，然后进入主菜单。再次执行同一命令可回到菜单并更新软件包。
+> ⚠️ **提醒：** 测试版可能存在 bug，因此仅推荐给有经验的用户或喜欢尝鲜的朋友。
 
 ---
 
-## 🧭 交互菜单
+## 🔀 Multi-WAN 与负载均衡
 
-1. 安装软件包配置  
-2. 检查并更新软件包  
-3. 网络设置（AP、访客、LAN、Multi-WAN、DNS）  
-4. 代理与路由  
-5. 系统资源  
-6. 维护与恢复  
+使用 DayPass，你可以在路由器上同时配置和管理多条互联网连接。
 
----
+- **🌐 有线互联网（`Ethernet WAN`）**  
+  通过 WAN 口（使用网线）从 ADSL/VDSL 调制解调器或光纤获取互联网。
 
-## 📦 软件包配置
+> 💡 **WAN 与 LAN 端口的区别**
+>
+> - **`WAN` 口（互联网入口）：** 路由器从主调制解调器、光纤或外部天线接收互联网。
+> - **`LAN` 口（互联网出口）：** 路由器将接收到的互联网分配给内部设备（电脑、电视、二级路由器或交换机）。
 
-| 模式 | 内容 |
-| :--- | :--- |
-| **推荐** | Passwall 2 + `xray-core` + 官方 Geo + LuCI **fa** |
-| **自定义** | Xray / Sing-box / 自动，Passwall 2 语言，跳过 / 官方 / 伊朗完整 / 精简 Geo |
+- **📱 手机与 USB 调制解调器互联网（`USB WAN`）**  
+  将 Android 手机、iPhone 或 4G/5G USB 调制解调器连接到路由器的 USB 接口。DayPass 支持 CDC-Ethernet 和 RNDIS 模式。
 
-自定义快捷键：数字开关包、`n`/`p` 翻页、`d` 完成、`q` 退出。ARM64 / x86 可同时装 Xray 与 Sing-box；弱 MIPS 不建议。
+### 🔌 带 USB 接口的路由器（支持 USB WAN）
 
----
+| 处理器架构                                       | 带 USB 接口的型号                                                                                                                                            | USB 接口数量与类型                                                                                               |
+| :----------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------- |
+| **`aarch64_cortex-a53`**                         | **Raspberry Pi：** 3B、3B+、4B<br>**FriendlyELEC：** NanoPi R2S、R4S、R5S<br>**GL.iNet：** Flint（GL-AX1800）、Slate AX（GL-AXT1800）<br>**Xiaomi：** AX6000 | **Raspberry Pi：** 4× USB<br>**NanoPi：** 1–2× USB<br>**GL.iNet：** 1× USB 3.0<br>**Xiaomi：** 1× USB 3.0        |
+| **`aarch64_cortex-a72/a76`**                     | **Raspberry Pi：** 4B、5<br>**SBC：** Rockchip RK3399、RK3588（NanoPi R6S、Orange Pi 5）                                                                     | **Raspberry Pi：** 2× USB 3.0 + 2× USB 2.0<br>**Orange Pi / NanoPi：** 2–3× USB                                  |
+| **`arm_cortex-a7_neon-vfpv4` / `arm_cortex-a9`** | **Linksys：** EA8300、MR8300<br>**Netgear：** R7000、R7800、R8000<br>**ASUS：** RT-AC68U、RT-AC87U<br>**GL.iNet：** B1300                                    | **Linksys：** 1× USB 3.0 / 2.0<br>**Netgear / ASUS：** 1× USB 3.0 + 1× USB 2.0<br>**GL.iNet B1300：** 1× USB 3.0 |
+| **`mipsel_24kc`**                                | **Xiaomi：** Mi Router 3G<br>**TP-Link：** Archer C7<br>**GL.iNet：** Mango（GL-MT300N-V2）、Shadow（GL-AR300M）                                             | **Xiaomi 3G：** 1× USB 3.0<br>**Archer C7：** 2× USB 2.0<br>**GL.iNet Mango/Shadow：** 1× USB 2.0                |
+| **`x86_64` / `i386`**                            | **迷你电脑与迷你服务器：** Intel N100、N5105、Protectli、Topton<br>**虚拟环境：** VMware、Proxmox（通过 USB 直通）                                           | **大多数具备 2 到 4 个 USB 3.0/2.0 接口**                                                                        |
 
-## 🌐 网络设置
+> - **`USB WAN (Tethering)`**  
+>   通过 USB 线将手机或 4G/5G 调制解调器的互联网共享给路由器的统称。
+> - **`RNDIS`**  
+>   微软制定的通过 USB 模拟网卡的标准，多用于较旧的 Android 手机和部分 USB 网卡。
+> - **`CDC-Ethernet`**  
+>   Linux/POSIX 的开放标准，速度更高、延迟更低、稳定性更好，适用于 iPhone、新款 Android 设备以及现代调制解调器。
 
-### 🔀 Multi-WAN 与负载均衡
+- **📡 无线互联网（`WWAN`）**  
+  从其他路由器、调制解调器或热点获取互联网，并分享给本地网络。
 
-* **🌐 有线 WAN** — 从调制解调器/光纤接入 WAN 口。  
-* **📱 USB WAN** — 接口 `wan_usb`（CDC-Ethernet / RNDIS）。请先在手机上打开 USB 共享。  
-* **📡 WWAN** — 作为客户端接入其他热点，接口 `wwan`。
+这些连接会自动注册到 `mwan3` 中，并提供两项主要功能：
 
-> **WAN** 是互联网入口，**LAN** 是向内部分发。
+- **Failover（故障转移）**  
+  当其中一条连接中断时，流量会自动切换到其他可用路径。
 
-`mwan3` 成员：`wan`（metric 1）、`wan_usb`（2）、`wwan`（3）。策略：**balanced** 与 **failover**。负载均衡**不会**把单条 TCP 下载叠成所有链路之和。
+- **Load Balancing（负载均衡）**  
+  流量在多条连接之间分配，从而同时使用多条互联网路径。
 
-### 🔌 带 USB 的路由器
-
-| 处理器架构 | 带 USB 接口的型号 | USB 接口数量与类型 |
-| :--- | :--- | :--- |
-| **`aarch64_cortex-a53`** | **Raspberry Pi：** 3B、3B+、4B<br>**FriendlyELEC：** NanoPi R2S、R4S、R5S<br>**GL.iNet：** Flint（GL-AX1800）、Slate AX（GL-AXT1800）<br>**Xiaomi：** AX6000 | **Raspberry Pi：** 4× USB<br>**NanoPi：** 1–2× USB<br>**GL.iNet：** 1× USB 3.0<br>**Xiaomi：** 1× USB 3.0 |
-| **`aarch64_cortex-a72/a76`** | **Raspberry Pi：** 4B、5<br>**SBC：** Rockchip RK3399、RK3588（NanoPi R6S、Orange Pi 5） | **Raspberry Pi：** 2× USB 3.0 + 2× USB 2.0<br>**Orange Pi / NanoPi：** 2–3× USB |
-| **`arm_cortex-a7_neon-vfpv4` / `arm_cortex-a9`** | **Linksys：** EA8300、MR8300<br>**Netgear：** R7000、R7800、R8000<br>**ASUS：** RT-AC68U、RT-AC87U<br>**GL.iNet：** B1300 | **Linksys：** 1× USB 3.0 / 2.0<br>**Netgear / ASUS：** 1× USB 3.0 + 1× USB 2.0<br>**GL.iNet B1300：** 1× USB 3.0 |
-| **`mipsel_24kc`** | **Xiaomi：** Mi Router 3G<br>**TP-Link：** Archer C7<br>**GL.iNet：** Mango（GL-MT300N-V2）、Shadow（GL-AR300M） | **Xiaomi 3G：** 1× USB 3.0<br>**Archer C7：** 2× USB 2.0<br>**GL.iNet Mango/Shadow：** 1× USB 2.0 |
-| **`x86_64` / `i386`** | **迷你电脑与迷你服务器：** Intel N100、N5105、Protectli、Topton<br>**虚拟环境：** VMware、Proxmox（通过 USB 直通） | **大多数具备 2 到 4 个 USB 3.0/2.0 接口** |
-
-### 🌐 Wi-Fi 管理与隔离
-
-2.4 / 5 GHz 家庭 AP 与 WWAN 客户端配置分开，避免互相覆盖。
-
-### 👥 访客网络与 QoS
-
-独立接口与防火墙、可选访客 SSID、`tc` 或 SQM（`cake` / `piece_of_cake.qos`）限速。
-
-### 🧭 DNS 管理器
-
-路由器持久 DNS（不是 Network Checker 里给 `opkg` 用的临时修复）。
-
-| 模式 | 行为 |
-| :--- | :--- |
-| **系统** | 使用运营商 DNS；关闭 Passwall DNS 劫持 |
-| **安全** | Stubby → https-dns-proxy → Passwall DoH → 公共 DNS |
-| **隧道** | 需要 Passwall；dnsmasq 转发到 Passwall 本地 DNS 端口 |
-| **混合** | 先 Passwall/DoH，再按严格顺序回落到 Cloudflare / Google |
-
-状态文件：`/etc/daypass/dns/mode`。
-
-### 🏠 LAN IP 与诊断
-
-修改 LAN、DHCP、清理 `/tmp/dhcp.leases`。临时 DNS 恢复（`1.1.1.1` / `8.8.8.8` / `9.9.9.9`）与 DNS 管理器分开。
+> **注意：** 负载均衡**并不意味着**单个下载任务的速度会等于所有连接速度的总和。流量会在可用路径之间分配，实际效果取决于连接类型和 `mwan3` 的配置。
 
 ---
 
-## 🛡️ 代理与路由
+## 🌐 Wi-Fi 管理与隔离
 
-配置管理、分流、节点均衡、健康检查（有则用 `tcping`）、配置文件：均衡 / 游戏 / 流媒体 / 全局 / 仅直连。数据目录：`/etc/daypass/proxy/`。
+在 OpenWrt 中，当路由器同时作为**接入点（Access Point）**和**客户端（Client）**运行时，经常会出现问题。修改其中一个模式的配置可能会影响另一个模式，甚至导致 Wi-Fi 断开。
+
+DayPass 通过完全分离这两种配置来解决此问题：
+
+- 管理路由器作为家庭网络接入点（2.4 GHz 和 5 GHz）的配置
+- 管理通过 Wi-Fi 接收互联网（`WWAN` / 客户端模式）的配置，且不影响接入点设置
 
 ---
 
-## 🧼 Cloudflare Clean IP
+## 🧭 DNS 管理器
 
-针对位于 Worker/CDN 后的配置：从分享链接取端口、在同端口探测候选 IP、只改 **Address**、保留 `SNI` / `Host` / `Path`，可选择导入 Passwall。
+该功能位于**网络设置**中，用于控制路由器为本地网络解析 DNS 的方式。
+
+### ❓ 它能做什么？
+
+- **系统默认（System Default）** — 使用 WAN / ISP 的解析器（OpenWrt 的常规路径）。
+- **安全 DNS（Secure）** — 在可用时优先使用加密解析器（DoT/DoH）。
+- **隧道 DNS** — 将 DNS 经 Passwall 转发，使查询走代理路径（需已安装 Passwall）。
+- **混合模式（推荐）** — 先尝试隧道 / 加密 DNS，失败后再回退到可信的公共解析器。
 
 ---
 
-## 🛠️ 维护与恢复
+## 🧼 Cloudflare Clean IP 管理
 
-按 `/etc/daypass/install.log` 卸载、清理 `.ipk`/`.apk`、`sysupgrade -b` 备份、`firstboot -y`（需输入 `RESET`）。启动时 UCI 备份在 `/tmp/daypass/backups`。
+本功能专为位于 **Cloudflare Worker / CDN** 后面的配置设计。由于严格的网络过滤，原始 IP 或域名可能会失效。
+
+### ❓ 它能做什么？
+
+- 从已保存的配置中选择一个损坏或不稳定的配置。
+- 直接从分享链接中提取 **端口**。
+- 在 **相同端口** 上测试候选 IP 列表。
+- 显示可用的 IP 及其延迟。
+- 仅替换配置中的 **Address** 字段为 Clean IP。
+- 完整保留 `SNI`、`Host`、`Path` 等重要参数。
+- 如果用户需要，可以将更新后的配置导入到 Passwall。
 
 ---
 
 ## ⚙️ 每日软件包更新
 
-1. 从 SourceForge `openwrt-passwall-build` 下载  
-2. 为 9 种架构和 OpenWrt 24+25 生成 zip 与 `manifest.json`  
-3. 发布到 GitHub Pages 并刷新 jsDelivr  
+DayPass 每天自动更新所有需要的软件包。流程如下：
 
-路由器上按清单比对版本/哈希后再安装。
-
----
-
-## 🗂️ 项目结构
-
-`config/`、`docs/`、`installer/`、`modules/network|proxy|system|service`、`ui/`、`.github/actions/`（Go 生成 `install.sh`）。
-
----
-
-## 💾 路由器上的数据
-
-| 路径 | 用途 |
-| :--- | :--- |
-| `/etc/daypass/` | 状态、安装日志、下载的包 |
-| `/etc/daypass/dns/` | DNS 模式 |
-| `/etc/daypass/proxy/` | 节点、订阅、路由、Clean IP |
-| `/tmp/daypass/` | 事务日志与配置备份 |
+1. 📥 从 **SourceForge** 下载软件包
+2. 📦 根据 **9 种硬件架构和 2 个 OpenWrt 版本** 进行分类和准备
+3. 🌐 将文件发布到 **jsDelivr CDN**

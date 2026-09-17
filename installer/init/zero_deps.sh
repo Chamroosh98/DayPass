@@ -38,16 +38,17 @@ deploy_system_dependencies()
         fi
     done
 
-    DNSMASQ_FULL_MISSING=0
-    if [ -f /etc/openwrt_release ]; then
-        if command -v pkg_installed >/dev/null 2>&1; then
-            if ! pkg_installed "dnsmasq-full"; then
-                DNSMASQ_FULL_MISSING=1
-            fi
+    # Keep the firmware dnsmasq (DHCP/DNS). Never remove it to install dnsmasq-full:
+    # a failed swap leaves LAN without DHCP and drops SSH from DHCP clients.
+    if command -v log_info >/dev/null 2>&1; then
+        if command -v pkg_installed >/dev/null 2>&1 && pkg_installed "dnsmasq-full"; then
+            log_info "DNS engine : dnsmasq-full (already present, left unchanged)"
+        else
+            log_info "DNS engine : firmware dnsmasq (not replaced)"
         fi
     fi
 
-    if [ -z "$MISSING_PACKAGES" ] && [ "$DNSMASQ_FULL_MISSING" -eq 0 ]; then
+    if [ -z "$MISSING_PACKAGES" ]; then
         log_success "Core system dependencies are ready & up to date!"
         return 0
     fi
@@ -71,32 +72,6 @@ deploy_system_dependencies()
             fi
             wait "$BG_PID"
         done
-    fi
-
-    if [ "$DNSMASQ_FULL_MISSING" -eq 1 ]; then
-        (
-            case "$PKG_MANAGER" in
-                opkg)
-                    opkg remove dnsmasq --force-depends >/dev/null 2>&1 || true
-                    opkg install dnsmasq-full libnetfilter-conntrack --force-overwrite >/dev/null 2>&1 || true
-                    ;;
-                apk)
-                    apk del dnsmasq >/dev/null 2>&1 || true
-                    apk add --allow-untrusted dnsmasq-full libnetfilter-conntrack >/dev/null 2>&1 || true
-                    ;;
-            esac
-        ) &
-        
-        BG_PID=$!
-        if command -v show_timer_progress >/dev/null 2>&1; then
-            show_timer_progress "$BG_PID" "optimizing DNS engine (dnsmasq-full)"
-        fi
-        wait "$BG_PID"
-        
-        echo "nameserver 8.8.8.8" > /tmp/resolv.conf.auto 2>/dev/null || true
-        /etc/init.d/dnsmasq restart >/dev/null 2>&1 || true
-        /etc/init.d/network reload >/dev/null 2>&1 || true
-        sleep 2
     fi
 
     log_success "All system dependencies configured successfully!"
