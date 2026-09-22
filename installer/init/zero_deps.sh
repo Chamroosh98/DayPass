@@ -88,7 +88,7 @@ deploy_system_dependencies()
         fi
     fi
 
-    COMMON_DEPS="ca-bundle ca-certificates curl jq libnetfilter-conntrack"
+    COMMON_DEPS="ca-bundle ca-certificates curl jq "
     OW24_EXTRA_DEPS="coreutils coreutils-base64 coreutils-nohup coreutils-timeout ip-full unzip resolveip lua libuci-lua luci-compat luci-lib-jsonc luci-lua-runtime lyaml"
 
     TARGET_PACKAGES="$COMMON_DEPS"
@@ -186,11 +186,11 @@ deploy_system_dependencies()
             case "$PKG_MANAGER" in
                 opkg)
                     opkg remove dnsmasq --force-depends >/dev/null 2>&1 || true
-                    opkg install dnsmasq-full libnetfilter-conntrack --force-overwrite >/dev/null 2>&1 || true
+                    opkg install dnsmasq-full  --force-overwrite >/dev/null 2>&1 || true
                     ;;
                 apk)
                     apk del dnsmasq >/dev/null 2>&1 || true
-                    apk add --allow-untrusted dnsmasq-full libnetfilter-conntrack >/dev/null 2>&1 || true
+                    apk add --allow-untrusted dnsmasq-full  >/dev/null 2>&1 || true
                     ;;
             esac
         ) &

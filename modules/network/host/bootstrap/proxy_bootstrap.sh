@@ -12,11 +12,10 @@ PROXY_HOST="127.0.0.1"
 # ---------- banner ----------
 _pb_banner() {
     echo
-    echo "  ${CYAN}${RESET}  ${BOLD}🌐  DayPass — Optional Network Proxy Bootstrap${RESET}"
+    echo "  ${CYAN}${RESET}${BOLD}🌐 DayPass — Optional Network Proxy Bootstrap${RESET}"
     echo "  ${CYAN}─────────────────────────────────────────────────────────${RESET}"
-    echo "  ${CYAN}${RESET}  Routing DayPass traffic through a local proxy helps"
-    echo "  ${CYAN}${RESET}  avoid ISP filtering and broken package downloads.  "
-    echo "  ${CYAN}${RESET}                                                     "
+    echo "  ${CYAN}${RESET}Routing DayPass traffic through a local proxy helps"
+    echo "  ${CYAN}${RESET}avoid ISP filtering and broken package downloads!  "
     echo "  ${CYAN}─────────────────────────────────────────────────────────${RESET}"
     echo
 }
@@ -27,28 +26,26 @@ _pb_manual() {
     echo "  ${BOLD}${WHITE}📖 Manual Setup${RESET}"
     echo "  ${DIM}──────────────────────────────────────────────────────────${RESET}"
     echo
-    echo "  ${BOLD}${CYAN}  🪟  Windows users :${RESET}"
-    echo "  ${WHITE}      1) Open your VPN / proxy client and enable a local${RESET}"
-    echo "  ${WHITE}         SOCKS/HTTP listener on port ${YELLOW}[${PROXY_DEFAULT_PORT}]${WHITE}.${RESET}"
-    echo "  ${WHITE}      2) In Windows Settings → Proxy, set:${RESET}"
-    echo "  ${GREEN}            Address : ${PROXY_HOST}${RESET}"
-    echo "  ${GREEN}            Port    : ${PROXY_DEFAULT_PORT}${RESET}"
-    echo "  ${WHITE}      3) Re-run DayPass; it will use that proxy.${RESET}"
+    echo "  ${BOLD}${CYAN}🪟 Windows users :${RESET}"
+    echo "  ${WHITE}1) Open your VPN / proxy client and enable a local${RESET}"
+    echo "  ${WHITE}   SOCKS/HTTP listener on port ${YELLOW}[${PROXY_DEFAULT_PORT}]${WHITE}.${RESET}"
+    echo "  ${WHITE}2) In Windows Settings → Proxy, set:${RESET}"
+    echo "  ${GREEN}   Address : ${PROXY_HOST}${RESET}"
+    echo "  ${GREEN}   Port    : ${PROXY_DEFAULT_PORT}${RESET}"
+    echo "  ${WHITE}3) Re-run DayPass! it will use that proxy.${RESET}"
     echo
-    echo "  ${BOLD}${CYAN}  🐧  Linux / macOS users :${RESET}"
-    echo "  ${WHITE}      Open a reverse SSH tunnel from your machine to the router:${RESET}"
+    echo "  ${BOLD}${CYAN}🐧 Linux / macOS users :${RESET}"
+    echo "  ${WHITE}Open a reverse SSH tunnel from your machine to the router :${RESET}"
     echo
-    echo "  ${YELLOW}        ssh -R ${PROXY_DEFAULT_PORT}:${PROXY_HOST}:<VPN_PORT_ON_PC> \\\\${RESET}"
-    echo "  ${YELLOW}            root@<ROUTER_IP> -N${RESET}"
+    echo "  ${YELLOW}        ssh -R ${PROXY_DEFAULT_PORT}:${PROXY_HOST}:<VPN_PORT_ON_PC> root@<ROUTER_IP> -N${RESET}"
     echo
-    echo "  ${WHITE}      Replace ${YELLOW}<VPN_PORT_ON_PC>${WHITE} with the local port your VPN${RESET}"
-    echo "  ${WHITE}      client listens on (e.g. ${YELLOW}10810${WHITE}), and ${YELLOW}<ROUTER_IP>${WHITE} with${RESET}"
-    echo "  ${WHITE}      your router address (e.g. ${YELLOW}192.168.1.1${WHITE}).${RESET}"
+    echo "  ${GRAY}Replace <VPN_PORT_ON_PC> with the local port your VPN${RESET}"
+    echo "  ${GRAY}client listens on (e.g. 10810}), and <ROUTER_IP> with${RESET}"
+    echo "  ${GRAY}your router address (e.g.192.168.1.1).${RESET}"
     echo
-    echo "  ${DIM}  ℹ️  Once the tunnel is up, all package downloads will${RESET}"
-    echo "  ${DIM}      flow through ${PROXY_HOST}:${PROXY_DEFAULT_PORT}.${RESET}"
-    echo
-    echo "  ${DIM}  ──────────────────────────────────────────────────────────${RESET}"
+    echo "  ${GRAY}ℹ️  Once the tunnel is up, all package downloads will${RESET}"
+    echo "  ${GRAY}flow through ${PROXY_HOST}:${PROXY_DEFAULT_PORT}.${RESET}"
+    echo "  ${DIM}──────────────────────────────────────────────────────────${RESET}"
     echo
 }
 
@@ -161,5 +158,5 @@ proxy_bootstrap_clear() {
     unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
     unset no_proxy NO_PROXY
     unset PROXY_PORT PROXY_URL
-    echo "${GREEN}  [+] Proxy environment cleared.${RESET}"
+    echo "${GREEN}  [+] Proxy environment cleared!${RESET}"
 }
