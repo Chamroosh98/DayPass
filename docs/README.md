@@ -23,7 +23,7 @@
 </p>
 
 <p align="center">
-  <a href="i18n/README_Fa.md"><strong>Persian</strong></a> | 
+  <a href="i18n/README_Fa.md"><strong>پارسی</strong></a> | 
   <a href="i18n/README_Ru.md"><strong>Русский</strong></a> | 
   <a href="i18n/README_Zh.md"><strong>中文</strong></a>
 </p>
@@ -39,9 +39,14 @@
 - [🔀 Multi-WAN and Load Balancing](#-multi-wan-and-load-balancing)
   - [🔌 Routers with USB Ports (USB WAN Compatible)](#-routers-with-usb-ports-usb-wan-compatible)
 - [🌐 Wi-Fi Management and Isolation](#-wi-fi-management-and-isolation)
-- [🧭 DNS Manager](#-dns-manager)
+<<<<<<< Updated upstream
 - [🧼 Clean IP Management for Cloudflare](#-clean-ip-management-for-cloudflare)
+=======
+- [🧭 DNS Manager](#-dns-manager)
+>>>>>>> Stashed changes
   - [❓ What does it do?](#-what-does-it-do)
+- [🧼 Clean IP Management for Cloudflare](#-clean-ip-management-for-cloudflare)
+  - [❓ What does it do?](#-what-does-it-do-1)
 - [⚙️ Daily Package Updates](#️-daily-package-updates)
 
 ---

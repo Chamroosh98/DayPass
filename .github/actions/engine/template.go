@@ -45,15 +45,18 @@ func generateInstallScript(outputFile string) error {
 		"ui/lib/progress.sh",
 		"ui/banner.sh",
 
-		// 2. Low-Level System Detection & Package Management
+		// 2. Network — Host Bootstrap (proxy, DNS, ...)
+		"modules/network/host/bootstrap/proxy_bootstrap.sh",   
+
+		// 3. Low-Level System Detection & Package Management
 		"installer/init/arch_detector.sh",
 		"installer/pkg/manager.sh",
 
-		// 3. Core System Modules
+		// 4. Core System Modules
 		"installer/init/zero_deps.sh",
 		"modules/system/arch_check.sh",
 
-		// 4. Network - Host
+		// 5. Network - Host
 		"modules/network/host/network_info.sh",
 		"modules/network/host/dns_fix.sh",
 		"modules/network/host/lan_ip.sh",
@@ -63,18 +66,9 @@ func generateInstallScript(outputFile string) error {
 		"modules/network/host/load_balancer.sh",
 		"modules/network/host/network_checker.sh",
 
-		// 5. Network - Guest
+		// 6. Network - Guest
 		"modules/network/guest/network.sh",
 		"modules/network/guest/qos.sh",
-
-		// 6. Network - DNS
-		"modules/network/dns/core.sh",
-		"modules/network/dns/mode_system.sh",
-		"modules/network/dns/mode_secure.sh",
-		"modules/network/dns/mode_tunnel.sh",
-		"modules/network/dns/mode_hybrid.sh",
-		"modules/network/dns/apply.sh",
-		"modules/network/dns/menu.sh",
 
 		// 7. Proxy - Config Management
 		"modules/proxy/config/config_storage.sh",
@@ -149,28 +143,31 @@ func generateInstallScript(outputFile string) error {
 ###############################################################################
 DEPLOYMENT_FAILED=0
 
-# 1. Pre-flight connectivity check
+# 1. Pre-flight proxy bootstrap (offers SSH tunnel to bypass filtering)
+proxy_bootstrap_offer
+
+# 2. Pre-flight connectivity check
 network_check || exit 1
 
-# 2. System environment discovery & version validation
+# 3. System environment discovery & version validation
 check_version || exit 1
 detect_system_architecture
 
-# 3. Core dependency initialization (does not replace firmware dnsmasq)
+# 4. Core dependency initialization => with delay (2 secs) to ensure system stability after installing the dnsmasq-full tool!
 deploy_system_dependencies
 initialize_installer
 
-# 4. Optional Automatic UCI Config Backup
+# 5. Optional Automatic UCI Config Backup
 if command -v backup_configs >/dev/null 2>&1; then
     backup_configs
 fi
 
-# 5. Interactive UI Launch
+# 6. Interactive UI Launch
 clear
 reset_state
 main_menu
 
-# 6. Clean Exit
+# 7. Clean Exit
 echo
 log_success "👋 DayPass session finished!"
 exit 0
