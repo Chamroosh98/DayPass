@@ -45,16 +45,19 @@ func generateInstallScript(outputFile string) error {
 		"ui/lib/progress.sh",
 		"ui/banner.sh",
 
-		// 2. Low-Level System Detection & Package Management
+		// 2. Network — Host Bootstrap (proxy, DNS, ...)
+		"modules/network/host/bootstrap/proxy_bootstrap.sh",   
+
+		// 3. Low-Level System Detection & Package Management
 		"installer/init/arch_detector.sh",
 		"installer/pkg/manager.sh",
 
-		// 3. Core System Modules
+		// 4. Core System Modules
 		"installer/init/zero_deps.sh",
 		"modules/system/arch_check.sh",
 		"modules/resource_monitor.sh",
 
-		// 4. Network - Host
+		// 5. Network - Host
 		"modules/network/host/network_info.sh",
 		"modules/network/host/dns_fix.sh",
 		"modules/network/host/lan_ip.sh",
@@ -64,42 +67,42 @@ func generateInstallScript(outputFile string) error {
 		"modules/network/host/load_balancer.sh",
 		"modules/network/host/network_checker.sh",
 
-		// 5. Network - Guest
+		// 6. Network - Guest
 		"modules/network/guest/network.sh",
 		"modules/network/guest/qos.sh",
 
-		// 6. Proxy - Config Management
+		// 7. Proxy - Config Management
 		"modules/proxy/config/config_storage.sh",
 		"modules/proxy/config/subscription.sh",
 		"modules/proxy/config/passwall_bridge.sh",
 		"modules/proxy/config/config_manager.sh",
 
-		// 7. Proxy - Other Modules
+		// 8. Proxy - Other Modules
 		"modules/proxy/routing.sh",
 		"modules/proxy/node_balancer.sh",
 		"modules/proxy/health_checker.sh",
 		"modules/proxy/profile_manager.sh",
 		
-		// 8. Proxy - Cloudflare Clean IP
+		// 9. Proxy - Cloudflare Clean IP
 		"modules/proxy/cloudflare/core.sh",
 		"modules/proxy/cloudflare/link_utils.sh",
 		"modules/proxy/cloudflare/scanner.sh",
 		"modules/proxy/cloudflare/applier.sh",
 		"modules/proxy/cloudflare/menu.sh",
 
-		// 9. Other Modules
+		// 10. Other Modules
 		"modules/system/backup_restore.sh",
 		"modules/system/maintenance.sh",
 		"modules/service/service_manager.sh",
 
-		// 10. Core Installer Logic & Package Processing
+		// 11. Core Installer Logic & Package Processing
 		"installer/init/install_core.sh",
 		"modules/system/resource_checker.sh",
 		"installer/pkg/resolver.sh",
 		"installer/pkg/installer.sh",
 		"installer/pkg/updater.sh",
 
-		// 11. UI Components & Interactive Menus
+		// 12. UI Components & Interactive Menus
 		"ui/state.sh",
 		"ui/menu/custom.sh",
 		"ui/menu/mode.sh",
@@ -141,29 +144,32 @@ func generateInstallScript(outputFile string) error {
 ###############################################################################
 DEPLOYMENT_FAILED=0
 
-# 1. Pre-flight connectivity check
+# 1. Pre-flight proxy bootstrap (offers SSH tunnel to bypass filtering)
+proxy_bootstrap_offer
+
+# 2. Pre-flight connectivity check
 network_check || exit 1
 
-# 2. System environment discovery & version validation
+# 3. System environment discovery & version validation
 check_version || exit 1
 detect_system_architecture
 
-# 3. Core dependency initialization => with delay (2 secs) to ensure system stability after installing the dnsmasq-full tool!
+# 4. Core dependency initialization => with delay (2 secs) to ensure system stability after installing the dnsmasq-full tool!
 deploy_system_dependencies
 sleep 2
 initialize_installer
 
-# 4. Optional Automatic UCI Config Backup
+# 5. Optional Automatic UCI Config Backup
 if command -v backup_configs >/dev/null 2>&1; then
     backup_configs
 fi
 
-# 5. Interactive UI Launch
+# 6. Interactive UI Launch
 clear
 reset_state
 main_menu
 
-# 6. Clean Exit
+# 7. Clean Exit
 echo
 log_success "👋 DayPass session finished!"
 exit 0
