@@ -168,8 +168,10 @@ show_live_speed() {
 }
 
 # Main interactive network menu loop
-network_menu()
+network_info_menu()
 {
+    local HELP_MODULE_ID="network_info"
+
     while true; do
         show_full_network_info
         
@@ -177,10 +179,19 @@ network_menu()
         printf "  🔄 ${CYAN:-}2${RESET:-}) Refresh Information\n"
         printf "  🚪 ${CYAN:-}0${RESET:-}) Back to Main Menu\n\n"
         
-        printf "  ⁉️ ${YELLOW:-}Select${RESET:-} ${GRAY:-}:${RESET:-} "
+        printf "  ⁉️ ${YELLOW:-}Select [0-2] or [h] Help${RESET:-} ${GRAY:-}:${RESET:-} "
         read -r net_choice </dev/tty
 
         case "$net_choice" in
+            h|H)
+                if command -v show_help >/dev/null 2>&1; then
+                    show_help "$HELP_MODULE_ID"
+                else
+                    log_warn "Help module not loaded!"
+                    sleep 1
+                fi
+                continue
+                ;;
             1) show_live_speed ;;
             2) continue ;;
             0) echo "   ${GRAY}  Exiting ...${RESET}"
@@ -201,5 +212,5 @@ network_menu()
 
 # Script entry point handler
 case "$0" in
-    *network_checker.sh|*network_info.sh) network_menu ;;
+    *network_checker.sh|*network_info.sh) network_info_menu ;;
 esac

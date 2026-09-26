@@ -205,6 +205,17 @@ show_system_resources_menu()
     echo "  ──────────────────────────────────────────────────────────"
     echo
 
-    printf "  ${GRAY}Press [ENTER] to return to main menu ...${RESET}"
-    read -r _ </dev/tty
+    printf "  ${GRAY}Press [h] Help or [Enter] to return ...${RESET}"
+    read -r res_choice </dev/tty
+    case "$res_choice" in
+        h|H)
+            if command -v show_help >/dev/null 2>&1; then
+                show_help "system"
+                show_system_resources_menu
+            else
+                log_warn "Help module not loaded!"
+                sleep 1
+            fi
+            ;;
+    esac
 }

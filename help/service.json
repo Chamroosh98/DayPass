@@ -1,0 +1,31 @@
+{
+  "module_id": "service",
+  "title": "Service Manager",
+  "summary": "Post-deployment service orchestration for the core network stack. It runs automatically after a deployment and has no interactive menu, so the entries below describe the services it controls rather than menu numbers.",
+  "items": [
+    {
+      "key": "passwall2",
+      "title": "Passwall Engine (passwall2)",
+      "description": "Enables the Passwall 2 service at boot and starts it after deployment.",
+      "usage_tip": "If the Passwall panel is unreachable, enable and restart this service."
+    },
+    {
+      "key": "passwall",
+      "title": "Passwall Engine (passwall)",
+      "description": "Enables and starts the legacy Passwall 1 service when that profile was installed.",
+      "usage_tip": "Only one engine should be active at a time."
+    },
+    {
+      "key": "dnsmasq",
+      "title": "DNS Subsystem (dnsmasq)",
+      "description": "Reloads or restarts dnsmasq so new DNS and DHCP settings take effect.",
+      "usage_tip": "Prefer a reload; a full restart briefly interrupts DNS for clients."
+    },
+    {
+      "key": "firewall",
+      "title": "Firewall Rules (firewall)",
+      "description": "Reloads the firewall so new zones and forwarding rules are applied.",
+      "usage_tip": "Guest and WAN forwarding rules stay inactive until this reload succeeds."
+    }
+  ]
+}

@@ -200,6 +200,8 @@ test_selected_nodes() {
 # Main Menu
 
 health_checker_menu() {
+    local HELP_MODULE_ID="proxy_health_checker"
+
     while true; do
         render_persistent_header 2>/dev/null || clear
 
@@ -211,12 +213,21 @@ health_checker_menu() {
         echo "  ───────────────────────────────────────────────────────────"
         echo
 
-        printf "  ⁉️ Select option [0-2] : "
+        printf "  ⁉️ Select option [0-2] or [h] Help : "
         read -r choice </dev/tty
 
         case "$choice" in
             1) test_all_nodes ;;
             2) test_selected_nodes ;;
+            h|H)
+                if command -v show_help >/dev/null 2>&1; then
+                    show_help "$HELP_MODULE_ID"
+                else
+                    log_warn "Help module not loaded!"
+                    sleep 1
+                fi
+                continue
+                ;;
             0) return 0 ;;
             *) log_warn "Invalid option!" ;;
         esac

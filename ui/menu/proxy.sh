@@ -1,6 +1,8 @@
 #!/bin/sh
 
 proxy_menu() {
+    local HELP_MODULE_ID="proxy"
+
     while true; do
         render_persistent_header 2>/dev/null || clear
 
@@ -16,7 +18,7 @@ proxy_menu() {
         echo "  ───────────────────────────────────────────────────────────"
         echo
 
-        printf "  ⁉️ Select option [0-6] : "
+        printf "  ⁉️ Select option [0-6] or [h] Help : "
         read -r choice </dev/tty
 
         case "$choice" in
@@ -67,6 +69,15 @@ proxy_menu() {
                     log_error "Clean IP module not found!"
                     sleep 2
                 fi
+                ;;
+            h|H)
+                if command -v show_help >/dev/null 2>&1; then
+                    show_help "$HELP_MODULE_ID"
+                else
+                    log_warn "Help module not loaded!"
+                    sleep 1
+                fi
+                continue
                 ;;
             0)
                 return 0

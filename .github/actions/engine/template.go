@@ -9,11 +9,11 @@ import (
 
 func generateInstallScript(outputFile string) error {
 	fmt.Println("⌛ Processing Core Components with Go Engine for DayPass ...")
-	
+
 	branch := os.Getenv("GITHUB_REF_NAME")
 	releaseType := os.Getenv("INPUT_RELEASE_TYPE")
 	if branch == "" {
-		branch = "beta" 
+		branch = "beta"
 	}
 
 	var scriptBuilder strings.Builder
@@ -43,10 +43,11 @@ func generateInstallScript(outputFile string) error {
 		"ui/lib/box_utils.sh",
 		"ui/lib/header.sh",
 		"ui/lib/progress.sh",
+		"ui/lib/help.sh",
 		"ui/banner.sh",
 
 		// 2. Network — Host Bootstrap (proxy, DNS, ...)
-		"modules/network/host/bootstrap/proxy_bootstrap.sh",   
+		"modules/network/host/bootstrap/proxy_bootstrap.sh",
 
 		// 3. Low-Level System Detection & Package Management
 		"installer/init/arch_detector.sh",
@@ -66,6 +67,15 @@ func generateInstallScript(outputFile string) error {
 		"modules/network/host/load_balancer.sh",
 		"modules/network/host/network_checker.sh",
 
+		// 5b. Network - DNS Manager
+		"modules/network/dns/core.sh",
+		"modules/network/dns/mode_system.sh",
+		"modules/network/dns/mode_secure.sh",
+		"modules/network/dns/mode_tunnel.sh",
+		"modules/network/dns/mode_hybrid.sh",
+		"modules/network/dns/apply.sh",
+		"modules/network/dns/menu.sh",
+
 		// 6. Network - Guest
 		"modules/network/guest/network.sh",
 		"modules/network/guest/qos.sh",
@@ -81,7 +91,7 @@ func generateInstallScript(outputFile string) error {
 		"modules/proxy/node_balancer.sh",
 		"modules/proxy/health_checker.sh",
 		"modules/proxy/profile_manager.sh",
-		
+
 		// 9. Proxy - Cloudflare Clean IP
 		"modules/proxy/cloudflare/core.sh",
 		"modules/proxy/cloudflare/link_utils.sh",
@@ -111,7 +121,8 @@ func generateInstallScript(outputFile string) error {
 		"ui/review.sh",
 		"ui/menu/passwall.sh",
 		"ui/menu/network.sh",
-		"ui/menu/proxy.sh",       
+		"ui/menu/proxy.sh",
+		"ui/menu/help.sh",
 		"ui/menu/main.sh",
 		"ui/installer_ui.sh",
 	}
@@ -122,7 +133,7 @@ func generateInstallScript(outputFile string) error {
 			fmt.Printf("⚠️ Warning : File [%s] not found, skipping ...\n", file)
 			continue
 		}
-		
+
 		scriptBuilder.WriteString(fmt.Sprintf("\n# 📄 Source : %s\n", filepath.Base(file)))
 		lines := strings.Split(string(data), "\n")
 		for _, line := range lines {

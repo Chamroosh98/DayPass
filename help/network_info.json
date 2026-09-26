@@ -1,0 +1,25 @@
+{
+  "module_id": "network_info",
+  "title": "Network Info & Speed Monitor",
+  "summary": "Diagnostic panel that reports public IP details and can show live WAN bandwidth. The panel also reports offline state when no provider can be reached.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Live Speed Monitor",
+      "description": "Prints real-time download and upload rates for the active WAN interface once per second.",
+      "usage_tip": "Press Ctrl+C to stop the monitor and return to the menu."
+    },
+    {
+      "key": "2",
+      "title": "Refresh Information",
+      "description": "Re-queries public IP providers (ipwho.is, ipapi.co, ifconfig.co) for IP, country, ISP and ASN.",
+      "usage_tip": "Use it after switching WAN or reconnecting a tunnel."
+    },
+    {
+      "key": "0",
+      "title": "Back to Main Menu",
+      "description": "Leaves the network information screen.",
+      "usage_tip": "Nothing is changed; the panel is read-only."
+    }
+  ]
+}

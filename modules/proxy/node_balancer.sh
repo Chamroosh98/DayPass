@@ -131,24 +131,38 @@ select_nodes() {
 # Set balancing mode
 # ------------------------------------------------------------
 set_balancer_mode() {
-    echo
-    echo "  ⚖️  Select Load Balancing Mode :"
-    echo "  ───────────────────────────────────────────────────────────"
-    echo "  ⏳ 1) Round-Robin      (distribute equally)"
-    echo "  🏓 2) Least Ping       (prefer lowest latency)"
-    echo "  👨‍👩‍👧‍👦 3) Failover         (use next only if previous fails)"
-    echo "  🤹 4) Random"
-    echo "  ───────────────────────────────────────────────────────────"
-    printf "  ⁉️ Select mode [1-4] : "
-    read -r mode_choice </dev/tty
+    local mode_choice mode
 
-    case "$mode_choice" in
-        1) mode="round-robin" ;;
-        2) mode="least-ping" ;;
-        3) mode="failover" ;;
-        4) mode="random" ;;
-        *) log_warn "Invalid mode!"; return 1 ;;
-    esac
+    while true; do
+        echo
+        echo "  ⚖️  Select Load Balancing Mode :"
+        echo "  ───────────────────────────────────────────────────────────"
+        echo "  ⏳ 1) Round-Robin      (distribute equally)"
+        echo "  🏓 2) Least Ping       (prefer lowest latency)"
+        echo "  👨‍👩‍👧‍👦 3) Failover         (use next only if previous fails)"
+        echo "  🤹 4) Random"
+        echo "  ───────────────────────────────────────────────────────────"
+        printf "  ⁉️ Select mode [1-4] or [h] Help : "
+        read -r mode_choice </dev/tty
+
+        case "$mode_choice" in
+            h|H)
+                if command -v show_help >/dev/null 2>&1; then
+                    show_help "proxy_balancer_modes"
+                else
+                    log_warn "Help module not loaded!"
+                    sleep 1
+                fi
+                continue
+                ;;
+            1) mode="round-robin" ;;
+            2) mode="least-ping" ;;
+            3) mode="failover" ;;
+            4) mode="random" ;;
+            *) log_warn "Invalid mode!"; return 1 ;;
+        esac
+        break
+    done
 
     echo "$mode" > "$BALANCER_DIR/mode"
     log_success "Balancer mode set to : [$mode]"
@@ -236,6 +250,8 @@ disable_balancer() {
 # Main Menu
 # ------------------------------------------------------------
 node_balancer_menu() {
+    local HELP_MODULE_ID="proxy_balancer"
+
     while true; do
         render_persistent_header 2>/dev/null || clear
 
@@ -251,7 +267,7 @@ node_balancer_menu() {
         echo "  ───────────────────────────────────────────────────────────"
         echo
 
-        printf "  ⁉️ Select option [0-4] : "
+        printf "  ⁉️ Select option [0-4] or [h] Help : "
         read -r choice </dev/tty
 
         case "$choice" in
@@ -259,6 +275,15 @@ node_balancer_menu() {
             2) set_balancer_mode ;;
             3) apply_balancer ;;
             4) disable_balancer ;;
+            h|H)
+                if command -v show_help >/dev/null 2>&1; then
+                    show_help "$HELP_MODULE_ID"
+                else
+                    log_warn "Help module not loaded!"
+                    sleep 1
+                fi
+                continue
+                ;;
             0) return 0 ;;
             *) log_warn "Invalid option!" ;;
         esac

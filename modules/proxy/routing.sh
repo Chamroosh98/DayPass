@@ -175,6 +175,8 @@ EOF
 # Main Routing Menu
 # ------------------------------------------------------------
 routing_menu() {
+    local HELP_MODULE_ID="proxy_routing"
+
     while true; do
         render_persistent_header 2>/dev/null || clear
 
@@ -190,7 +192,7 @@ routing_menu() {
         echo "  ───────────────────────────────────────────────────────────"
         echo
 
-        printf "  ⁉️ Select option [0-4] : "
+        printf "  ⁉️ Select option [0-4] or [h] Help : "
         read -r choice </dev/tty
 
         case "$choice" in
@@ -207,6 +209,15 @@ routing_menu() {
                 else
                     echo "  💅🏻 No routing mode configured yet!"
                 fi
+                ;;
+            h|H)
+                if command -v show_help >/dev/null 2>&1; then
+                    show_help "$HELP_MODULE_ID"
+                else
+                    log_warn "Help module not loaded!"
+                    sleep 1
+                fi
+                continue
                 ;;
             0) return 0 ;;
             *) log_warn "Invalid option!" ;;

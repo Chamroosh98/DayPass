@@ -65,6 +65,8 @@ configure_mwan3_engine() {
 }
 
 load_balancer_menu() {
+    local HELP_MODULE_ID="network_multiwan"
+
     while true; do
         render_persistent_header 2>/dev/null || clear
         echo "  ⚖️ Multi-WAN Load Balancer"
@@ -76,7 +78,7 @@ load_balancer_menu() {
         echo "  👀 5) Show mwan3 Status"
         echo "  🚪 0) Back"
         echo "  ───────────────────────────────────────────────────────────"
-        printf "  ⁉️ Select option [0-5] : "
+        printf "  ⁉️ Select option [0-5] or [h] Help : "
         read -r c </dev/tty
 
         case "$c" in
@@ -85,6 +87,15 @@ load_balancer_menu() {
             3) setup_wifi_wan 2>/dev/null || log_warn "Wi-Fi WAN module not loaded." ;;
             4) configure_mwan3_engine ;;
             5) command -v mwan3 >/dev/null && mwan3 status || log_error "mwan3 not installed!" ;;
+            h|H)
+                if command -v show_help >/dev/null 2>&1; then
+                    show_help "$HELP_MODULE_ID"
+                else
+                    log_warn "Help module not loaded!"
+                    sleep 1
+                fi
+                continue
+                ;;
             0) return 0 ;;
             *) log_warn "Invalid option!" ;;
         esac

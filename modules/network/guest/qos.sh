@@ -148,6 +148,8 @@ remove_guest_qos() {
 # Menu
 # ------------------------------------------------------------
 guest_qos_menu() {
+    local HELP_MODULE_ID="network_guest_qos"
+
     while true; do
         render_persistent_header 2>/dev/null || clear
 
@@ -158,13 +160,22 @@ guest_qos_menu() {
         echo "  3) Remove all Guest QoS"
         echo "  0) Back"
         echo "  ───────────────────────────────────────────────────────────"
-        printf "  ⁉️ Select : "
+        printf "  ⁉️ Select [0-3] or [h] Help : "
         read -r choice </dev/tty
 
         case "$choice" in
             1) setup_simple_qos ;;
             2) setup_sqm_qos ;;
             3) remove_guest_qos ;;
+            h|H)
+                if command -v show_help >/dev/null 2>&1; then
+                    show_help "$HELP_MODULE_ID"
+                else
+                    log_warn "Help module not loaded!"
+                    sleep 1
+                fi
+                continue
+                ;;
             0) return 0 ;;
             *) log_warn "Invalid option!" ;;
         esac

@@ -1,0 +1,25 @@
+{
+  "module_id": "proxy_health_checker",
+  "title": "Node Health Checker",
+  "summary": "Tests whether saved nodes are reachable by opening a TCP connection to the host and port inside each share link, and reports approximate latency in milliseconds.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Check All Nodes",
+      "description": "Tests every saved config and prints a reachable/total summary at the end.",
+      "usage_tip": "Disabled configs are skipped and counted separately."
+    },
+    {
+      "key": "2",
+      "title": "Check Selected Nodes",
+      "description": "Lets you test only the node numbers you type instead of the whole list.",
+      "usage_tip": "Enter numbers separated by spaces, for example 1 2 4."
+    },
+    {
+      "key": "0",
+      "title": "Back",
+      "description": "Returns to the Proxy & Routing Manager.",
+      "usage_tip": "Results are only displayed; no config is modified."
+    }
+  ]
+}

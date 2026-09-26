@@ -1,0 +1,49 @@
+{
+  "module_id": "network",
+  "title": "Network Settings",
+  "summary": "Manages the home Wi-Fi access point, the isolated guest network, the router LAN IP, multi-WAN balancing, live speed monitoring and DNS mode.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Wi-Fi Access Point (Home WiFi)",
+      "description": "Configures the 2.4/5 GHz access points: SSID naming, WPA2 password and radio state.",
+      "usage_tip": "Use this if clients lose connection to the main Wi-Fi."
+    },
+    {
+      "key": "2",
+      "title": "Guest Network & Bandwidth Control",
+      "description": "Opens the guest sub-menu: isolated guest network, guest Wi-Fi SSID and QoS speed limits.",
+      "usage_tip": "Guests stay separated from your LAN and cannot reach your devices."
+    },
+    {
+      "key": "3",
+      "title": "Change Local Router LAN IP",
+      "description": "Moves the router to a new subnet (for example 192.168.10.1) and re-sizes the DHCP pool to .100-.249.",
+      "usage_tip": "Use it when your ISP modem already uses 192.168.1.1. Your SSH session will drop after applying."
+    },
+    {
+      "key": "4",
+      "title": "Multi-WAN Load Balancer",
+      "description": "Combines wired WAN, USB tethering and Wi-Fi hotspot WAN with mwan3 balancing and failover.",
+      "usage_tip": "Install the dependencies first, then apply load balancing."
+    },
+    {
+      "key": "5",
+      "title": "Network Info & Speed Monitor",
+      "description": "Shows public IP, country, ISP/ASN details and offers a real-time download/upload monitor.",
+      "usage_tip": "The speed monitor runs until you press Ctrl+C."
+    },
+    {
+      "key": "6",
+      "title": "DNS Manager",
+      "description": "Chooses how the router resolves DNS: system default, secure DoT/DoH, tunnel or hybrid.",
+      "usage_tip": "Hybrid is the safest pick when you use Passwall."
+    },
+    {
+      "key": "0",
+      "title": "Back to Main Menu",
+      "description": "Returns to the main DayPass menu.",
+      "usage_tip": "No network settings are changed."
+    }
+  ]
+}

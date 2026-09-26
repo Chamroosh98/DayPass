@@ -11,9 +11,10 @@ main_menu()
         printf "  🛡️ 4) Proxy & Routing Manager\n"
         printf "  🖥️ 5) System Resources & Hardware Info\n"
         printf "  🛠️ 6) Maintenance & Recovery\n"
+        printf "  📖 7) Help & Manuals\n"
         printf "  🚪 0) Exit\n\n"
 
-        printf "  ⁉️ Select option [0-6] : "
+        printf "  ⁉️ Select option [0-7] or [h] Help : "
         read -r choice </dev/tty
 
         case "$choice" in
@@ -63,6 +64,14 @@ main_menu()
                     maintenance_menu || true
                 else
                     log_error "Maintenance module not found!"
+                    sleep 2
+                fi
+                ;;
+            7|h|H)
+                if command -v help_menu >/dev/null 2>&1; then
+                    help_menu || true
+                else
+                    log_error "Help module not found!"
                     sleep 2
                 fi
                 ;;

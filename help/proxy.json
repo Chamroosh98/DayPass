@@ -1,0 +1,49 @@
+{
+  "module_id": "proxy",
+  "title": "Proxy & Routing Manager",
+  "summary": "All Passwall-related tools in one place: local node and subscription storage, traffic routing, balancing, health checks, routing profiles and Cloudflare Clean IP.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Config Manager (Nodes & Subscriptions)",
+      "description": "Stores proxy share links and subscription links locally and pushes them into Passwall.",
+      "usage_tip": "Start here: add a config or a subscription before touching routing."
+    },
+    {
+      "key": "2",
+      "title": "Traffic Routing / Shunt Rules",
+      "description": "Applies ready-made shunt modes such as Iran direct, global proxy and direct only.",
+      "usage_tip": "Rules can only be applied when Passwall is installed."
+    },
+    {
+      "key": "3",
+      "title": "Node Load Balancing",
+      "description": "Selects several saved nodes plus a balancing mode and writes them into Passwall.",
+      "usage_tip": "You need at least two saved configs to balance meaningful traffic."
+    },
+    {
+      "key": "4",
+      "title": "Node Health Checker",
+      "description": "Tests saved nodes with a TCP connect and reports approximate latency.",
+      "usage_tip": "Run it before choosing nodes for balancing."
+    },
+    {
+      "key": "5",
+      "title": "Routing Profiles",
+      "description": "One-click profiles: balanced, gaming, streaming, global proxy and direct only.",
+      "usage_tip": "Profiles simply call the routing modes for you."
+    },
+    {
+      "key": "6",
+      "title": "Clean IP Manager",
+      "description": "Finds reachable Cloudflare IPs for a config and replaces only the address part of the link.",
+      "usage_tip": "Use it when a Worker or CDN address stops responding."
+    },
+    {
+      "key": "0",
+      "title": "Back to Main Menu",
+      "description": "Returns to the main DayPass menu.",
+      "usage_tip": "Your nodes and rules stay saved."
+    }
+  ]
+}

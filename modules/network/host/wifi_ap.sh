@@ -170,6 +170,8 @@ setup_wifi_ap() {
 # Main Menu
 # ------------------------------------------------------------
 wifi_ap_menu() {
+    local HELP_MODULE_ID="network_wifi_ap"
+
     while true; do
         render_persistent_header 2>/dev/null || clear
 
@@ -179,7 +181,7 @@ wifi_ap_menu() {
         echo "  🛜 2) Create / Update Access Point (AP)"
         echo "  🚪 0) Back"
         echo "  ───────────────────────────────────────────────────────────"
-        printf "  ⁉️ Select option [0-2] : "
+        printf "  ⁉️ Select option [0-2] or [h] Help : "
         read -r choice </dev/tty
 
         case "$choice" in
@@ -192,6 +194,15 @@ wifi_ap_menu() {
                 setup_wifi_ap
                 printf "  ${GRAY:-}Press [Enter] to continue ... ${RESET:-}\n"
                 read -r _ </dev/tty
+                ;;
+            h|H)
+                if command -v show_help >/dev/null 2>&1; then
+                    show_help "$HELP_MODULE_ID"
+                else
+                    log_warn "Help module not loaded!"
+                    sleep 1
+                fi
+                continue
                 ;;
             0) return 0 ;;
             *) log_warn "Invalid option!" ;;

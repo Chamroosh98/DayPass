@@ -3,6 +3,8 @@
 # Guest Sub-Menu (Network + QoS)
 
 guest_menu() {
+    local HELP_MODULE_ID="network_guest"
+
     while true; do
         render_persistent_header 2>/dev/null || clear
 
@@ -16,7 +18,7 @@ guest_menu() {
         echo "  ─────────────────────────────────────────────────────────── "
         echo
 
-        printf "  ⁉️ Select option [0-4] : "
+        printf "  ⁉️ Select option [0-4] or [h] Help : "
         read -r choice </dev/tty
 
         case "$choice" in
@@ -48,6 +50,15 @@ guest_menu() {
                     log_error "Remove function not found!"
                 fi
                 ;;
+            h|H)
+                if command -v show_help >/dev/null 2>&1; then
+                    show_help "$HELP_MODULE_ID"
+                else
+                    log_warn "Help module not loaded!"
+                    sleep 1
+                fi
+                continue
+                ;;
             0) return 0 ;;
             *) log_warn "Invalid option!" ;;
         esac
@@ -60,6 +71,8 @@ guest_menu() {
 # Main Network Menu
 
 network_menu() {
+    local HELP_MODULE_ID="network"
+
     while true; do
         render_persistent_header 2>/dev/null || clear
 
@@ -75,7 +88,7 @@ network_menu() {
         echo "  ───────────────────────────────────────────────────────────"
         echo
 
-        printf "  ⁉️ Select option [0-6] : "
+        printf "  ⁉️ Select option [0-6] or [h] Help : "
         read -r choice </dev/tty
 
         case "$choice" in
@@ -121,6 +134,15 @@ network_menu() {
                     log_error "DNS module not found!"
                     sleep 2
                 fi
+                ;;
+            h|H)
+                if command -v show_help >/dev/null 2>&1; then
+                    show_help "$HELP_MODULE_ID"
+                else
+                    log_warn "Help module not loaded!"
+                    sleep 1
+                fi
+                continue
                 ;;
             0)
                 return 0

@@ -1,0 +1,25 @@
+{
+  "module_id": "network_wifi_ap",
+  "title": "Wi-Fi Access Point (Home WiFi)",
+  "summary": "Manages only the Access Point interfaces of the home Wi-Fi on every radio; station/WWAN interfaces are never modified.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Show current AP status",
+      "description": "Lists every AP interface with its SSID, device, network, encryption and enabled/disabled state.",
+      "usage_tip": "Run it before changing anything to see what is already configured."
+    },
+    {
+      "key": "2",
+      "title": "Create / Update Access Point (AP)",
+      "description": "Asks for an SSID strategy (unified or separate per band) and a WPA2 password, then applies it to all radios.",
+      "usage_tip": "The password must be at least 8 characters. Wi-Fi reloads at the end, so clients reconnect briefly."
+    },
+    {
+      "key": "0",
+      "title": "Back",
+      "description": "Returns to Network Settings.",
+      "usage_tip": "Existing AP configuration is left untouched."
+    }
+  ]
+}

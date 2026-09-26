@@ -60,8 +60,23 @@ clean_ip_for_config() {
     echo "  🧪 Test mode :"
     echo "  👼🏻 1) Basic TCP only"
     echo "  👩🏻‍🔬 2) Advanced (Xray/Sing-box aware - placeholder)"
-    printf "  ⁉️ Select mode [1-2] (default: 1) : "
+    printf "  ⁉️ Select mode [1-2] (default: 1) or [h] Help : "
     read -r mode_choice </dev/tty
+
+    while [ "$mode_choice" = "h" ] || [ "$mode_choice" = "H" ]; do
+        if command -v show_help >/dev/null 2>&1; then
+            show_help "proxy_clean_ip_scan"
+        else
+            log_warn "Help module not loaded!"
+            sleep 1
+        fi
+        echo
+        echo "  🧪 Test mode :"
+        echo "  👼🏻 1) Basic TCP only"
+        echo "  👩🏻‍🔬 2) Advanced (Xray/Sing-box aware - placeholder)"
+        printf "  ⁉️ Select mode [1-2] (default: 1) or [h] Help : "
+        read -r mode_choice </dev/tty
+    done
 
     local mode="basic"
     [ "$mode_choice" = "2" ] && mode="advanced"
@@ -96,6 +111,8 @@ clean_ip_for_config() {
 # Main Cloudflare Clean IP Menu
 # ------------------------------------------------------------
 clean_ip_menu() {
+    local HELP_MODULE_ID="proxy_clean_ip"
+
     while true; do
         render_persistent_header 2>/dev/null || clear
 
@@ -113,7 +130,7 @@ clean_ip_menu() {
         echo "  ───────────────────────────────────────────────────────────"
         echo
 
-        printf "  ⁉️ Select option [0-3] : "
+        printf "  ⁉️ Select option [0-3] or [h] Help : "
         read -r choice </dev/tty
 
         case "$choice" in
@@ -129,6 +146,15 @@ clean_ip_menu() {
                 else
                     log_warn "No scan results yet!"
                 fi
+                ;;
+            h|H)
+                if command -v show_help >/dev/null 2>&1; then
+                    show_help "$HELP_MODULE_ID"
+                else
+                    log_warn "Help module not loaded!"
+                    sleep 1
+                fi
+                continue
                 ;;
             0) return 0 ;;
             *) log_warn "Invalid option!" ;;

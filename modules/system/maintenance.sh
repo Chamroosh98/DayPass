@@ -93,6 +93,8 @@ backup_system_config()
 # Maintenance Sub-Menu
 maintenance_menu()
 {
+    local HELP_MODULE_ID="system"
+
     while true; do
         render_persistent_header
         
@@ -104,7 +106,7 @@ maintenance_menu()
         printf "  🚨 4) Factory Reset OpenWrt (Firstboot)\n"
         printf "  🚪 0) Back to Main Menu\n\n"
         printf "  ─────────────────────────────────────────────────────────── \n"
-        printf "  ⁉️ Select option [0-4] : "
+        printf "  ⁉️ Select option [0-4] or [h] Help : "
         read -r choice </dev/tty
 
         case "$choice" in
@@ -112,6 +114,15 @@ maintenance_menu()
             2) clean_daypass_cache ;;
             3) backup_system_config ;;
             4) factory_reset_system ;;
+            h|H)
+                if command -v show_help >/dev/null 2>&1; then
+                    show_help "$HELP_MODULE_ID"
+                else
+                    log_warn "Help module not loaded!"
+                    sleep 1
+                fi
+                continue
+                ;;
             0) break ;;
             *)
                 log_warn "Invalid choice!"

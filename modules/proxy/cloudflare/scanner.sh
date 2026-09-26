@@ -171,7 +171,7 @@ edit_candidates() {
     log_info "Candidate file : [$CANDIDATE_FILE]"
     echo "  Current list :"
     echo "  ───────────────────────────────────────────────────────────"
-    cat  "  $CANDIDATE_FILE"
+    cat "$CANDIDATE_FILE"
     echo "  ───────────────────────────────────────────────────────────"
     echo
     log_info "Edit this file manually, then rerun scan!"

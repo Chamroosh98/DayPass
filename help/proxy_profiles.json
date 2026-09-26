@@ -1,0 +1,43 @@
+{
+  "module_id": "proxy_profiles",
+  "title": "Routing Profiles",
+  "summary": "Ready-made traffic profiles that apply a routing mode to Passwall and remember the active profile. The header shows the active profile and the current routing mode.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Balanced (Iran Direct + Foreign Proxy)",
+      "description": "Applies the Iran direct mode: local traffic direct, foreign traffic through the proxy.",
+      "usage_tip": "Recommended profile for everyday browsing."
+    },
+    {
+      "key": "2",
+      "title": "Gaming (Low latency focus)",
+      "description": "Currently applies the Iran direct mode as its base and is aimed at low latency and stability.",
+      "usage_tip": "Keep a close node selected for the best result."
+    },
+    {
+      "key": "3",
+      "title": "Streaming (Better for video services)",
+      "description": "Currently applies the Iran direct mode as its base and is aimed at YouTube/Netflix style traffic.",
+      "usage_tip": "Works best with a fast node and the health checker run beforehand."
+    },
+    {
+      "key": "4",
+      "title": "Global Proxy (All traffic through proxy)",
+      "description": "Applies the global mode so every destination uses the proxy.",
+      "usage_tip": "Expect slower local access while this profile is active."
+    },
+    {
+      "key": "5",
+      "title": "Direct Only (Disable proxy completely)",
+      "description": "Applies direct only mode and turns Passwall proxying off.",
+      "usage_tip": "Use it to rule out the proxy when debugging connectivity."
+    },
+    {
+      "key": "0",
+      "title": "Back",
+      "description": "Returns to the Proxy & Routing Manager.",
+      "usage_tip": "The last applied profile stays active."
+    }
+  ]
+}

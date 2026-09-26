@@ -139,6 +139,8 @@ apply_profile() {
 # Main Menu
 
 profile_manager_menu() {
+    local HELP_MODULE_ID="proxy_profiles"
+
     while true; do
         render_persistent_header 2>/dev/null || clear
 
@@ -152,7 +154,7 @@ profile_manager_menu() {
         echo "  ───────────────────────────────────────────────────────────"
         echo
 
-        printf "  ⁉️ Select profile [1-5] or 0 to back : "
+        printf "  ⁉️ Select profile [1-5], [h] Help or 0 to back : "
         read -r choice </dev/tty
 
         case "$choice" in
@@ -161,6 +163,15 @@ profile_manager_menu() {
             3) apply_profile "streaming" ;;
             4) apply_profile "global" ;;
             5) apply_profile "direct" ;;
+            h|H)
+                if command -v show_help >/dev/null 2>&1; then
+                    show_help "$HELP_MODULE_ID"
+                else
+                    log_warn "Help module not loaded!"
+                    sleep 1
+                fi
+                continue
+                ;;
             0) return 0 ;;
             *) log_warn "Invalid option!" ;;
         esac

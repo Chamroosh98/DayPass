@@ -1,0 +1,37 @@
+{
+  "module_id": "network_guest",
+  "title": "Guest Network & Bandwidth Control",
+  "summary": "Builds an isolated guest LAN on 192.168.200.0/24 with its own DHCP server, firewall zone and optional guest Wi-Fi.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Setup Guest Network (Interface + Firewall)",
+      "description": "Creates the guest interface, its DHCP range and firewall rules that allow internet access only.",
+      "usage_tip": "Guests can reach DNS and DHCP but are rejected when trying to reach the main LAN."
+    },
+    {
+      "key": "2",
+      "title": "Setup Guest WiFi",
+      "description": "Broadcasts the guest SSID on all radios with client isolation enabled.",
+      "usage_tip": "The guest network is created automatically if it does not exist yet."
+    },
+    {
+      "key": "3",
+      "title": "Bandwidth Control (QoS)",
+      "description": "Opens the QoS sub-menu to limit guest download and upload speed.",
+      "usage_tip": "Set limits before sharing your connection with many devices."
+    },
+    {
+      "key": "4",
+      "title": "Remove Guest Network",
+      "description": "Deletes the guest interface, DHCP entry, firewall rules and every guest Wi-Fi interface.",
+      "usage_tip": "Your main Wi-Fi and LAN settings are left untouched."
+    },
+    {
+      "key": "0",
+      "title": "Back",
+      "description": "Returns to Network Settings.",
+      "usage_tip": "Nothing is removed while using this option."
+    }
+  ]
+}

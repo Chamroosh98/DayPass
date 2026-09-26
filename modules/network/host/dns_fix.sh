@@ -55,54 +55,71 @@ restore_dns()
 # Interactive DNS resolution recovery menu
 dns_fix_menu()
 {
-    if command -v render_persistent_header >/dev/null 2>&1; then
-        render_persistent_header
-    else
-        clear
-    fi
+    local HELP_MODULE_ID="network_dns_recovery"
 
-    echo "  ───────────────────────────────────────────────────────────"
-    echo "   📡 DNS Resolution Recovery                                "
-    echo "  ───────────────────────────────────────────────────────────"
-    echo "   ☁️ 1) Cloudflare DNS   (1.1.1.1)                          "
-    echo "   🔍 2) Google DNS       (8.8.8.8)                          "
-    echo "   🛡️ 3) Quad9 DNS        (9.9.9.9)                          "
-    
-    if [ -f "$BACKUP_DNS_FILE" ]; then
-        echo "   4) 🔄 Restore Original DNS                           "
-        echo "   5) 🚫 Skip                                           "
-        MAX_OPT="5"
-    else
-        echo "   4) 🚫 Skip                                           "
-        MAX_OPT="4"
-    fi
-    echo "  ───────────────────────────────────────────────────────────"
-    echo
+    while true; do
+        if command -v render_persistent_header >/dev/null 2>&1; then
+            render_persistent_header
+        else
+            clear
+        fi
 
-    printf "  ⁉️ Select option [1-%s] (Default: 1) : " "$MAX_OPT"
-    read -r dns_choice </dev/tty
+        echo "  ───────────────────────────────────────────────────────────"
+        echo "   📡 DNS Resolution Recovery                                "
+        echo "  ───────────────────────────────────────────────────────────"
+        echo "   ☁️ 1) Cloudflare DNS   (1.1.1.1)                          "
+        echo "   🔍 2) Google DNS       (8.8.8.8)                          "
+        echo "   🛡️ 3) Quad9 DNS        (9.9.9.9)                          "
 
-    case "$dns_choice" in
-        1|"")
-            apply_dns "1.1.1.1"
-            ;;
-        2)
-            apply_dns "8.8.8.8"
-            ;;
-        3)
-            apply_dns "9.9.9.9"
-            ;;
-        4) 
-            if [ -f "$BACKUP_DNS_FILE" ]; then
-                restore_dns
-            else
+        if [ -f "$BACKUP_DNS_FILE" ]; then
+            echo "   4) 🔄 Restore Original DNS                           "
+            echo "   5) 🚫 Skip                                           "
+            MAX_OPT="5"
+        else
+            echo "   4) 🚫 Skip                                           "
+            MAX_OPT="4"
+        fi
+        echo "  ───────────────────────────────────────────────────────────"
+        echo
+
+        printf "  ⁉️ Select option [1-%s] (Default: 1) or [h] Help : " "$MAX_OPT"
+        read -r dns_choice </dev/tty
+
+        case "$dns_choice" in
+            h|H)
+                if command -v show_help >/dev/null 2>&1; then
+                    show_help "$HELP_MODULE_ID"
+                else
+                    log_warn "Help module not loaded!"
+                    sleep 1
+                fi
+                continue
+                ;;
+            1|"")
+                apply_dns "1.1.1.1"
+                ;;
+            2)
+                apply_dns "8.8.8.8"
+                ;;
+            3)
+                apply_dns "9.9.9.9"
+                ;;
+            4)
+                if [ -f "$BACKUP_DNS_FILE" ]; then
+                    restore_dns
+                else
+                    log_info "Skipping DNS fix!"
+                fi
+                ;;
+            5)
                 log_info "Skipping DNS fix!"
-            fi
-            ;;
-        *)
-            log_info "Skipping DNS fix!"
-            ;;
-    esac
+                ;;
+            *)
+                log_info "Skipping DNS fix!"
+                ;;
+        esac
+        return 0
+    done
 }
 
 # Standalone execution handler

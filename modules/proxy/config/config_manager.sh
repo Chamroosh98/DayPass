@@ -4,6 +4,8 @@
 # ============================================================
 
 config_manager_menu() {
+    local HELP_MODULE_ID="proxy_config_manager"
+
     while true; do
         render_persistent_header 2>/dev/null || clear
 
@@ -29,7 +31,7 @@ config_manager_menu() {
         echo "  ───────────────────────────────────────────────────────────"
         echo
 
-        printf "  ⁉️ Select option [0-9] : "
+        printf "  ⁉️ Select option [0-9] or [h] Help : "
         read -r choice </dev/tty
 
         case "$choice" in
@@ -100,6 +102,15 @@ config_manager_menu() {
                 else
                     log_error "remove_config() not found!"
                 fi
+                ;;
+            h|H)
+                if command -v show_help >/dev/null 2>&1; then
+                    show_help "$HELP_MODULE_ID"
+                else
+                    log_warn "Help module not loaded!"
+                    sleep 1
+                fi
+                continue
                 ;;
             0)
                 return 0

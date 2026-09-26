@@ -3,6 +3,8 @@
 # DNS Manager Menu — persistent router DNS (not the temporary opkg recovery fix)
 
 dns_menu() {
+    local HELP_MODULE_ID="network_dns"
+
     while true; do
         render_persistent_header 2>/dev/null || clear
 
@@ -19,7 +21,7 @@ dns_menu() {
         echo "  ${GRAY}Temporary package-manager DNS recovery stays in Network Checker.${RESET}"
         echo
 
-        printf "  ⁉️ Select option [0-4] : "
+        printf "  ⁉️ Select option [0-4] or [h] Help : "
         read -r choice </dev/tty
 
         case "$choice" in
@@ -27,6 +29,15 @@ dns_menu() {
             2) apply_dns_mode "secure" ;;
             3) apply_dns_mode "tunnel" ;;
             4) apply_dns_mode "hybrid" ;;
+            h|H)
+                if command -v show_help >/dev/null 2>&1; then
+                    show_help "$HELP_MODULE_ID"
+                else
+                    log_warn "Help module not loaded!"
+                    sleep 1
+                fi
+                continue
+                ;;
             0) return 0 ;;
             *) log_warn "Invalid option!" ;;
         esac
