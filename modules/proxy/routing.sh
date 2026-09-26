@@ -178,7 +178,7 @@ routing_menu() {
     local HELP_MODULE_ID="proxy_routing"
 
     while true; do
-        render_persistent_header 2>/dev/null || clear
+        render_persistent_header
 
         echo "  🚦 Traffic Routing / Shunt Rules"
         echo "  ───────────────────────────────────────────────────────────"

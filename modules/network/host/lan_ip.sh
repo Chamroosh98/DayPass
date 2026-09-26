@@ -21,7 +21,7 @@ validate_ip()
 
 change_lan_ip_menu()
 {
-    render_persistent_header 2>/dev/null || clear
+    render_persistent_header
 
     CURRENT_IP=$(uci -q get network.lan.ipaddr || echo "192.168.1.1")
     CURRENT_NETMASK=$(uci -q get network.lan.netmask || echo "255.255.255.0")

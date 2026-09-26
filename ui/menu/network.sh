@@ -6,7 +6,7 @@ guest_menu() {
     local HELP_MODULE_ID="network_guest"
 
     while true; do
-        render_persistent_header 2>/dev/null || clear
+        render_persistent_header
 
         echo "  👥 Guest Network Management"
         echo "  ─────────────────────────────────────────────────────────── "
@@ -74,7 +74,7 @@ network_menu() {
     local HELP_MODULE_ID="network"
 
     while true; do
-        render_persistent_header 2>/dev/null || clear
+        render_persistent_header
 
         echo "  🌐 Network Settings"
         echo "  ───────────────────────────────────────────────────────────"

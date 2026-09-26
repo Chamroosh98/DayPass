@@ -109,7 +109,7 @@ remove_guest_network() {
 # Create Guest WiFi (AP on Guest network)
 # ------------------------------------------------------------
 setup_guest_wifi() {
-    render_persistent_header 2>/dev/null || clear
+    render_persistent_header
 
     echo "  👥 Guest WiFi Configuration"
     echo "  ───────────────────────────────────────────────────────────"
@@ -168,7 +168,7 @@ setup_guest_wifi() {
 # ------------------------------------------------------------
 guest_network_menu() {
     while true; do
-        render_persistent_header 2>/dev/null || clear
+        render_persistent_header
 
         echo "  👥 Guest Network Manager"
         echo "  ───────────────────────────────────────────────────────────"

@@ -142,7 +142,7 @@ profile_manager_menu() {
     local HELP_MODULE_ID="proxy_profiles"
 
     while true; do
-        render_persistent_header 2>/dev/null || clear
+        render_persistent_header
 
         echo "  🎭 Routing Profiles"
         echo "  ───────────────────────────────────────────────────────────"

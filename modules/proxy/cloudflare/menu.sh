@@ -114,7 +114,7 @@ clean_ip_menu() {
     local HELP_MODULE_ID="proxy_clean_ip"
 
     while true; do
-        render_persistent_header 2>/dev/null || clear
+        render_persistent_header
 
         local core
         core=$(detect_proxy_core)

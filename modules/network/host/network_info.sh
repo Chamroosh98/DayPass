@@ -53,13 +53,7 @@ fetch_ip_data()
 # Render full network information panel
 show_full_network_info()
 {
-    # Render persistent header if function is available
-    if command -v render_persistent_header >/dev/null 2>&1; then
-        render_persistent_header
-    else
-        clear
-        [ -n "$(command -v show_banner)" ] && show_banner
-    fi
+    render_persistent_header
     
     printf "  ${CYAN:-}🌐 Network Diagnostics & Information${RESET:-}\n"
     printf "  ${GRAY:-}─────────────────────────────────────────${RESET:-}\n"

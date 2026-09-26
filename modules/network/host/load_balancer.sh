@@ -68,7 +68,7 @@ load_balancer_menu() {
     local HELP_MODULE_ID="network_multiwan"
 
     while true; do
-        render_persistent_header 2>/dev/null || clear
+        render_persistent_header
         echo "  ⚖️ Multi-WAN Load Balancer"
         echo "  ───────────────────────────────────────────────────────────"
         echo "  📌 1) Install Dependencies"

@@ -6,7 +6,7 @@
 # ============================================================
 
 setup_wifi_wan() {
-    render_persistent_header 2>/dev/null || clear
+    render_persistent_header
 
     echo "  📡 Wi-Fi WAN (Station Mode)"
     echo "  ───────────────────────────────────────────────────────────"

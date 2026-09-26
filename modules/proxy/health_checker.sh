@@ -203,7 +203,7 @@ health_checker_menu() {
     local HELP_MODULE_ID="proxy_health_checker"
 
     while true; do
-        render_persistent_header 2>/dev/null || clear
+        render_persistent_header
 
         echo "  🩺 Node Health Checker"
         echo "  ───────────────────────────────────────────────────────────"

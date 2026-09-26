@@ -58,11 +58,7 @@ dns_fix_menu()
     local HELP_MODULE_ID="network_dns_recovery"
 
     while true; do
-        if command -v render_persistent_header >/dev/null 2>&1; then
-            render_persistent_header
-        else
-            clear
-        fi
+        render_persistent_header
 
         echo "  ───────────────────────────────────────────────────────────"
         echo "   📡 DNS Resolution Recovery                                "

@@ -7,7 +7,7 @@ config_manager_menu() {
     local HELP_MODULE_ID="proxy_config_manager"
 
     while true; do
-        render_persistent_header 2>/dev/null || clear
+        render_persistent_header
 
         local pw_version="unknown"
         if command -v detect_passwall_version >/dev/null 2>&1; then

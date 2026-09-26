@@ -6,7 +6,7 @@ dns_menu() {
     local HELP_MODULE_ID="network_dns"
 
     while true; do
-        render_persistent_header 2>/dev/null || clear
+        render_persistent_header
 
         echo "  🧭 DNS Manager"
         echo "  ───────────────────────────────────────────────────────────"

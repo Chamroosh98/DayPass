@@ -46,7 +46,7 @@ show_ap_status() {
 # Main Setup Function
 # ------------------------------------------------------------
 setup_wifi_ap() {
-    render_persistent_header 2>/dev/null || clear
+    render_persistent_header
 
     echo "  📡 Wi-Fi Access Point Configuration"
     echo "  ───────────────────────────────────────────────────────────"
@@ -173,7 +173,7 @@ wifi_ap_menu() {
     local HELP_MODULE_ID="network_wifi_ap"
 
     while true; do
-        render_persistent_header 2>/dev/null || clear
+        render_persistent_header
 
         echo "  📡 Wi-Fi Access Point Manager"
         echo "  ───────────────────────────────────────────────────────────"

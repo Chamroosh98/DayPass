@@ -22,6 +22,7 @@ _pb_banner() {
 
 # ---------- manual ----------
 _pb_manual() {
+    render_persistent_header
     echo
     echo "  ${BOLD}${WHITE}📖 Manual Setup${RESET}"
     echo "  ${DIM}──────────────────────────────────────────────────────────${RESET}"
@@ -101,6 +102,7 @@ proxy_bootstrap_offer() {
         esac
     fi
 
+    render_persistent_header
     _pb_banner
 
     printf "  Route DayPass traffic through a local proxy? ${DIM}[y/N/help]${RESET} : "

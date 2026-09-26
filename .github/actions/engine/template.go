@@ -41,10 +41,10 @@ func generateInstallScript(outputFile string) error {
 		"installer/init/globals.sh",
 		"ui/lib/styles.sh",
 		"ui/lib/box_utils.sh",
+		"ui/banner.sh",
 		"ui/lib/header.sh",
 		"ui/lib/progress.sh",
 		"ui/lib/help.sh",
-		"ui/banner.sh",
 
 		// 2. Network — Host Bootstrap (proxy, DNS, ...)
 		"modules/network/host/bootstrap/proxy_bootstrap.sh",

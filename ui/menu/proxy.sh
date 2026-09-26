@@ -4,7 +4,7 @@ proxy_menu() {
     local HELP_MODULE_ID="proxy"
 
     while true; do
-        render_persistent_header 2>/dev/null || clear
+        render_persistent_header
 
         echo "  🛡️  Proxy & Routing Manager"
         echo "  ───────────────────────────────────────────────────────────"

@@ -1,6 +1,5 @@
 #!/bin/sh
 
-clear
 # Cross-platform sleeping utility for UI spinner rendering
 spin_sleep() {
     if command -v usleep >/dev/null 2>&1; then
@@ -158,7 +157,7 @@ network_check()
     TOTAL_CHECKS=0
     DNS_FAILED=0
 
-    echo
+    render_persistent_header
     printf "  ${BOLD:-}${CYAN:-}🔎 DayPass Network Health Check${RESET:-}\n"
     
     printf "  ${GRAY:-}──────────────────────────────────────────${RESET:-}\n"

@@ -8,8 +8,7 @@ review_install()
         return 1
     fi
 
-    clear
-    [ -n "$(command -v render_persistent_header)" ] && render_persistent_header
+    render_persistent_header
 
     echo "  📊 Installation Plan Summary"
     echo "  ─────────────────────────────────────────────────────────────"

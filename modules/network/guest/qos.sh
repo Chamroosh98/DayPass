@@ -151,7 +151,7 @@ guest_qos_menu() {
     local HELP_MODULE_ID="network_guest_qos"
 
     while true; do
-        render_persistent_header 2>/dev/null || clear
+        render_persistent_header
 
         echo "  🚦 Guest Bandwidth Control (QoS)"
         echo "  ───────────────────────────────────────────────────────────"

@@ -2,8 +2,7 @@
 # ============================================================
 # DayPass - In-App Help Viewer & Manual Index
 # Renders the JSON manuals cached by ui/lib/help.sh.
-# The viewer uses a compact header (no banner) so a full page
-# of manual entries fits a standard 24-row SSH terminal.
+# Pages use the same DayPass banner as every other screen.
 # ============================================================
 
 HELP_ITEM_INDENT="       "
@@ -25,12 +24,14 @@ help_rows() {
 # ------------------------------------------------------------
 help_item_page_size() {
     HELP_ROWS="$(help_rows)"
-    if [ "$HELP_ROWS" -ge 44 ]; then
+    if [ "$HELP_ROWS" -ge 50 ]; then
         echo 4
-    elif [ "$HELP_ROWS" -ge 32 ]; then
+    elif [ "$HELP_ROWS" -ge 40 ]; then
         echo 3
-    else
+    elif [ "$HELP_ROWS" -ge 28 ]; then
         echo 2
+    else
+        echo 1
     fi
 }
 
@@ -39,12 +40,14 @@ help_item_page_size() {
 # ------------------------------------------------------------
 help_list_page_size() {
     HELP_ROWS="$(help_rows)"
-    if [ "$HELP_ROWS" -ge 40 ]; then
+    if [ "$HELP_ROWS" -ge 46 ]; then
         echo 8
-    elif [ "$HELP_ROWS" -ge 30 ]; then
+    elif [ "$HELP_ROWS" -ge 36 ]; then
         echo 6
-    else
+    elif [ "$HELP_ROWS" -ge 28 ]; then
         echo 4
+    else
+        echo 2
     fi
 }
 
@@ -81,7 +84,7 @@ help_wrap() {
 help_unavailable() {
     HELP_LABEL="${1:-Manual}"
 
-    echo
+    render_persistent_header
     log_warn "Manual unavailable"
     echo "  ${GRAY}[${HELP_LABEL}] has no cached copy, and jq or the download failed.${RESET}"
     echo "  ${GRAY}Cache directory : [$(help_cache_dir)]${RESET}"
@@ -120,7 +123,7 @@ show_help() {
     HELP_PAGE=1
 
     while true; do
-        clear
+        render_persistent_header
 
         HELP_TITLE=$(jq -r '.title // "Help"' "$HELP_FILE" 2>/dev/null)
         HELP_SUMMARY=$(jq -r '.summary // ""' "$HELP_FILE" 2>/dev/null)
@@ -190,7 +193,7 @@ help_menu() {
     HELP_PAGE=1
 
     while true; do
-        clear
+        render_persistent_header
 
         echo "  📖 ${BOLD}Help & Manuals${RESET}"
         echo "  ───────────────────────────────────────────────────────────"
