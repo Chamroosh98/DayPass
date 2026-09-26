@@ -1,0 +1,43 @@
+{
+  "module_id": "network_multiwan",
+  "title": "Multi-WAN Load Balancer",
+  "summary": "Adds USB tethering and Wi-Fi hotspot as extra internet sources and balances all links with mwan3 policies (balanced + failover).",
+  "items": [
+    {
+      "key": "1",
+      "title": "Install Dependencies",
+      "description": "Installs the mwan3 package set needed for balancing and failover.",
+      "usage_tip": "Run it once before applying load balancing."
+    },
+    {
+      "key": "2",
+      "title": "Setup USB Tethering WAN",
+      "description": "Detects a tethered phone or modem interface (usb0, rndis0, eth1, eth2) and registers it as WAN with metric 20.",
+      "usage_tip": "Enable USB tethering on the phone before running this option."
+    },
+    {
+      "key": "3",
+      "title": "Setup Wi-Fi Hotspot WAN",
+      "description": "Connects the router as a client to a phone hotspot or another Wi-Fi network and adds it as WWAN.",
+      "usage_tip": "Station mode never touches your Access Point interfaces."
+    },
+    {
+      "key": "4",
+      "title": "Apply mwan3 Load Balancing",
+      "description": "Creates balanced and failover policies over WAN, USB WAN and Wi-Fi WAN, then restarts mwan3.",
+      "usage_tip": "Traffic is spread across links; a single download will not reach the combined speed."
+    },
+    {
+      "key": "5",
+      "title": "Show mwan3 Status",
+      "description": "Prints the current mwan3 interface and policy status.",
+      "usage_tip": "Use it to confirm which links are online right now."
+    },
+    {
+      "key": "0",
+      "title": "Back",
+      "description": "Returns to Network Settings.",
+      "usage_tip": "Existing WAN interfaces keep working."
+    }
+  ]
+}

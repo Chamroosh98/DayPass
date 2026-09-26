@@ -1,0 +1,37 @@
+{
+  "module_id": "proxy_routing",
+  "title": "Traffic Routing / Shunt Rules",
+  "summary": "Switches Passwall between ready-made traffic routing modes and records the active mode locally so the menu can show it later.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Iran Direct + Foreign Proxy (Recommended)",
+      "description": "Iranian domains and IPs are reached directly while everything else goes through the proxy.",
+      "usage_tip": "The most common setup for local users: fast local access, proxied foreign traffic."
+    },
+    {
+      "key": "2",
+      "title": "Global Proxy (All traffic via proxy)",
+      "description": "Routes all destinations through the proxy, including traffic inside the country.",
+      "usage_tip": "Local sites become slower; use it mainly for testing or strict privacy needs."
+    },
+    {
+      "key": "3",
+      "title": "Direct Only (Disable proxy)",
+      "description": "Turns Passwall proxying off so every connection goes direct.",
+      "usage_tip": "Handy for checking whether a problem comes from the proxy or the line."
+    },
+    {
+      "key": "4",
+      "title": "Show current rules",
+      "description": "Prints the saved routing mode and the rule file that belongs to it.",
+      "usage_tip": "Read-only: nothing is changed on the router."
+    },
+    {
+      "key": "0",
+      "title": "Back",
+      "description": "Returns to the Proxy & Routing Manager.",
+      "usage_tip": "The active routing mode stays applied."
+    }
+  ]
+}

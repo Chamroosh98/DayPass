@@ -1,0 +1,243 @@
+{
+  "generated_for": "DayPass",
+  "schema_version": 1,
+  "base_dir": "help",
+  "schema": {
+    "module_id": "unique manual id",
+    "title": "short screen title",
+    "summary": "1-2 line purpose of the module or menu",
+    "items": [
+      {
+        "key": "exact menu key the user types (or service name when there is no menu)",
+        "title": "menu label",
+        "description": "what the option does (1-2 short sentences)",
+        "usage_tip": "when or why to use it"
+      }
+    ]
+  },
+  "total_manuals": 20,
+  "manuals": [
+    {
+      "file": "main.json",
+      "module_id": "main",
+      "title": "Main Menu",
+      "summary": "Central entry point of DayPass: install or update packages first, then open the network, proxy, hardware and maintenance menus.",
+      "item_count": 8,
+      "sources": [
+        "ui/menu/main.sh"
+      ],
+      "reachable_from": "Runs at the end of the installer / DayPass start"
+    },
+    {
+      "file": "network.json",
+      "module_id": "network",
+      "title": "Network Settings",
+      "summary": "Manages the home Wi-Fi access point, the isolated guest network, the router LAN IP, multi-WAN balancing, live speed monitoring and DNS mode.",
+      "item_count": 7,
+      "sources": [
+        "ui/menu/network.sh"
+      ],
+      "reachable_from": "Main menu -> 3"
+    },
+    {
+      "file": "network_wifi_ap.json",
+      "module_id": "network_wifi_ap",
+      "title": "Wi-Fi Access Point (Home WiFi)",
+      "summary": "Manages only the Access Point interfaces of the home Wi-Fi on every radio; station/WWAN interfaces are never modified.",
+      "item_count": 3,
+      "sources": [
+        "modules/network/host/wifi_ap.sh"
+      ],
+      "reachable_from": "Network Settings -> 1"
+    },
+    {
+      "file": "network_guest.json",
+      "module_id": "network_guest",
+      "title": "Guest Network & Bandwidth Control",
+      "summary": "Builds an isolated guest LAN on 192.168.200.0/24 with its own DHCP server, firewall zone and optional guest Wi-Fi.",
+      "item_count": 5,
+      "sources": [
+        "ui/menu/network.sh (guest_menu)"
+      ],
+      "reachable_from": "Network Settings -> 2"
+    },
+    {
+      "file": "network_guest_qos.json",
+      "module_id": "network_guest_qos",
+      "title": "Guest Bandwidth Control (QoS)",
+      "summary": "Caps guest download and upload speed with either lightweight tc rules or SQM using the Cake algorithm.",
+      "item_count": 4,
+      "sources": [
+        "modules/network/guest/qos.sh"
+      ],
+      "reachable_from": "Guest Network -> 3"
+    },
+    {
+      "file": "network_dns.json",
+      "module_id": "network_dns",
+      "title": "DNS Manager",
+      "summary": "Controls how the router resolves names for the local network. The status header shows the active mode, the detected Passwall package and the current dnsmasq upstreams. The chosen mode is remembered under /etc/daypass/dns/mode.",
+      "item_count": 5,
+      "sources": [
+        "modules/network/dns/menu.sh",
+        "modules/network/dns/core.sh"
+      ],
+      "reachable_from": "Network Settings -> 6"
+    },
+    {
+      "file": "network_dns_recovery.json",
+      "module_id": "network_dns_recovery",
+      "title": "DNS Resolution Recovery",
+      "summary": "Temporary DNS switch that is offered by the network checker when domain resolution fails. It changes DNS only for the current session and is not a replacement for the permanent DNS Manager.",
+      "item_count": 5,
+      "sources": [
+        "modules/network/host/dns_fix.sh"
+      ],
+      "reachable_from": "Offered by the network checker when DNS resolution fails"
+    },
+    {
+      "file": "network_multiwan.json",
+      "module_id": "network_multiwan",
+      "title": "Multi-WAN Load Balancer",
+      "summary": "Adds USB tethering and Wi-Fi hotspot as extra internet sources and balances all links with mwan3 policies (balanced + failover).",
+      "item_count": 6,
+      "sources": [
+        "modules/network/host/load_balancer.sh"
+      ],
+      "reachable_from": "Network Settings -> 4"
+    },
+    {
+      "file": "network_info.json",
+      "module_id": "network_info",
+      "title": "Network Info & Speed Monitor",
+      "summary": "Diagnostic panel that reports public IP details and can show live WAN bandwidth. The panel also reports offline state when no provider can be reached.",
+      "item_count": 3,
+      "sources": [
+        "modules/network/host/network_info.sh"
+      ],
+      "reachable_from": "Network Settings -> 5"
+    },
+    {
+      "file": "proxy.json",
+      "module_id": "proxy",
+      "title": "Proxy & Routing Manager",
+      "summary": "All Passwall-related tools in one place: local node and subscription storage, traffic routing, balancing, health checks, routing profiles and Cloudflare Clean IP.",
+      "item_count": 7,
+      "sources": [
+        "ui/menu/proxy.sh"
+      ],
+      "reachable_from": "Main menu -> 4"
+    },
+    {
+      "file": "proxy_config_manager.json",
+      "module_id": "proxy_config_manager",
+      "title": "Config Manager (Nodes & Subscriptions)",
+      "summary": "Local node store for single share links and subscription links. Configs live in /etc/daypass/proxy/configs and the header shows the detected Passwall engine.",
+      "item_count": 10,
+      "sources": [
+        "modules/proxy/config/config_manager.sh"
+      ],
+      "reachable_from": "Proxy menu -> 1"
+    },
+    {
+      "file": "proxy_routing.json",
+      "module_id": "proxy_routing",
+      "title": "Traffic Routing / Shunt Rules",
+      "summary": "Switches Passwall between ready-made traffic routing modes and records the active mode locally so the menu can show it later.",
+      "item_count": 5,
+      "sources": [
+        "modules/proxy/routing.sh"
+      ],
+      "reachable_from": "Proxy menu -> 2"
+    },
+    {
+      "file": "proxy_balancer.json",
+      "module_id": "proxy_balancer",
+      "title": "Node Load Balancing",
+      "summary": "Chooses which saved nodes take part in balancing and writes the balancer settings into Passwall. The status header shows the active mode and node count.",
+      "item_count": 5,
+      "sources": [
+        "modules/proxy/node_balancer.sh"
+      ],
+      "reachable_from": "Proxy menu -> 3"
+    },
+    {
+      "file": "proxy_balancer_modes.json",
+      "module_id": "proxy_balancer_modes",
+      "title": "Load Balancing Modes",
+      "summary": "The mode list shown by Set Balancing Mode. The choice is stored locally and used the next time you apply the balancer.",
+      "item_count": 4,
+      "sources": [
+        "modules/proxy/node_balancer.sh (set_balancer_mode)"
+      ],
+      "reachable_from": "Node Load Balancing -> 2"
+    },
+    {
+      "file": "proxy_health_checker.json",
+      "module_id": "proxy_health_checker",
+      "title": "Node Health Checker",
+      "summary": "Tests whether saved nodes are reachable by opening a TCP connection to the host and port inside each share link, and reports approximate latency in milliseconds.",
+      "item_count": 3,
+      "sources": [
+        "modules/proxy/health_checker.sh"
+      ],
+      "reachable_from": "Proxy menu -> 4"
+    },
+    {
+      "file": "proxy_profiles.json",
+      "module_id": "proxy_profiles",
+      "title": "Routing Profiles",
+      "summary": "Ready-made traffic profiles that apply a routing mode to Passwall and remember the active profile. The header shows the active profile and the current routing mode.",
+      "item_count": 6,
+      "sources": [
+        "modules/proxy/profile_manager.sh"
+      ],
+      "reachable_from": "Proxy menu -> 5"
+    },
+    {
+      "file": "proxy_clean_ip.json",
+      "module_id": "proxy_clean_ip",
+      "title": "Clean IP Manager (Cloudflare)",
+      "summary": "Scans candidate Cloudflare IPs on a config's own port, then replaces only the address inside the share link. SNI, Host and Path stay untouched. The header shows the detected proxy core.",
+      "item_count": 4,
+      "sources": [
+        "modules/proxy/cloudflare/menu.sh"
+      ],
+      "reachable_from": "Proxy menu -> 6"
+    },
+    {
+      "file": "proxy_clean_ip_scan.json",
+      "module_id": "proxy_clean_ip_scan",
+      "title": "Clean IP Test Mode",
+      "summary": "Test depth that Find Clean IP for a Config asks for before scanning the candidate IP list.",
+      "item_count": 2,
+      "sources": [
+        "modules/proxy/cloudflare/scanner.sh"
+      ],
+      "reachable_from": "Clean IP Manager -> 1"
+    },
+    {
+      "file": "system.json",
+      "module_id": "system",
+      "title": "Maintenance & Recovery",
+      "summary": "Repair and clean-up tools for the system module. The same module also powers the read-only Hardware & Resource Status screen (main menu option 5), which shows architecture, OpenWrt release, RAM and storage usage.",
+      "item_count": 5,
+      "sources": [
+        "modules/system/maintenance.sh",
+        "modules/system/resource_checker.sh"
+      ],
+      "reachable_from": "Main menu -> 6 (resources overview: Main menu -> 5)"
+    },
+    {
+      "file": "service.json",
+      "module_id": "service",
+      "title": "Service Manager",
+      "summary": "Post-deployment service orchestration for the core network stack. It runs automatically after a deployment and has no interactive menu, so the entries below describe the services it controls rather than menu numbers.",
+      "item_count": 4,
+      "sources": [
+        "modules/service/service_manager.sh"
+      ],
+      "reachable_from": "Runs automatically after deployment (no menu)"
+    }
+  ]
+}

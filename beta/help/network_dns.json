@@ -1,0 +1,37 @@
+{
+  "module_id": "network_dns",
+  "title": "DNS Manager",
+  "summary": "Controls how the router resolves names for the local network. The status header shows the active mode, the detected Passwall package and the current dnsmasq upstreams. The chosen mode is remembered under /etc/daypass/dns/mode.",
+  "items": [
+    {
+      "key": "1",
+      "title": "System Default (WAN / ISP resolvers)",
+      "description": "Clears the dnsmasq overrides so clients use the normal WAN/ISP DNS path.",
+      "usage_tip": "Pick this to undo earlier DNS experiments."
+    },
+    {
+      "key": "2",
+      "title": "Secure DNS (DoT/DoH when available)",
+      "description": "Forwards queries to a local encrypted stub (Stubby or https-dns-proxy) or to Passwall DoH.",
+      "usage_tip": "If no encrypted resolver exists it falls back to public DNS in plaintext."
+    },
+    {
+      "key": "3",
+      "title": "DNS through Tunnel (Passwall required)",
+      "description": "Sends all DNS through Passwall so queries follow the proxy path and LAN DNS is redirected.",
+      "usage_tip": "Needs Passwall installed; otherwise it stops with a clear error."
+    },
+    {
+      "key": "4",
+      "title": "Hybrid (tunnel/DoH first, public fallback)",
+      "description": "Tries the tunnel or encrypted resolver first, then falls back to Cloudflare and Google in order.",
+      "usage_tip": "Most reliable mode when the tunnel is unstable."
+    },
+    {
+      "key": "0",
+      "title": "Back",
+      "description": "Returns to Network Settings.",
+      "usage_tip": "The active DNS mode keeps running."
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "module_id": "proxy_balancer",
+  "title": "Node Load Balancing",
+  "summary": "Chooses which saved nodes take part in balancing and writes the balancer settings into Passwall. The status header shows the active mode and node count.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Select Nodes for Balancing",
+      "description": "Numbers the saved configs and stores the ones you pick, skipping disabled configs automatically.",
+      "usage_tip": "Enter node numbers separated by spaces, for example 1 3 4."
+    },
+    {
+      "key": "2",
+      "title": "Set Balancing Mode",
+      "description": "Chooses between round-robin, least-ping, failover and random distribution.",
+      "usage_tip": "Failover is the safest choice for unstable links."
+    },
+    {
+      "key": "3",
+      "title": "Apply Balancer to Passwall",
+      "description": "Writes the selected mode and node list into Passwall and reloads the service.",
+      "usage_tip": "Requires a saved mode and at least one selected node."
+    },
+    {
+      "key": "4",
+      "title": "Disable Balancer",
+      "description": "Removes the balancer section from Passwall and clears the saved mode and node list.",
+      "usage_tip": "Use it to return to normal single-node proxy operation."
+    },
+    {
+      "key": "0",
+      "title": "Back",
+      "description": "Returns to the Proxy & Routing Manager.",
+      "usage_tip": "Balancer settings stay as they are."
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "module_id": "network_guest_qos",
+  "title": "Guest Bandwidth Control (QoS)",
+  "summary": "Caps guest download and upload speed with either lightweight tc rules or SQM using the Cake algorithm.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Simple Limit (tc) - Lightweight",
+      "description": "Creates an HTB rate limit script for the guest bridge and re-applies it at every boot.",
+      "usage_tip": "Best for low-power routers. Defaults are 10 Mbps download and 5 Mbps upload."
+    },
+    {
+      "key": "2",
+      "title": "Advanced Limit (SQM + Cake) - Better quality",
+      "description": "Configures SQM with Cake on the guest interface for smoother latency under load.",
+      "usage_tip": "Installs sqm-scripts if missing. Defaults are 15 Mbps download and 5 Mbps upload."
+    },
+    {
+      "key": "3",
+      "title": "Remove all Guest QoS",
+      "description": "Deletes the tc script, its boot entry and the SQM section, then clears the live rules.",
+      "usage_tip": "Use it if guests report dropped or throttled connections."
+    },
+    {
+      "key": "0",
+      "title": "Back",
+      "description": "Returns to the Guest Network menu.",
+      "usage_tip": "Current speed limits stay active."
+    }
+  ]
+}

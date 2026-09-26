@@ -1,0 +1,55 @@
+{
+  "module_id": "main",
+  "title": "Main Menu",
+  "summary": "Central entry point of DayPass: install or update packages first, then open the network, proxy, hardware and maintenance menus.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Install Package Profile",
+      "description": "Starts the installer flow: pick Passwall-1 or Passwall-2, then choose Recommended or Custom mode.",
+      "usage_tip": "Run this first on a fresh router. Recommended mode is the safest choice."
+    },
+    {
+      "key": "2",
+      "title": "Check & Update Packages",
+      "description": "Refreshes and upgrades the packages DayPass installed from its own package source.",
+      "usage_tip": "Use it after a new DayPass release or when a proxy engine stops working."
+    },
+    {
+      "key": "3",
+      "title": "Network Settings",
+      "description": "Opens the network module: home Wi-Fi AP, guest network, LAN IP, multi-WAN, live speed and DNS.",
+      "usage_tip": "Start here when clients cannot connect or when you need a guest SSID."
+    },
+    {
+      "key": "4",
+      "title": "Proxy & Routing Manager",
+      "description": "Opens the proxy module: nodes, subscriptions, routing rules, balancing, health checks and Clean IP.",
+      "usage_tip": "Everything about Passwall is managed from this menu."
+    },
+    {
+      "key": "5",
+      "title": "System Resources & Hardware Info",
+      "description": "Shows a read-only summary of architecture, OpenWrt version, package manager, RAM and storage usage.",
+      "usage_tip": "Check free storage before installing heavy proxy engines."
+    },
+    {
+      "key": "6",
+      "title": "Maintenance & Recovery",
+      "description": "Purge DayPass packages, clear caches, back up the system configuration or factory reset the router.",
+      "usage_tip": "Take a backup before making large changes."
+    },
+    {
+      "key": "7",
+      "title": "Help & Manuals",
+      "description": "Opens the manual index. The same index also opens when you press h on this screen.",
+      "usage_tip": "On any other menu, h opens that screen's own manual."
+    },
+    {
+      "key": "0",
+      "title": "Exit",
+      "description": "Closes the DayPass session without changing anything.",
+      "usage_tip": "Safe to use at any time."
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "module_id": "proxy_config_manager",
+  "title": "Config Manager (Nodes & Subscriptions)",
+  "summary": "Local node store for single share links and subscription links. Configs live in /etc/daypass/proxy/configs and the header shows the detected Passwall engine.",
+  "items": [
+    {
+      "key": "1",
+      "title": "List Configs",
+      "description": "Shows every saved config with its protocol, ON/OFF state and the subscription it came from.",
+      "usage_tip": "Run it first to learn the exact config names used by other options."
+    },
+    {
+      "key": "2",
+      "title": "Add Manual Config",
+      "description": "Saves one share link under a name you choose and detects the protocol automatically.",
+      "usage_tip": "Supported links: vless, vmess, trojan, ss and hysteria2."
+    },
+    {
+      "key": "3",
+      "title": "Toggle Enable/Disable Config",
+      "description": "Flips a config's enabled flag so it is skipped by scans, health checks, balancing and pushes.",
+      "usage_tip": "Disabled nodes are ignored everywhere until you re-enable them."
+    },
+    {
+      "key": "4",
+      "title": "Add Subscription",
+      "description": "Stores a subscription name and its URL for later updates.",
+      "usage_tip": "Nothing is downloaded until you run Update All Subscriptions."
+    },
+    {
+      "key": "5",
+      "title": "List Subscriptions",
+      "description": "Lists saved subscriptions together with their last update time.",
+      "usage_tip": "Use it to check when a subscription was refreshed last."
+    },
+    {
+      "key": "6",
+      "title": "Update All Subscriptions",
+      "description": "Downloads every subscription, accepts plain or base64 content and stores each link as a separate config.",
+      "usage_tip": "Nodes from the same subscription are replaced on every update."
+    },
+    {
+      "key": "7",
+      "title": "Push Config to Passwall",
+      "description": "Lists the configs and imports the one you name into the Passwall panel.",
+      "usage_tip": "The config must exist in the local store first."
+    },
+    {
+      "key": "8",
+      "title": "Push All Configs to Passwall",
+      "description": "Imports every saved config into Passwall in one go.",
+      "usage_tip": "Use it after a fresh install or a subscription refresh."
+    },
+    {
+      "key": "9",
+      "title": "Remove Config",
+      "description": "Lists the configs and deletes the one you confirm.",
+      "usage_tip": "A deleted node also disappears from the balancer list."
+    },
+    {
+      "key": "0",
+      "title": "Back",
+      "description": "Returns to the Proxy & Routing Manager.",
+      "usage_tip": "Stored configs and subscriptions are kept."
+    }
+  ]
+}

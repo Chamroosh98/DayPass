@@ -1,0 +1,31 @@
+{
+  "module_id": "proxy_balancer_modes",
+  "title": "Load Balancing Modes",
+  "summary": "The mode list shown by Set Balancing Mode. The choice is stored locally and used the next time you apply the balancer.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Round-Robin (distribute equally)",
+      "description": "Sends new connections to each node in turn.",
+      "usage_tip": "Good for spreading traffic evenly across similar nodes."
+    },
+    {
+      "key": "2",
+      "title": "Least Ping (prefer lowest latency)",
+      "description": "Prefers the node with the lowest measured latency.",
+      "usage_tip": "Run the health checker first so the latency values are fresh."
+    },
+    {
+      "key": "3",
+      "title": "Failover (use next only if previous fails)",
+      "description": "Keeps the first node in use and switches only when it stops responding.",
+      "usage_tip": "Most predictable option for daily use."
+    },
+    {
+      "key": "4",
+      "title": "Random",
+      "description": "Picks a random node for each new connection.",
+      "usage_tip": "Helpful for avoiding per-IP rate limits on subscription nodes."
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "module_id": "system",
+  "title": "Maintenance & Recovery",
+  "summary": "Repair and clean-up tools for the system module. The same module also powers the read-only Hardware & Resource Status screen (main menu option 5), which shows architecture, OpenWrt release, RAM and storage usage.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Purge DayPass Installed Packages",
+      "description": "Reads the install log and removes every package DayPass installed, after confirmation.",
+      "usage_tip": "Useful before reinstalling with a different package manager or release."
+    },
+    {
+      "key": "2",
+      "title": "Clean Temporary Cache & Downloads",
+      "description": "Deletes leftover .ipk, .apk and .part files from the DayPass directory.",
+      "usage_tip": "Run it before a large install to free flash space."
+    },
+    {
+      "key": "3",
+      "title": "Backup System Configuration",
+      "description": "Creates a timestamped sysupgrade archive of the current OpenWrt configuration in /tmp.",
+      "usage_tip": "Copy the archive off the router: /tmp does not survive a reboot."
+    },
+    {
+      "key": "4",
+      "title": "Factory Reset OpenWrt (Firstboot)",
+      "description": "Erases all user configuration and reboots the router with clean defaults.",
+      "usage_tip": "You must type RESET to confirm. There is no undo."
+    },
+    {
+      "key": "0",
+      "title": "Back to Main Menu",
+      "description": "Returns to the main DayPass menu.",
+      "usage_tip": "Nothing is removed while using this option."
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "module_id": "proxy_clean_ip",
+  "title": "Clean IP Manager (Cloudflare)",
+  "summary": "Scans candidate Cloudflare IPs on a config's own port, then replaces only the address inside the share link. SNI, Host and Path stay untouched. The header shows the detected proxy core.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Find Clean IP for a Config",
+      "description": "Scans candidate IPs on the port taken from a config's share link and saves the IP you choose.",
+      "usage_tip": "After applying you can push the updated config straight to Passwall."
+    },
+    {
+      "key": "2",
+      "title": "Show / Edit Candidate IP List",
+      "description": "Prints the candidate file path and its contents so you can edit it manually.",
+      "usage_tip": "The default list is Cloudflare-focused; one IP per line and # starts a comment."
+    },
+    {
+      "key": "3",
+      "title": "Show Last Scan Results",
+      "description": "Displays the cached results of the most recent scan sorted by latency.",
+      "usage_tip": "Results are cleared and rebuilt on every new scan."
+    },
+    {
+      "key": "0",
+      "title": "Back",
+      "description": "Returns to the Proxy & Routing Manager.",
+      "usage_tip": "Saved configs keep their current address."
+    }
+  ]
+}
