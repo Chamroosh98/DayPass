@@ -88,6 +88,11 @@ _pb_apply() {
 
 # Public — interactive offer (NEVER blocks pipeline)
 proxy_bootstrap_offer() {
+    local _existing
+    local _ans
+    local _choice
+    local _c2
+
     _existing="$(_pb_detect_existing)"
 
     # ---- already configured? just confirm ----
@@ -130,7 +135,14 @@ proxy_bootstrap_offer() {
             ;;
     esac
 
-    # ---- ask for port ----
+    proxy_bootstrap_setup
+    return 0
+}
+
+# Public — prompt for port and export proxy env (used by the bootstrap wizard)
+proxy_bootstrap_setup() {
+    local _port
+
     printf "  Proxy port on router side ${DIM}[default ${PROXY_DEFAULT_PORT}]${RESET} : "
     read -r _port </dev/tty
     [ -z "$_port" ] && _port="$PROXY_DEFAULT_PORT"

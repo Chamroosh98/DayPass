@@ -46,8 +46,10 @@ func generateInstallScript(outputFile string) error {
 		"ui/lib/progress.sh",
 		"ui/lib/help.sh",
 
-		// 2. Network — Host Bootstrap (proxy, DNS, ...)
+		// 2. Network — Host Bootstrap (proxy, Worker mirror, wizard)
 		"modules/network/host/bootstrap/proxy_bootstrap.sh",
+		"modules/network/host/bootstrap/worker_bootstrap.sh",
+		"modules/network/host/bootstrap/wizard.sh",
 
 		// 3. Low-Level System Detection & Package Management
 		"installer/init/arch_detector.sh",
@@ -154,8 +156,8 @@ func generateInstallScript(outputFile string) error {
 ###############################################################################
 DEPLOYMENT_FAILED=0
 
-# 1. Pre-flight proxy bootstrap (offers SSH tunnel to bypass filtering)
-proxy_bootstrap_offer
+# 1. Pre-flight network bootstrap (proxy, Worker mirror, or direct)
+network_bootstrap_offer
 
 # 2. Pre-flight connectivity check
 network_check || exit 1
