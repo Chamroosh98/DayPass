@@ -10,14 +10,15 @@ show_custom_help()
     echo "     replaces previously selected translations for clean config."
     echo "  🔹 ${YELLOW}[n] / [p]:${RESET} Navigate to Next or Previous page."
     echo "  🔹 ${YELLOW}[d]:${RESET} Save your current selection and proceed to Review."
-    echo "  🔹 ${YELLOW}[q]:${RESET} Cancel and return to main menu."
+    echo "  🔹 ${YELLOW}[0]:${RESET} Cancel selection and go back."
+    echo "  🔹 ${YELLOW}[q]:${RESET} Quit DayPass."
     echo "  ──────────────────────────────────────────────────────────"
     echo "  💡 ${CYAN}Pro-Tip:${RESET} Combining Sing-box and Xray together is supported,"
     echo "     but recommended mainly for powerful hardware (ARM64 / x86)."
     echo "  ──────────────────────────────────────────────────────────"
     echo
     printf "  ${GRAY}Press [ENTER] to return to selection menu ...${RESET}"
-    read -r _ </dev/tty
+    read -r _ </dev/tty || daypass_quit
 }
 
 toggle_custom_package()
@@ -144,11 +145,11 @@ handle_custom_profile()
         FIRST_RENDER=0
 
         echo "  ${GRAY}──────────────────────────────────────────────────────────${RESET}"
-        echo "  ${GRAY}[${CYAN}n${RESET}${GRAY}] Next | [${CYAN}p${RESET}${GRAY}] Prev | [${YELLOW}h${RESET}${GRAY}] Help | [${RED}q${RESET}${GRAY}] Cancel | [${GREEN}d${RESET}${GRAY}] Save & Done${RESET}"
+        echo "  ${GRAY}[${CYAN}n${RESET}${GRAY}] Next | [${CYAN}p${RESET}${GRAY}] Prev | [${YELLOW}h${RESET}${GRAY}] Help | [${RED}0${RESET}${GRAY}] Back | [${RED}q${RESET}${GRAY}] Quit | [${GREEN}d${RESET}${GRAY}] Save & Done${RESET}"
         echo
 
-        printf "  ⁉️ ${YELLOW}Toggle Item${RESET} ${GRAY}(1-$((item_no - 1))) or Action (${CYAN}n${RESET}${GRAY}/${CYAN}p${RESET}${GRAY}/${YELLOW}h${RESET}${GRAY}/${RED}q${RESET}${GRAY}/${GREEN}d${RESET}${GRAY}) :${RESET} "
-        read -r cmd </dev/tty
+        printf "  ⁉️ ${YELLOW}Toggle Item${RESET} ${GRAY}(1-$((item_no - 1))) or Action (${CYAN}n${RESET}${GRAY}/${CYAN}p${RESET}${GRAY}/${YELLOW}h${RESET}${GRAY}/${RED}0${RESET}${GRAY}/${RED}q${RESET}${GRAY}/${GREEN}d${RESET}${GRAY}) :${RESET} "
+        read -r cmd </dev/tty || daypass_quit
 
         case "$cmd" in
             n|N)
@@ -161,6 +162,9 @@ handle_custom_profile()
                 show_custom_help
                 ;;
             q|Q)
+                daypass_quit
+                ;;
+            0)
                 log_warn "Custom selection cancelled."
                 SELECTED_PACKAGES=""
                 return 1

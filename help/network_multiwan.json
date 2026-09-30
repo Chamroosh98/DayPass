@@ -1,31 +1,31 @@
 {
   "module_id": "network_multiwan",
   "title": "Multi-WAN Load Balancer",
-  "summary": "Adds USB tethering and Wi-Fi hotspot as extra internet sources and balances all links with mwan3 policies (balanced + failover).",
+  "summary": "Adds USB tethering and a Wi-Fi hotspot as extra internet sources and writes an mwan3 setup over wan, wan_usb and wwan. Links are used in priority order: wan, then USB, then Wi-Fi.",
   "items": [
     {
       "key": "1",
       "title": "Install Dependencies",
-      "description": "Installs the mwan3 package set needed for balancing and failover.",
-      "usage_tip": "Run it once before applying load balancing."
+      "description": "Calls an mwan3 dependency installer that is not part of this DayPass build, so it only prints a warning.",
+      "usage_tip": "Install mwan3 yourself with opkg or apk before applying load balancing."
     },
     {
       "key": "2",
       "title": "Setup USB Tethering WAN",
-      "description": "Detects a tethered phone or modem interface (usb0, rndis0, eth1, eth2) and registers it as WAN with metric 20.",
-      "usage_tip": "Enable USB tethering on the phone before running this option."
+      "description": "Registers the first USB tethering interface (detected by kernel driver: rndis_host, cdc_ether, cdc_ncm, ipheth; fallback usb0) as wan_usb with metric 20.",
+      "usage_tip": "Hardware & USB Tethering (Main menu -> 2) offers device choice, metrics and toggling."
     },
     {
       "key": "3",
       "title": "Setup Wi-Fi Hotspot WAN",
-      "description": "Connects the router as a client to a phone hotspot or another Wi-Fi network and adds it as WWAN.",
+      "description": "Connects the router as a client to a phone hotspot or another Wi-Fi network and adds it as wwan with metric 30.",
       "usage_tip": "Station mode never touches your Access Point interfaces."
     },
     {
       "key": "4",
       "title": "Apply mwan3 Load Balancing",
-      "description": "Creates balanced and failover policies over WAN, USB WAN and Wi-Fi WAN, then restarts mwan3.",
-      "usage_tip": "Traffic is spread across links; a single download will not reach the combined speed."
+      "description": "Writes balanced and failover policies over wan, wan_usb and wwan, tracks 1.1.1.1 and 8.8.8.8, then restarts mwan3.",
+      "usage_tip": "The links have different priorities, so traffic moves to the next link only when the current one goes down."
     },
     {
       "key": "5",

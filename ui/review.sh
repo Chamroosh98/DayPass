@@ -38,14 +38,17 @@ review_install()
     echo
 
     while true; do
-        printf "  ⁉️  Proceed with deployment? [Y/n] : "
-        read -r confirm </dev/tty
+        ui_read "Proceed with deployment? [Y/n], [0] Back or [q] Quit"
+        confirm="$UI_CHOICE"
 
         case "$confirm" in
             y|Y|"")
                 return 0
                 ;;
-            n|N)
+            q|Q)
+                daypass_quit
+                ;;
+            n|N|0)
                 log_warn "Installation cancelled by user!"
                 FINAL_PACKAGES=""
                 export FINAL_PACKAGES
@@ -54,7 +57,7 @@ review_install()
                 return 1
                 ;;
             *)
-                log_error "Invalid input! Please enter Y or N."
+                log_error "Invalid input! Please enter Y, N or 0."
                 ;;
         esac
     done

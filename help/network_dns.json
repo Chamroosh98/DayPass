@@ -1,7 +1,7 @@
 {
   "module_id": "network_dns",
   "title": "DNS Manager",
-  "summary": "Controls how the router resolves names for the local network. The status header shows the active mode, the detected Passwall package and the current dnsmasq upstreams. The chosen mode is remembered under /etc/daypass/dns/mode.",
+  "summary": "Controls how the router resolves names for the local network. The status header shows the active mode, the active transport engine and the current dnsmasq upstreams. The chosen mode is remembered under /etc/daypass/dns/mode.",
   "items": [
     {
       "key": "1",
@@ -12,14 +12,14 @@
     {
       "key": "2",
       "title": "Secure DNS (DoT/DoH when available)",
-      "description": "Forwards queries to a local encrypted stub (Stubby or https-dns-proxy) or to Passwall DoH.",
+      "description": "Forwards queries to a local encrypted stub (Stubby or https-dns-proxy) or to the active engine's DoH resolver.",
       "usage_tip": "If no encrypted resolver exists it falls back to public DNS in plaintext."
     },
     {
       "key": "3",
-      "title": "DNS through Tunnel (Passwall required)",
-      "description": "Sends all DNS through Passwall so queries follow the proxy path and LAN DNS is redirected.",
-      "usage_tip": "Needs Passwall installed; otherwise it stops with a clear error."
+      "title": "DNS through Tunnel (transport engine required)",
+      "description": "Sends all DNS through the active engine: its DNS listener (Passwall, sing-box/Xray dns-in inbound) or, for WireGuard/OpenVPN, 1.1.1.1 routed through the tunnel.",
+      "usage_tip": "Stops with a clear error when no engine is installed or it has no DNS endpoint."
     },
     {
       "key": "4",

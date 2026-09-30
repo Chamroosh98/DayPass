@@ -2,7 +2,7 @@
 
 show_banner()
 {
-    VERSION="v1.10.0"
+    VERSION="v2.0.0"
 
     echo
 

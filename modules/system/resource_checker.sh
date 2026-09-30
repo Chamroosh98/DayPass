@@ -205,9 +205,10 @@ show_system_resources_menu()
     echo "  ──────────────────────────────────────────────────────────"
     echo
 
-    printf "  ${GRAY}Press [h] Help or [Enter] to return ...${RESET}"
-    read -r res_choice </dev/tty
+    printf "  ${GRAY}Press [h] Help, [q] Quit or [Enter/0] Back ...${RESET}"
+    read -r res_choice </dev/tty || daypass_quit
     case "$res_choice" in
+        q|Q) daypass_quit ;;
         h|H)
             if command -v show_help >/dev/null 2>&1; then
                 show_help "system"

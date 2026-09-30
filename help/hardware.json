@@ -1,0 +1,73 @@
+{
+  "module_id": "hardware",
+  "title": "Hardware & USB Tethering Manager",
+  "summary": "Shows USB devices (lsusb, or sysfs when usbutils is missing), USB network interfaces by kernel driver (rndis_host, cdc_ether, cdc_ncm, ipheth = phone tethering; qmi_wwan, cdc_mbim = modems), modem ports and WAN metrics.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Setup USB Tethering WAN (DHCP client)",
+      "description": "Creates or updates network.wan_usb (proto dhcp) on the chosen tethering device with the metric you enter (default 20), adds it to the firewall zone named wan and brings it up.",
+      "usage_tip": "With one tethering device it is picked automatically; with none you can type a device name (default usb0)."
+    },
+    {
+      "key": "2",
+      "title": "Toggle USB Tethering Interface",
+      "description": "Disables wan_usb (ifdown + disabled=1) or enables it again (ifup).",
+      "usage_tip": "Disabling keeps the configuration so it can be enabled later."
+    },
+    {
+      "key": "3",
+      "title": "Failover Metric Rules",
+      "description": "Backup: wan_usb metric 20 (or wan metric + 10). Primary: wan_usb 5 and wan 10. Custom: any metric. Lower metric is preferred.",
+      "usage_tip": "When mwan3 runs, its member metrics decide failover instead."
+    },
+    {
+      "key": "4",
+      "title": "USB ModeSwitch",
+      "description": "Lists modems still in storage (CD-ROM) mode with usbmode -l and switches them to modem mode with usbmode -s.",
+      "usage_tip": "Needs usb-modeswitch from the USB profile."
+    },
+    {
+      "key": "5",
+      "title": "Remove USB Tethering WAN",
+      "description": "Brings wan_usb down, deletes it and removes it from the wan firewall zone.",
+      "usage_tip": "Multi-WAN (mwan3) still lists wan_usb until it is reconfigured."
+    },
+    {
+      "key": "6",
+      "title": "Refresh Detection",
+      "description": "Re-reads devices and interfaces.",
+      "usage_tip": "Use after plugging in a phone or modem."
+    },
+    {
+      "key": "7",
+      "title": "Install USB / Tethering Drivers",
+      "description": "Opens the USB package profile plan and installs it after confirmation.",
+      "usage_tip": "Same as Package Profiles -> 3."
+    },
+    {
+      "key": "8",
+      "title": "System Resources & Hardware Info",
+      "description": "Architecture, OpenWrt release, RAM and storage usage.",
+      "usage_tip": "Read-only."
+    },
+    {
+      "key": "0",
+      "title": "Back to Main Menu",
+      "description": "Returns to the main menu.",
+      "usage_tip": "Nothing is changed by leaving this menu."
+    },
+    {
+      "key": "q",
+      "title": "Quit DayPass",
+      "description": "Ends the DayPass session from any menu.",
+      "usage_tip": "Ctrl+C does the same and restores the terminal."
+    },
+    {
+      "key": "h",
+      "title": "Help",
+      "description": "Opens the manual of the current screen.",
+      "usage_tip": "Enter or 0 inside a manual returns to the screen you came from; q quits DayPass."
+    }
+  ]
+}

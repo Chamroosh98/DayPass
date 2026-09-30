@@ -2,84 +2,37 @@
 
 main_menu()
 {
+    local HELP_MODULE_ID="main"
+
+    trap daypass_interrupt INT TERM
+
     while true; do
         render_persistent_header
 
-        printf "  📦 1) Install Package Profile\n"
-        printf "  🔄 2) Check & Update Packages\n"
-        printf "  🌐 3) Network Settings\n"
-        printf "  🛡️ 4) Proxy & Routing Manager\n"
-        printf "  🖥️ 5) System Resources & Hardware Info\n"
-        printf "  🛠️ 6) Maintenance & Recovery\n"
-        printf "  📖 7) Help & Manuals\n"
-        printf "  🚪 0) Exit\n\n"
+        ui_title "🏠 Main Menu"
+        echo "  📦 1) Package Profiles & Dependencies"
+        echo "  🔌 2) Hardware & USB Tethering Manager"
+        echo "  🌐 3) Network & Routing Configuration"
+        echo "  🛡️ 4) Proxy & Tunnel Engine Manager"
+        echo "  ⚖️ 5) Node Balancer & Health Diagnostics"
+        echo "  🛠️ 6) System Maintenance & Backup"
+        echo "  📖 7) Help & Manuals"
+        echo "  ───────────────────────────────────────────────────────────"
+        ui_nav_footer root
 
-        printf "  ⁉️ Select option [0-7] or [h] Help : "
-        read -r choice </dev/tty
+        ui_prompt 7
 
-        case "$choice" in
-            1)
-                if command -v package_menu >/dev/null 2>&1; then
-                    package_menu || true
-                else
-                    log_error "Package module not found!"
-                    sleep 2
-                fi
-                ;;
-            2)
-                if command -v update_packages_menu >/dev/null 2>&1; then
-                    update_packages_menu || true
-                else
-                    log_error "Update module not found!"
-                    sleep 2
-                fi
-                ;;
-            3)
-                if command -v network_menu >/dev/null 2>&1; then
-                    network_menu || true
-                else
-                    log_error "Network menu not found!"
-                    sleep 2
-                fi
-                ;;
-            4)
-                if command -v proxy_menu >/dev/null 2>&1; then
-                    proxy_menu || true
-                else
-                    log_error "Proxy menu not found!"
-                    sleep 2
-                fi
-                ;;
-            
-            5)
-                if command -v show_system_resources_menu >/dev/null 2>&1; then
-                    show_system_resources_menu || true
-                else
-                    log_error "Resource checker module not found!"
-                    sleep 2
-                fi
-                ;;
-            6)
-                if command -v maintenance_menu >/dev/null 2>&1; then
-                    maintenance_menu || true
-                else
-                    log_error "Maintenance module not found!"
-                    sleep 2
-                fi
-                ;;
-            7|h|H)
-                if command -v help_menu >/dev/null 2>&1; then
-                    help_menu || true
-                else
-                    log_error "Help module not found!"
-                    sleep 2
-                fi
-                ;;
-            0)
-                printf "  ${GRAY}TNX for using DayPass! =)${RESET}\n"
-                exit 0
-                ;;
+        case "$UI_CHOICE" in
+            1) ui_run packages_menu "Package Profiles" ;;
+            2) ui_run hardware_menu "Hardware & USB Tethering" ;;
+            3) ui_run network_menu "Network" ;;
+            4) ui_run proxy_menu "Proxy & Tunnel Engine" ;;
+            5) ui_run diagnostics_menu "Node Balancer & Diagnostics" ;;
+            6) ui_run system_menu "System Maintenance" ;;
+            7) ui_run help_menu "Help" ;;
+            0) daypass_quit ;;
             *)
+                ui_nav_common "$UI_CHOICE" "$HELP_MODULE_ID" && continue
                 log_warn "Invalid choice!"
                 sleep 1
                 ;;

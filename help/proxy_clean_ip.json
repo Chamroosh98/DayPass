@@ -7,7 +7,7 @@
       "key": "1",
       "title": "Find Clean IP for a Config",
       "description": "Scans candidate IPs on the port taken from a config's share link and saves the IP you choose.",
-      "usage_tip": "After applying you can push the updated config straight to Passwall."
+      "usage_tip": "Every saved config is listed, including disabled ones. After applying you can push the updated config to Passwall."
     },
     {
       "key": "2",

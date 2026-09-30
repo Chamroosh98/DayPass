@@ -1,5 +1,8 @@
 {
   "release": "24.10",
+  "package_manager": "opkg",
+  "package_format": "ipk",
+  "package_profiles": "config/package_profiles.json",
   "architectures": [
     {
       "name": "x86_64",

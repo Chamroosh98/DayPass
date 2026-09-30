@@ -1,6 +1,6 @@
 {
   "module_id": "network",
-  "title": "Network Settings",
+  "title": "Network & Routing Configuration",
   "summary": "Manages the home Wi-Fi access point, the isolated guest network, the router LAN IP, multi-WAN balancing, live speed monitoring and DNS mode.",
   "items": [
     {
@@ -11,7 +11,7 @@
     },
     {
       "key": "2",
-      "title": "Guest Network & Bandwidth Control",
+      "title": "Guest Network & Bandwidth Control (QoS / SQM)",
       "description": "Opens the guest sub-menu: isolated guest network, guest Wi-Fi SSID and QoS speed limits.",
       "usage_tip": "Guests stay separated from your LAN and cannot reach your devices."
     },
@@ -23,9 +23,9 @@
     },
     {
       "key": "4",
-      "title": "Multi-WAN Load Balancer",
-      "description": "Combines wired WAN, USB tethering and Wi-Fi hotspot WAN with mwan3 balancing and failover.",
-      "usage_tip": "Install the dependencies first, then apply load balancing."
+      "title": "Multi-WAN Load Balancer (mwan3)",
+      "description": "Adds USB tethering and Wi-Fi hotspot WAN next to the wired WAN and configures mwan3 with priority failover.",
+      "usage_tip": "Install the mwan3 package yourself before applying load balancing."
     },
     {
       "key": "5",
@@ -35,7 +35,7 @@
     },
     {
       "key": "6",
-      "title": "DNS Manager",
+      "title": "DNS Manager (DNS modes)",
       "description": "Chooses how the router resolves DNS: system default, secure DoT/DoH, tunnel or hybrid.",
       "usage_tip": "Hybrid is the safest pick when you use Passwall."
     },
@@ -44,6 +44,18 @@
       "title": "Back to Main Menu",
       "description": "Returns to the main DayPass menu.",
       "usage_tip": "No network settings are changed."
+    },
+    {
+      "key": "q",
+      "title": "Quit DayPass",
+      "description": "Ends the DayPass session from any menu.",
+      "usage_tip": "Ctrl+C does the same and restores the terminal."
+    },
+    {
+      "key": "h",
+      "title": "Help",
+      "description": "Opens the manual of the current screen.",
+      "usage_tip": "Enter or 0 inside a manual returns to the screen you came from; q quits DayPass."
     }
   ]
 }

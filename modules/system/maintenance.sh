@@ -104,16 +104,16 @@ maintenance_menu()
         printf "  🗑️ 2) Clean Temporary Cache & Downloads\n"
         printf "  💾 3) Backup System Configuration\n"
         printf "  🚨 4) Factory Reset OpenWrt (Firstboot)\n"
-        printf "  🚪 0) Back to Main Menu\n\n"
-        printf "  ─────────────────────────────────────────────────────────── \n"
-        printf "  ⁉️ Select option [0-4] or [h] Help : "
-        read -r choice </dev/tty
+        ui_nav_footer
+        ui_prompt 4
+        choice="$UI_CHOICE"
 
         case "$choice" in
             1) purge_daypass_packages ;;
             2) clean_daypass_cache ;;
             3) backup_system_config ;;
             4) factory_reset_system ;;
+            q|Q) daypass_quit ;;
             h|H)
                 if command -v show_help >/dev/null 2>&1; then
                     show_help "$HELP_MODULE_ID"
@@ -131,6 +131,6 @@ maintenance_menu()
         esac
         
         printf "\n  ${GRAY:-}Press [Enter] to continue ... ${RESET:-}"
-        read -r _ </dev/tty
+        read -r _ </dev/tty || daypass_quit
     done
 }

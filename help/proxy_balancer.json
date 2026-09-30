@@ -1,31 +1,37 @@
 {
   "module_id": "proxy_balancer",
   "title": "Node Load Balancing",
-  "summary": "Chooses which saved nodes take part in balancing and writes the balancer settings into Passwall. The status header shows the active mode and node count.",
+  "summary": "Probes the nodes of the active transport engine and switches to the best one for the chosen mode. Nodes are Passwall nodes, WireGuard peers, OpenVPN instances or sing-box/Xray outbounds.",
   "items": [
     {
       "key": "1",
       "title": "Select Nodes for Balancing",
-      "description": "Numbers the saved configs and stores the ones you pick, skipping disabled configs automatically.",
-      "usage_tip": "Enter node numbers separated by spaces, for example 1 3 4."
+      "description": "Lists the nodes defined in the active engine and stores the ones you pick in /etc/daypass/proxy/balancer/nodes.list.",
+      "usage_tip": "Enter node numbers separated by spaces, for example 1 3 4. Select again after switching engines."
     },
     {
       "key": "2",
       "title": "Set Balancing Mode",
-      "description": "Chooses between round-robin, least-ping, failover and random distribution.",
+      "description": "Chooses between round-robin, least-ping, failover and random selection.",
       "usage_tip": "Failover is the safest choice for unstable links."
     },
     {
       "key": "3",
-      "title": "Apply Balancer to Passwall",
-      "description": "Writes the selected mode and node list into Passwall and reloads the service.",
-      "usage_tip": "Requires a saved mode and at least one selected node."
+      "title": "Apply Balancer (probe & switch node)",
+      "description": "Probes every selected node (TCP connect, or ping for UDP nodes), picks one for the mode and makes it the engine's active node.",
+      "usage_tip": "It runs once per Apply; the active node is left unchanged when no selected node answers."
     },
     {
       "key": "4",
       "title": "Disable Balancer",
-      "description": "Removes the balancer section from Passwall and clears the saved mode and node list.",
-      "usage_tip": "Use it to return to normal single-node proxy operation."
+      "description": "Clears the saved mode, node list and probe results, and removes the old Passwall balancer section if present.",
+      "usage_tip": "The currently active node stays in use."
+    },
+    {
+      "key": "5",
+      "title": "Probe Selected Nodes",
+      "description": "Shows reachability and latency for each selected node without switching.",
+      "usage_tip": "UDP nodes that ignore ping show as unknown rather than down."
     },
     {
       "key": "0",

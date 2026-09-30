@@ -45,11 +45,12 @@ func generateInstallScript(outputFile string) error {
 		"ui/lib/header.sh",
 		"ui/lib/progress.sh",
 		"ui/lib/help.sh",
+		"ui/lib/nav.sh",
 
 		// 2. Network — Host Bootstrap (proxy, Worker mirror, wizard)
-		"modules/network/host/bootstrap/proxy_bootstrap.sh",
-		"modules/network/host/bootstrap/worker_bootstrap.sh",
-		"modules/network/host/bootstrap/wizard.sh",
+		"modules/network/relays/ssh/reverse_tunnel.sh",
+		"modules/network/relays/cloudflare/worker.sh",
+		"modules/network/relays/wizard.sh",
 
 		// 3. Low-Level System Detection & Package Management
 		"installer/init/arch_detector.sh",
@@ -60,46 +61,52 @@ func generateInstallScript(outputFile string) error {
 		"modules/system/arch_check.sh",
 
 		// 5. Network - Host
-		"modules/network/host/network_info.sh",
-		"modules/network/host/dns_fix.sh",
-		"modules/network/host/lan_ip.sh",
-		"modules/network/host/usb_wan.sh",
-		"modules/network/host/wifi_wan.sh",
-		"modules/network/host/wifi_ap.sh",
-		"modules/network/host/load_balancer.sh",
-		"modules/network/host/network_checker.sh",
+		"modules/network/diagnostics/network_info.sh",
+		"modules/network/dns/recovery.sh",
+		"modules/network/interfaces/lan/lan_ip.sh",
+		"modules/network/interfaces/usb/usb_wan.sh",
+		"modules/network/interfaces/wifi/wifi_wan.sh",
+		"modules/network/interfaces/wifi/wifi_ap.sh",
+		"modules/network/routing/load_balancing/load_balancer.sh",
+		"modules/network/connectivity/diagnostics/network_checker.sh",
 
 		// 5b. Network - DNS Manager
 		"modules/network/dns/core.sh",
-		"modules/network/dns/mode_system.sh",
-		"modules/network/dns/mode_secure.sh",
-		"modules/network/dns/mode_tunnel.sh",
-		"modules/network/dns/mode_hybrid.sh",
+		"modules/network/dns/modes/system.sh",
+		"modules/network/dns/modes/secure.sh",
+		"modules/network/dns/modes/tunnel.sh",
+		"modules/network/dns/modes/hybrid.sh",
 		"modules/network/dns/apply.sh",
-		"modules/network/dns/menu.sh",
+		"modules/network/dns/ui/menu.sh",
 
 		// 6. Network - Guest
-		"modules/network/guest/network.sh",
-		"modules/network/guest/qos.sh",
+		"modules/network/interfaces/guest/network.sh",
+		"modules/network/qos/guest/qos.sh",
 
 		// 7. Proxy - Config Management
-		"modules/proxy/config/config_storage.sh",
-		"modules/proxy/config/subscription.sh",
-		"modules/proxy/config/passwall_bridge.sh",
-		"modules/proxy/config/config_manager.sh",
+		"modules/network/profiles/storage.sh",
+		"modules/network/profiles/subscription.sh",
+		"modules/network/transports/transport_bridge.sh",
+		"modules/network/transports/drivers/core_common.sh",
+		"modules/network/transports/drivers/passwall.sh",
+		"modules/network/transports/drivers/singbox.sh",
+		"modules/network/transports/drivers/xray.sh",
+		"modules/network/transports/drivers/wireguard.sh",
+		"modules/network/transports/drivers/openvpn.sh",
+		"modules/network/profiles/manager.sh",
 
 		// 8. Proxy - Other Modules
-		"modules/proxy/routing.sh",
-		"modules/proxy/node_balancer.sh",
-		"modules/proxy/health_checker.sh",
-		"modules/proxy/profile_manager.sh",
+		"modules/network/routing/core.sh",
+		"modules/network/balancing/node_balancer.sh",
+		"modules/network/connectivity/checker/health_checker.sh",
+		"modules/network/profiles/profile_manager.sh",
 
 		// 9. Proxy - Cloudflare Clean IP
-		"modules/proxy/cloudflare/core.sh",
-		"modules/proxy/cloudflare/link_utils.sh",
-		"modules/proxy/cloudflare/scanner.sh",
-		"modules/proxy/cloudflare/applier.sh",
-		"modules/proxy/cloudflare/menu.sh",
+		"modules/network/relays/cloudflare/core.sh",
+		"modules/network/relays/cloudflare/link_utils.sh",
+		"modules/network/relays/cloudflare/scanner.sh",
+		"modules/network/relays/cloudflare/applier.sh",
+		"modules/network/relays/cloudflare/menu.sh",
 
 		// 10. Other Modules
 		"modules/system/backup_restore.sh",
@@ -121,9 +128,13 @@ func generateInstallScript(outputFile string) error {
 		"ui/menu/language.sh",
 		"ui/menu/geo.sh",
 		"ui/review.sh",
-		"ui/menu/passwall.sh",
+		"ui/menu/packages.sh",
+		"ui/menu/hardware.sh",
 		"ui/menu/network.sh",
+		"ui/menu/proxy_engine.sh",
 		"ui/menu/proxy.sh",
+		"ui/menu/diagnostics.sh",
+		"ui/menu/system.sh",
 		"ui/menu/help.sh",
 		"ui/menu/main.sh",
 		"ui/installer_ui.sh",
@@ -146,6 +157,21 @@ func generateInstallScript(outputFile string) error {
 			}
 		}
 		fmt.Printf("✅ [%s] appended dynamically!\n", filepath.Base(file))
+	}
+
+	// Embedded package profiles read by load_package_profiles in installer/pkg/resolver.sh
+	profilesFile := "config/package_profiles.json"
+	if data, err := os.ReadFile(profilesFile); err == nil {
+		scriptBuilder.WriteString(fmt.Sprintf("\n# 📄 Source : %s (embedded)\n", filepath.Base(profilesFile)))
+		scriptBuilder.WriteString("daypass_embedded_profiles()\n{\n    cat <<'DAYPASS_PROFILES_JSON'\n")
+		scriptBuilder.Write(data)
+		if len(data) > 0 && data[len(data)-1] != '\n' {
+			scriptBuilder.WriteByte('\n')
+		}
+		scriptBuilder.WriteString("DAYPASS_PROFILES_JSON\n}\n")
+		fmt.Printf("✅ [%s] embedded!\n", filepath.Base(profilesFile))
+	} else {
+		fmt.Printf("⚠️ Warning : File [%s] not found, skipping ...\n", profilesFile)
 	}
 
 	// Cleaned Runtime Execution Pipeline

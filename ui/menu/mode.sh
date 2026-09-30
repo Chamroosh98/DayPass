@@ -15,12 +15,23 @@ menu_mode()
     echo "  1) ⚡ Recommended (Quick & Pre-configured for users)       "
     echo "  2) 🛠️ Custom      (Advanced package selection)             "
     echo "  ───────────────────────────────────────────────────────────"
-    echo
+    ui_nav_footer
 
-    printf "  ⁉️ Select option [1-2] (Default: 1) : "
-    read -r choice </dev/tty
+    ui_read "Select option [0-2] (Default: 1), [q] Quit or [h] Help"
+    choice="$UI_CHOICE"
 
     case "$choice" in
+        0)
+            return 1
+            ;;
+        q|Q)
+            daypass_quit
+            ;;
+        h|H)
+            ui_show_help "packages"
+            menu_mode
+            return
+            ;;
         1|"")
             SELECTED_MODE="recommended"  
             export SELECTED_MODE
@@ -29,7 +40,7 @@ menu_mode()
         2)
             SELECTED_MODE="custom"       
             export SELECTED_MODE
-            handle_custom_profile
+            handle_custom_profile || return 1
             ;;
         *)
             log_warn "Invalid choice! Defaulting to Recommended mode!"

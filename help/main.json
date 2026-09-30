@@ -1,55 +1,67 @@
 {
   "module_id": "main",
   "title": "Main Menu",
-  "summary": "Central entry point of DayPass: install or update packages first, then open the network, proxy, hardware and maintenance menus.",
+  "summary": "Central entry point of DayPass. Every menu uses the same keys: a number opens an option, 0 goes back (or exits here), q quits DayPass and h opens the manual of the screen.",
   "items": [
     {
       "key": "1",
-      "title": "Install Package Profile",
-      "description": "Starts the installer flow: pick Passwall-1 or Passwall-2, then choose Recommended or Custom mode.",
-      "usage_tip": "Run this first on a fresh router. Recommended mode is the safest choice."
+      "title": "Package Profiles & Dependencies",
+      "description": "Installs or updates the proxy (Passwall), VPN, USB tethering and network tool packages.",
+      "usage_tip": "Run this first on a fresh router; the Proxy profile starts the Passwall wizard."
     },
     {
       "key": "2",
-      "title": "Check & Update Packages",
-      "description": "Refreshes and upgrades the packages DayPass installed from its own package source.",
-      "usage_tip": "Use it after a new DayPass release or when a proxy engine stops working."
+      "title": "Hardware & USB Tethering Manager",
+      "description": "Detects USB phones and modems, sets up the wan_usb DHCP client, toggles it, sets failover metrics and runs USB ModeSwitch.",
+      "usage_tip": "Enable USB Tethering on the phone before opening this menu."
     },
     {
       "key": "3",
-      "title": "Network Settings",
-      "description": "Opens the network module: home Wi-Fi AP, guest network, LAN IP, multi-WAN, live speed and DNS.",
-      "usage_tip": "Start here when clients cannot connect or when you need a guest SSID."
+      "title": "Network & Routing Configuration",
+      "description": "Home Wi-Fi AP, guest network with QoS / SQM, LAN IP, Multi-WAN (mwan3), network info and DNS modes.",
+      "usage_tip": "Start here when clients cannot connect or you need a second internet source."
     },
     {
       "key": "4",
-      "title": "Proxy & Routing Manager",
-      "description": "Opens the proxy module: nodes, subscriptions, routing rules, balancing, health checks and Clean IP.",
-      "usage_tip": "Everything about Passwall is managed from this menu."
+      "title": "Proxy & Tunnel Engine Manager",
+      "description": "Transport engines (Passwall, sing-box, Xray, WireGuard, OpenVPN), nodes and subscriptions, traffic routing, routing profiles and Clean IP.",
+      "usage_tip": "Pick the active engine first; routing, DNS and balancing follow it."
     },
     {
       "key": "5",
-      "title": "System Resources & Hardware Info",
-      "description": "Shows a read-only summary of architecture, OpenWrt version, package manager, RAM and storage usage.",
-      "usage_tip": "Check free storage before installing heavy proxy engines."
+      "title": "Node Balancer & Health Diagnostics",
+      "description": "Node probing, Active/Standby (failover) and other balancing modes, probe-and-switch, node health checks and an internet connectivity check.",
+      "usage_tip": "Switching is on demand; there is no background auto-switch daemon."
     },
     {
       "key": "6",
-      "title": "Maintenance & Recovery",
-      "description": "Purge DayPass packages, clear caches, back up the system configuration or factory reset the router.",
-      "usage_tip": "Take a backup before making large changes."
+      "title": "System Maintenance & Backup",
+      "description": "Maintenance and recovery, backup and restore of engine configs, log viewer and package updates.",
+      "usage_tip": "Take a backup before large changes."
     },
     {
       "key": "7",
       "title": "Help & Manuals",
-      "description": "Opens the manual index. The same index also opens when you press h on this screen.",
+      "description": "Opens the manual index.",
       "usage_tip": "On any other menu, h opens that screen's own manual."
     },
     {
       "key": "0",
-      "title": "Exit",
+      "title": "Exit DayPass",
       "description": "Closes the DayPass session without changing anything.",
       "usage_tip": "Safe to use at any time."
+    },
+    {
+      "key": "q",
+      "title": "Quit DayPass",
+      "description": "Ends the DayPass session from any menu.",
+      "usage_tip": "Ctrl+C does the same and restores the terminal."
+    },
+    {
+      "key": "h",
+      "title": "Help",
+      "description": "Opens the manual of the current screen.",
+      "usage_tip": "Enter or 0 inside a manual returns to the screen you came from; q quits DayPass."
     }
   ]
 }

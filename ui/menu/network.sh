@@ -8,63 +8,30 @@ guest_menu() {
     while true; do
         render_persistent_header
 
-        echo "  👥 Guest Network Management"
-        echo "  ─────────────────────────────────────────────────────────── "
+        ui_title "👥 Guest Network Management"
         echo "  🍚 1) Setup Guest Network (Interface + Firewall)"
         echo "  🛜 2) Setup Guest WiFi"
-        echo "  🛣️ 3) Bandwidth Control (QoS)"
+        echo "  🛣️ 3) Bandwidth Control (QoS / SQM)"
         echo "  ❌ 4) Remove Guest Network"
-        echo "  🚪 0) Back"
-        echo "  ─────────────────────────────────────────────────────────── "
-        echo
+        ui_nav_footer
 
-        printf "  ⁉️ Select option [0-4] or [h] Help : "
-        read -r choice </dev/tty
+        ui_prompt 4
 
-        case "$choice" in
-            1)
-                if command -v setup_guest_network >/dev/null 2>&1; then
-                    setup_guest_network
-                else
-                    log_error "Guest Network module not found!"
-                fi
-                ;;
-            2)
-                if command -v setup_guest_wifi >/dev/null 2>&1; then
-                    setup_guest_wifi
-                else
-                    log_error "Guest WiFi function not found!"
-                fi
-                ;;
-            3)
-                if command -v guest_qos_menu >/dev/null 2>&1; then
-                    guest_qos_menu
-                else
-                    log_error "Guest QoS module not found!"
-                fi
-                ;;
-            4)
-                if command -v remove_guest_network >/dev/null 2>&1; then
-                    remove_guest_network
-                else
-                    log_error "Remove function not found!"
-                fi
-                ;;
-            h|H)
-                if command -v show_help >/dev/null 2>&1; then
-                    show_help "$HELP_MODULE_ID"
-                else
-                    log_warn "Help module not loaded!"
-                    sleep 1
-                fi
+        case "$UI_CHOICE" in
+            1) ui_run setup_guest_network "Guest Network" ;;
+            2) ui_run setup_guest_wifi "Guest WiFi" ;;
+            3) ui_run guest_qos_menu "Guest QoS"; continue ;;
+            4) ui_run remove_guest_network "Guest Network" ;;
+            0) return 0 ;;
+            *)
+                ui_nav_common "$UI_CHOICE" "$HELP_MODULE_ID" && continue
+                log_warn "Invalid option!"
+                sleep 1
                 continue
                 ;;
-            0) return 0 ;;
-            *) log_warn "Invalid option!" ;;
         esac
 
-        printf "\n  ${GRAY}Press [ENTER] to return ... ${RESET}"
-        read -r _ </dev/tty
+        ui_pause
     done
 }
 
@@ -76,78 +43,27 @@ network_menu() {
     while true; do
         render_persistent_header
 
-        echo "  🌐 Network Settings"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_title "🌐 Network & Routing Configuration"
         echo "  📡 1) Wi-Fi Access Point (Home WiFi)"
-        echo "  👥 2) Guest Network & Bandwidth Control"
+        echo "  👥 2) Guest Network & Bandwidth Control (QoS / SQM)"
         echo "  🏠 3) Change Local Router LAN IP"
-        echo "  ⚖️ 4) Multi-WAN Load Balancer"
+        echo "  ⚖️ 4) Multi-WAN Load Balancer (mwan3)"
         echo "  📊 5) Network Info & Speed Monitor"
-        echo "  🧭 6) DNS Manager"
-        echo "  🚪 0) Back to Main Menu"
-        echo "  ───────────────────────────────────────────────────────────"
-        echo
+        echo "  🧭 6) DNS Manager (DNS modes)"
+        ui_nav_footer main
 
-        printf "  ⁉️ Select option [0-6] or [h] Help : "
-        read -r choice </dev/tty
+        ui_prompt 6
 
-        case "$choice" in
-            1)
-                if command -v wifi_ap_menu >/dev/null 2>&1; then
-                    wifi_ap_menu
-                else
-                    log_error "WiFi Access Point (AP) module not found!"
-                    sleep 2
-                fi
-                ;;
-            2)
-                guest_menu
-                ;;
-            3)
-                if command -v change_lan_ip_menu >/dev/null 2>&1; then
-                    change_lan_ip_menu
-                else
-                    log_error "LAN IP module not found!"
-                    sleep 2
-                fi
-                ;;
-            4)
-                if command -v load_balancer_menu >/dev/null 2>&1; then
-                    load_balancer_menu
-                else
-                    log_error "Load Balancer module not found!"
-                    sleep 2
-                fi
-                ;;
-            5)
-                if command -v network_info_menu >/dev/null 2>&1; then
-                    network_info_menu
-                else
-                    log_error "Network Info module not found!"
-                    sleep 2
-                fi
-                ;;
-            6)
-                if command -v dns_menu >/dev/null 2>&1; then
-                    dns_menu
-                else
-                    log_error "DNS module not found!"
-                    sleep 2
-                fi
-                ;;
-            h|H)
-                if command -v show_help >/dev/null 2>&1; then
-                    show_help "$HELP_MODULE_ID"
-                else
-                    log_warn "Help module not loaded!"
-                    sleep 1
-                fi
-                continue
-                ;;
-            0)
-                return 0
-                ;;
+        case "$UI_CHOICE" in
+            1) ui_run wifi_ap_menu "WiFi Access Point (AP)" ;;
+            2) guest_menu ;;
+            3) ui_run change_lan_ip_menu "LAN IP" ;;
+            4) ui_run load_balancer_menu "Load Balancer" ;;
+            5) ui_run network_info_menu "Network Info" ;;
+            6) ui_run dns_menu "DNS" ;;
+            0) return 0 ;;
             *)
+                ui_nav_common "$UI_CHOICE" "$HELP_MODULE_ID" && continue
                 log_warn "Invalid option!"
                 sleep 1
                 ;;

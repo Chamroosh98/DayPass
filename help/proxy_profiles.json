@@ -6,20 +6,20 @@
     {
       "key": "1",
       "title": "Balanced (Iran Direct + Foreign Proxy)",
-      "description": "Applies the Iran direct mode: local traffic direct, foreign traffic through the proxy.",
+      "description": "Enables Passwall and sets its proxy mode to gfwlist, so only listed destinations use the proxy.",
       "usage_tip": "Recommended profile for everyday browsing."
     },
     {
       "key": "2",
       "title": "Gaming (Low latency focus)",
-      "description": "Currently applies the Iran direct mode as its base and is aimed at low latency and stability.",
-      "usage_tip": "Keep a close node selected for the best result."
+      "description": "Applies the same Iran direct mode as Balanced and saves the profile name as gaming.",
+      "usage_tip": "No latency tuning is applied yet; keep a close node selected in Passwall."
     },
     {
       "key": "3",
       "title": "Streaming (Better for video services)",
-      "description": "Currently applies the Iran direct mode as its base and is aimed at YouTube/Netflix style traffic.",
-      "usage_tip": "Works best with a fast node and the health checker run beforehand."
+      "description": "Applies the same Iran direct mode as Balanced and saves the profile name as streaming.",
+      "usage_tip": "No streaming-specific rules are applied yet; pick a fast node in Passwall."
     },
     {
       "key": "4",

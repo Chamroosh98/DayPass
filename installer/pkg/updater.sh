@@ -91,8 +91,8 @@ update_packages_menu()
     if [ ! -f "$INSTALL_LOG" ] || [ ! -s "$INSTALL_LOG" ]; then
         log_warn "No installed packages log found. Please install DayPass packages first!"
         echo
-        printf "  ${GRAY}Press [ENTER] to return to main menu ...${RESET}"
-        read -r _ </dev/tty
+        printf "  ${GRAY}Press [ENTER] to go back ...${RESET}"
+        read -r _ </dev/tty || daypass_quit
         return 1
     fi
 
@@ -103,8 +103,8 @@ update_packages_menu()
     INSPECT_STATUS=$?
 
     if [ "$INSPECT_STATUS" -eq 2 ] || [ "$INSPECT_STATUS" -eq 3 ]; then
-        printf "  ${GRAY}Press [ENTER] to return to main menu ...${RESET}"
-        read -r _ </dev/tty
+        printf "  ${GRAY}Press [ENTER] to go back ...${RESET}"
+        read -r _ </dev/tty || daypass_quit
         return 0
     fi
 
@@ -117,6 +117,6 @@ update_packages_menu()
     fi
 
     echo
-    printf "  ${GRAY}Press [ENTER] to return to main menu ...${RESET}"
-    read -r _ </dev/tty
+    printf "  ${GRAY}Press [ENTER] to go back ...${RESET}"
+    read -r _ </dev/tty || daypass_quit
 }

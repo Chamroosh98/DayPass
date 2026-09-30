@@ -29,9 +29,9 @@
     },
     {
       "key": "0",
-      "title": "Back to Main Menu",
-      "description": "Returns to the main DayPass menu.",
-      "usage_tip": "Nothing is removed while using this option."
+      "title": "Back",
+      "description": "Returns to the previous menu.",
+      "usage_tip": "Nothing is changed by leaving this menu."
     }
   ]
 }

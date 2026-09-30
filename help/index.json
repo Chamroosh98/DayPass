@@ -15,25 +15,50 @@
       }
     ]
   },
-  "total_manuals": 20,
+  "total_manuals": 25,
   "manuals": [
     {
       "file": "main.json",
       "module_id": "main",
       "title": "Main Menu",
-      "summary": "Central entry point of DayPass: install or update packages first, then open the network, proxy, hardware and maintenance menus.",
-      "item_count": 8,
+      "summary": "Central entry point of DayPass. Every menu uses the same keys: a number opens an option, 0 goes back (or exits here), q quits DayPass and h opens the manual of the screen.",
+      "item_count": 10,
       "sources": [
         "ui/menu/main.sh"
       ],
       "reachable_from": "Runs at the end of the installer / DayPass start"
     },
     {
+      "file": "packages.json",
+      "module_id": "packages",
+      "title": "Package Profiles & Dependencies",
+      "summary": "Installs the package profiles from config/package_profiles.json. Each profile shows its resolved package plan before anything is installed; failed required packages roll the profile back.",
+      "item_count": 9,
+      "sources": [
+        "ui/menu/packages.sh",
+        "installer/pkg/resolver.sh",
+        "config/package_profiles.json"
+      ],
+      "reachable_from": "Main menu -> 1"
+    },
+    {
+      "file": "hardware.json",
+      "module_id": "hardware",
+      "title": "Hardware & USB Tethering Manager",
+      "summary": "Shows USB devices (lsusb, or sysfs when usbutils is missing), USB network interfaces by kernel driver (rndis_host, cdc_ether, cdc_ncm, ipheth = phone tethering; qmi_wwan, cdc_mbim = modems), modem ports and WAN metrics.",
+      "item_count": 11,
+      "sources": [
+        "ui/menu/hardware.sh",
+        "modules/network/interfaces/usb/usb_wan.sh"
+      ],
+      "reachable_from": "Main menu -> 2"
+    },
+    {
       "file": "network.json",
       "module_id": "network",
-      "title": "Network Settings",
+      "title": "Network & Routing Configuration",
       "summary": "Manages the home Wi-Fi access point, the isolated guest network, the router LAN IP, multi-WAN balancing, live speed monitoring and DNS mode.",
-      "item_count": 7,
+      "item_count": 9,
       "sources": [
         "ui/menu/network.sh"
       ],
@@ -46,9 +71,9 @@
       "summary": "Manages only the Access Point interfaces of the home Wi-Fi on every radio; station/WWAN interfaces are never modified.",
       "item_count": 3,
       "sources": [
-        "modules/network/host/wifi_ap.sh"
+        "modules/network/interfaces/wifi/wifi_ap.sh"
       ],
-      "reachable_from": "Network Settings -> 1"
+      "reachable_from": "Network -> 1"
     },
     {
       "file": "network_guest.json",
@@ -59,16 +84,16 @@
       "sources": [
         "ui/menu/network.sh (guest_menu)"
       ],
-      "reachable_from": "Network Settings -> 2"
+      "reachable_from": "Network -> 2"
     },
     {
       "file": "network_guest_qos.json",
       "module_id": "network_guest_qos",
       "title": "Guest Bandwidth Control (QoS)",
-      "summary": "Caps guest download and upload speed with either lightweight tc rules or SQM using the Cake algorithm.",
+      "summary": "Caps guest speed with either lightweight tc rules or SQM using the Cake algorithm. Known issues: the tc directions are swapped (the download value limits upload and vice versa) and SQM targets the interface name guest instead of the bridge device.",
       "item_count": 4,
       "sources": [
-        "modules/network/guest/qos.sh"
+        "modules/network/qos/guest/qos.sh"
       ],
       "reachable_from": "Guest Network -> 3"
     },
@@ -76,13 +101,14 @@
       "file": "network_dns.json",
       "module_id": "network_dns",
       "title": "DNS Manager",
-      "summary": "Controls how the router resolves names for the local network. The status header shows the active mode, the detected Passwall package and the current dnsmasq upstreams. The chosen mode is remembered under /etc/daypass/dns/mode.",
+      "summary": "Controls how the router resolves names for the local network. The status header shows the active mode, the active transport engine and the current dnsmasq upstreams. The chosen mode is remembered under /etc/daypass/dns/mode.",
       "item_count": 5,
       "sources": [
-        "modules/network/dns/menu.sh",
-        "modules/network/dns/core.sh"
+        "modules/network/dns/ui/menu.sh",
+        "modules/network/dns/core.sh",
+        "modules/network/transports/transport_bridge.sh"
       ],
-      "reachable_from": "Network Settings -> 6"
+      "reachable_from": "Network -> 6"
     },
     {
       "file": "network_dns_recovery.json",
@@ -91,7 +117,7 @@
       "summary": "Temporary DNS switch that is offered by the network checker when domain resolution fails. It changes DNS only for the current session and is not a replacement for the permanent DNS Manager.",
       "item_count": 5,
       "sources": [
-        "modules/network/host/dns_fix.sh"
+        "modules/network/dns/recovery.sh"
       ],
       "reachable_from": "Offered by the network checker when DNS resolution fails"
     },
@@ -99,12 +125,12 @@
       "file": "network_multiwan.json",
       "module_id": "network_multiwan",
       "title": "Multi-WAN Load Balancer",
-      "summary": "Adds USB tethering and Wi-Fi hotspot as extra internet sources and balances all links with mwan3 policies (balanced + failover).",
+      "summary": "Adds USB tethering and a Wi-Fi hotspot as extra internet sources and writes an mwan3 setup over wan, wan_usb and wwan. Links are used in priority order: wan, then USB, then Wi-Fi.",
       "item_count": 6,
       "sources": [
-        "modules/network/host/load_balancer.sh"
+        "modules/network/routing/load_balancing/load_balancer.sh"
       ],
-      "reachable_from": "Network Settings -> 4"
+      "reachable_from": "Network -> 4"
     },
     {
       "file": "network_info.json",
@@ -113,16 +139,16 @@
       "summary": "Diagnostic panel that reports public IP details and can show live WAN bandwidth. The panel also reports offline state when no provider can be reached.",
       "item_count": 3,
       "sources": [
-        "modules/network/host/network_info.sh"
+        "modules/network/diagnostics/network_info.sh"
       ],
-      "reachable_from": "Network Settings -> 5"
+      "reachable_from": "Network -> 5"
     },
     {
       "file": "proxy.json",
       "module_id": "proxy",
-      "title": "Proxy & Routing Manager",
-      "summary": "All Passwall-related tools in one place: local node and subscription storage, traffic routing, balancing, health checks, routing profiles and Cloudflare Clean IP.",
-      "item_count": 7,
+      "title": "Proxy & Tunnel Engine Manager",
+      "summary": "Transport engines and everything that acts on the active engine: nodes and subscriptions, traffic routing, routing profiles and Cloudflare Clean IP. Balancing and health checks are in Main menu -> 5.",
+      "item_count": 8,
       "sources": [
         "ui/menu/proxy.sh"
       ],
@@ -132,56 +158,70 @@
       "file": "proxy_config_manager.json",
       "module_id": "proxy_config_manager",
       "title": "Config Manager (Nodes & Subscriptions)",
-      "summary": "Local node store for single share links and subscription links. Configs live in /etc/daypass/proxy/configs and the header shows the detected Passwall engine.",
+      "summary": "Local node store for single share links and subscription links. Configs live in /etc/daypass/proxy/configs and the header shows the active transport engine.",
       "item_count": 10,
       "sources": [
-        "modules/proxy/config/config_manager.sh"
+        "modules/network/profiles/manager.sh"
       ],
-      "reachable_from": "Proxy menu -> 1"
+      "reachable_from": "Proxy menu -> 2"
     },
     {
       "file": "proxy_routing.json",
       "module_id": "proxy_routing",
       "title": "Traffic Routing / Shunt Rules",
-      "summary": "Switches Passwall between ready-made traffic routing modes and records the active mode locally so the menu can show it later.",
-      "item_count": 5,
+      "summary": "Applies a routing mode to the active transport engine. Passwall and Passwall2 get the mode through their own settings; sing-box and Xray get a DayPass TPROXY rule set; WireGuard and OpenVPN get a DayPass policy route into the tunnel.",
+      "item_count": 6,
       "sources": [
-        "modules/proxy/routing.sh"
+        "modules/network/routing/core.sh",
+        "modules/network/transports/transport_bridge.sh"
       ],
-      "reachable_from": "Proxy menu -> 2"
+      "reachable_from": "Proxy menu -> 3"
+    },
+    {
+      "file": "proxy_transport.json",
+      "module_id": "proxy_transport",
+      "title": "Transport Engines",
+      "summary": "Proxy & Tunnel Engine Manager. The list shows every engine DayPass supports (Passwall, Passwall2, sing-box, Xray, WireGuard, OpenVPN), whether it is installed and running, how it intercepts traffic (self, tproxy or tunnel) and which one is active. Pick a number to open the engine.",
+      "item_count": 9,
+      "sources": [
+        "ui/menu/proxy_engine.sh",
+        "modules/network/transports/transport_bridge.sh",
+        "modules/network/transports/drivers/"
+      ],
+      "reachable_from": "Proxy menu -> 1 (also Traffic Routing -> 5)"
     },
     {
       "file": "proxy_balancer.json",
       "module_id": "proxy_balancer",
       "title": "Node Load Balancing",
-      "summary": "Chooses which saved nodes take part in balancing and writes the balancer settings into Passwall. The status header shows the active mode and node count.",
-      "item_count": 5,
+      "summary": "Probes the nodes of the active transport engine and switches to the best one for the chosen mode. Nodes are Passwall nodes, WireGuard peers, OpenVPN instances or sing-box/Xray outbounds.",
+      "item_count": 6,
       "sources": [
-        "modules/proxy/node_balancer.sh"
+        "modules/network/balancing/node_balancer.sh"
       ],
-      "reachable_from": "Proxy menu -> 3"
+      "reachable_from": "Diagnostics -> 1"
     },
     {
       "file": "proxy_balancer_modes.json",
       "module_id": "proxy_balancer_modes",
       "title": "Load Balancing Modes",
-      "summary": "The mode list shown by Set Balancing Mode. The choice is stored locally and used the next time you apply the balancer.",
+      "summary": "The mode list shown by Set Balancing Mode. Each Apply probes the selected nodes and uses the mode to pick the next active node.",
       "item_count": 4,
       "sources": [
-        "modules/proxy/node_balancer.sh (set_balancer_mode)"
+        "modules/network/balancing/node_balancer.sh (set_balancer_mode)"
       ],
-      "reachable_from": "Node Load Balancing -> 2"
+      "reachable_from": "Node Balancer -> 2"
     },
     {
       "file": "proxy_health_checker.json",
       "module_id": "proxy_health_checker",
       "title": "Node Health Checker",
-      "summary": "Tests whether saved nodes are reachable by opening a TCP connection to the host and port inside each share link, and reports approximate latency in milliseconds.",
+      "summary": "Tests whether saved nodes are reachable by opening a TCP connection (nc -z) to the host and port inside each share link, and reports approximate latency in milliseconds. Results are only displayed and are not used by the balancer.",
       "item_count": 3,
       "sources": [
-        "modules/proxy/health_checker.sh"
+        "modules/network/connectivity/checker/health_checker.sh"
       ],
-      "reachable_from": "Proxy menu -> 4"
+      "reachable_from": "Diagnostics -> 4"
     },
     {
       "file": "proxy_profiles.json",
@@ -190,9 +230,9 @@
       "summary": "Ready-made traffic profiles that apply a routing mode to Passwall and remember the active profile. The header shows the active profile and the current routing mode.",
       "item_count": 6,
       "sources": [
-        "modules/proxy/profile_manager.sh"
+        "modules/network/profiles/profile_manager.sh"
       ],
-      "reachable_from": "Proxy menu -> 5"
+      "reachable_from": "Proxy menu -> 4"
     },
     {
       "file": "proxy_clean_ip.json",
@@ -201,9 +241,9 @@
       "summary": "Scans candidate Cloudflare IPs on a config's own port, then replaces only the address inside the share link. SNI, Host and Path stay untouched. The header shows the detected proxy core.",
       "item_count": 4,
       "sources": [
-        "modules/proxy/cloudflare/menu.sh"
+        "modules/network/relays/cloudflare/menu.sh"
       ],
-      "reachable_from": "Proxy menu -> 6"
+      "reachable_from": "Proxy menu -> 5"
     },
     {
       "file": "proxy_clean_ip_scan.json",
@@ -212,9 +252,35 @@
       "summary": "Test depth that Find Clean IP for a Config asks for before scanning the candidate IP list.",
       "item_count": 2,
       "sources": [
-        "modules/proxy/cloudflare/scanner.sh"
+        "modules/network/relays/cloudflare/scanner.sh"
       ],
       "reachable_from": "Clean IP Manager -> 1"
+    },
+    {
+      "file": "diagnostics.json",
+      "module_id": "diagnostics",
+      "title": "Node Balancer & Health Diagnostics",
+      "summary": "Probes the nodes of the active transport engine and switches between them. The status block shows the balancing mode, selected nodes, engine and current node.",
+      "item_count": 8,
+      "sources": [
+        "ui/menu/diagnostics.sh",
+        "modules/network/balancing/node_balancer.sh",
+        "modules/network/connectivity/checker/health_checker.sh"
+      ],
+      "reachable_from": "Main menu -> 5"
+    },
+    {
+      "file": "system_menu.json",
+      "module_id": "system_menu",
+      "title": "System Maintenance & Backup",
+      "summary": "Maintenance tools, DayPass engine config backups, logs and package updates.",
+      "item_count": 8,
+      "sources": [
+        "ui/menu/system.sh",
+        "modules/system/backup_restore.sh",
+        "installer/pkg/updater.sh"
+      ],
+      "reachable_from": "Main menu -> 6"
     },
     {
       "file": "system.json",
@@ -226,7 +292,7 @@
         "modules/system/maintenance.sh",
         "modules/system/resource_checker.sh"
       ],
-      "reachable_from": "Main menu -> 6 (resources overview: Main menu -> 5)"
+      "reachable_from": "System menu -> 1 (resources overview: Hardware -> 8)"
     },
     {
       "file": "service.json",
@@ -239,5 +305,10 @@
       ],
       "reachable_from": "Runs automatically after deployment (no menu)"
     }
-  ]
+  ],
+  "reference_manual": {
+    "file": "daypass.json",
+    "schema_version": "2.0.0",
+    "description": "Full reference: navigation tree, articles, terminology, known issues and the L1-L7 network layer map. Not rendered by the in-app viewer; read it with jq."
+  }
 }

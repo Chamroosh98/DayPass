@@ -207,6 +207,12 @@ func main() {
 	// Stage in-app manuals next to install.sh so Pages serves REPO_URL/help/<id>.json
 	stageHelpManuals("build-artifacts/help")
 
+	// Package profiles served as REPO_URL/config/package_profiles.json
+	os.MkdirAll("build-artifacts/config", 0755)
+	if err := copyFile("config/package_profiles.json", "build-artifacts/config/package_profiles.json"); err != nil {
+		fmt.Printf("⚠️ Package profiles not staged : [%v]\n", err)
+	}
+
 	fmt.Println("\n📊 Checking Final Release Assets Structure :")
 	filepath.Walk("build-artifacts", func(path string, info os.FileInfo, err error) error {
 		if err == nil && !info.IsDir() {

@@ -90,7 +90,7 @@ help_unavailable() {
     echo "  ${GRAY}Cache directory : [$(help_cache_dir)]${RESET}"
     echo
     printf "  ${GRAY}Press [Enter] to continue ...${RESET}"
-    read -r _ </dev/tty
+    read -r _ </dev/tty || daypass_quit
     return 0
 }
 
@@ -162,10 +162,10 @@ show_help() {
         done
 
         echo "  ───────────────────────────────────────────────────────────"
-        printf "  ${GRAY}Page ${YELLOW}%s${GRAY}/${YELLOW}%s${GRAY} | [n] Next | [p] Prev | [Enter] Return${RESET}\n" \
+        printf "  ${GRAY}Page ${YELLOW}%s${GRAY}/${YELLOW}%s${GRAY} | [n] Next | [p] Prev | [Enter/0] Back | [q] Quit DayPass${RESET}\n" \
             "$HELP_PAGE" "$HELP_PAGES"
-        printf "  ⁉️ ${YELLOW}Option${RESET} ${GRAY}(n/p/Enter) :${RESET} "
-        read -r HELP_CMD </dev/tty
+        printf "  ⁉️ ${YELLOW}Option${RESET} ${GRAY}(n/p/0/q) :${RESET} "
+        read -r HELP_CMD </dev/tty || daypass_quit
 
         case "$HELP_CMD" in
             n|N)
@@ -174,11 +174,14 @@ show_help() {
             p|P)
                 [ "$HELP_PAGE" -gt 1 ] && HELP_PAGE=$((HELP_PAGE - 1))
                 ;;
-            ''|q|Q)
+            ''|0)
                 return 0
                 ;;
+            q|Q)
+                daypass_quit
+                ;;
             *)
-                log_warn "Use [n] Next, [p] Prev or [Enter] to return."
+                log_warn "Use [n] Next, [p] Prev, [Enter/0] Back or [q] Quit."
                 sleep 1
                 ;;
         esac
@@ -246,10 +249,10 @@ help_menu() {
         done
 
         echo "  ───────────────────────────────────────────────────────────"
-        printf "  ${GRAY}Page ${YELLOW}%s${GRAY}/${YELLOW}%s${GRAY} | [n] Next | [p] Prev | [r] Refresh | [Enter] Back${RESET}\n" \
+        printf "  ${GRAY}Page ${YELLOW}%s${GRAY}/${YELLOW}%s${GRAY} | [n] Next | [p] Prev | [r] Refresh | [Enter/0] Back | [q] Quit DayPass${RESET}\n" \
             "$HELP_PAGE" "$HELP_PAGES"
         printf "  ⁉️ ${YELLOW}Manual number${RESET} ${GRAY}or action :${RESET} "
-        read -r HELP_CMD </dev/tty
+        read -r HELP_CMD </dev/tty || daypass_quit
 
         case "$HELP_CMD" in
             n|N)
@@ -266,9 +269,13 @@ help_menu() {
                 sleep 1
                 continue
                 ;;
-            ''|q|Q)
+            ''|0)
                 rm -f "$HELP_LIST_FILE" 2>/dev/null
                 return 0
+                ;;
+            q|Q)
+                rm -f "$HELP_LIST_FILE" 2>/dev/null
+                daypass_quit
                 ;;
             *[!0-9]*)
                 log_warn "Invalid choice!"

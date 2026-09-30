@@ -18,7 +18,7 @@
     {
       "key": "0",
       "title": "Back to Main Menu",
-      "description": "Leaves the network information screen.",
+      "description": "Leaves the network information screen and returns to Network Settings.",
       "usage_tip": "Nothing is changed; the panel is read-only."
     }
   ]
