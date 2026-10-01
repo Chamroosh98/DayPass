@@ -4,7 +4,7 @@
 # Profile definitions: config/package_profiles.json
 #
 # Public functions (all return 0 on success, 1 on failure):
-#   list_package_profiles      Print available profile ids and titles
+#   list_package_profiles      Compact CLI list of profile ids (menu uses profile_status_dashboard)
 #   resolve_profile <name>     Build PROFILE_PLAN / PROFILE_PACKAGES without installing
 #   install_profile <name>     Resolve and install a profile (DAYPASS_DRY_RUN=1 only prints the plan)
 #   resolve_packages           Resolve the default profile into FINAL_PACKAGES (installer UI flow)
@@ -17,9 +17,20 @@ _pr_log()
 {
     _pr_level="$1"
     shift
+    _pr_msg="$*"
+    _pr_logfile="${DAYPASS_RESOLVE_LOG:-/tmp/daypass_resolve.log}"
+
+    if [ "${DAYPASS_RESOLVE_QUIET:-0}" = "1" ]; then
+        printf '[%s] %s\n' "$_pr_level" "$_pr_msg" >> "$_pr_logfile" 2>/dev/null
+        case "$_pr_level" in
+            ERROR) printf '  [%s] %s\n' "$_pr_level" "$_pr_msg" >&2 ;;
+        esac
+        return 0
+    fi
+
     case "$_pr_level" in
-        WARN|ERROR) printf '  [%s] %s\n' "$_pr_level" "$*" >&2 ;;
-        *)          printf '  [%s] %s\n' "$_pr_level" "$*" ;;
+        WARN|ERROR) printf '  [%s] %s\n' "$_pr_level" "$_pr_msg" >&2 ;;
+        *)          printf '  [%s] %s\n' "$_pr_level" "$_pr_msg" ;;
     esac
 }
 
@@ -556,8 +567,8 @@ _pr_install_candidate()
                 _pr_log WARN "Manifest install failed for [$1]; falling back to OpenWrt feeds ..."
             fi
             _pr_install_from_feed "$1"
-            ;;
-    esac
+                    ;;
+            esac
 }
 
 _pr_rollback()
@@ -613,9 +624,23 @@ install_profile()
     _ip_done=0
     _ip_skipped=0
     _ip_failed_optional=0
+    _ip_ui="${DAYPASS_INSTALL_UI:-0}"
+    _ip_total=0
+    _ip_idx=0
+    for _ip_row in $PROFILE_PACKAGES; do
+        _ip_total=$((_ip_total + 1))
+    done
 
     while IFS='|' read -r _ip_name _ip_source _ip_optional _ip_alts _ip_prof _ip_step _ip_note; do
         [ -z "$_ip_name" ] && continue
+        _ip_idx=$((_ip_idx + 1))
+        _ip_label="$_ip_name"
+        command -v pkg_display_title >/dev/null 2>&1 && _ip_label="$(pkg_display_title "$_ip_name")"
+
+        if [ "$_ip_ui" = "1" ] && command -v show_ascii_progress >/dev/null 2>&1 && [ "$_ip_total" -gt 0 ]; then
+            show_ascii_progress "Installing" "$_ip_idx" "$_ip_total"
+            printf '\n'
+        fi
 
         _ip_present=""
         for _ip_candidate in $_ip_name $_ip_alts; do
@@ -626,17 +651,26 @@ install_profile()
         done
 
         if [ -n "$_ip_present" ]; then
-            _pr_log INFO "[$_ip_present] is already installed. Skipped."
+            if [ "$_ip_ui" = "1" ]; then
+                log_info "[$_ip_idx/$_ip_total] $_ip_label — already on this router."
+            else
+                _pr_log INFO "[$_ip_present] is already installed. Skipped."
+            fi
             _ip_skipped=$((_ip_skipped + 1))
             continue
         fi
 
-        [ -n "$_ip_note" ] && _pr_log INFO "Note for [$_ip_name] : $_ip_note"
-        _pr_log INFO "Installing [$_ip_name] ($_ip_source) ..."
+        [ -n "$_ip_note" ] && [ "$_ip_ui" != "1" ] && _pr_log INFO "Note for [$_ip_name] : $_ip_note"
+        if [ "$_ip_ui" = "1" ]; then
+            log_info "[$_ip_idx/$_ip_total] Installing $_ip_label ..."
+        else
+            _pr_log INFO "Installing [$_ip_name] ($_ip_source) ..."
+        fi
 
         _ip_installed=""
         for _ip_candidate in $_ip_name $_ip_alts; do
-            [ "$_ip_candidate" != "$_ip_name" ] && _pr_log INFO "Trying alternative [$_ip_candidate] ..."
+            [ "$_ip_candidate" != "$_ip_name" ] && [ "$_ip_ui" != "1" ] && \
+                _pr_log INFO "Trying alternative [$_ip_candidate] ..."
             if _pr_install_candidate "$_ip_candidate" "$_ip_source"; then
                 _ip_installed="$_ip_candidate"
                 break
@@ -646,13 +680,21 @@ install_profile()
         if [ -n "$_ip_installed" ]; then
             _ip_session="${_ip_session:+$_ip_session }$_ip_installed"
             _ip_done=$((_ip_done + 1))
-            _pr_log SUCCESS "Installed [$_ip_installed]"
+            if [ "$_ip_ui" = "1" ]; then
+                log_success "Installed $_ip_label"
+            else
+                _pr_log SUCCESS "Installed [$_ip_installed]"
+            fi
             continue
         fi
 
         if [ "$_ip_optional" = "1" ]; then
             _ip_failed_optional=$((_ip_failed_optional + 1))
-            _pr_log WARN "Optional package [$_ip_name] could not be installed. Continuing ..."
+            if [ "$_ip_ui" = "1" ]; then
+                log_warn "Optional: $_ip_label could not be installed — continuing."
+            else
+                _pr_log WARN "Optional package [$_ip_name] could not be installed. Continuing ..."
+            fi
             continue
         fi
 
@@ -672,7 +714,25 @@ EOF
         sort -u "$INSTALL_LOG" -o "$INSTALL_LOG" 2>/dev/null
     fi
 
-    _pr_log SUCCESS "Profile [$_ip_profile] finished : $_ip_done installed, $_ip_skipped already present, $_ip_failed_optional optional skipped."
+    # Record the whole resolved suite (including already-present packages)
+    # so purge can remove the module as a unit.
+    if command -v mf_record_install >/dev/null 2>&1; then
+        _ip_tracked=""
+        for _ip_name in $PROFILE_PACKAGES; do
+            if command -v _pr_is_installed >/dev/null 2>&1 && _pr_is_installed "$_ip_name"; then
+                _ip_tracked="${_ip_tracked:+$_ip_tracked }$_ip_name"
+            fi
+        done
+        [ -z "$_ip_tracked" ] && _ip_tracked="$_ip_session"
+        [ -n "$_ip_tracked" ] && mf_record_install "$_ip_profile" "$_ip_tracked"
+    fi
+
+    if [ "$_ip_ui" = "1" ]; then
+        echo
+        log_success "Profile finished : $_ip_done installed, $_ip_skipped already present, $_ip_failed_optional optional skipped."
+    else
+        _pr_log SUCCESS "Profile [$_ip_profile] finished : $_ip_done installed, $_ip_skipped already present, $_ip_failed_optional optional skipped."
+    fi
     return 0
 }
 

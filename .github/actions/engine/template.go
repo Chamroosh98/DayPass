@@ -118,8 +118,11 @@ func generateInstallScript(outputFile string) error {
 		"installer/init/install_core.sh",
 		"modules/system/resource_checker.sh",
 		"installer/pkg/resolver.sh",
+		"installer/pkg/package_catalog.sh",
+		"installer/pkg/manifest_manager.sh",
 		"installer/pkg/installer.sh",
 		"installer/pkg/updater.sh",
+		"installer/pkg/purge.sh",
 
 		// 12. UI Components & Interactive Menus
 		"ui/state.sh",
@@ -173,6 +176,20 @@ func generateInstallScript(outputFile string) error {
 		fmt.Printf("✅ [%s] embedded!\n", filepath.Base(profilesFile))
 	} else {
 		fmt.Printf("⚠️ Warning : File [%s] not found, skipping ...\n", profilesFile)
+	}
+
+	catalogFile := "config/package_catalog.json"
+	if data, err := os.ReadFile(catalogFile); err == nil {
+		scriptBuilder.WriteString(fmt.Sprintf("\n# 📄 Source : %s (embedded)\n", filepath.Base(catalogFile)))
+		scriptBuilder.WriteString("daypass_embedded_catalog()\n{\n    cat <<'DAYPASS_CATALOG_JSON'\n")
+		scriptBuilder.Write(data)
+		if len(data) > 0 && data[len(data)-1] != '\n' {
+			scriptBuilder.WriteByte('\n')
+		}
+		scriptBuilder.WriteString("DAYPASS_CATALOG_JSON\n}\n")
+		fmt.Printf("✅ [%s] embedded!\n", filepath.Base(catalogFile))
+	} else {
+		fmt.Printf("⚠️ Warning : File [%s] not found, skipping ...\n", catalogFile)
 	}
 
 	// Embedded Cloudflare Worker mirror, deployed by worker_api_deploy in

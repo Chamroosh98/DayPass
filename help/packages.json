@@ -12,20 +12,20 @@
     {
       "key": "2",
       "title": "VPN & Tunnels",
-      "description": "Resolves and installs the VPN profile (WireGuard, OpenVPN and helpers).",
-      "usage_tip": "Optional packages that fail only print a warning."
+      "description": "Shows a friendly summary of the VPN profile (WireGuard, OpenVPN, SoftEther) with Core / Web Interface / Enhancement tags, then installs after you confirm with Enter or Y.",
+      "usage_tip": "Resolution details are written to /tmp/daypass_resolve.log instead of the screen."
     },
     {
       "key": "3",
       "title": "USB & Hardware Drivers",
-      "description": "RNDIS, CDC-Ether, CDC-NCM and iPhone (ipheth + usbmuxd) tethering drivers, usbutils and usb-modeswitch.",
+      "description": "USB tethering drivers (Android, CDC, iPhone) listed with plain-English titles, then installed after confirmation.",
       "usage_tip": "Install this before using the Hardware & USB Tethering menu."
     },
     {
       "key": "4",
       "title": "Network Tools & Traffic",
-      "description": "mwan3, SQM and traffic tools, plus optional TPROXY kernel support for sing-box / Xray.",
-      "usage_tip": "Needed for Multi-WAN and for tproxy engines."
+      "description": "Multi-WAN, Smart Queue Management, bandwidth tests and TPROXY support, each with a short description — not raw package names.",
+      "usage_tip": "Needed for Multi-WAN and for tproxy engines. Enter confirms the default Yes."
     },
     {
       "key": "5",
@@ -35,9 +35,9 @@
     },
     {
       "key": "6",
-      "title": "List Package Profiles",
-      "description": "Prints every profile id with its title and description.",
-      "usage_tip": "Read-only."
+      "title": "Profile Status Dashboard",
+      "description": "Clears the screen and shows every package profile with its install status (Installed / Partial / Not Installed), key tools, and package count.",
+      "usage_tip": "Status is taken from packages on the router and /etc/daypass/installed_manifest.json. Enter returns to this menu."
     },
     {
       "key": "0",

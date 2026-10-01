@@ -58,28 +58,26 @@ resource_snapshot()
 # Smart estimation: Calculates REAL net storage expansion
 estimate_install_size()
 {
-    [ -z "${FINAL_PACKAGES:-}" ] && return 0
+    _est_list="${PACKAGES_TO_PROCESS:-${FINAL_PACKAGES:-}}"
+    [ -z "$_est_list" ] && return 0
     [ -z "${MANIFEST_FILE:-}" ] || [ ! -f "$MANIFEST_FILE" ] && return 0
 
     TOTAL_REQUIRED_BYTES=0
     TOTAL_SAVED_BYTES=0
     RECLAIMABLE_BYTES=0
 
-    for pkg in $FINAL_PACKAGES; do
+    for pkg in $_est_list; do
         pkg_bytes=$(manifest_lookup "size" "$pkg")
         [ -z "$pkg_bytes" ] || [ "$pkg_bytes" = "null" ] && pkg_bytes=0
 
-        inst_ver=$(pkg_get_installed_version "$pkg")
-        manif_ver=$(manifest_lookup "version" "$pkg")
-
-        # Skip logic if version is identical and not generic "Latest"
-        if [ -n "$inst_ver" ] && [ "$inst_ver" = "$manif_ver" ] && [ "$manif_ver" != "Latest" ]; then
+        # Payload size counts only packages that are missing or outdated.
+        if command -v pkg_payload_required >/dev/null 2>&1 && ! pkg_payload_required "$pkg"; then
             TOTAL_SAVED_BYTES=$((TOTAL_SAVED_BYTES + pkg_bytes))
         else
             TOTAL_REQUIRED_BYTES=$((TOTAL_REQUIRED_BYTES + pkg_bytes))
 
-            # If replacing an existing package, account for reclaimed space
-            if [ -n "$inst_ver" ] && [ "$inst_ver" != "None" ]; then
+            inst_ver=$(pkg_get_installed_version "$pkg" 2>/dev/null | awk 'NR==1 { print $1 }')
+            if [ -n "$inst_ver" ]; then
                 RECLAIMABLE_BYTES=$((RECLAIMABLE_BYTES + pkg_bytes))
             fi
         fi

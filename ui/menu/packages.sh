@@ -78,12 +78,12 @@ proxy_install_wizard()
     return 0
 }
 
-# Resolves a profile, shows the plan and installs it after confirmation.
+# Resolves a profile, shows a friendly plan and installs it after confirmation.
 # $1 profile id from config/package_profiles.json
 install_profile_interactive()
 {
     local profile="$1"
-    local count
+    local count title rel_label
 
     render_persistent_header
 
@@ -93,40 +93,62 @@ install_profile_interactive()
         return 1
     fi
 
+    title="$(profile_display_title "$profile" 2>/dev/null || echo "$profile")"
+    printf "  📦 ${BOLD}Profile Installation: %s${RESET}\n" "$title"
+    echo "  ───────────────────────────────────────────────────────────"
+
+    rel_label="${OPENWRT_MAJOR:-${PROFILE_RELEASE:-?}}"
+    log_info "Resolving package dependencies for OpenWrt [${rel_label}.x]..."
+
+    : > "${DAYPASS_RESOLVE_LOG:-/tmp/daypass_resolve.log}"
+    DAYPASS_RESOLVE_QUIET=1
+    export DAYPASS_RESOLVE_QUIET
     if ! resolve_profile "$profile"; then
+        DAYPASS_RESOLVE_QUIET=0
+        log_error "Could not build the package list for this profile."
+        log_info "Details : ${DAYPASS_RESOLVE_LOG:-/tmp/daypass_resolve.log}"
         ui_pause
         return 1
     fi
+    DAYPASS_RESOLVE_QUIET=0
 
     count=$(echo $PROFILE_PACKAGES | wc -w | tr -d ' ')
-    echo
-    ui_title "📦 Profile [$profile] : ${count:-0} package(s)"
-    printf '%s\n' "$PROFILE_PLAN" | while IFS='|' read -r name source optional alts _; do
-        [ -n "$name" ] || continue
-        if [ "$optional" = "1" ]; then
-            printf "     ├─ 🔹 ${CYAN}%s${RESET} ${GRAY}(%s, optional)${RESET}\n" "$name" "$source"
-        else
-            printf "     ├─ 🔹 ${CYAN}%s${RESET} ${GRAY}(%s)${RESET}\n" "$name" "$source"
-        fi
-        [ -n "$alts" ] && printf "     │    ${GRAY}alternatives : %s${RESET}\n" "$alts"
-    done
-    echo "  ───────────────────────────────────────────────────────────"
-    echo
+    log_success "Ready — ${count:-0} component(s) selected."
 
-    ui_read "Install this profile? [y/N]"
+    render_persistent_header
+    render_profile_plan "$profile"
+
+    profile_install_prompt "$title" "${count:-0}"
     case "$UI_CHOICE" in
-        y|Y) ;;
-        q|Q) daypass_quit ;;
-        *)
+        ''|y|Y)
+            ;;
+        0|n|N)
             log_info "Installation cancelled."
+            ui_pause
+            return 0
+            ;;
+        q|Q)
+            daypass_quit
+            ;;
+        *)
+            log_warn "Please answer Y or n."
             ui_pause
             return 0
             ;;
     esac
 
     echo
+    DAYPASS_RESOLVE_QUIET=1
+    DAYPASS_INSTALL_UI=1
+    export DAYPASS_RESOLVE_QUIET DAYPASS_INSTALL_UI
     install_profile "$profile"
+    _ip_rc=$?
+    DAYPASS_RESOLVE_QUIET=0
+    DAYPASS_INSTALL_UI=0
+    export DAYPASS_RESOLVE_QUIET DAYPASS_INSTALL_UI
+    echo
     ui_pause
+    return "$_ip_rc"
 }
 
 packages_menu()
@@ -137,15 +159,12 @@ packages_menu()
         render_persistent_header
 
         ui_title "📦 Package Profiles & Dependencies"
-        printf "  ${GRAY}Package manager : %s | OpenWrt : %s${RESET}\n" "${PKG_MANAGER:-auto}" "${OPENWRT_MAJOR:-auto}"
-        echo "  ───────────────────────────────────────────────────────────"
         echo "  🛡️ 1) Proxy & Evasion Cores     (Passwall wizard)"
         echo "  🔐 2) VPN & Tunnels             (WireGuard, OpenVPN, ...)"
         echo "  🔌 3) USB & Hardware Drivers    (RNDIS, CDC, ModeSwitch)"
         echo "  📈 4) Network Tools & Traffic   (mwan3, SQM, TPROXY, ...)"
         echo "  🔄 5) Check & Update Installed Packages"
-        echo "  📋 6) List Package Profiles"
-        echo "  ───────────────────────────────────────────────────────────"
+        echo "  📋 6) Profile Status Dashboard"
         ui_nav_footer main
 
         ui_prompt 6
@@ -156,11 +175,7 @@ packages_menu()
             3) install_profile_interactive usb ;;
             4) install_profile_interactive network_tools ;;
             5) ui_run update_packages_menu "Update" ;;
-            6)
-                echo
-                ui_run list_package_profiles "Package resolver"
-                ui_pause
-                ;;
+            6) ui_run profile_status_dashboard "Profile dashboard" ;;
             0) return 0 ;;
             *)
                 ui_nav_common "$UI_CHOICE" "$HELP_MODULE_ID" && continue

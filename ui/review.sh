@@ -10,9 +10,14 @@ review_install()
 
     render_persistent_header
 
-    echo "  📊 Installation Plan Summary"
+    _rv_title="${SELECTED_PROFILE:-DayPass}"
+    command -v mf_title_for >/dev/null 2>&1 && _rv_title="$(mf_title_for "${SELECTED_PROFILE:-proxy}")"
+
+    echo "  📊 ${_rv_title} — Installation Plan"
     echo "  ─────────────────────────────────────────────────────────────"
-    printf "  👤 %-18s : %s\n" "Selected Profile" "${SELECTED_PROFILE:-N/A}"
+    printf "  👤 %-18s : %s\n" "Module" "${SELECTED_PROFILE:-N/A}"
+    command -v mf_category_for >/dev/null 2>&1 && \
+        printf "  📂 %-18s : %s\n" "Category" "$(mf_category_for "${SELECTED_PROFILE:-proxy}")"
     printf "  🛠️ %-18s : %s\n" "Installation Mode" "${SELECTED_MODE:-recommended}"
     printf "  ⚙️ %-18s : %s\n" "Proxy Engine"    "${SELECTED_ENGINE:-xray}"
     

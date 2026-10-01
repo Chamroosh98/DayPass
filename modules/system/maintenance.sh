@@ -1,50 +1,14 @@
 #!/bin/sh
 
-# 1. Purge Packages Installed by DayPass
+# 1. Purge Packages Installed by DayPass (selective engine in installer/pkg/purge.sh)
 purge_daypass_packages()
 {
-    log_info "Analyzing installed DayPass packages ..."
-
-    if [ ! -s "$INSTALL_LOG" ]; then
-        log_warn "No installed package records found in [$INSTALL_LOG]"
-        return 0
+    if command -v purge_menu >/dev/null 2>&1; then
+        purge_menu
+        return $?
     fi
-
-    # Extract unique packages list safely
-    INSTALLED_PKGS=$(sort -u "$INSTALL_LOG" | tr '\n' ' ')
-
-    if [ -z "$INSTALLED_PKGS" ]; then
-        log_warn "No tracked packages to purge!"
-        return 0
-    fi
-
-    echo
-    printf "  ${YELLOW}⚠️ The following packages will be REMOVED : ${RESET}\n"
-    printf "  ${CYAN}%s${RESET}\n\n" "$INSTALLED_PKGS"
-
-    printf "  ⁉️ Are you sure you want to purge these packages? [y/N]: "
-    read -r confirm </dev/tty
-    case "$confirm" in
-        [yY][eE][sS]|[yY])
-            log_info "Initiating package purge ..."
-            
-            PKG_MGR="${PKG_MANAGER:-opkg}"
-            for pkg in $INSTALLED_PKGS; do
-                [ -z "$pkg" ] && continue
-                log_info "Removing [$pkg]..."
-                case "$PKG_MGR" in
-                    apk)  apk del "$pkg" >/dev/null 2>&1 || true ;;
-                    opkg|*) opkg remove "$pkg" >/dev/null 2>&1 || true ;;
-                esac
-            done
-
-            rm -f "$INSTALL_LOG"
-            log_success "DayPass packages purged successfully!"
-            ;;
-        *)
-            log_info "Purge cancelled by use :("
-            ;;
-    esac
+    log_error "Purge engine is not loaded."
+    return 1
 }
 
 # 2. OpenWrt Factory Reset

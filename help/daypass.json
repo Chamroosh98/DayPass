@@ -1640,9 +1640,17 @@
       "modules": [
         "modules/system/maintenance.sh",
         "modules/system/backup_restore.sh",
-        "modules/system/banner.sh"
+        "modules/system/banner.sh",
+        "installer/pkg/purge.sh",
+        "installer/pkg/manifest_manager.sh"
       ],
       "functions": [
+        "mf_export_json",
+        "mf_unregister_module",
+        "mf_register_module",
+        "mf_record_install",
+        "purge_packages",
+        "purge_menu",
         "purge_daypass_packages",
         "clean_daypass_cache",
         "backup_system_config",
@@ -1660,7 +1668,7 @@
       ],
       "summary": "Purge tracked packages, clean caches, back up the system configuration, factory reset or manage the SSH login banner.",
       "behavior": [
-        "Purge removes every package listed in /etc/daypass/install.log (apk del / opkg remove), then deletes the log.",
+        "Purge reads /etc/daypass/installed_manifest.json (and manifest.d). Each recorded module lists title, category, packages, configs and services. Purging a module stops those services, removes its packages, deletes its UCI files, flushes LuCI, then drops the module from the registry. A legacy install.log is imported on first use.",
         "Cache clean removes *.apk, *.ipk and *.part from /etc/daypass.",
         "Backup: 'sysupgrade -b /tmp/backup-<timestamp>.tar.gz'.",
         "Factory reset requires typing RESET, then runs 'firstboot -y && reboot'.",
@@ -1671,7 +1679,9 @@
         "/etc/daypass/install.log",
         "/tmp/backup-*.tar.gz",
         "/etc/banner",
-        "/etc/banner.daypass-orig"
+        "/etc/banner.daypass-orig",
+        "/etc/daypass/installed_manifest.json",
+        "/etc/daypass/manifest.d/*"
       ],
       "tools": [
         "opkg",

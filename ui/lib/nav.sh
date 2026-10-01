@@ -45,11 +45,11 @@ ui_pause() {
 # $1 "root" | "main" (back to main menu) | anything else (back one level)
 ui_nav_footer() {
     case "${1:-}" in
-        root) echo "  🚪 0) Exit DayPass" ;;
-        main) echo "  🚪 0) Back to Main Menu" ;;
-        *)    echo "  🚪 0) Back" ;;
+        root) printf "  🚪 ${YELLOW}0)${RESET} ${WHITE}Exit DayPass${RESET}\n" ;;
+        main) printf "  🚪 ${YELLOW}0)${RESET} ${WHITE}Back to Main Menu${RESET}\n" ;;
+        *)    printf "  🚪 ${YELLOW}0)${RESET} ${WHITE}Back${RESET}\n" ;;
     esac
-    echo "  ${GRAY}   q) Quit DayPass   h) Help${RESET}"
+    printf "  ${DIM}${CYAN}   q)${RESET} ${WHITE}Quit DayPass${RESET}   ${DIM}${CYAN}h)${RESET} ${WHITE}Help${RESET}\n"
     echo "  ───────────────────────────────────────────────────────────"
     echo
 }

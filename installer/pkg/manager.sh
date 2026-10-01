@@ -70,6 +70,37 @@ pkg_get_installed_version()
     fi
 }
 
+# 0 = a payload download is required, 1 = already installed and current.
+# Concrete manifest versions that differ still download; unknown/"Latest"
+# versions do not force a re-download of a package opkg/apk already has.
+pkg_payload_required()
+{
+    _pp_pkg="$1"
+    [ -n "$_pp_pkg" ] || return 0
+
+    pkg_installed "$_pp_pkg" || return 0
+
+    _pp_inst=$(pkg_get_installed_version "$_pp_pkg" 2>/dev/null | awk 'NR==1 { print $1 }')
+    _pp_man=""
+    if command -v manifest_lookup >/dev/null 2>&1 \
+        && [ -n "${MANIFEST_FILE:-}" ] && [ -f "$MANIFEST_FILE" ]; then
+        _pp_man=$(manifest_lookup "version" "$_pp_pkg" 2>/dev/null)
+    fi
+
+    case "$_pp_man" in
+        ""|null|Latest|N/A) return 1 ;;
+    esac
+
+    [ "$_pp_inst" = "$_pp_man" ] && return 1
+    case "$_pp_inst" in
+        "${_pp_man}"-[0-9]*) return 1 ;;
+    esac
+    case "$_pp_man" in
+        "${_pp_inst}"-[0-9]*) return 1 ;;
+    esac
+    return 0
+}
+
 # Check if target package is currently installed on host system
 pkg_installed()
 {

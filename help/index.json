@@ -290,7 +290,8 @@
       "item_count": 6,
       "sources": [
         "modules/system/maintenance.sh",
-        "modules/system/resource_checker.sh"
+        "modules/system/resource_checker.sh",
+        "installer/pkg/purge.sh"
       ],
       "reachable_from": "System menu -> 1 (resources overview: Hardware -> 8)"
     },
