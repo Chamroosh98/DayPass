@@ -25,7 +25,7 @@ apply_dns()
         
         # Optionally apply to UCI network configuration for persistence during setup
         if command -v uci >/dev/null 2>&1; then
-            uci -q del network.wan.dns 2>/dev/null || true
+            uci -q delete network.wan.dns 2>/dev/null || true
             uci -q add_list network.wan.dns="$NEW_DNS" 2>/dev/null || true
         fi
 
@@ -43,7 +43,7 @@ restore_dns()
         
         # Revert UCI changes if needed
         if command -v uci >/dev/null 2>&1; then
-            uci -q del network.wan.dns 2>/dev/null || true
+            uci -q delete network.wan.dns 2>/dev/null || true
         fi
 
         log_success "Original DNS restored successfully!"

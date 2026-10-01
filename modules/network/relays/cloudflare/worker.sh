@@ -14,7 +14,7 @@ WORKER_APK_REPOS="/etc/apk/repositories"
 # ---------- banner ----------
 _wb_banner() {
     echo
-    echo "  ${CYAN}${RESET}${BOLD}☁️  DayPass — Cloudflare Worker Mirror${RESET}"
+    echo "  ${CYAN}${RESET}${BOLD}☁️ Cloudflare Worker Mirror${RESET}"
     echo "  ${CYAN}─────────────────────────────────────────────────────────${RESET}"
     echo "  ${CYAN}${RESET}Package feeds are rewritten from downloads.openwrt.org"
     echo "  ${CYAN}${RESET}to your Worker so opkg / apk can fetch through CF.  "

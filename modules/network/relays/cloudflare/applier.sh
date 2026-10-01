@@ -26,9 +26,16 @@ apply_clean_ip_to_config() {
         return 1
     fi
 
-    new_link=$(replace_address_in_link "$share_link" "$clean_ip")
+    # A refusal means the swap would break the connection (Reality, QUIC, ss):
+    # leave the stored config exactly as it is.
+    if ! new_link=$(replace_address_in_link "$share_link" "$clean_ip"); then
+        log_error "Clean IP not applied to [$conf_name]."
+        return 1
+    fi
+
     if [ -z "$new_link" ] || [ "$new_link" = "$share_link" ]; then
-        new_link=$(echo "$share_link" | sed "s/@[^:/]*/@${clean_ip}/")
+        log_error "Share link of [$conf_name] was left unchanged; Clean IP not applied."
+        return 1
     fi
 
     tmp=$(mktemp)
@@ -43,5 +50,9 @@ apply_clean_ip_to_config() {
     fi
 
     log_success "Config [$conf_name] updated with Clean IP : [$clean_ip]"
-    log_info "SNI/Host/Path left unchanged!"
+    if [ -n "${CF_REPLACE_NOTE:-}" ]; then
+        log_info "$CF_REPLACE_NOTE"
+    else
+        log_info "SNI / Host / Path left unchanged!"
+    fi
 }

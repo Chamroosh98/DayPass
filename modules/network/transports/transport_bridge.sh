@@ -297,126 +297,390 @@ url_decode() {
 }
 
 # ------------------------------------------------------------
-# Parse share link (improved)
-# Supports: vless / vmess / trojan / ss / hysteria2
-# Extracts main fields + some common query params
+# Share link parser
+# Supports: vless (incl. Reality), vmess, trojan, ss (legacy + SIP002),
+#           ssr, hysteria, hysteria2, tuic, anytls, naive+https/quic
+# Sets PARSED_* for the caller. Returns 1 for an unsupported scheme or
+# when no server address could be extracted.
 # ------------------------------------------------------------
+
+# base64 decode tolerating the url-safe alphabet and missing padding
+_sl_b64() {
+    local data pad
+
+    data=$(printf '%s' "$1" | tr -d '\r\n' | tr '_-' '/+')
+    [ -n "$data" ] || return 1
+
+    pad=$(( ${#data} % 4 ))
+    case "$pad" in
+        2) data="${data}==" ;;
+        3) data="${data}=" ;;
+        1) return 1 ;;
+    esac
+
+    printf '%s' "$data" | base64 -d 2>/dev/null
+}
+
+# $1 query string, $2.. parameter names; prints the first one that is set
+_sl_query() {
+    local query="$1"
+    local key val
+
+    shift
+    for key in "$@"; do
+        val=$(printf '%s\n' "$query" | tr '&;' '\n\n' | sed -n "s/^${key}=//p" | head -n 1)
+        if [ -n "$val" ]; then
+            url_decode "$val"
+            return 0
+        fi
+    done
+    return 1
+}
+
+# $1 JSON document, $2 key
+_sl_json() {
+    if command -v jq >/dev/null 2>&1; then
+        printf '%s' "$1" | jq -r --arg k "$2" '.[$k] // empty | tostring' 2>/dev/null
+        return 0
+    fi
+
+    printf '%s' "$1" | tr ',{' '\n\n' | \
+        sed -n "s/^[[:space:]]*\"$2\"[[:space:]]*:[[:space:]]*//p" | head -n 1 | \
+        sed 's/^"//;s/"[[:space:]]*}*[[:space:]]*$//;s/[[:space:]]*}*[[:space:]]*$//'
+}
+
+# Sets SL_HOST / SL_PORT from host:port, [v6]:port, host:443,8443 or host:443-500
+_sl_hostport() {
+    local hp="${1%%/*}"
+
+    SL_HOST=""
+    SL_PORT=""
+
+    case "$hp" in
+        '['*)
+            SL_HOST=${hp#\[}
+            SL_HOST=${SL_HOST%%\]*}
+            SL_PORT=${hp##*\]}
+            SL_PORT=${SL_PORT#:}
+            ;;
+        *:*:*)
+            # bare IPv6 literal (brackets are required to carry a port)
+            SL_HOST="$hp"
+            ;;
+        *:*)
+            SL_HOST=${hp%:*}
+            SL_PORT=${hp##*:}
+            ;;
+        *)
+            SL_HOST="$hp"
+            ;;
+    esac
+
+    # hysteria2 / tuic may advertise a port list or range: keep the first port
+    SL_PORT=${SL_PORT%%,*}
+    SL_PORT=${SL_PORT%%-*}
+    case "$SL_PORT" in
+        ''|*[!0-9]*) SL_PORT="" ;;
+    esac
+}
+
+# Splits a scheme-less "userinfo@host:port?query#fragment" body
+_sl_uri() {
+    local body="$1"
+
+    SL_USERINFO=""
+    SL_QUERY=""
+    SL_FRAGMENT=""
+
+    case "$body" in *'#'*) SL_FRAGMENT=${body#*#}; body=${body%%#*} ;; esac
+    case "$body" in *'?'*) SL_QUERY=${body#*\?};   body=${body%%\?*} ;; esac
+    case "$body" in *@*)   SL_USERINFO=${body%@*}; body=${body##*@}  ;; esac
+
+    _sl_hostport "$body"
+}
+
+# Transport name -> PARSED_L4
+_sl_l4_from_network() {
+    case "$1" in
+        kcp|mkcp|quic) PARSED_L4="udp" ;;
+        *)             PARSED_L4="tcp" ;;
+    esac
+}
+
 parse_share_link() {
     local link="$1"
+    local scheme body json creds decoded frag rest query hostpart
+    local sr_host sr_port sr_proto sr_method sr_obfs sr_pass
 
     PARSED_PROTOCOL=""
     PARSED_ADDRESS=""
     PARSED_PORT=""
     PARSED_UUID=""
     PARSED_PASSWORD=""
+    PARSED_METHOD=""
     PARSED_REMARKS=""
     PARSED_NETWORK=""
     PARSED_SECURITY=""
     PARSED_SNI=""
     PARSED_FLOW=""
     PARSED_FP=""
+    PARSED_PBK=""
+    PARSED_SID=""
+    PARSED_SPX=""
     PARSED_PATH=""
     PARSED_HOST_HEADER=""
+    PARSED_L4="tcp"
 
     case "$link" in
-        vless://*)
+        *://*)
+            scheme=${link%%://*}
+            body=${link#*://}
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+
+    case "$scheme" in
+        vless)
             PARSED_PROTOCOL="vless"
+            _sl_uri "$body"
 
-            local body query fragment
-            body=$(echo "$link" | sed 's|vless://||')
-            fragment=$(echo "$body" | grep -o '#.*' | sed 's/^#//')
-            body=$(echo "$body" | cut -d'#' -f1)
-            query=$(echo "$body" | cut -d'?' -f2- -s)
-            body=$(echo "$body" | cut -d'?' -f1)
-
-            PARSED_UUID=$(echo "$body" | cut -d'@' -f1)
-            local hostport
-            hostport=$(echo "$body" | cut -d'@' -f2)
-            PARSED_ADDRESS=$(echo "$hostport" | cut -d':' -f1)
-            PARSED_PORT=$(echo "$hostport" | cut -d':' -f2)
-
-            PARSED_REMARKS=$(url_decode "$fragment")
+            PARSED_UUID=$(url_decode "$SL_USERINFO")
+            PARSED_ADDRESS="$SL_HOST"
+            PARSED_PORT="$SL_PORT"
+            PARSED_NETWORK=$(_sl_query "$SL_QUERY" type) || PARSED_NETWORK="tcp"
+            PARSED_SECURITY=$(_sl_query "$SL_QUERY" security) || PARSED_SECURITY="none"
+            PARSED_SNI=$(_sl_query "$SL_QUERY" sni peer servername)
+            PARSED_FLOW=$(_sl_query "$SL_QUERY" flow)
+            PARSED_FP=$(_sl_query "$SL_QUERY" fp fingerprint)
+            PARSED_PBK=$(_sl_query "$SL_QUERY" pbk publicKey)
+            PARSED_SID=$(_sl_query "$SL_QUERY" sid shortId)
+            PARSED_SPX=$(_sl_query "$SL_QUERY" spx spiderX)
+            PARSED_PATH=$(_sl_query "$SL_QUERY" path serviceName)
+            PARSED_HOST_HEADER=$(_sl_query "$SL_QUERY" host authority)
+            PARSED_REMARKS=$(url_decode "$SL_FRAGMENT")
             [ -z "$PARSED_REMARKS" ] && PARSED_REMARKS="VLESS-Node"
-
-            # Parse common query parameters
-            if [ -n "$query" ]; then
-                PARSED_NETWORK=$(echo "$query" | tr '&' '\n' | grep -m1 '^type=' | cut -d'=' -f2)
-                PARSED_SECURITY=$(echo "$query" | tr '&' '\n' | grep -m1 '^security=' | cut -d'=' -f2)
-                PARSED_SNI=$(echo "$query" | tr '&' '\n' | grep -m1 '^sni=' | cut -d'=' -f2)
-                PARSED_FLOW=$(echo "$query" | tr '&' '\n' | grep -m1 '^flow=' | cut -d'=' -f2)
-                PARSED_FP=$(echo "$query" | tr '&' '\n' | grep -m1 '^fp=' | cut -d'=' -f2)
-                PARSED_PATH=$(echo "$query" | tr '&' '\n' | grep -m1 '^path=' | cut -d'=' -f2)
-                PARSED_HOST_HEADER=$(echo "$query" | tr '&' '\n' | grep -m1 '^host=' | cut -d'=' -f2)
-            fi
+            _sl_l4_from_network "$PARSED_NETWORK"
             ;;
 
-        vmess://*)
+        vmess)
             PARSED_PROTOCOL="vmess"
-            local b64 json
-            b64=$(echo "$link" | sed 's|vmess://||' | tr '_-' '/+' )
-            # pad base64 if needed
-            local mod=$(( ${#b64} % 4 ))
-            if [ "$mod" -eq 2 ]; then b64="${b64}=="; fi
-            if [ "$mod" -eq 3 ]; then b64="${b64}="; fi
+            json=$(_sl_b64 "${body%%#*}")
 
-            json=$(echo "$b64" | base64 -d 2>/dev/null)
+            case "$json" in
+                '{'*)
+                    PARSED_ADDRESS=$(_sl_json "$json" add)
+                    PARSED_PORT=$(_sl_json "$json" port)
+                    PARSED_UUID=$(_sl_json "$json" id)
+                    PARSED_REMARKS=$(_sl_json "$json" ps)
+                    PARSED_NETWORK=$(_sl_json "$json" net)
+                    PARSED_PATH=$(_sl_json "$json" path)
+                    PARSED_HOST_HEADER=$(_sl_json "$json" host)
+                    PARSED_SECURITY=$(_sl_json "$json" tls)
+                    PARSED_SNI=$(_sl_json "$json" sni)
+                    PARSED_FP=$(_sl_json "$json" fp)
+                    PARSED_FLOW=$(_sl_json "$json" flow)
+                    ;;
+                *)
+                    # Xray-style vmess URI: vmess://uuid@host:port?type=...
+                    _sl_uri "$body"
+                    PARSED_UUID=$(url_decode "$SL_USERINFO")
+                    PARSED_ADDRESS="$SL_HOST"
+                    PARSED_PORT="$SL_PORT"
+                    PARSED_NETWORK=$(_sl_query "$SL_QUERY" type)
+                    PARSED_SECURITY=$(_sl_query "$SL_QUERY" security)
+                    PARSED_SNI=$(_sl_query "$SL_QUERY" sni peer)
+                    PARSED_FP=$(_sl_query "$SL_QUERY" fp fingerprint)
+                    PARSED_PATH=$(_sl_query "$SL_QUERY" path serviceName)
+                    PARSED_HOST_HEADER=$(_sl_query "$SL_QUERY" host)
+                    PARSED_REMARKS=$(url_decode "$SL_FRAGMENT")
+                    ;;
+            esac
 
-            if [ -n "$json" ]; then
-                PARSED_ADDRESS=$(echo "$json" | jq -r '.add // empty' 2>/dev/null)
-                PARSED_PORT=$(echo "$json" | jq -r '.port // empty' 2>/dev/null)
-                PARSED_UUID=$(echo "$json" | jq -r '.id // empty' 2>/dev/null)
-                PARSED_REMARKS=$(echo "$json" | jq -r '.ps // empty' 2>/dev/null)
-                PARSED_NETWORK=$(echo "$json" | jq -r '.net // empty' 2>/dev/null)
-                PARSED_PATH=$(echo "$json" | jq -r '.path // empty' 2>/dev/null)
-                PARSED_HOST_HEADER=$(echo "$json" | jq -r '.host // empty' 2>/dev/null)
-                PARSED_SECURITY=$(echo "$json" | jq -r '.tls // empty' 2>/dev/null)
-                PARSED_SNI=$(echo "$json" | jq -r '.sni // empty' 2>/dev/null)
-            fi
-
+            [ -z "$PARSED_NETWORK" ] && PARSED_NETWORK="tcp"
             [ -z "$PARSED_REMARKS" ] && PARSED_REMARKS="VMess-Node"
+            _sl_l4_from_network "$PARSED_NETWORK"
             ;;
 
-        trojan://*)
+        trojan)
             PARSED_PROTOCOL="trojan"
+            _sl_uri "$body"
 
-            local body query fragment
-            body=$(echo "$link" | sed 's|trojan://||')
-            fragment=$(echo "$body" | grep -o '#.*' | sed 's/^#//')
-            body=$(echo "$body" | cut -d'#' -f1)
-            query=$(echo "$body" | cut -d'?' -f2- -s)
-            body=$(echo "$body" | cut -d'?' -f1)
-
-            PARSED_PASSWORD=$(echo "$body" | cut -d'@' -f1)
-            local hostport
-            hostport=$(echo "$body" | cut -d'@' -f2)
-            PARSED_ADDRESS=$(echo "$hostport" | cut -d':' -f1)
-            PARSED_PORT=$(echo "$hostport" | cut -d':' -f2)
-
-            PARSED_REMARKS=$(url_decode "$fragment")
+            PARSED_PASSWORD=$(url_decode "$SL_USERINFO")
+            PARSED_ADDRESS="$SL_HOST"
+            PARSED_PORT="$SL_PORT"
+            PARSED_NETWORK=$(_sl_query "$SL_QUERY" type) || PARSED_NETWORK="tcp"
+            PARSED_SECURITY=$(_sl_query "$SL_QUERY" security) || PARSED_SECURITY="tls"
+            PARSED_SNI=$(_sl_query "$SL_QUERY" sni peer servername)
+            PARSED_FP=$(_sl_query "$SL_QUERY" fp fingerprint)
+            PARSED_PBK=$(_sl_query "$SL_QUERY" pbk publicKey)
+            PARSED_SID=$(_sl_query "$SL_QUERY" sid shortId)
+            PARSED_SPX=$(_sl_query "$SL_QUERY" spx spiderX)
+            PARSED_PATH=$(_sl_query "$SL_QUERY" path serviceName)
+            PARSED_HOST_HEADER=$(_sl_query "$SL_QUERY" host authority)
+            PARSED_REMARKS=$(url_decode "$SL_FRAGMENT")
             [ -z "$PARSED_REMARKS" ] && PARSED_REMARKS="Trojan-Node"
-
-            if [ -n "$query" ]; then
-                PARSED_SNI=$(echo "$query" | tr '&' '\n' | grep -m1 '^sni=' | cut -d'=' -f2)
-                PARSED_SECURITY=$(echo "$query" | tr '&' '\n' | grep -m1 '^security=' | cut -d'=' -f2)
-                PARSED_FP=$(echo "$query" | tr '&' '\n' | grep -m1 '^fp=' | cut -d'=' -f2)
-            fi
+            _sl_l4_from_network "$PARSED_NETWORK"
             ;;
 
-        ss://*)
+        ss)
             PARSED_PROTOCOL="shadowsocks"
-            local fragment
-            fragment=$(echo "$link" | grep -o '#.*' | sed 's/^#//')
-            PARSED_REMARKS=$(url_decode "$fragment")
+
+            frag=""
+            rest="$body"
+            case "$rest" in *'#'*) frag=${rest#*#}; rest=${rest%%#*} ;; esac
+            query=""
+            case "$rest" in *'?'*) query=${rest#*\?}; rest=${rest%%\?*} ;; esac
+
+            case "$rest" in
+                *@*)
+                    # SIP002: ss://base64(method:password)@host:port
+                    creds=${rest%@*}
+                    hostpart=${rest##*@}
+                    decoded=$(_sl_b64 "$creds")
+                    case "$decoded" in
+                        *:*) creds="$decoded" ;;
+                        *)   creds=$(url_decode "$creds") ;;
+                    esac
+                    _sl_hostport "$hostpart"
+                    ;;
+                *)
+                    # legacy: ss://base64(method:password@host:port)
+                    decoded=$(_sl_b64 "$rest")
+                    case "$decoded" in
+                        *@*)
+                            creds=${decoded%@*}
+                            _sl_hostport "${decoded##*@}"
+                            ;;
+                        *)
+                            creds=""
+                            ;;
+                    esac
+                    ;;
+            esac
+
+            PARSED_ADDRESS="$SL_HOST"
+            PARSED_PORT="$SL_PORT"
+            PARSED_METHOD=${creds%%:*}
+            case "$creds" in
+                *:*) PARSED_PASSWORD=${creds#*:} ;;
+            esac
+            PARSED_HOST_HEADER=$(_sl_query "$query" obfs-host)
+            PARSED_REMARKS=$(url_decode "$frag")
             [ -z "$PARSED_REMARKS" ] && PARSED_REMARKS="SS-Node"
-            # Full SS parsing is complex (sip002 / legacy). Keep basic for now.
             ;;
 
-        hysteria2://*|hy2://*)
+        ssr)
+            PARSED_PROTOCOL="ssr"
+            # ssr://base64(host:port:protocol:method:obfs:base64(password)/?params)
+            decoded=$(_sl_b64 "${body%%#*}")
+            [ -n "$decoded" ] || return 1
+
+            query=""
+            case "$decoded" in *'?'*) query=${decoded#*\?}; decoded=${decoded%%\?*} ;; esac
+            decoded=${decoded%/}
+
+            IFS=':' read -r sr_host sr_port sr_proto sr_method sr_obfs sr_pass << EOF
+$decoded
+EOF
+            PARSED_ADDRESS="$sr_host"
+            PARSED_PORT="$sr_port"
+            PARSED_METHOD="$sr_method"
+            PARSED_PASSWORD=$(_sl_b64 "$sr_pass")
+            # sr_proto / sr_obfs are SSR plugin names with no PARSED_* equivalent;
+            # subscribe.lua reads them from the link itself when importing.
+            PARSED_REMARKS=$(_sl_b64 "$(_sl_query "$query" remarks)")
+            [ -z "$PARSED_REMARKS" ] && PARSED_REMARKS="SSR-Node"
+            ;;
+
+        hysteria)
+            PARSED_PROTOCOL="hysteria"
+            _sl_uri "$body"
+
+            PARSED_ADDRESS="$SL_HOST"
+            PARSED_PORT="$SL_PORT"
+            PARSED_PASSWORD=$(_sl_query "$SL_QUERY" auth auth_str authStr)
+            [ -z "$PARSED_PASSWORD" ] && PARSED_PASSWORD=$(url_decode "$SL_USERINFO")
+            PARSED_SNI=$(_sl_query "$SL_QUERY" peer sni)
+            PARSED_SECURITY="tls"
+            PARSED_NETWORK=$(_sl_query "$SL_QUERY" protocol) || PARSED_NETWORK="udp"
+            PARSED_REMARKS=$(url_decode "$SL_FRAGMENT")
+            [ -z "$PARSED_REMARKS" ] && PARSED_REMARKS="Hysteria-Node"
+            PARSED_L4="udp"
+            ;;
+
+        hysteria2|hy2)
             PARSED_PROTOCOL="hysteria2"
-            local fragment
-            fragment=$(echo "$link" | grep -o '#.*' | sed 's/^#//')
-            PARSED_REMARKS=$(url_decode "$fragment")
+            _sl_uri "$body"
+
+            PARSED_ADDRESS="$SL_HOST"
+            PARSED_PORT="$SL_PORT"
+            PARSED_PASSWORD=$(url_decode "$SL_USERINFO")
+            PARSED_SNI=$(_sl_query "$SL_QUERY" sni peer)
+            PARSED_SECURITY="tls"
+            PARSED_REMARKS=$(url_decode "$SL_FRAGMENT")
             [ -z "$PARSED_REMARKS" ] && PARSED_REMARKS="Hysteria2-Node"
+            PARSED_L4="udp"
+            ;;
+
+        tuic)
+            PARSED_PROTOCOL="tuic"
+            _sl_uri "$body"
+
+            PARSED_ADDRESS="$SL_HOST"
+            PARSED_PORT="$SL_PORT"
+            PARSED_UUID=$(url_decode "${SL_USERINFO%%:*}")
+            case "$SL_USERINFO" in
+                *:*) PARSED_PASSWORD=$(url_decode "${SL_USERINFO#*:}") ;;
+            esac
+            PARSED_SNI=$(_sl_query "$SL_QUERY" sni peer)
+            PARSED_SECURITY="tls"
+            PARSED_REMARKS=$(url_decode "$SL_FRAGMENT")
+            [ -z "$PARSED_REMARKS" ] && PARSED_REMARKS="TUIC-Node"
+            PARSED_L4="udp"
+            ;;
+
+        anytls)
+            PARSED_PROTOCOL="anytls"
+            _sl_uri "$body"
+
+            PARSED_ADDRESS="$SL_HOST"
+            PARSED_PORT="$SL_PORT"
+            case "$SL_USERINFO" in
+                *:*)
+                    PARSED_UUID=$(url_decode "${SL_USERINFO%%:*}")
+                    PARSED_PASSWORD=$(url_decode "${SL_USERINFO#*:}")
+                    ;;
+                *)
+                    PARSED_PASSWORD=$(url_decode "$SL_USERINFO")
+                    ;;
+            esac
+            PARSED_SNI=$(_sl_query "$SL_QUERY" sni peer servername)
+            PARSED_FP=$(_sl_query "$SL_QUERY" fp fingerprint)
+            PARSED_SECURITY="tls"
+            PARSED_REMARKS=$(url_decode "$SL_FRAGMENT")
+            [ -z "$PARSED_REMARKS" ] && PARSED_REMARKS="AnyTLS-Node"
+            ;;
+
+        naive|naive+https|naive+quic)
+            PARSED_PROTOCOL="naive"
+            _sl_uri "$body"
+
+            PARSED_ADDRESS="$SL_HOST"
+            PARSED_PORT="$SL_PORT"
+            PARSED_UUID=$(url_decode "${SL_USERINFO%%:*}")
+            case "$SL_USERINFO" in
+                *:*) PARSED_PASSWORD=$(url_decode "${SL_USERINFO#*:}") ;;
+            esac
+            PARSED_SNI=$(_sl_query "$SL_QUERY" sni peer)
+            PARSED_SECURITY="tls"
+            case "$scheme" in
+                *quic) PARSED_NETWORK="quic"; PARSED_L4="udp" ;;
+                *)     PARSED_NETWORK="https" ;;
+            esac
+            PARSED_REMARKS=$(url_decode "$SL_FRAGMENT")
+            [ -z "$PARSED_REMARKS" ] && PARSED_REMARKS="Naive-Node"
             ;;
 
         *)
@@ -424,6 +688,7 @@ parse_share_link() {
             ;;
     esac
 
+    [ -n "$PARSED_ADDRESS" ] || return 1
     return 0
 }
 

@@ -12,12 +12,30 @@ HEALTH_DIR="$PROXY_DIR/health"
 mkdir -p "$HEALTH_DIR"
 
 
-# Extract host and port from share link
+# True unless the config is explicitly disabled.
+# jq's "//" treats false as absent, so '.enabled // true' reads a disabled
+# config as enabled; test the value itself instead.
+
+_hc_enabled() {
+    [ "$(jq -r 'if .enabled == false then "false" else "true" end' "$1" 2>/dev/null)" != "false" ]
+}
+
+
+# Extract host, port and L4 protocol from share link
 
 extract_host_port() {
     local link="$1"
     HOST=""
     PORT=""
+    L4="tcp"
+
+    # The transport bridge's parser understands every scheme DayPass supports
+    if command -v parse_share_link >/dev/null 2>&1 && parse_share_link "$link"; then
+        HOST="$PARSED_ADDRESS"
+        PORT="$PARSED_PORT"
+        L4="${PARSED_L4:-tcp}"
+        [ -n "$HOST" ] && [ -n "$PORT" ] && return 0
+    fi
 
     # VLESS / Trojan style: protocol://uuid@host:port
     HOST=$(echo "$link" | sed -n 's/.*@\([^:/]*\).*/\1/p' | head -1)
@@ -48,9 +66,7 @@ test_node() {
     fi
 
     # Skip disabled configs
-    local enabled
-    enabled=$(jq -r '.enabled // true' "$file" 2>/dev/null)
-    if [ "$enabled" = "false" ]; then
+    if ! _hc_enabled "$file"; then
         log_warn "$name → disabled (skipped)"
         return 1
     fi
@@ -70,37 +86,51 @@ test_node() {
         return 1
     fi
 
-    # Measure approximate latency using TCP connect
-    local start_time end_time latency
-    start_time=$(date +%s%N 2>/dev/null || date +%s)
+    local state="down"
+    local latency=""
+    local start_time end_time
 
-    local reachable=0
-
-    if command -v nc >/dev/null 2>&1; then
-        if nc -z -w 3 "$HOST" "$PORT" >/dev/null 2>&1; then
-            reachable=1
-        fi
+    if command -v transport_probe >/dev/null 2>&1; then
+        # Shared probe: knows whether this busybox nc supports -z and reports
+        # UDP endpoints as unknown instead of unreachable.
+        transport_probe "$HOST" "$PORT" "${L4:-tcp}"
+        state="$PROBE_STATE"
+        latency="$PROBE_MS"
     else
-        if timeout 3 sh -c "echo > /dev/tcp/$HOST/$PORT" 2>/dev/null; then
-            reachable=1
+        start_time=$(date +%s%N 2>/dev/null || date +%s)
+
+        if command -v nc >/dev/null 2>&1; then
+            # busybox nc has no -z: connect with stdin closed instead
+            if nc -w 3 "$HOST" "$PORT" </dev/null >/dev/null 2>&1; then
+                state="up"
+            fi
+        elif timeout 3 sh -c "echo > /dev/tcp/$HOST/$PORT" 2>/dev/null; then
+            state="up"
         fi
-    fi
 
-    end_time=$(date +%s%N 2>/dev/null || date +%s)
-
-    if [ "$reachable" -eq 1 ]; then
-        # Calculate latency in ms if nanoseconds available
-        if [ "${#start_time}" -ge 13 ] 2>/dev/null; then
+        end_time=$(date +%s%N 2>/dev/null || date +%s)
+        if [ "$state" = "up" ] && [ "${#start_time}" -ge 13 ] 2>/dev/null; then
             latency=$(( (end_time - start_time) / 1000000 ))
-            log_success "$name → ${HOST}:${PORT}  |  ${latency} ms"
-        else
-            log_success "$name → ${HOST}:${PORT}  |  Reachable"
         fi
-        return 0
-    else
-        log_error "$name → ${HOST}:${PORT}  |  Unreachable"
-        return 1
     fi
+
+    case "$state" in
+        up)
+            if [ -n "$latency" ]; then
+                log_success "$name → ${HOST}:${PORT}  |  ${latency} ms"
+            else
+                log_success "$name → ${HOST}:${PORT}  |  Reachable"
+            fi
+            return 0
+            ;;
+        unknown)
+            log_warn "$name → ${HOST}:${PORT}  |  UDP endpoint, no ICMP reply (unknown)"
+            return 1
+            ;;
+    esac
+
+    log_error "$name → ${HOST}:${PORT}  |  Unreachable"
+    return 1
 }
 
 
@@ -124,8 +154,7 @@ test_all_nodes() {
             ok=$((ok + 1))
         else
             # Count disabled separately if needed
-            enabled=$(jq -r '.enabled // true' "$file" 2>/dev/null)
-            [ "$enabled" = "false" ] && skipped=$((skipped + 1))
+            _hc_enabled "$file" || skipped=$((skipped + 1))
         fi
     done
 
@@ -153,12 +182,11 @@ test_selected_nodes() {
         [ -f "$file" ] || continue
         name=$(basename "$file" .json)
         protocol=$(jq -r '.protocol // "unknown"' "$file" 2>/dev/null)
-        enabled=$(jq -r '.enabled // true' "$file" 2>/dev/null)
 
-        if [ "$enabled" = "false" ]; then
-            echo "  $i) $name  ${GRAY}($protocol) [DISABLED]${RESET}"
-        else
+        if _hc_enabled "$file"; then
             echo "  $i) $name  ${GRAY}($protocol)${RESET}"
+        else
+            echo "  $i) $name  ${GRAY}($protocol) [DISABLED]${RESET}"
         fi
 
         configs="$configs $name"

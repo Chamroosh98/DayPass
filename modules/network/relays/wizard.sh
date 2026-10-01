@@ -7,7 +7,7 @@
 # ---------- banner ----------
 _nb_banner() {
     echo
-    echo "  ${CYAN}${RESET}${BOLD}🌐 DayPass — Network Bootstrap Wizard${RESET}"
+    echo "  ${CYAN}${RESET}${BOLD}🌐 Network Bootstrap Wizard${RESET}"
     echo "  ${CYAN}─────────────────────────────────────────────────────────${RESET}"
     echo "  ${CYAN}${RESET}Choose how DayPass should reach package mirrors"
     echo "  ${CYAN}${RESET}before updating or installing software.          "
@@ -17,8 +17,8 @@ _nb_banner() {
 
 _nb_menu() {
     echo "  ${WHITE}🔌 1)${RESET} Configure Local HTTP/HTTPS Proxy"
-    echo "  ${WHITE}☁️  2)${RESET} Use Cloudflare Worker Mirror"
-    echo "  ${WHITE}➡️  3)${RESET} Proceed with Direct Connection ${DIM}(default)${RESET}"
+    echo "  ${WHITE}☁️ 2)${RESET} Use Cloudflare Worker Mirror"
+    echo "  ${WHITE}➡️ 3)${RESET} Proceed with Direct Connection ${DIM}(default)${RESET}"
     echo
     echo "  ${DIM}─────────────────────────────────────────────────────────${RESET}"
     echo

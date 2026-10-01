@@ -12,7 +12,7 @@ PROXY_HOST="127.0.0.1"
 # ---------- banner ----------
 _pb_banner() {
     echo
-    echo "  ${CYAN}${RESET}${BOLD}🌐 DayPass — Optional Network Proxy Bootstrap${RESET}"
+    echo "  ${CYAN}${RESET}${BOLD}🌐 Optional Network Proxy Bootstrap${RESET}"
     echo "  ${CYAN}─────────────────────────────────────────────────────────${RESET}"
     echo "  ${CYAN}${RESET}Routing DayPass traffic through a local proxy helps"
     echo "  ${CYAN}${RESET}avoid ISP filtering and broken package downloads!  "
