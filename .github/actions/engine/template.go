@@ -110,6 +110,7 @@ func generateInstallScript(outputFile string) error {
 
 		// 10. Other Modules
 		"modules/system/backup_restore.sh",
+		"modules/system/banner.sh",
 		"modules/system/maintenance.sh",
 		"modules/service/service_manager.sh",
 

@@ -28,6 +28,12 @@
       "usage_tip": "You must type RESET to confirm. There is no undo."
     },
     {
+      "key": "5",
+      "title": "SSH Login Banner (install / restore)",
+      "description": "Shows the current state of /etc/banner and lets you install or refresh the DayPass banner, preview it, or put the original OpenWrt banner back.",
+      "usage_tip": "The stock banner is copied to /etc/banner.daypass-orig the first time, so Restore always has something to return to. Installing it again only refreshes the version and firmware lines."
+    },
+    {
       "key": "0",
       "title": "Back",
       "description": "Returns to the previous menu.",

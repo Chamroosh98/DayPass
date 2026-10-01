@@ -1,7 +1,7 @@
 {
   "module_id": "service",
   "title": "Service Manager",
-  "summary": "Post-deployment service orchestration for the core network stack. It runs automatically after a deployment and has no interactive menu, so the entries below describe the services it controls rather than menu numbers.",
+  "summary": "Service helpers for the core network stack: enable, start, stop and status checks used by other modules. post_install_services_init bundles them for a post-deployment pass and has no interactive menu, so the entries below describe the services it controls rather than menu numbers.",
   "items": [
     {
       "key": "passwall2",

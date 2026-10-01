@@ -1,13 +1,13 @@
 {
   "module_id": "proxy_routing",
   "title": "Traffic Routing / Shunt Rules",
-  "summary": "Applies a routing mode to the active transport engine. Passwall and Passwall2 get the mode through their own settings; sing-box and Xray get a DayPass TPROXY rule set; WireGuard and OpenVPN get a DayPass policy route into the tunnel.",
+  "summary": "Applies a routing mode to the active transport engine. Passwall and Passwall2 get the mode through their own settings (Iran Direct builds a shunt node); sing-box and Xray get a DayPass TPROXY rule set; WireGuard and OpenVPN get a DayPass policy route into the tunnel.",
   "items": [
     {
       "key": "1",
       "title": "Iran Direct + Foreign Proxy (Recommended)",
-      "description": "Passwall: enables it with TCP proxy mode gfwlist. Other engines: steers LAN traffic to the engine except private ranges and the CIDRs in /etc/daypass/proxy/routing/direct_v4.list (and direct_v6.list).",
-      "usage_tip": "Without a direct list, WireGuard/OpenVPN send everything through the tunnel and sing-box/Xray rely on their own routing rules."
+      "description": "Passwall/Passwall2: builds the DayPass shunt node (protocol _shunt) whose default node is your selected proxy node and whose Iran rule (geosite:category-ir, geosite:ir, geoip:ir) goes direct, makes that shunt the active node and sets TCP and UDP proxy mode to proxy. Other engines: steers LAN traffic to the engine except private ranges and the CIDRs in /etc/daypass/proxy/routing/direct_v4.list (and direct_v6.list).",
+      "usage_tip": "Select a node first: on Passwall the mode is refused while no proxy node is chosen. Without a direct list, WireGuard/OpenVPN send everything through the tunnel and sing-box/Xray rely on their own routing rules."
     },
     {
       "key": "2",
@@ -18,7 +18,7 @@
     {
       "key": "3",
       "title": "Direct Only (Disable proxy)",
-      "description": "Passwall: turns proxying off. Other engines: removes the DayPass interception rules; the engine itself keeps running.",
+      "description": "Passwall: sets TCP and UDP proxy mode to disable, turns the engine off and points it back at your real node instead of the DayPass shunt. Other engines: removes the DayPass interception rules; the engine itself keeps running.",
       "usage_tip": "Handy for checking whether a problem comes from the proxy or the line."
     },
     {

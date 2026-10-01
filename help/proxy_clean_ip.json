@@ -1,13 +1,13 @@
 {
   "module_id": "proxy_clean_ip",
   "title": "Clean IP Manager (Cloudflare)",
-  "summary": "Scans candidate Cloudflare IPs on a config's own port, then replaces only the address inside the share link. SNI, Host and Path stay untouched. The header shows the detected proxy core.",
+  "summary": "Scans candidate Cloudflare IPs on a config's own port, then rewrites the address inside the share link when the config can really be fronted by Cloudflare: vless, vmess or trojan over ws, httpupgrade, h2, grpc, xhttp or splithttp. Reality, QUIC protocols (hysteria, hysteria2, tuic, naive+quic) and shadowsocks are refused and left untouched. The header shows the detected proxy core.",
   "items": [
     {
       "key": "1",
       "title": "Find Clean IP for a Config",
-      "description": "Scans candidate IPs on the port taken from a config's share link and saves the IP you choose.",
-      "usage_tip": "Every saved config is listed, including disabled ones. After applying you can push the updated config to Passwall."
+      "description": "Scans candidate IPs on the port taken from a config's share link and saves the IP you choose. The original domain is pinned as sni (TLS) or host (plaintext) when the link carried neither, so the TLS handshake still matches.",
+      "usage_tip": "Every saved config is listed, including disabled ones. A config that cannot be fronted is reported and keeps its address. After applying you can push the updated config to the active engine, which refreshes the existing node instead of skipping it."
     },
     {
       "key": "2",
@@ -25,7 +25,7 @@
       "key": "0",
       "title": "Back",
       "description": "Returns to the Proxy & Routing Manager.",
-      "usage_tip": "Saved configs keep their current address."
+      "usage_tip": "Saved configs keep the address they have now."
     }
   ]
 }

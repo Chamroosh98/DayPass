@@ -104,8 +104,9 @@ maintenance_menu()
         printf "  🗑️ 2) Clean Temporary Cache & Downloads\n"
         printf "  💾 3) Backup System Configuration\n"
         printf "  🚨 4) Factory Reset OpenWrt (Firstboot)\n"
+        printf "  🪧 5) SSH Login Banner (install / restore)\n"
         ui_nav_footer
-        ui_prompt 4
+        ui_prompt 5
         choice="$UI_CHOICE"
 
         case "$choice" in
@@ -113,6 +114,13 @@ maintenance_menu()
             2) clean_daypass_cache ;;
             3) backup_system_config ;;
             4) factory_reset_system ;;
+            5)
+                if command -v system_banner_manage >/dev/null 2>&1; then
+                    system_banner_manage
+                else
+                    log_warn "Login banner module not loaded!"
+                fi
+                ;;
             q|Q) daypass_quit ;;
             h|H)
                 if command -v show_help >/dev/null 2>&1; then

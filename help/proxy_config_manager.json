@@ -13,13 +13,13 @@
       "key": "2",
       "title": "Add Manual Config",
       "description": "Saves one share link under a name you choose and detects the protocol automatically.",
-      "usage_tip": "Supported links: vless, vmess, trojan, ss and hysteria2."
+      "usage_tip": "Accepted here: vless, vmess, trojan, ss and hysteria2. ssr, hysteria v1, tuic, anytls and naive links are understood by the push importer but cannot be saved yet."
     },
     {
       "key": "3",
       "title": "Toggle Enable/Disable Config",
       "description": "Writes enabled=false or true into the config file.",
-      "usage_tip": "Known issue: a stored false is read back as true, so the node still shows ON and is not skipped."
+      "usage_tip": "Known issue: List Configs and this toggle still read a stored false as true, so a disabled config keeps showing ON here. The health checker does skip it."
     },
     {
       "key": "4",
@@ -42,14 +42,14 @@
     {
       "key": "7",
       "title": "Push Config to Active Engine",
-      "description": "Lists the configs and imports the one you name into the active engine (Passwall or Passwall2).",
-      "usage_tip": "sing-box, Xray, WireGuard and OpenVPN nodes are managed in their own configs; a node whose name already exists is skipped."
+      "description": "Lists the configs and imports the one you name into the active engine (Passwall or Passwall2) with the engine's own importer, so Reality, ssr, hysteria, tuic, anytls and naive fields are built correctly.",
+      "usage_tip": "sing-box, Xray, WireGuard and OpenVPN nodes are managed in their own configs. A name that already exists is refreshed in place and keeps its node id, so a Clean IP address change is picked up and routing, balancer and shunt selections survive."
     },
     {
       "key": "8",
       "title": "Push All Configs to Active Engine",
       "description": "Imports every saved config into the active engine in one go.",
-      "usage_tip": "Names already present are skipped, so updated links are not re-imported."
+      "usage_tip": "Existing names are refreshed in place, so updated links are re-imported."
     },
     {
       "key": "9",

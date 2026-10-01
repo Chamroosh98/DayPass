@@ -62,6 +62,11 @@ proxy_install_wizard()
     if deploy_targeted_packages; then
         echo
         log_success "All targeted components deployed successfully!"
+
+        if command -v system_banner_post_install >/dev/null 2>&1; then
+            system_banner_post_install
+        fi
+
         ui_pause
     else
         echo

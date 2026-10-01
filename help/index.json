@@ -169,7 +169,7 @@
       "file": "proxy_routing.json",
       "module_id": "proxy_routing",
       "title": "Traffic Routing / Shunt Rules",
-      "summary": "Applies a routing mode to the active transport engine. Passwall and Passwall2 get the mode through their own settings; sing-box and Xray get a DayPass TPROXY rule set; WireGuard and OpenVPN get a DayPass policy route into the tunnel.",
+      "summary": "Applies a routing mode to the active transport engine. Passwall and Passwall2 get the mode through their own settings (Iran Direct builds a shunt node); sing-box and Xray get a DayPass TPROXY rule set; WireGuard and OpenVPN get a DayPass policy route into the tunnel.",
       "item_count": 6,
       "sources": [
         "modules/network/routing/core.sh",
@@ -216,7 +216,7 @@
       "file": "proxy_health_checker.json",
       "module_id": "proxy_health_checker",
       "title": "Node Health Checker",
-      "summary": "Tests whether saved nodes are reachable by opening a TCP connection (nc -z) to the host and port inside each share link, and reports approximate latency in milliseconds. Results are only displayed and are not used by the balancer.",
+      "summary": "Tests whether saved nodes are reachable by probing the host and port inside each share link (TCP connect, or a UDP probe for kcp, quic, hysteria and tuic links) and reports approximate latency in milliseconds. Results are only displayed and are not used by the balancer.",
       "item_count": 3,
       "sources": [
         "modules/network/connectivity/checker/health_checker.sh"
@@ -227,7 +227,7 @@
       "file": "proxy_profiles.json",
       "module_id": "proxy_profiles",
       "title": "Routing Profiles",
-      "summary": "Ready-made traffic profiles that apply a routing mode to Passwall and remember the active profile. The header shows the active profile and the current routing mode.",
+      "summary": "Ready-made traffic profiles that apply a routing mode to the active transport engine and remember the active profile. The header shows the active profile and the current routing mode.",
       "item_count": 6,
       "sources": [
         "modules/network/profiles/profile_manager.sh"
@@ -238,7 +238,7 @@
       "file": "proxy_clean_ip.json",
       "module_id": "proxy_clean_ip",
       "title": "Clean IP Manager (Cloudflare)",
-      "summary": "Scans candidate Cloudflare IPs on a config's own port, then replaces only the address inside the share link. SNI, Host and Path stay untouched. The header shows the detected proxy core.",
+      "summary": "Scans candidate Cloudflare IPs on a config's own port, then rewrites the address inside the share link when the config can really be fronted by Cloudflare: vless, vmess or trojan over ws, httpupgrade, h2, grpc, xhttp or splithttp. Reality, QUIC protocols (hysteria, hysteria2, tuic, naive+quic) and shadowsocks are refused and left untouched. The header shows the detected proxy core.",
       "item_count": 4,
       "sources": [
         "modules/network/relays/cloudflare/menu.sh"
@@ -287,7 +287,7 @@
       "module_id": "system",
       "title": "Maintenance & Recovery",
       "summary": "Repair and clean-up tools for the system module. The same module also powers the read-only Hardware & Resource Status screen (main menu option 5), which shows architecture, OpenWrt release, RAM and storage usage.",
-      "item_count": 5,
+      "item_count": 6,
       "sources": [
         "modules/system/maintenance.sh",
         "modules/system/resource_checker.sh"
@@ -298,7 +298,7 @@
       "file": "service.json",
       "module_id": "service",
       "title": "Service Manager",
-      "summary": "Post-deployment service orchestration for the core network stack. It runs automatically after a deployment and has no interactive menu, so the entries below describe the services it controls rather than menu numbers.",
+      "summary": "Service helpers for the core network stack: enable, start, stop and status checks used by other modules. post_install_services_init bundles them for a post-deployment pass and has no interactive menu, so the entries below describe the services it controls rather than menu numbers.",
       "item_count": 4,
       "sources": [
         "modules/service/service_manager.sh"
