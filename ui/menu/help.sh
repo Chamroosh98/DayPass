@@ -20,18 +20,16 @@ help_rows() {
 }
 
 # ------------------------------------------------------------
-# How many manual entries fit on one page
+# How many help items fit on one contextual-help page.
+# Floor is 2 so typical OpenWrt terminals (24 rows) no longer show
+# a single entry per page; taller screens get 3.
 # ------------------------------------------------------------
 help_item_page_size() {
     HELP_ROWS="$(help_rows)"
-    if [ "$HELP_ROWS" -ge 50 ]; then
-        echo 4
-    elif [ "$HELP_ROWS" -ge 40 ]; then
+    if [ "$HELP_ROWS" -ge 36 ]; then
         echo 3
-    elif [ "$HELP_ROWS" -ge 28 ]; then
-        echo 2
     else
-        echo 1
+        echo 2
     fi
 }
 
@@ -138,15 +136,16 @@ show_help() {
         jq -r \
             --argjson s "$(( (HELP_PAGE - 1) * HELP_PAGE_SIZE ))" \
             --argjson e "$(( HELP_PAGE * HELP_PAGE_SIZE ))" '
-            .items[$s:$e][]? |
-            "K\u0009\(.key)\u0009\(.title)",
-            "D\u0009\(.description // "")",
-            "T\u0009\(.usage_tip // "")"
+            .items[$s:$e] as $page |
+            $page | to_entries[] |
+            "K\u0009\(.value.key)\u0009\(.value.title)",
+            "D\u0009\(.value.description // "")",
+            "T\u0009\(.value.usage_tip // "")",
+            (if .key + 1 < ($page | length) then "S\u0009" else empty end)
         ' "$HELP_FILE" 2>/dev/null | while IFS="$HELP_TAB" read -r HELP_TAG HELP_F1 HELP_F2; do
             case "$HELP_TAG" in
                 K)
-                    echo
-                    printf "  ${CYAN}${BOLD}%s)${RESET} ${BOLD}%s${RESET}\n" "$HELP_F1" "$HELP_F2"
+                    printf "\n  ${CYAN}${BOLD}%s)${RESET} ${BOLD}%s${RESET}\n" "$HELP_F1" "$HELP_F2"
                     ;;
                 D)
                     if [ -n "$HELP_F1" ]; then
@@ -157,6 +156,9 @@ show_help() {
                     if [ -n "$HELP_F1" ]; then
                         help_wrap "$HELP_F1" "${HELP_ITEM_INDENT}💡 " 66
                     fi
+                    ;;
+                S)
+                    printf "  %s\n" "───────────────────────────────────────────────────────────"
                     ;;
             esac
         done

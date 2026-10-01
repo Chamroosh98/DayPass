@@ -4,11 +4,6 @@
 # login banner (/etc/banner) and the help metadata.
 DAYPASS_VERSION="v2.1.1"
 
-# The logo carries backslashes and a backtick, and the colors come from
-# variables. printf with a literal format keeps every row byte for byte:
-# nothing in the art or in a color variable is ever read as an escape
-# sequence or as a format specifier.
-# $1 left half (red), $2 right half (white), $3 optional trailing text
 _banner_row()
 {
     printf '%s%s%s%s%s%s%s\n' "$RED" "$1" "$RESET" "$WHITE" "$2" "$RESET" "$3"

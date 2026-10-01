@@ -1703,7 +1703,7 @@
       "summary": "Asks how to reach package mirrors before any package work. It never fails the installer.",
       "behavior": [
         "1: local HTTP/HTTPS proxy (proxy_bootstrap_setup).",
-        "2: Cloudflare Worker mirror (worker_bootstrap_offer).",
+        "2: Cloudflare Worker mirror (worker_bootstrap_offer -> worker_mirror_menu: import, API deploy, or restore).",
         "3 or Enter: direct connection; feeds are unchanged."
       ],
       "tools": [],
@@ -1752,30 +1752,45 @@
       "menu_path": "Bootstrap wizard -> 2",
       "manual": null,
       "modules": [
-        "modules/network/relays/cloudflare/worker.sh"
+        "modules/network/relays/cloudflare/worker.sh",
+        "config/worker.js"
       ],
       "functions": [
+        "worker_mirror_menu",
         "worker_bootstrap_offer",
+        "worker_import_domain",
+        "worker_api_deploy",
         "worker_bootstrap_apply",
         "worker_bootstrap_restore",
         "worker_bootstrap_status"
       ],
-      "summary": "Rewrites downloads.openwrt.org in the package feed files to your Worker hostname.",
+      "summary": "Menu that points the package feeds at a Cloudflare Worker mirror: import an existing Worker hostname, deploy config/worker.js to your own Cloudflare account through the REST API, or restore the OpenWrt defaults.",
       "behavior": [
-        "Files: /etc/opkg/distfeeds.conf and /etc/apk/repositories; a .bak copy is made once and later rewrites start from it.",
-        "Default host: openwrt.daypass.workers.dev (override with WORKER_MIRROR_HOST); only A-Z, a-z, 0-9, '.', '_' and '-' are allowed.",
-        "Reachability probe on https://<host>/: any HTTP 2xx-4xx counts as reachable (curl, then wget, then uclient-fetch).",
-        "Typing 'restore' copies the .bak files back."
+        "Files: /etc/opkg/distfeeds.conf and /etc/apk/repositories; a .bak copy is made once and later rewrites start from it, so switching hosts or restoring is always possible. http:// upstream entries become https:// because workers.dev is TLS only; feeds that do not point at downloads.openwrt.org are left alone.",
+        "Option 1 (import): the input is normalised (scheme, port and path stripped) and validated (A-Z a-z 0-9 '.' '_' '-', at least one dot). Default host: openwrt.daypass.workers.dev, override with WORKER_MIRROR_HOST.",
+        "Health check: GET https://<host>/daypass-health must answer with \"mirror\":\"daypass-openwrt\". A genuine mirror is applied straight away; a host that answers something else, or does not answer at all, needs an explicit y/N confirmation. Feed files are never touched before that gate passes.",
+        "Option 2 (deploy): needs curl and an API token with Account -> Cloudflare Workers -> Edit plus the 32-hex Account ID. Steps: GET /user/tokens/verify, GET the script (to report create vs overwrite), PUT /accounts/<id>/workers/scripts/daypass-mirror as multipart/form-data (metadata main_module=worker.js, compatibility_date 2025-01-01, module part as application/javascript+module), GET /accounts/<id>/workers/subdomain for the account's workers.dev name, then POST .../scripts/daypass-mirror/subdomain {\"enabled\":true}.",
+        "The resulting host is daypass-mirror.<subdomain>.workers.dev. It is probed up to 6 times, 3 s apart, and only then written to the feed files. Any API error, a missing workers.dev subdomain or a failed probe aborts with the feeds untouched.",
+        "The token is read with terminal echo off and handed to curl through a config on stdin, so it never appears in the process list; it is never written to disk or to the state files.",
+        "Worker source order: daypass_embedded_worker_js (embedded in install.sh by the build), then $DAYPASS_DIR/worker.js or config/worker.js, then a download from REPO_URL, jsDelivr or raw GitHub. Every candidate must contain 'export default' and the daypass-openwrt marker.",
+        "Option 3 (restore): copies the .bak files back and clears the saved host.",
+        "The applied host is remembered in /etc/daypass/worker/host (and source: import or verified)."
       ],
       "state_files": [
         "/etc/opkg/distfeeds.conf(.bak)",
-        "/etc/apk/repositories(.bak)"
+        "/etc/apk/repositories(.bak)",
+        "/etc/daypass/worker/host",
+        "/etc/daypass/worker/source"
       ],
       "tools": [
         "sed",
         "curl",
         "wget",
-        "uclient-fetch"
+        "uclient-fetch",
+        "jq",
+        "stty",
+        "tr",
+        "cat"
       ],
       "layers": [
         "L6_Presentation",
@@ -2030,9 +2045,10 @@
     },
     "Worker mirror": {
       "expansion": "Cloudflare Worker reverse proxy",
-      "definition": "A workers.dev (or custom) host that relays downloads.openwrt.org; DayPass rewrites the feeds to use it.",
+      "definition": "Worker script 'daypass-mirror' (config/worker.js) that proxies downloads.openwrt.org through the Cloudflare edge: Range requests for resumed package downloads, a long edge cache for .ipk/.apk, short-lived indexes, and a /daypass-health identity endpoint.",
       "used_in": [
-        "worker_mirror"
+        "worker_mirror",
+        "bootstrap_wizard"
       ]
     },
     "WPA2-PSK": {
@@ -2541,7 +2557,8 @@
       "installer/**/*.sh",
       "config/package_profiles.json",
       "modules/system/banner.sh",
-      ".github/actions/engine/template.go"
+      ".github/actions/engine/template.go",
+      "config/worker.js"
     ],
     "manual_corrections": [
       {
@@ -2662,6 +2679,11 @@
       {
         "manual": "daypass",
         "change": "Stale ui/menu/passwall.sh and package_menu references replaced by the modular package profile flow; KI-04/06/07/08 moved to resolved_issues; KI-13/14/15 added; banner, _shunt and system banner terminology documented.",
+        "status": "applied"
+      },
+      {
+        "manual": "daypass",
+        "change": "Worker mirror rewritten as a 3-option menu (import / Cloudflare API deploy / restore) with the /daypass-health gate, and config/worker.js documented (Range+resume, edge cache tiers, CORS, health endpoint).",
         "status": "applied"
       }
     ]

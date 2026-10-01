@@ -175,6 +175,22 @@ func generateInstallScript(outputFile string) error {
 		fmt.Printf("⚠️ Warning : File [%s] not found, skipping ...\n", profilesFile)
 	}
 
+	// Embedded Cloudflare Worker mirror, deployed by worker_api_deploy in
+	// modules/network/relays/cloudflare/worker.sh
+	mirrorFile := "config/worker.js"
+	if data, err := os.ReadFile(mirrorFile); err == nil {
+		scriptBuilder.WriteString(fmt.Sprintf("\n# 📄 Source : %s (embedded)\n", filepath.Base(mirrorFile)))
+		scriptBuilder.WriteString("daypass_embedded_worker_js()\n{\n    cat <<'DAYPASS_WORKER_JS'\n")
+		scriptBuilder.Write(data)
+		if len(data) > 0 && data[len(data)-1] != '\n' {
+			scriptBuilder.WriteByte('\n')
+		}
+		scriptBuilder.WriteString("DAYPASS_WORKER_JS\n}\n")
+		fmt.Printf("✅ [%s] embedded!\n", filepath.Base(mirrorFile))
+	} else {
+		fmt.Printf("⚠️ Warning : File [%s] not found, skipping ...\n", mirrorFile)
+	}
+
 	// Cleaned Runtime Execution Pipeline
 	scriptBuilder.WriteString(`
 
