@@ -413,27 +413,37 @@ _wb_api_reset() {
 }
 
 # $1 method, $2 api path, $3 body file (optional), $4 content type (optional)
-# Body/response land in files; the token is passed through a curl config on
-# stdin so it never shows up in the process list.
+# Uses daypass_http_request (curl, then uclient-fetch, then wget).
 _wb_api_call() {
     local _method="$1"
     local _path="$2"
     local _body="$3"
     local _ctype="$4"
+    local _hdr="${WORKER_TMP}.hdr"
     local _code
+    local _umask
 
     WB_API_OUT="${WORKER_TMP}.api"
-    rm -f "$WB_API_OUT" 2>/dev/null
+    rm -f "$WB_API_OUT" "$_hdr" 2>/dev/null
 
-    set -- -sS -o "$WB_API_OUT" -w '%{http_code}' \
-        -X "$_method" --connect-timeout 15 --max-time 180
-    [ -n "$_ctype" ] && set -- "$@" -H "Content-Type: ${_ctype}"
-    [ -n "$_body" ]  && set -- "$@" --data-binary "@${_body}"
+    _umask="$(umask)"
+    umask 077
+    {
+        printf 'Authorization: Bearer %s\n' "$WB_API_TOKEN"
+        [ -n "$_ctype" ] && printf 'Content-Type: %s\n' "$_ctype"
+    } > "$_hdr" 2>/dev/null
+    umask "$_umask"
 
-    _code="$(printf 'header = "Authorization: Bearer %s"\n' "$WB_API_TOKEN" \
-        | curl -K - "$@" "${WORKER_CF_API}${_path}" 2>/dev/null)"
+    if ! command -v daypass_http_request >/dev/null 2>&1; then
+        WB_API_CODE="000"
+        printf '%s\n' "HTTP helper is not loaded." > "${DAYPASS_HTTP_ERR:-/tmp/daypass_http.err}"
+        return 1
+    fi
 
-    WB_API_CODE="${_code:-000}"
+    _code="$(daypass_http_request "$_method" "${WORKER_CF_API}${_path}" "$WB_API_OUT" "$_body" "$_hdr")"
+    rm -f "$_hdr" 2>/dev/null
+    WB_API_CODE="$(printf '%s\n' "$_code" | tail -n 1)"
+    [ -n "$WB_API_CODE" ] || WB_API_CODE="000"
 
     case "$WB_API_CODE" in
         2[0-9][0-9]) return 0 ;;
@@ -466,6 +476,11 @@ _wb_api_field() {
 }
 
 _wb_api_report_errors() {
+    if [ "${WB_API_CODE:-000}" = "000" ] && [ -s "${DAYPASS_HTTP_ERR:-/tmp/daypass_http.err}" ]; then
+        _wb_err "$(sed -n '1p' "${DAYPASS_HTTP_ERR:-/tmp/daypass_http.err}")"
+        return 0
+    fi
+
     _wb_err "Cloudflare API returned HTTP ${WB_API_CODE}."
 
     [ -s "$WB_API_OUT" ] || return 0
@@ -612,6 +627,26 @@ worker_bootstrap_apply() {
 
     _wb_state_save "$_host" "${_mode:-import}"
     _wb_ok "Mirror host set → ${BOLD}https://${_host}/${RESET}"
+    _wb_enqueue_curl
+    return 0
+}
+
+# Feeds are reachable now, so pick up a full curl without blocking the menu.
+_wb_enqueue_curl() {
+    command -v curl >/dev/null 2>&1 && return 0
+
+    if command -v opkg >/dev/null 2>&1; then
+        (
+            opkg update && opkg install curl ca-certificates
+        ) </dev/null >/tmp/daypass_curl_setup.log 2>&1 &
+        return 0
+    fi
+
+    if command -v apk >/dev/null 2>&1; then
+        (
+            apk add --no-progress curl ca-certificates
+        ) </dev/null >/tmp/daypass_curl_setup.log 2>&1 &
+    fi
     return 0
 }
 
@@ -675,9 +710,9 @@ worker_api_deploy() {
     _wb_hint "Script name : ${WORKER_SCRIPT_NAME} (re-running updates it in place)"
     printf '\n'
 
-    if ! command -v curl >/dev/null 2>&1; then
-        _wb_err "curl is required for API deployment and is not installed."
-        _wb_hint "Install curl, or use option 1 with a Worker you deployed by hand."
+    if ! daypass_http_available; then
+        _wb_err "No HTTP client found (curl, uclient-fetch or wget)."
+        _wb_hint "Use option 1 with a Worker you deployed by hand."
         return 1
     fi
 

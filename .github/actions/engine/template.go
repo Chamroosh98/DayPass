@@ -48,6 +48,7 @@ func generateInstallScript(outputFile string) error {
 		"ui/lib/nav.sh",
 
 		// 2. Network — Host Bootstrap (proxy, Worker mirror, wizard)
+		"modules/mirror/http_request.sh",
 		"modules/network/relays/ssh/reverse_tunnel.sh",
 		"modules/network/relays/cloudflare/worker.sh",
 		"modules/network/relays/wizard.sh",

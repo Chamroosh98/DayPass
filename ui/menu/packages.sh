@@ -159,10 +159,10 @@ packages_menu()
         render_persistent_header
 
         ui_title "📦 Package Profiles & Dependencies"
-        echo "  🛡️ 1) Proxy & Evasion Cores     (Passwall wizard)"
-        echo "  🔐 2) VPN & Tunnels             (WireGuard, OpenVPN, ...)"
-        echo "  🔌 3) USB & Hardware Drivers    (RNDIS, CDC, ModeSwitch)"
-        echo "  📈 4) Network Tools & Traffic   (mwan3, SQM, TPROXY, ...)"
+        echo "  🛡️ 1) Proxy & Evasion Cores"
+        echo "  🔐 2) VPN & Tunnels"
+        echo "  🔌 3) USB & Hardware Drivers"
+        echo "  📈 4) Network Tools & Traffic"
         echo "  🔄 5) Check & Update Installed Packages"
         echo "  📋 6) Profile Status Dashboard"
         ui_nav_footer main
