@@ -10,6 +10,11 @@
 # ---------------------------------------------------------------------------
 TOOL_PROBE_MAP="curl:curl jq:jq unzip:unzip lua:lua"
 
+# USB tethering kernel modules: "<package>:<lsmod name>"
+# Present when the package is installed or the module is already loaded.
+USB_TETHER_KMOD_MAP="kmod-usb-net-rndis:rndis_host kmod-usb-net-cdc-ether:cdc_ether kmod-usb-net-ipheth:ipheth"
+USB_TETHER_DEPS="kmod-usb-net-rndis kmod-usb-net-cdc-ether kmod-usb-net-ipheth"
+
 # 1 when the package database can be queried, 0 when we must rely on probes only
 PKG_DB_OK=0
 
@@ -24,6 +29,67 @@ tool_probe_for()
     echo ""
 }
 
+# Kernel module name for a USB tethering package (empty when unknown)
+kmod_probe_for()
+{
+    for mapping in $USB_TETHER_KMOD_MAP; do
+        case "$mapping" in
+            "$1:"*) echo "${mapping#*:}" ; return 0 ;;
+        esac
+    done
+    echo ""
+}
+
+# 0 when the package is installed or its kernel module is loaded
+usb_tether_kmod_present()
+{
+    _utk_pkg="$1"
+    _utk_mod="$2"
+
+    if command -v pkg_installed >/dev/null 2>&1 && pkg_installed "$_utk_pkg"; then
+        return 0
+    fi
+    if [ -n "$_utk_mod" ] && lsmod 2>/dev/null | grep -q "^${_utk_mod} "; then
+        return 0
+    fi
+    return 1
+}
+
+# Install any missing USB tethering modules. Never fails the caller.
+ensure_usb_tether_kmods()
+{
+    _utk_missing=""
+
+    for _utk_spec in $USB_TETHER_KMOD_MAP; do
+        _utk_pkg="${_utk_spec%%:*}"
+        _utk_mod="${_utk_spec#*:}"
+        usb_tether_kmod_present "$_utk_pkg" "$_utk_mod" && continue
+        _utk_missing="$_utk_missing $_utk_pkg"
+    done
+
+    [ -n "$_utk_missing" ] || return 0
+
+    if command -v pkg_update >/dev/null 2>&1; then
+        pkg_update >/dev/null 2>&1 || true
+    elif command -v opkg >/dev/null 2>&1; then
+        opkg update >/dev/null 2>&1 || true
+    elif command -v apk >/dev/null 2>&1; then
+        apk update >/dev/null 2>&1 || true
+    fi
+
+    for _utk_pkg in $_utk_missing; do
+        if command -v pkg_install >/dev/null 2>&1; then
+            pkg_install "$_utk_pkg" >/dev/null 2>&1 || true
+        elif command -v opkg >/dev/null 2>&1; then
+            opkg install "$_utk_pkg" >/dev/null 2>&1 || true
+        elif command -v apk >/dev/null 2>&1; then
+            apk add --allow-untrusted "$_utk_pkg" >/dev/null 2>&1 || true
+        fi
+    done
+
+    return 0
+}
+
 # Decide whether a single tool/package is already usable on this system.
 # Returns 0 = present, 1 = missing ; TOOL_REASON explains the verdict to the user.
 tool_is_available()
@@ -33,6 +99,16 @@ tool_is_available()
 
     if [ -n "$probe" ] && command -v "$probe" >/dev/null 2>&1; then
         TOOL_REASON="present (binary [$probe] found)"
+        return 0
+    fi
+
+    kmod="$(kmod_probe_for "$1")"
+    if [ -n "$kmod" ] && usb_tether_kmod_present "$1" "$kmod"; then
+        if [ -n "$kmod" ] && lsmod 2>/dev/null | grep -q "^${kmod} "; then
+            TOOL_REASON="present (kernel module [$kmod] loaded)"
+        else
+            TOOL_REASON="present (package database)"
+        fi
         return 0
     fi
 
@@ -99,6 +175,8 @@ deploy_system_dependencies()
     else
         log_info "OpenWrt v$OW_MAJOR_VER detected : using the minimal base tool set."
     fi
+
+    TARGET_PACKAGES="$TARGET_PACKAGES $USB_TETHER_DEPS"
 
     # The package-database helper decides HOW tools are validated : with it we can
     # also recognise packages that ship no binary (ca-bundle, luci-* modules...).

@@ -116,6 +116,10 @@ setup_usb_wan() {
 
     log_info "Setting up USB Tethering WAN interface ..."
 
+    if command -v ensure_usb_tether_kmods >/dev/null 2>&1; then
+        ensure_usb_tether_kmods || true
+    fi
+
     if [ -z "$usb_dev" ]; then
         usb_dev=$(detect_usb_device)
     fi

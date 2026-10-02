@@ -143,11 +143,23 @@ proxy_bootstrap_offer() {
 proxy_bootstrap_setup() {
     local _port
 
-    printf "  Proxy port on router side ${DIM}[default ${PROXY_DEFAULT_PORT}]${RESET} : "
-    read -r _port </dev/tty
-    [ -z "$_port" ] && _port="$PROXY_DEFAULT_PORT"
+    printf "  Proxy port on router side ${DIM}[default ${PROXY_DEFAULT_PORT}, enter 0 to go back/skip]${RESET} : "
+    if ! read -r _port </dev/tty; then
+        echo "${CYAN}  [i]${RESET} Local proxy setup skipped. Proceeding with execution..."
+        return 0
+    fi
 
-    # ---- apply (never fails the caller) ----
+    case "$_port" in
+        '')
+            _port="$PROXY_DEFAULT_PORT"
+            ;;
+        0|[bB]|[bB][aA][cC][kK]|[cC]|[cC][aA][nN][cC][eE][lL])
+            echo "${CYAN}  [i]${RESET} Local proxy setup skipped. Proceeding with execution..."
+            return 0
+            ;;
+    esac
+
+    # ---- apply (never fails the caller; cancel leaves existing proxies alone) ----
     if _pb_apply "$_port"; then
         echo "${GREEN}  [i] All subsequent downloads will use this proxy.${RESET}"
     else

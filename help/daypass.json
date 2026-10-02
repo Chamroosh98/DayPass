@@ -1745,7 +1745,7 @@
       ],
       "summary": "Exports proxy environment variables so DayPass downloads go through a local HTTP proxy.",
       "behavior": [
-        "Default port 2585 on 127.0.0.1; ports outside 1-65535 are rejected.",
+        "Default port 2585 on 127.0.0.1. Enter keeps 2585. 0, b, back, c, or cancel skips setup and leaves http_proxy / https_proxy unchanged. Other ports outside 1-65535 are rejected.",
         "Exports http_proxy, https_proxy, HTTP_PROXY, HTTPS_PROXY and no_proxy/NO_PROXY=localhost,127.0.0.1,::1 for the current session only.",
         "The manual screen shows the client-side command: ssh -R 2585:127.0.0.1:<VPN_PORT_ON_PC> root@<ROUTER_IP> -N. DayPass does not start or keep this tunnel alive."
       ],

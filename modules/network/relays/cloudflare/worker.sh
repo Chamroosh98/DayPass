@@ -468,26 +468,30 @@ worker_browser_deploy() {
     local _url
     _url="$(_wb_worker_raw_url)"
 
-    printf '  %s🔗 Deploy to Cloudflare%s\n' "$BOLD" "$RESET"
-    printf '  %s─────────────────────────────────────────────────────────%s\n' "$GRAY" "$RESET"
-    _wb_hint "DayPass does not contact Cloudflare from this screen."
-    echo
-    _wb_info "1. Dashboard → Workers & Pages → Create Application"
-    _wb_hint "   → Start with Hello World → Deploy."
-    echo
-    _wb_info "2. Edit Code opens in the browser."
-    _wb_hint "   Delete the Hello World placeholder, paste DayPass worker.js,"
-    _wb_hint "   then Save and Deploy."
-    echo
-    _wb_info "3. Cloudflare shows a *.workers.dev hostname."
-    echo
-    _wb_info "4. Come back here and choose Import Worker Domain / URL."
-    _wb_hint "   Paste that hostname."
-    echo
-    _wb_info "Copy the script from this plain-text link (phone or PC):"
-    echo
+    if command -v render_persistent_header >/dev/null 2>&1; then
+        render_persistent_header
+    fi
+
+    printf '  %sDeploy to Cloudflare%s\n' "$BOLD" "$RESET"
+    printf '\n'
+    printf '  DayPass does not contact Cloudflare from this screen.\n'
+    printf '\n'
+    printf '  %s[i]%s 1. Dashboard → Workers & Pages → Create Application\n' "$CYAN" "$RESET"
+    printf '          → Start with Hello World → Deploy.\n'
+    printf '\n'
+    printf '  %s[i]%s 2. Edit Code opens in the browser.\n' "$CYAN" "$RESET"
+    printf '          Delete the Hello World placeholder, paste DayPass worker.js,\n'
+    printf '          then Save and Deploy.\n'
+    printf '\n'
+    printf '  %s[i]%s 3. Cloudflare shows a *.workers.dev hostname.\n' "$CYAN" "$RESET"
+    printf '\n'
+    printf '  %s[i]%s 4. Come back here and choose Import Worker Domain / URL.\n' "$CYAN" "$RESET"
+    printf '          Paste that hostname.\n'
+    printf '\n'
+    printf '  %s[i]%s Copy the script from this plain-text link (phone or PC):\n' "$CYAN" "$RESET"
+    printf '\n'
     printf '  %s%s%s\n' "$CYAN" "$_url" "$RESET"
-    echo
+    printf '\n'
     return 0
 }
 
