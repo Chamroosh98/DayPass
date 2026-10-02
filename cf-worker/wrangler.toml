@@ -1,0 +1,14 @@
+# Deployed by Cloudflare's public button, not by the router.
+# https://deploy.workers.cloudflare.com/?url=https://github.com/<repo>/tree/<branch>/cf-worker
+#
+# worker.js must stay byte-identical to config/worker.js. The installer
+# build refuses to continue when the two files differ.
+# compatibility_date must match WORKER_COMPAT_DATE in
+# modules/network/relays/cloudflare/worker.sh.
+#
+# No KV, Durable Objects, or other bindings — this deploys on the free plan.
+
+name = "daypass-mirror"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+workers_dev = true

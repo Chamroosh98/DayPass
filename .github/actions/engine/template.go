@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -194,20 +195,30 @@ func generateInstallScript(outputFile string) error {
 	}
 
 	// Embedded Cloudflare Worker mirror, deployed by worker_api_deploy in
-	// modules/network/relays/cloudflare/worker.sh
+	// modules/network/relays/cloudflare/worker.sh.
+	// cf-worker/worker.js is the same script, published for the browser
+	// deploy button. Refuse the build if the two copies drift.
 	mirrorFile := "config/worker.js"
-	if data, err := os.ReadFile(mirrorFile); err == nil {
-		scriptBuilder.WriteString(fmt.Sprintf("\n# 📄 Source : %s (embedded)\n", filepath.Base(mirrorFile)))
-		scriptBuilder.WriteString("daypass_embedded_worker_js()\n{\n    cat <<'DAYPASS_WORKER_JS'\n")
-		scriptBuilder.Write(data)
-		if len(data) > 0 && data[len(data)-1] != '\n' {
-			scriptBuilder.WriteByte('\n')
-		}
-		scriptBuilder.WriteString("DAYPASS_WORKER_JS\n}\n")
-		fmt.Printf("✅ [%s] embedded!\n", filepath.Base(mirrorFile))
-	} else {
-		fmt.Printf("⚠️ Warning : File [%s] not found, skipping ...\n", mirrorFile)
+	deployCopy := "cf-worker/worker.js"
+	canon, err := os.ReadFile(mirrorFile)
+	if err != nil {
+		return fmt.Errorf("read %s: %w", mirrorFile, err)
 	}
+	deployed, err := os.ReadFile(deployCopy)
+	if err != nil {
+		return fmt.Errorf("read %s: %w", deployCopy, err)
+	}
+	if !bytes.Equal(canon, deployed) {
+		return fmt.Errorf("%s drifted from %s — copy %s onto %s", deployCopy, mirrorFile, mirrorFile, deployCopy)
+	}
+	scriptBuilder.WriteString(fmt.Sprintf("\n# 📄 Source : %s (embedded)\n", filepath.Base(mirrorFile)))
+	scriptBuilder.WriteString("daypass_embedded_worker_js()\n{\n    cat <<'DAYPASS_WORKER_JS'\n")
+	scriptBuilder.Write(canon)
+	if len(canon) > 0 && canon[len(canon)-1] != '\n' {
+		scriptBuilder.WriteByte('\n')
+	}
+	scriptBuilder.WriteString("DAYPASS_WORKER_JS\n}\n")
+	fmt.Printf("✅ [%s] embedded!\n", filepath.Base(mirrorFile))
 
 	// Cleaned Runtime Execution Pipeline
 	scriptBuilder.WriteString(`

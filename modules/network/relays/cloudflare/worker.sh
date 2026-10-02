@@ -5,11 +5,11 @@
 #   reverse-proxy so downloads.openwrt.org can be reached through the
 #   Cloudflare edge.
 #
-#   Three ways in:
-#     1. import a Worker hostname the user already has,
-#     2. deploy config/worker.js to the user's own Cloudflare account
-#        through the REST API and use the resulting workers.dev URL,
-#     3. roll the feed files back to the OpenWrt defaults.
+#   Four ways in:
+#     1. open Cloudflare's deploy button in a browser (no token on the router),
+#     2. import the *.workers.dev hostname Cloudflare showed,
+#     3. advanced: deploy config/worker.js through the REST API,
+#     4. roll the feed files back to the OpenWrt defaults.
 #
 #   Feed files are never touched before the target host is confirmed, so a
 #   cancelled prompt or a failed API call always leaves the router working.
@@ -352,6 +352,13 @@ _wb_mirror_branch() {
     fi
 }
 
+# Public deploy-button URL. Cloudflare logs the user into their own account.
+# No token is sent from the router. Branch matches help_branch / REPO_URL.
+_wb_deploy_button_url() {
+    printf 'https://deploy.workers.cloudflare.com/?url=https://github.com/%s/tree/%s/cf-worker' \
+        "$WORKER_REPO_SLUG" "$(_wb_mirror_branch)"
+}
+
 # $1 destination — leaves a validated worker.js behind
 _wb_mirror_source() {
     local _out="$1"
@@ -485,7 +492,8 @@ _wb_put_unsupported() {
 _wb_manual_worker_guide() {
     local _js="$1"
     local _paste="/tmp/daypass_worker.js"
-    local _link="https://deploy.workers.cloudflare.com/?url=https://github.com/${WORKER_REPO_SLUG}"
+    local _link
+    _link="$(_wb_deploy_button_url)"
 
     if [ -s "$_js" ]; then
         cp "$_js" "$_paste" 2>/dev/null || _paste="$_js"
@@ -493,8 +501,8 @@ _wb_manual_worker_guide() {
 
     echo
     _wb_warn "CLI PUT upload not supported by stock wget."
-    _wb_hint "Feeds are unchanged. Deploy the script once, then import its hostname"
-    _wb_hint "with option 1."
+    _wb_hint "Feeds are unchanged. Deploy the script once, then use"
+    _wb_hint "Import Worker Domain with the hostname Cloudflare shows you."
     echo
     _wb_info "1-click Cloudflare deploy (open on a computer):"
     printf '      %s%s%s\n' "$CYAN" "$_link" "$RESET"
@@ -505,7 +513,7 @@ _wb_manual_worker_guide() {
         _wb_hint "Dashboard → Workers & Pages → Create → paste that file → Deploy."
     fi
     echo
-    _wb_hint "When the Worker answers, choose option 1 and enter its workers.dev URL."
+    _wb_hint "When the Worker answers, choose Import Worker Domain and enter its workers.dev URL."
 }
 
 _wb_api_report_errors() {
@@ -723,7 +731,29 @@ worker_import_domain() {
 }
 
 # ------------------------------------------------------------
-# Menu 2 — deploy / update the Worker through the Cloudflare API
+# Menu 1 — browser deploy. Prints a URL. Does not call Cloudflare.
+# ------------------------------------------------------------
+worker_browser_deploy() {
+    local _url
+    _url="$(_wb_deploy_button_url)"
+
+    printf '  %s🔗 Deploy to Cloudflare%s\n' "$BOLD" "$RESET"
+    printf '  %s─────────────────────────────────────────────────────────%s\n' "$GRAY" "$RESET"
+    _wb_hint "Recommended. No Account ID and no API token on this router."
+    _wb_hint "DayPass does not contact Cloudflare from this screen."
+    echo
+    _wb_info "Open this link in a phone or PC browser:"
+    echo
+    printf '  %s%s%s\n' "$CYAN" "$_url" "$RESET"
+    echo
+    _wb_hint "Log into your own Cloudflare account on that page and wait until"
+    _wb_hint "the deploy finishes. Cloudflare shows a *.workers.dev hostname."
+    _wb_hint "Come back here and choose Import Worker Domain, then paste that hostname."
+    return 0
+}
+
+# ------------------------------------------------------------
+# Menu 3 — advanced: deploy / update the Worker through the Cloudflare API
 # ------------------------------------------------------------
 worker_api_deploy() {
     local _account=""
@@ -744,7 +774,7 @@ worker_api_deploy() {
 
     if ! daypass_http_available; then
         _wb_err "No HTTP client found (curl, uclient-fetch or wget)."
-        _wb_hint "Use option 1 with a Worker you deployed by hand."
+        _wb_hint "Use Deploy to Cloudflare, or Import Worker Domain for a Worker you deployed by hand."
         return 1
     fi
 
@@ -850,7 +880,7 @@ worker_api_deploy() {
         "$_json" "application/json" || ! _wb_api_success; then
         _wb_api_report_errors
         _wb_hint "Enable the workers.dev route for [${WORKER_SCRIPT_NAME}] by hand,"
-        _wb_hint "then import the URL with option 1."
+        _wb_hint "then use Import Worker Domain."
         _wb_api_reset
         return 1
     fi
@@ -866,7 +896,7 @@ worker_api_deploy() {
     if ! _wb_wait_for_worker "$_host" 6; then
         _wb_err "The Worker did not pass the health check yet."
         _wb_hint "Propagation can take a minute. Feeds are unchanged — import"
-        _wb_hint "[${_host}] with option 1 once https://${_host}${WORKER_HEALTH_PATH} answers."
+        _wb_hint "[${_host}] with Import Worker Domain once https://${_host}${WORKER_HEALTH_PATH} answers."
         return 1
     fi
     _wb_ok "Health check passed — verified DayPass mirror."
@@ -919,13 +949,14 @@ worker_mirror_menu() {
         _wb_header
         worker_bootstrap_status
         printf '  %s─────────────────────────────────────────────────────────%s\n' "$GRAY" "$RESET"
-        printf '  %s🔗 1)%s Import Custom Worker Domain / URL\n' "$WHITE" "$RESET"
-        printf '  %s⚡ 2)%s Auto-Deploy / Update Worker via Cloudflare API\n' "$WHITE" "$RESET"
-        printf '  %s🔄 3)%s Restore Default OpenWrt Feeds %s(fail-safe)%s\n' "$WHITE" "$RESET" "$GRAY" "$RESET"
+        printf '  %s🔗 1)%s Deploy to Cloudflare %s(browser, no token needed)%s\n' "$WHITE" "$RESET" "$GRAY" "$RESET"
+        printf '  %s📥 2)%s Import Worker Domain / URL\n' "$WHITE" "$RESET"
+        printf '  %s⚡ 3)%s Advanced: scripted API deploy\n' "$WHITE" "$RESET"
+        printf '  %s🔄 4)%s Restore Default OpenWrt Feeds %s(fail-safe)%s\n' "$WHITE" "$RESET" "$GRAY" "$RESET"
         printf '  %s⬅️ 0)%s Back\n' "$WHITE" "$RESET"
         printf '  %s─────────────────────────────────────────────────────────%s\n' "$GRAY" "$RESET"
         printf '\n'
-        printf '  %s⁉️ Select option%s %s[0-3]%s : ' "$YELLOW" "$RESET" "$GRAY" "$RESET"
+        printf '  %s⁉️ Select option%s %s[0-4]%s : ' "$YELLOW" "$RESET" "$GRAY" "$RESET"
 
         if ! read -r _choice </dev/tty; then
             printf '\n'
@@ -935,9 +966,10 @@ worker_mirror_menu() {
         printf '\n'
 
         case "$_choice" in
-            1) worker_import_domain || true ;;
-            2) worker_api_deploy    || true ;;
-            3) worker_bootstrap_restore || true ;;
+            1) worker_browser_deploy || true ;;
+            2) worker_import_domain  || true ;;
+            3) worker_api_deploy     || true ;;
+            4) worker_bootstrap_restore || true ;;
             0|'') return 0 ;;
             *)
                 _wb_warn "Invalid option!"
