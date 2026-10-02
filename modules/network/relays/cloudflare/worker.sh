@@ -43,7 +43,6 @@ _wb_warn() { printf '  %s[!] %s%s\n' "$YELLOW" "$1" "$RESET"; }
 _wb_hint() { printf '      %s%s%s\n' "$GRAY"   "$1" "$RESET"; }
 
 _wb_banner() {
-    printf '\n'
     printf '  %s%s☁️ Cloudflare Worker Mirror%s\n' "$CYAN" "$BOLD" "$RESET"
     printf '  %s─────────────────────────────────────────────────────────%s\n' "$CYAN" "$RESET"
     printf '  %sPackage feeds are rewritten from %s%s\n' "$CYAN" "$WORKER_UPSTREAM_HOST" "$RESET"
@@ -475,6 +474,40 @@ _wb_api_field() {
         | head -n 1
 }
 
+_wb_put_unsupported() {
+    [ "${WB_API_CODE:-000}" = "000" ] || return 1
+    [ -s "${DAYPASS_HTTP_ERR:-/tmp/daypass_http.err}" ] || return 1
+    grep -q '^PUT_UNSUPPORTED$' "${DAYPASS_HTTP_ERR:-/tmp/daypass_http.err}"
+}
+
+# Stock wget cannot PUT. Point the user at a manual deploy, then option 1.
+# $1 path to the prepared worker.js
+_wb_manual_worker_guide() {
+    local _js="$1"
+    local _paste="/tmp/daypass_worker.js"
+    local _link="https://deploy.workers.cloudflare.com/?url=https://github.com/${WORKER_REPO_SLUG}"
+
+    if [ -s "$_js" ]; then
+        cp "$_js" "$_paste" 2>/dev/null || _paste="$_js"
+    fi
+
+    echo
+    _wb_warn "CLI PUT upload not supported by stock wget."
+    _wb_hint "Feeds are unchanged. Deploy the script once, then import its hostname"
+    _wb_hint "with option 1."
+    echo
+    _wb_info "1-click Cloudflare deploy (open on a computer):"
+    printf '      %s%s%s\n' "$CYAN" "$_link" "$RESET"
+    echo
+    if [ -s "$_paste" ]; then
+        _wb_info "Worker script saved for pasting:"
+        printf '      %s%s%s\n' "$CYAN" "$_paste" "$RESET"
+        _wb_hint "Dashboard → Workers & Pages → Create → paste that file → Deploy."
+    fi
+    echo
+    _wb_hint "When the Worker answers, choose option 1 and enter its workers.dev URL."
+}
+
 _wb_api_report_errors() {
     if [ "${WB_API_CODE:-000}" = "000" ] && [ -s "${DAYPASS_HTTP_ERR:-/tmp/daypass_http.err}" ]; then
         _wb_err "$(sed -n '1p' "${DAYPASS_HTTP_ERR:-/tmp/daypass_http.err}")"
@@ -707,7 +740,6 @@ worker_api_deploy() {
     _wb_hint "Needs an API token with : Account → Cloudflare Workers → Edit"
     _wb_hint "Create one at dash.cloudflare.com → My Profile → API Tokens."
     _wb_hint "The Account ID is on the right side of any domain overview."
-    _wb_hint "Script name : ${WORKER_SCRIPT_NAME} (re-running updates it in place)"
     printf '\n'
 
     if ! daypass_http_available; then
@@ -779,6 +811,11 @@ worker_api_deploy() {
     _wb_info "${_action} Worker [${WORKER_SCRIPT_NAME}] ..."
     if ! _wb_api_call PUT "/accounts/${_account}/workers/scripts/${WORKER_SCRIPT_NAME}" \
         "$_body" "multipart/form-data; boundary=${WB_MP_BOUNDARY}" || ! _wb_api_success; then
+        if _wb_put_unsupported; then
+            _wb_manual_worker_guide "$_js"
+            _wb_api_reset
+            return 1
+        fi
         _wb_api_report_errors
         _wb_hint "Check that the token has Account → Cloudflare Workers → Edit."
         _wb_hint "Feeds are unchanged."

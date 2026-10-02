@@ -2,7 +2,7 @@
 
 # Single source of truth for the version shown in the UI, the system
 # login banner (/etc/banner) and the help metadata.
-DAYPASS_VERSION="v2.1.1"
+DAYPASS_VERSION="v2.1.2"
 
 _banner_row()
 {

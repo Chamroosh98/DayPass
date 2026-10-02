@@ -4,7 +4,7 @@ geo_menu()
 {
     render_persistent_header
 
-    echo "  🕵️‍♀️ Select Geo Database                                     "
+    echo "  🕵️‍♀️ Select Geo Database                                      "
     echo "  ─────────────────────────────────────────────────────────── "
     echo "  🫸🏻 1) Skip       (Do not install Geo databases)             "
     echo "  👔 2) Official   (Standard official release packages)       "

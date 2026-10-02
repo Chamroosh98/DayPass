@@ -107,11 +107,11 @@ func generateInstallScript(outputFile string) error {
 		"modules/network/relays/cloudflare/link_utils.sh",
 		"modules/network/relays/cloudflare/scanner.sh",
 		"modules/network/relays/cloudflare/applier.sh",
-		"modules/network/relays/cloudflare/menu.sh",
+		"ui/menu/cf.sh",
 
 		// 10. Other Modules
 		"modules/system/backup_restore.sh",
-		"modules/system/banner.sh",
+		"ui/lib/banner.sh",
 		"modules/system/maintenance.sh",
 		"modules/service/service_manager.sh",
 
@@ -126,13 +126,13 @@ func generateInstallScript(outputFile string) error {
 		"installer/pkg/purge.sh",
 
 		// 12. UI Components & Interactive Menus
-		"ui/state.sh",
+		"ui/lib/state.sh",
 		"ui/menu/custom.sh",
 		"ui/menu/mode.sh",
 		"ui/menu/engine.sh",
 		"ui/menu/language.sh",
 		"ui/menu/geo.sh",
-		"ui/review.sh",
+		"ui/lib/review.sh",
 		"ui/menu/packages.sh",
 		"ui/menu/hardware.sh",
 		"ui/menu/network.sh",
@@ -142,7 +142,7 @@ func generateInstallScript(outputFile string) error {
 		"ui/menu/system.sh",
 		"ui/menu/help.sh",
 		"ui/menu/main.sh",
-		"ui/installer_ui.sh",
+		"ui/lib/installer_ui.sh",
 	}
 
 	for _, file := range installerFiles {
