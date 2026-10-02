@@ -194,8 +194,8 @@ func generateInstallScript(outputFile string) error {
 		fmt.Printf("⚠️ Warning : File [%s] not found, skipping ...\n", catalogFile)
 	}
 
-	// Embedded Cloudflare Worker mirror, deployed by worker_api_deploy in
-	// modules/network/relays/cloudflare/worker.sh.
+	// Embedded Cloudflare Worker mirror (config/worker.js). The menu tells
+	// the user to paste this script in the Cloudflare dashboard editor.
 	// cf-worker/worker.js is the same script, published for the browser
 	// deploy button. Refuse the build if the two copies drift.
 	mirrorFile := "config/worker.js"

@@ -5,14 +5,13 @@
 #   reverse-proxy so downloads.openwrt.org can be reached through the
 #   Cloudflare edge.
 #
-#   Four ways in:
-#     1. open Cloudflare's deploy button in a browser (no token on the router),
+#   Three ways in:
+#     1. paste config/worker.js into the Cloudflare dashboard editor,
 #     2. import the *.workers.dev hostname Cloudflare showed,
-#     3. advanced: deploy config/worker.js through the REST API,
-#     4. roll the feed files back to the OpenWrt defaults.
+#     3. roll the feed files back to the OpenWrt defaults.
 #
 #   Feed files are never touched before the target host is confirmed, so a
-#   cancelled prompt or a failed API call always leaves the router working.
+#   cancelled prompt always leaves the router working.
 
 # ---------- defaults ----------
 WORKER_DEFAULT_HOST="openwrt.daypass.workers.dev"
@@ -21,12 +20,8 @@ WORKER_OPKG_FEEDS="/etc/opkg/distfeeds.conf"
 WORKER_APK_REPOS="/etc/apk/repositories"
 
 # ---------- Worker identity (must match config/worker.js) ----------
-WORKER_SCRIPT_NAME="daypass-mirror"
-WORKER_MODULE_NAME="worker.js"
-WORKER_COMPAT_DATE="2025-01-01"
 WORKER_HEALTH_PATH="/daypass-health"
 WORKER_HEALTH_ID="daypass-openwrt"
-WORKER_CF_API="https://api.cloudflare.com/client/v4"
 WORKER_REPO_SLUG="${DAYPASS_HELP_REPO:-Chamroosh98/DayPass}"
 
 # ---------- scratch ----------
@@ -69,28 +64,6 @@ _wb_confirm() {
         [yY]|[yY][eE][sS]) return 0 ;;
     esac
     return 1
-}
-
-# $1 prompt — reads without echoing; result in WB_SECRET
-_wb_read_secret() {
-    WB_SECRET=""
-
-    printf '  %s%s :%s ' "$CYAN" "$1" "$RESET"
-
-    if command -v stty >/dev/null 2>&1 && stty -echo </dev/tty 2>/dev/null; then
-        if read -r WB_SECRET </dev/tty; then
-            stty echo </dev/tty 2>/dev/null
-            printf '\n'
-            return 0
-        fi
-        stty echo </dev/tty 2>/dev/null
-        printf '\n'
-        return 1
-    fi
-
-    _wb_warn "Terminal echo cannot be disabled — the token will be visible."
-    read -r WB_SECRET </dev/tty || return 1
-    return 0
 }
 
 # ------------------------------------------------------------
@@ -309,7 +282,7 @@ _wb_gate_host() {
             ;;
         2)
             _wb_warn "Host answered, but it is not a DayPass mirror."
-            _wb_hint "Deploy option 2 to get a verified Worker, or continue if you"
+            _wb_hint "Use Deploy to Cloudflare, or continue if you"
             _wb_hint "know this host proxies ${WORKER_UPSTREAM_HOST}."
             _wb_confirm "Use [${_host}] anyway?" || return 1
             return 0
@@ -323,26 +296,8 @@ _wb_gate_host() {
     esac
 }
 
-# Health probe with retries: a fresh deployment needs a few seconds.
-_wb_wait_for_worker() {
-    local _host="$1"
-    local _tries="${2:-6}"
-    local _n=1
-
-    while [ "$_n" -le "$_tries" ]; do
-        if _wb_health_probe "$_host"; then
-            return 0
-        fi
-        _wb_info "Worker not answering yet (${_n}/${_tries}) ..."
-        [ "$_n" -lt "$_tries" ] && sleep 3
-        _n=$((_n + 1))
-    done
-
-    return 1
-}
-
 # ------------------------------------------------------------
-# Worker source (embedded by the build, on disk, or downloaded)
+# Branch used for the raw worker.js link
 # ------------------------------------------------------------
 _wb_mirror_branch() {
     if command -v help_branch >/dev/null 2>&1; then
@@ -352,234 +307,10 @@ _wb_mirror_branch() {
     fi
 }
 
-# Public deploy-button URL. Cloudflare logs the user into their own account.
-# No token is sent from the router. Branch matches help_branch / REPO_URL.
-_wb_deploy_button_url() {
-    printf 'https://deploy.workers.cloudflare.com/?url=https://github.com/%s/tree/%s/cf-worker' \
+# Plain-text config/worker.js on the same branch as this installer.
+_wb_worker_raw_url() {
+    printf 'https://raw.githubusercontent.com/%s/%s/config/worker.js' \
         "$WORKER_REPO_SLUG" "$(_wb_mirror_branch)"
-}
-
-# $1 destination — leaves a validated worker.js behind
-_wb_mirror_source() {
-    local _out="$1"
-    local _candidate
-    local _url
-
-    if command -v daypass_embedded_worker_js >/dev/null 2>&1; then
-        if daypass_embedded_worker_js > "$_out" 2>/dev/null && _wb_mirror_valid "$_out"; then
-            _wb_ok "Worker source : embedded in this installer."
-            return 0
-        fi
-    fi
-
-    for _candidate in "${DAYPASS_DIR:-/etc/daypass}/worker.js" "config/worker.js" "./worker.js"; do
-        [ -f "$_candidate" ] || continue
-        if cp "$_candidate" "$_out" 2>/dev/null && _wb_mirror_valid "$_out"; then
-            _wb_ok "Worker source : ${_candidate}"
-            return 0
-        fi
-    done
-
-    for _url in \
-        "${REPO_URL:+${REPO_URL%/}/worker.js}" \
-        "https://cdn.jsdelivr.net/gh/${WORKER_REPO_SLUG}@$(_wb_mirror_branch)/config/worker.js" \
-        "https://raw.githubusercontent.com/${WORKER_REPO_SLUG}/$(_wb_mirror_branch)/config/worker.js"
-    do
-        [ -n "$_url" ] || continue
-        if _wb_http_fetch "$_url" "$_out" && _wb_mirror_valid "$_out"; then
-            _wb_ok "Worker source : downloaded."
-            return 0
-        fi
-    done
-
-    rm -f "$_out" 2>/dev/null
-    _wb_err "Could not obtain the Worker script (config/worker.js)."
-    return 1
-}
-
-_wb_mirror_valid() {
-    [ -s "$1" ] || return 1
-    grep -q 'export default' "$1" 2>/dev/null || return 1
-    grep -qF "$WORKER_HEALTH_ID" "$1" 2>/dev/null || return 1
-    return 0
-}
-
-# ------------------------------------------------------------
-# Cloudflare REST API
-# ------------------------------------------------------------
-WB_API_OUT=""
-WB_API_CODE=""
-WB_API_TOKEN=""
-
-_wb_api_reset() {
-    WB_API_TOKEN=""
-    WB_SECRET=""
-    rm -f "${WORKER_TMP}".* 2>/dev/null
-    return 0
-}
-
-# $1 method, $2 api path, $3 body file (optional), $4 content type (optional)
-# Uses daypass_http_request (curl, then uclient-fetch, then wget).
-_wb_api_call() {
-    local _method="$1"
-    local _path="$2"
-    local _body="$3"
-    local _ctype="$4"
-    local _hdr="${WORKER_TMP}.hdr"
-    local _code
-    local _umask
-
-    WB_API_OUT="${WORKER_TMP}.api"
-    rm -f "$WB_API_OUT" "$_hdr" 2>/dev/null
-
-    _umask="$(umask)"
-    umask 077
-    {
-        printf 'Authorization: Bearer %s\n' "$WB_API_TOKEN"
-        [ -n "$_ctype" ] && printf 'Content-Type: %s\n' "$_ctype"
-    } > "$_hdr" 2>/dev/null
-    umask "$_umask"
-
-    if ! command -v daypass_http_request >/dev/null 2>&1; then
-        WB_API_CODE="000"
-        printf '%s\n' "HTTP helper is not loaded." > "${DAYPASS_HTTP_ERR:-/tmp/daypass_http.err}"
-        return 1
-    fi
-
-    _code="$(daypass_http_request "$_method" "${WORKER_CF_API}${_path}" "$WB_API_OUT" "$_body" "$_hdr")"
-    rm -f "$_hdr" 2>/dev/null
-    WB_API_CODE="$(printf '%s\n' "$_code" | tail -n 1)"
-    [ -n "$WB_API_CODE" ] || WB_API_CODE="000"
-
-    case "$WB_API_CODE" in
-        2[0-9][0-9]) return 0 ;;
-    esac
-    return 1
-}
-
-_wb_api_success() {
-    [ -s "$WB_API_OUT" ] || return 1
-
-    if command -v jq >/dev/null 2>&1; then
-        [ "$(jq -r '.success // false' "$WB_API_OUT" 2>/dev/null)" = "true" ] && return 0
-        return 1
-    fi
-
-    tr -d ' \t\n\r' < "$WB_API_OUT" 2>/dev/null | grep -qF '"success":true'
-}
-
-# $1 jq path (e.g. .result.subdomain), $2 fallback JSON key name
-_wb_api_field() {
-    [ -s "$WB_API_OUT" ] || return 1
-
-    if command -v jq >/dev/null 2>&1; then
-        jq -r "$1 // empty" "$WB_API_OUT" 2>/dev/null
-        return 0
-    fi
-
-    sed -n "s|.*\"$2\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*|\1|p" "$WB_API_OUT" 2>/dev/null \
-        | head -n 1
-}
-
-_wb_put_unsupported() {
-    [ "${WB_API_CODE:-000}" = "000" ] || return 1
-    [ -s "${DAYPASS_HTTP_ERR:-/tmp/daypass_http.err}" ] || return 1
-    grep -q '^PUT_UNSUPPORTED$' "${DAYPASS_HTTP_ERR:-/tmp/daypass_http.err}"
-}
-
-# Stock wget cannot PUT. Point the user at a manual deploy, then option 1.
-# $1 path to the prepared worker.js
-_wb_manual_worker_guide() {
-    local _js="$1"
-    local _paste="/tmp/daypass_worker.js"
-    local _link
-    _link="$(_wb_deploy_button_url)"
-
-    if [ -s "$_js" ]; then
-        cp "$_js" "$_paste" 2>/dev/null || _paste="$_js"
-    fi
-
-    echo
-    _wb_warn "CLI PUT upload not supported by stock wget."
-    _wb_hint "Feeds are unchanged. Deploy the script once, then use"
-    _wb_hint "Import Worker Domain with the hostname Cloudflare shows you."
-    echo
-    _wb_info "1-click Cloudflare deploy (open on a computer):"
-    printf '      %s%s%s\n' "$CYAN" "$_link" "$RESET"
-    echo
-    if [ -s "$_paste" ]; then
-        _wb_info "Worker script saved for pasting:"
-        printf '      %s%s%s\n' "$CYAN" "$_paste" "$RESET"
-        _wb_hint "Dashboard → Workers & Pages → Create → paste that file → Deploy."
-    fi
-    echo
-    _wb_hint "When the Worker answers, choose Import Worker Domain and enter its workers.dev URL."
-}
-
-_wb_api_report_errors() {
-    if [ "${WB_API_CODE:-000}" = "000" ] && [ -s "${DAYPASS_HTTP_ERR:-/tmp/daypass_http.err}" ]; then
-        _wb_err "$(sed -n '1p' "${DAYPASS_HTTP_ERR:-/tmp/daypass_http.err}")"
-        return 0
-    fi
-
-    _wb_err "Cloudflare API returned HTTP ${WB_API_CODE}."
-
-    [ -s "$WB_API_OUT" ] || return 0
-
-    if command -v jq >/dev/null 2>&1; then
-        jq -r '.errors[]? | "      - [\(.code // "?")] \(.message // "unknown error")"' \
-            "$WB_API_OUT" 2>/dev/null | head -n 5
-    else
-        sed -n 's|.*"message"[[:space:]]*:[[:space:]]*"\([^"]*\)".*|      - \1|p' \
-            "$WB_API_OUT" 2>/dev/null | head -n 5
-    fi
-
-    return 0
-}
-
-# Builds the multipart/form-data body the Workers script API expects for an
-# ES-module Worker. Boundary ends up in WB_MP_BOUNDARY.
-# $1 worker.js, $2 output body file
-_wb_build_multipart() {
-    local _js="$1"
-    local _out="$2"
-
-    WB_MP_BOUNDARY="DayPassMirror$$$(date +%s 2>/dev/null)"
-
-    {
-        printf -- '--%s\r\n' "$WB_MP_BOUNDARY"
-        printf 'Content-Disposition: form-data; name="metadata"; filename="metadata.json"\r\n'
-        printf 'Content-Type: application/json\r\n\r\n'
-        printf '{"main_module":"%s","compatibility_date":"%s","bindings":[]}\r\n' \
-            "$WORKER_MODULE_NAME" "$WORKER_COMPAT_DATE"
-        printf -- '--%s\r\n' "$WB_MP_BOUNDARY"
-        printf 'Content-Disposition: form-data; name="%s"; filename="%s"\r\n' \
-            "$WORKER_MODULE_NAME" "$WORKER_MODULE_NAME"
-        printf 'Content-Type: application/javascript+module\r\n\r\n'
-        cat "$_js"
-        printf '\r\n--%s--\r\n' "$WB_MP_BOUNDARY"
-    } > "$_out" 2>/dev/null
-
-    [ -s "$_out" ]
-}
-
-_wb_valid_account_id() {
-    case "$1" in
-        *[!0-9a-fA-F]*) return 1 ;;
-        ????????????????????????????????) return 0 ;;
-    esac
-    return 1
-}
-
-_wb_valid_token() {
-    case "$1" in
-        '')                 return 1 ;;
-        *[!A-Za-z0-9_.-]*)  return 1 ;;
-    esac
-
-    # Cloudflare tokens are 40 characters; stay lenient but reject typos.
-    [ "${#1}" -ge 20 ] || return 1
-    return 0
 }
 
 # ------------------------------------------------------------
@@ -731,183 +462,33 @@ worker_import_domain() {
 }
 
 # ------------------------------------------------------------
-# Menu 1 — browser deploy. Prints a URL. Does not call Cloudflare.
+# Menu 1 — paste the Worker in the Cloudflare dashboard. No network call.
 # ------------------------------------------------------------
 worker_browser_deploy() {
     local _url
-    _url="$(_wb_deploy_button_url)"
+    _url="$(_wb_worker_raw_url)"
 
     printf '  %s🔗 Deploy to Cloudflare%s\n' "$BOLD" "$RESET"
     printf '  %s─────────────────────────────────────────────────────────%s\n' "$GRAY" "$RESET"
-    _wb_hint "Recommended. No Account ID and no API token on this router."
     _wb_hint "DayPass does not contact Cloudflare from this screen."
     echo
-    _wb_info "Open this link in a phone or PC browser:"
+    _wb_info "1. Dashboard → Workers & Pages → Create Application"
+    _wb_hint "   → Start with Hello World → Deploy."
+    echo
+    _wb_info "2. Edit Code opens in the browser."
+    _wb_hint "   Delete the Hello World placeholder, paste DayPass worker.js,"
+    _wb_hint "   then Save and Deploy."
+    echo
+    _wb_info "3. Cloudflare shows a *.workers.dev hostname."
+    echo
+    _wb_info "4. Come back here and choose Import Worker Domain / URL."
+    _wb_hint "   Paste that hostname."
+    echo
+    _wb_info "Copy the script from this plain-text link (phone or PC):"
     echo
     printf '  %s%s%s\n' "$CYAN" "$_url" "$RESET"
     echo
-    _wb_hint "Log into your own Cloudflare account on that page and wait until"
-    _wb_hint "the deploy finishes. Cloudflare shows a *.workers.dev hostname."
-    _wb_hint "Come back here and choose Import Worker Domain, then paste that hostname."
     return 0
-}
-
-# ------------------------------------------------------------
-# Menu 3 — advanced: deploy / update the Worker through the Cloudflare API
-# ------------------------------------------------------------
-worker_api_deploy() {
-    local _account=""
-    local _js="${WORKER_TMP}.worker.js"
-    local _body="${WORKER_TMP}.multipart"
-    local _json="${WORKER_TMP}.json"
-    local _subdomain=""
-    local _host=""
-    local _action="Creating"
-    local _rc=1
-
-    printf '  %s⚡ Deploy the DayPass mirror to your Cloudflare account%s\n' "$BOLD" "$RESET"
-    printf '  %s─────────────────────────────────────────────────────────%s\n' "$GRAY" "$RESET"
-    _wb_hint "Needs an API token with : Account → Cloudflare Workers → Edit"
-    _wb_hint "Create one at dash.cloudflare.com → My Profile → API Tokens."
-    _wb_hint "The Account ID is on the right side of any domain overview."
-    printf '\n'
-
-    if ! daypass_http_available; then
-        _wb_err "No HTTP client found (curl, uclient-fetch or wget)."
-        _wb_hint "Use Deploy to Cloudflare, or Import Worker Domain for a Worker you deployed by hand."
-        return 1
-    fi
-
-    printf '  %sCloudflare Account ID%s : ' "$CYAN" "$RESET"
-    read -r _account </dev/tty || return 1
-    _account="$(printf '%s' "$_account" | tr -d ' \t\r')"
-
-    if [ -z "$_account" ]; then
-        _wb_warn "Cancelled — nothing was deployed and feeds are unchanged."
-        return 1
-    fi
-
-    if ! _wb_valid_account_id "$_account"; then
-        _wb_err "That does not look like an Account ID (32 hex characters)."
-        return 1
-    fi
-
-    if ! _wb_read_secret "Cloudflare API Token (hidden)"; then
-        _wb_warn "Cancelled — nothing was deployed and feeds are unchanged."
-        _wb_api_reset
-        return 1
-    fi
-
-    WB_API_TOKEN="$WB_SECRET"
-    WB_SECRET=""
-
-    if ! _wb_valid_token "$WB_API_TOKEN"; then
-        _wb_err "Empty or malformed API token."
-        _wb_api_reset
-        return 1
-    fi
-
-    # 1. token
-    _wb_info "Verifying the API token ..."
-    if ! _wb_api_call GET "/user/tokens/verify" || ! _wb_api_success; then
-        _wb_api_report_errors
-        _wb_hint "Feeds are unchanged."
-        _wb_api_reset
-        return 1
-    fi
-    _wb_ok "Token accepted by Cloudflare."
-
-    # 2. worker source
-    if ! _wb_mirror_source "$_js"; then
-        _wb_api_reset
-        return 1
-    fi
-
-    # 3. create or update?
-    if _wb_api_call GET "/accounts/${_account}/workers/scripts/${WORKER_SCRIPT_NAME}"; then
-        _action="Updating"
-        _wb_info "Script [${WORKER_SCRIPT_NAME}] exists — it will be overwritten."
-    else
-        _wb_info "Script [${WORKER_SCRIPT_NAME}] not found — it will be created."
-    fi
-
-    # 4. upload
-    if ! _wb_build_multipart "$_js" "$_body"; then
-        _wb_err "Failed to build the upload body."
-        _wb_api_reset
-        return 1
-    fi
-
-    _wb_info "${_action} Worker [${WORKER_SCRIPT_NAME}] ..."
-    if ! _wb_api_call PUT "/accounts/${_account}/workers/scripts/${WORKER_SCRIPT_NAME}" \
-        "$_body" "multipart/form-data; boundary=${WB_MP_BOUNDARY}" || ! _wb_api_success; then
-        if _wb_put_unsupported; then
-            _wb_manual_worker_guide "$_js"
-            _wb_api_reset
-            return 1
-        fi
-        _wb_api_report_errors
-        _wb_hint "Check that the token has Account → Cloudflare Workers → Edit."
-        _wb_hint "Feeds are unchanged."
-        _wb_api_reset
-        return 1
-    fi
-    _wb_ok "Worker script uploaded."
-
-    # 5. account workers.dev subdomain
-    if ! _wb_api_call GET "/accounts/${_account}/workers/subdomain" || ! _wb_api_success; then
-        _wb_api_report_errors
-        _wb_hint "Register a workers.dev subdomain once in the Cloudflare dashboard."
-        _wb_api_reset
-        return 1
-    fi
-
-    _subdomain="$(_wb_api_field '.result.subdomain' 'subdomain')"
-    _subdomain="$(printf '%s' "$_subdomain" | tr -d ' \t\r\n')"
-
-    if [ -z "$_subdomain" ]; then
-        _wb_err "This account has no workers.dev subdomain yet."
-        _wb_hint "Create it in the dashboard (Workers & Pages → subdomain), then retry."
-        _wb_api_reset
-        return 1
-    fi
-
-    # 6. route it on *.workers.dev
-    printf '{"enabled":true,"previews_enabled":false}\n' > "$_json" 2>/dev/null
-    _wb_info "Enabling the workers.dev route ..."
-    if ! _wb_api_call POST \
-        "/accounts/${_account}/workers/scripts/${WORKER_SCRIPT_NAME}/subdomain" \
-        "$_json" "application/json" || ! _wb_api_success; then
-        _wb_api_report_errors
-        _wb_hint "Enable the workers.dev route for [${WORKER_SCRIPT_NAME}] by hand,"
-        _wb_hint "then use Import Worker Domain."
-        _wb_api_reset
-        return 1
-    fi
-    _wb_ok "Route enabled on *.workers.dev."
-
-    _host="${WORKER_SCRIPT_NAME}.${_subdomain}.workers.dev"
-    _wb_api_reset
-
-    _wb_ok "Deployed → ${BOLD}https://${_host}/${RESET}"
-
-    # 7. prove it answers before any feed file is touched
-    _wb_info "Waiting for the Worker to answer its health check ..."
-    if ! _wb_wait_for_worker "$_host" 6; then
-        _wb_err "The Worker did not pass the health check yet."
-        _wb_hint "Propagation can take a minute. Feeds are unchanged — import"
-        _wb_hint "[${_host}] with Import Worker Domain once https://${_host}${WORKER_HEALTH_PATH} answers."
-        return 1
-    fi
-    _wb_ok "Health check passed — verified DayPass mirror."
-
-    # 8. apply (probe already done)
-    if worker_bootstrap_apply "$_host" "verified"; then
-        _wb_info "Package updates will now go through your own Worker."
-        _rc=0
-    fi
-
-    return "$_rc"
 }
 
 # ------------------------------------------------------------
@@ -949,14 +530,13 @@ worker_mirror_menu() {
         _wb_header
         worker_bootstrap_status
         printf '  %s─────────────────────────────────────────────────────────%s\n' "$GRAY" "$RESET"
-        printf '  %s🔗 1)%s Deploy to Cloudflare %s(browser, no token needed)%s\n' "$WHITE" "$RESET" "$GRAY" "$RESET"
+        printf '  %s🔗 1)%s Deploy to Cloudflare\n' "$WHITE" "$RESET"
         printf '  %s📥 2)%s Import Worker Domain / URL\n' "$WHITE" "$RESET"
-        printf '  %s⚡ 3)%s Advanced: scripted API deploy\n' "$WHITE" "$RESET"
-        printf '  %s🔄 4)%s Restore Default OpenWrt Feeds %s(fail-safe)%s\n' "$WHITE" "$RESET" "$GRAY" "$RESET"
+        printf '  %s🔄 3)%s Restore Default OpenWrt Feeds %s(fail-safe)%s\n' "$WHITE" "$RESET" "$GRAY" "$RESET"
         printf '  %s⬅️ 0)%s Back\n' "$WHITE" "$RESET"
         printf '  %s─────────────────────────────────────────────────────────%s\n' "$GRAY" "$RESET"
         printf '\n'
-        printf '  %s⁉️ Select option%s %s[0-4]%s : ' "$YELLOW" "$RESET" "$GRAY" "$RESET"
+        printf '  %s⁉️ Select option%s %s[0-3]%s : ' "$YELLOW" "$RESET" "$GRAY" "$RESET"
 
         if ! read -r _choice </dev/tty; then
             printf '\n'
@@ -968,8 +548,7 @@ worker_mirror_menu() {
         case "$_choice" in
             1) worker_browser_deploy || true ;;
             2) worker_import_domain  || true ;;
-            3) worker_api_deploy     || true ;;
-            4) worker_bootstrap_restore || true ;;
+            3) worker_bootstrap_restore || true ;;
             0|'') return 0 ;;
             *)
                 _wb_warn "Invalid option!"

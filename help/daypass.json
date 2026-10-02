@@ -1713,7 +1713,7 @@
       "summary": "Asks how to reach package mirrors before any package work. It never fails the installer.",
       "behavior": [
         "1: local HTTP/HTTPS proxy (proxy_bootstrap_setup).",
-        "2: Cloudflare Worker mirror (worker_bootstrap_offer -> worker_mirror_menu: browser deploy, import hostname, advanced API deploy, or restore).",
+        "2: Cloudflare Worker mirror (worker_bootstrap_offer -> worker_mirror_menu: paste worker.js in the dashboard, import the hostname, or restore).",
         "3 or Enter: direct connection; feeds are unchanged."
       ],
       "tools": [],
@@ -1772,24 +1772,18 @@
         "worker_bootstrap_offer",
         "worker_browser_deploy",
         "worker_import_domain",
-        "worker_api_deploy",
         "worker_bootstrap_apply",
         "worker_bootstrap_restore",
         "worker_bootstrap_status"
       ],
-      "summary": "Menu that points the package feeds at a Cloudflare Worker mirror. The recommended path is Cloudflare's deploy button in a browser (no token on the router), then pasting the *.workers.dev hostname. An API-token deploy remains for scripts. Feeds can be restored to the OpenWrt defaults.",
+      "summary": "Menu that points the package feeds at a Cloudflare Worker mirror. The user pastes config/worker.js into the Cloudflare dashboard editor, then imports the *.workers.dev hostname. Feeds can be restored to the OpenWrt defaults. The router never asks for a Cloudflare Account ID or API token.",
       "behavior": [
         "Files: /etc/opkg/distfeeds.conf and /etc/apk/repositories; a .bak copy is made once and later rewrites start from it, so switching hosts or restoring is always possible. http:// upstream entries become https:// because workers.dev is TLS only; feeds that do not point at downloads.openwrt.org are left alone.",
-        "Option 1 (recommended, browser): prints https://deploy.workers.cloudflare.com/?url=https://github.com/<WORKER_REPO_SLUG>/tree/<branch>/cf-worker and does not contact Cloudflare. The user logs into their own account in that page. DayPass never asks for or stores an API token on this path. After deploy, the user returns and uses Import Worker Domain with the *.workers.dev hostname Cloudflare displayed. Repo and branch come from WORKER_REPO_SLUG and help_branch (beta when REPO_URL ends in /beta, otherwise main).",
-        "The deployable unit is cf-worker/: wrangler.toml (name daypass-mirror, main worker.js, compatibility_date 2025-01-01, workers_dev, no bindings) plus worker.js, which the installer build requires to be byte-identical to config/worker.js. The button URL does not pass paid=true.",
+        "Option 1 (Deploy to Cloudflare): does not contact Cloudflare. It tells the user to open Workers & Pages → Create Application → Start with Hello World → Deploy, then in Edit Code delete the Hello World placeholder, paste DayPass worker.js, and Save and Deploy. Cloudflare shows a *.workers.dev hostname. The screen also prints a raw GitHub URL for config/worker.js on the current branch (WORKER_REPO_SLUG and help_branch: beta when REPO_URL ends in /beta, otherwise main) so the script can be copied from a phone or PC. The user then chooses Import Worker Domain / URL and pastes that hostname.",
         "Option 2 (import): the input is normalised (scheme, port and path stripped) and validated (A-Z a-z 0-9 '.' '_' '-', at least one dot). Default host: openwrt.daypass.workers.dev, override with WORKER_MIRROR_HOST.",
         "Health check: GET https://<host>/daypass-health must answer with \"mirror\":\"daypass-openwrt\". A genuine mirror is applied straight away; a host that answers something else, or does not answer at all, needs an explicit y/N confirmation. Feed files are never touched before that gate passes.",
-        "Option 3 (advanced, scripted): Account ID plus an API token, for non-interactive use. Uses daypass_http_request. PUT is sent with curl -X PUT, else uclient-fetch --method, else BusyBox wget as POST plus X-HTTP-Method-Override: PUT, else a raw HTTP/1.1 PUT through openssl s_client. If none of those can upload, the screen explains that stock wget cannot PUT and offers the same deploy-button URL. An API token with Account -> Cloudflare Workers -> Edit and the 32-hex Account ID are required only on this path. Steps: GET /user/tokens/verify, GET the script (to report create vs overwrite), PUT /accounts/<id>/workers/scripts/daypass-mirror as multipart/form-data (metadata main_module=worker.js, compatibility_date 2025-01-01, module part as application/javascript+module), GET /accounts/<id>/workers/subdomain for the account's workers.dev name, then POST .../scripts/daypass-mirror/subdomain {\"enabled\":true}.",
-        "The resulting host is daypass-mirror.<subdomain>.workers.dev. It is probed up to 6 times, 3 s apart, and only then written to the feed files. Any API error, a missing workers.dev subdomain or a failed probe aborts with the feeds untouched.",
-        "On the advanced path only, the token is read with terminal echo off. With curl it is passed through a config file, not the command line. It is removed after the call and is never written to the state files. The browser path never prompts for it.",
         "After the mirror feeds are applied, curl and ca-certificates are installed in the background (opkg update && opkg install, or apk add) when curl is not already present.",
-        "Worker source order: daypass_embedded_worker_js (embedded in install.sh by the build), then $DAYPASS_DIR/worker.js or config/worker.js, then a download from REPO_URL, jsDelivr or raw GitHub. Every candidate must contain 'export default' and the daypass-openwrt marker.",
-        "Option 4 (restore): copies the .bak files back and clears the saved host.",
+        "Option 3 (restore): copies the .bak files back and clears the saved host.",
         "The applied host is remembered in /etc/daypass/worker/host (and source: import or verified)."
       ],
       "state_files": [
@@ -1803,8 +1797,6 @@
         "curl",
         "wget",
         "uclient-fetch",
-        "jq",
-        "stty",
         "tr",
         "cat"
       ],
