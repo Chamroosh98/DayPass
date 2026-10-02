@@ -228,8 +228,8 @@ func generateInstallScript(outputFile string) error {
 ###############################################################################
 DEPLOYMENT_FAILED=0
 
-# 1. Pre-flight network bootstrap (proxy, Worker mirror, or direct)
-network_bootstrap_offer
+# 1. Pre-flight network bootstrap (skipped when a mirror or proxy is already set)
+network_bootstrap_startup
 
 # 2. Pre-flight connectivity check
 network_check || exit 1

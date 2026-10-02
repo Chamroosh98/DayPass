@@ -10,6 +10,11 @@ main_menu()
         render_persistent_header
 
         ui_title "🏠 Main Menu"
+        if [ -n "${BOOTSTRAP_SKIP_NOTICE:-}" ]; then
+            printf '  %s%s%s\n' "$GREEN" "$BOOTSTRAP_SKIP_NOTICE" "$RESET"
+            echo "  ───────────────────────────────────────────────────────────"
+            BOOTSTRAP_SKIP_NOTICE=""
+        fi
         echo "  📦 1) Package Profiles & Dependencies"
         echo "  🔌 2) Hardware & USB Tethering Manager"
         echo "  🌐 3) Network & Routing Configuration"
@@ -17,10 +22,11 @@ main_menu()
         echo "  ⚖️ 5) Node Balancer & Health Diagnostics"
         echo "  🛠️ 6) System Maintenance & Backup"
         echo "  📖 7) Help & Manuals"
+        echo "  🌐 8) Network Bootstrap Wizard"
         echo "  ───────────────────────────────────────────────────────────"
         ui_nav_footer root
 
-        ui_prompt 7
+        ui_prompt 8
 
         case "$UI_CHOICE" in
             1) ui_run packages_menu "Package Profiles" ;;
@@ -30,6 +36,7 @@ main_menu()
             5) ui_run diagnostics_menu "Node Balancer & Diagnostics" ;;
             6) ui_run system_menu "System Maintenance" ;;
             7) ui_run help_menu "Help" ;;
+            8) ui_run network_bootstrap_from_menu "Network Bootstrap" ;;
             0) daypass_quit ;;
             *)
                 ui_nav_common "$UI_CHOICE" "$HELP_MODULE_ID" && continue

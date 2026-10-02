@@ -46,6 +46,12 @@
       "usage_tip": "On any other menu, h opens that screen's own manual."
     },
     {
+      "key": "8",
+      "title": "Network Bootstrap Wizard",
+      "description": "Sets a local HTTP proxy or a Cloudflare Worker package mirror. If one is already configured, Enter keeps it.",
+      "usage_tip": "Startup skips this wizard when /etc/opkg/distfeeds.conf or http_proxy already points somewhere other than downloads.openwrt.org."
+    },
+    {
       "key": "0",
       "title": "Exit DayPass",
       "description": "Closes the DayPass session without changing anything.",

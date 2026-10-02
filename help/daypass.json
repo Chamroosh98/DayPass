@@ -548,8 +548,8 @@
       "id": "bootstrap",
       "title": "Pre-flight Bootstrap & Mirrors",
       "summary": "Before any package work, choose how the router reaches OpenWrt feeds: a local HTTP proxy (reverse SSH tunnel), a Cloudflare Worker mirror, or a direct connection.",
-      "menu_path": "Runs first in the generated installer (network_bootstrap_offer)",
-      "ui_entry": "modules/network/relays/wizard.sh (network_bootstrap_offer)",
+      "menu_path": "Main menu -> 8, or startup only when no mirror or proxy is set (network_bootstrap_startup)",
+      "ui_entry": "modules/network/relays/wizard.sh (network_bootstrap_startup)",
       "manuals": [],
       "articles": [
         "bootstrap_wizard",
@@ -1702,16 +1702,20 @@
       "title": "Network Bootstrap Wizard",
       "category": "bootstrap",
       "subcategory": "bootstrap_wizard",
-      "menu_path": "First step of the generated installer",
+      "menu_path": "Main menu -> 8; startup only when feeds and http_proxy are still official",
       "manual": null,
       "modules": [
         "modules/network/relays/wizard.sh"
       ],
       "functions": [
+        "network_bootstrap_startup",
+        "network_bootstrap_from_menu",
         "network_bootstrap_offer"
       ],
-      "summary": "Asks how to reach package mirrors before any package work. It never fails the installer.",
+      "summary": "Asks how to reach package mirrors. Startup skips the wizard when a custom feed host or http_proxy is already set, and the main menu can open it later.",
       "behavior": [
+        "On startup, /etc/opkg/distfeeds.conf and /etc/apk/repositories are scanned for a host other than downloads.openwrt.org. http_proxy, https_proxy, HTTP_PROXY and HTTPS_PROXY count as well. A hit prints [+] Active package mirror detected: [URL] -> Bypassing Bootstrap Wizard. and goes to the main menu.",
+        "Main menu -> 8 opens the wizard. If a mirror or proxy is already set, it prints [!] Active configuration found: [host] and asks ⁉️ Overwrite existing mirror settings? [y/N]. Enter or n keeps the current settings.",
         "1: local HTTP/HTTPS proxy (proxy_bootstrap_setup).",
         "2: Cloudflare Worker mirror (worker_bootstrap_offer -> worker_mirror_menu: paste worker.js in the dashboard, import the hostname, or restore).",
         "3 or Enter: direct connection; feeds are unchanged."
