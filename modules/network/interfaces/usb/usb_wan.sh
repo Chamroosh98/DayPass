@@ -76,6 +76,7 @@ setup_usb_wan() {
     local usb_dev="${1:-}"
     local metric="${2:-$USB_WAN_DEFAULT_METRIC}"
     local zone
+    local usb_guessed=0
 
     log_info "Setting up USB Tethering WAN interface ..."
 
@@ -95,6 +96,7 @@ setup_usb_wan() {
         log_warn "No USB tethering device detected."
         log_warn "Connect your phone and enable USB Tethering first."
         usb_dev="usb0"
+        usb_guessed=1
     else
         log_success "Using USB device : $usb_dev"
     fi
@@ -119,7 +121,11 @@ setup_usb_wan() {
     fi
 
     ifup $USB_WAN_IFACE >/dev/null 2>&1 || true
-    log_success "USB WAN interface [$USB_WAN_IFACE] is ready (device $usb_dev, metric $metric)!"
+    if [ "$usb_guessed" -eq 1 ]; then
+        log_warn "USB WAN interface [$USB_WAN_IFACE] configured for device [$usb_dev], but no USB device is connected yet. Plug in your phone with tethering enabled, then re-run Setup (or use Refresh) to pick it up."
+    else
+        log_success "USB WAN interface [$USB_WAN_IFACE] is ready (device $usb_dev, metric $metric)!"
+    fi
     return 0
 }
 
