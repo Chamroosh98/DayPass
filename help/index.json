@@ -43,7 +43,7 @@
       "file": "hardware.json",
       "module_id": "hardware",
       "title": "Hardware & USB Tethering Manager",
-      "summary": "Two-column USB dashboard with device status, WAN metrics, separate Android and iOS driver installs, and a reset that can remove wan_usb and the driver packages.",
+      "summary": "USB status, then the operations menu: tethering, WAN metrics, Android and iOS drivers, and a reset that can remove wan_usb and the driver packages.",
       "item_count": 11,
       "sources": [
         "ui/menu/hardware.sh",

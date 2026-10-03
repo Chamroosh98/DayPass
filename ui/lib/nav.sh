@@ -50,7 +50,9 @@ ui_nav_footer() {
         main) printf "  ${_nav_muted}0) Back to Main Menu${RESET}\n" ;;
         *)    printf "  ${_nav_muted}0) Back / Skip${RESET}\n" ;;
     esac
-    printf "  ${_nav_muted}q) Quit DayPass${RESET}\n"
+    if [ "${1:-}" != "root" ]; then
+        printf "  ${_nav_muted}q) Quit DayPass${RESET}\n"
+    fi
     printf "  ${_nav_muted}h) Help${RESET}\n"
     echo "  ───────────────────────────────────────────────────────────"
     echo

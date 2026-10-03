@@ -1,7 +1,7 @@
 {
   "module_id": "hardware",
   "title": "Hardware & USB Tethering Manager",
-  "summary": "Two-column USB dashboard. The left side shows devices, interfaces and WAN metrics. The right side is the action menu. Drivers install as Android, iOS, or the full suite.",
+  "summary": "USB status first, then the operations menu. Drivers install as Android, iOS, or the full suite.",
   "items": [
     {
       "key": "1",

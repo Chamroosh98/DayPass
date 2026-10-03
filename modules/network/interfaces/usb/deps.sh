@@ -154,10 +154,10 @@ usb_driver_menu() {
         if command -v render_persistent_header >/dev/null 2>&1; then
             render_persistent_header
         fi
-        echo "  USB drivers"
-        echo "  1) Android Drivers (RNDIS / CDC-Ether / NCM) (~150KB)"
-        echo "  2) iPhone/iOS Drivers (ipheth & usbmuxd) (~1.2MB)"
-        echo "  3) Full Hardware Suite (Android + iOS + Modems)"
+        echo "  📌 USB drivers"
+        echo "  📱 1) Android Drivers (RNDIS / CDC-Ether / NCM) "
+        echo "  🍏 2) iPhone/iOS Drivers (ipheth & usbmuxd)"
+        echo "  📦 3) Full Hardware Suite (Android + iOS + Modems)"
         if command -v ui_nav_footer >/dev/null 2>&1; then
             ui_nav_footer
         fi

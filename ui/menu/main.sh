@@ -10,11 +10,6 @@ main_menu()
         render_persistent_header
 
         ui_title "🏠 Main Menu"
-        if [ -n "${BOOTSTRAP_SKIP_NOTICE:-}" ]; then
-            printf '  %s%s%s\n' "$GREEN" "$BOOTSTRAP_SKIP_NOTICE" "$RESET"
-            echo "  ───────────────────────────────────────────────────────────"
-            BOOTSTRAP_SKIP_NOTICE=""
-        fi
         echo "  📦 1) Package Profiles & Dependencies"
         echo "  🔌 2) Hardware & USB Tethering Manager"
         echo "  🌐 3) Network & Routing Configuration"

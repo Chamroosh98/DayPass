@@ -195,7 +195,7 @@ hardware_menu() {
         else
             show_hardware_status
         fi
-        echo
+        ui_nav_footer main
         ui_read "Select option"
 
         case "$UI_CHOICE" in

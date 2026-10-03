@@ -81,7 +81,6 @@ bootstrap_detect_active() {
 # Startup: skip the wizard when a mirror or proxy is already in place.
 network_bootstrap_startup() {
     if bootstrap_detect_active; then
-        BOOTSTRAP_SKIP_NOTICE="[+] Active package mirror detected: [${BOOTSTRAP_ACTIVE_URL}] -> Bypassing Bootstrap Wizard."
         return 0
     fi
     network_bootstrap_offer
