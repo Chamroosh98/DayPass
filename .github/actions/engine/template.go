@@ -117,6 +117,7 @@ func generateInstallScript(outputFile string) error {
 		// 10. Other Modules
 		"modules/system/backup_restore.sh",
 		"ui/lib/banner.sh",
+		"modules/system/banner.sh",
 		"modules/system/maintenance.sh",
 		"modules/service/service_manager.sh",
 
@@ -251,12 +252,17 @@ if command -v backup_configs >/dev/null 2>&1; then
     backup_configs
 fi
 
-# 6. Interactive UI Launch
+# 6. Replace the OpenWrt SSH/console banner (/etc/banner)
+if command -v system_banner_post_install >/dev/null 2>&1; then
+    system_banner_post_install
+fi
+
+# 7. Interactive UI Launch
 clear
 reset_state
 main_menu
 
-# 7. Clean Exit
+# 8. Clean Exit
 echo
 log_success "👋 DayPass session finished!"
 exit 0
