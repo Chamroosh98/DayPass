@@ -143,21 +143,39 @@ proxy_bootstrap_offer() {
 proxy_bootstrap_setup() {
     local _port
 
-    printf "  Proxy port on router side ${DIM}[default ${PROXY_DEFAULT_PORT}, enter 0 to go back/skip]${RESET} : "
-    if ! read -r _port </dev/tty; then
-        echo "${CYAN}  [i]${RESET} Local proxy setup skipped. Proceeding with execution..."
-        return 0
-    fi
-
-    case "$_port" in
-        '')
-            _port="$PROXY_DEFAULT_PORT"
-            ;;
-        0|[bB]|[bB][aA][cC][kK]|[cC]|[cC][aA][nN][cC][eE][lL])
+    while true; do
+        if command -v ui_nav_footer >/dev/null 2>&1; then
+            ui_nav_footer
+        fi
+        printf "  Proxy port on router side [default ${PROXY_DEFAULT_PORT}] : "
+        if ! read -r _port </dev/tty; then
             echo "${CYAN}  [i]${RESET} Local proxy setup skipped. Proceeding with execution..."
             return 0
-            ;;
-    esac
+        fi
+
+        case "$_port" in
+            '')
+                _port="$PROXY_DEFAULT_PORT"
+                break
+                ;;
+            0|[bB]|[bB][aA][cC][kK]|[cC]|[cC][aA][nN][cC][eE][lL])
+                echo "${CYAN}  [i]${RESET} Local proxy setup skipped. Proceeding with execution..."
+                return 0
+                ;;
+            q|Q)
+                command -v daypass_quit >/dev/null 2>&1 && daypass_quit
+                return 0
+                ;;
+            h|H)
+                if command -v ui_show_help >/dev/null 2>&1; then
+                    ui_show_help "local_proxy_bootstrap"
+                fi
+                ;;
+            *)
+                break
+                ;;
+        esac
+    done
 
     # ---- apply (never fails the caller; cancel leaves existing proxies alone) ----
     if _pb_apply "$_port"; then

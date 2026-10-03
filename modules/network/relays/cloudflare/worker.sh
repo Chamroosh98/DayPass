@@ -536,11 +536,11 @@ worker_mirror_menu() {
         printf '  %s─────────────────────────────────────────────────────────%s\n' "$GRAY" "$RESET"
         printf '  %s🔗 1)%s Deploy to Cloudflare\n' "$WHITE" "$RESET"
         printf '  %s📥 2)%s Import Worker Domain / URL\n' "$WHITE" "$RESET"
-        printf '  %s🔄 3)%s Restore Default OpenWrt Feeds %s(fail-safe)%s\n' "$WHITE" "$RESET" "$GRAY" "$RESET"
-        printf '  %s⬅️ 0)%s Back\n' "$WHITE" "$RESET"
-        printf '  %s─────────────────────────────────────────────────────────%s\n' "$GRAY" "$RESET"
-        printf '\n'
-        printf '  %s⁉️ Select option%s %s[0-3]%s : ' "$YELLOW" "$RESET" "$GRAY" "$RESET"
+        printf '  %s🔄 3)%s Restore Default OpenWrt Feeds\n' "$WHITE" "$RESET"
+        if command -v ui_nav_footer >/dev/null 2>&1; then
+            ui_nav_footer
+        fi
+        printf '  ⁉️ Select option [0-3] : '
 
         if ! read -r _choice </dev/tty; then
             printf '\n'
@@ -554,6 +554,16 @@ worker_mirror_menu() {
             2) worker_import_domain  || true ;;
             3) worker_bootstrap_restore || true ;;
             0|'') return 0 ;;
+            q|Q)
+                command -v daypass_quit >/dev/null 2>&1 && daypass_quit
+                return 0
+                ;;
+            h|H)
+                if command -v ui_show_help >/dev/null 2>&1; then
+                    ui_show_help "worker_mirror"
+                fi
+                continue
+                ;;
             *)
                 _wb_warn "Invalid option!"
                 ;;

@@ -69,6 +69,8 @@ func generateInstallScript(outputFile string) error {
 		"modules/network/interfaces/usb/deps.sh",
 		"modules/network/interfaces/usb/detect.sh",
 		"modules/network/interfaces/usb/usb_wan.sh",
+		"modules/network/interfaces/usb/restore.sh",
+		"modules/network/interfaces/usb/dashboard.sh",
 		"modules/network/interfaces/wifi/wifi_wan.sh",
 		"modules/network/interfaces/wifi/wifi_ap.sh",
 		"modules/network/routing/load_balancing/load_balancer.sh",

@@ -1,55 +1,55 @@
 {
   "module_id": "hardware",
   "title": "Hardware & USB Tethering Manager",
-  "summary": "Shows USB devices (lsusb, or sysfs when usbutils is missing), USB network interfaces by kernel driver (rndis_host, cdc_ether, cdc_ncm, ipheth = phone tethering; qmi_wwan, cdc_mbim = modems), modem ports and WAN metrics.",
+  "summary": "Two-column USB dashboard. The left side shows devices, interfaces and WAN metrics. The right side is the action menu. Drivers install as Android, iOS, or the full suite.",
   "items": [
     {
       "key": "1",
-      "title": "Setup USB Tethering WAN (DHCP client)",
-      "description": "Creates or updates network.wan_usb (proto dhcp) on the chosen tethering device with the metric you enter (default 20), adds it to the firewall zone named wan and brings it up.",
-      "usage_tip": "With one tethering device it is picked automatically; with none you can type a device name (default usb0)."
+      "title": "Setup USB Tethering",
+      "description": "Creates network.wan_usb (proto dhcp) on a detected tethering device, adds it to the firewall wan zone and brings it up.",
+      "usage_tip": "If the phone is in MTP mode, enable USB Tethering first. Creating the interface anyway requires an explicit yes."
     },
     {
       "key": "2",
-      "title": "Toggle USB Tethering Interface",
-      "description": "Disables wan_usb (ifdown + disabled=1) or enables it again (ifup).",
-      "usage_tip": "Disabling keeps the configuration so it can be enabled later."
+      "title": "Toggle Interface",
+      "description": "Enables or disables network.wan_usb.",
+      "usage_tip": "Create the interface with option 1 before toggling it."
     },
     {
       "key": "3",
-      "title": "Failover Metric Rules",
-      "description": "Backup: wan_usb metric 20 (or wan metric + 10). Primary: wan_usb 5 and wan 10. Custom: any metric. Lower metric is preferred.",
-      "usage_tip": "When mwan3 runs, its member metrics decide failover instead."
+      "title": "Failover & Metrics",
+      "description": "Lists wan, wan_usb, wan6 and other WAN interfaces with their metrics. Choosing one writes network.<iface>.metric.",
+      "usage_tip": "A lower metric is preferred. Enter on the metric prompt leaves that interface unchanged."
     },
     {
       "key": "4",
-      "title": "USB ModeSwitch",
-      "description": "Lists modems still in storage (CD-ROM) mode with usbmode -l and switches them to modem mode with usbmode -s.",
-      "usage_tip": "Needs usb-modeswitch from the USB profile."
+      "title": "Install Drivers",
+      "description": "1 installs RNDIS, CDC-Ether and CDC-NCM. 2 installs ipheth and usbmuxd. 3 installs both plus QMI, MBIM and usb-modeswitch.",
+      "usage_tip": "Install only the phone you use. The full suite is the larger option."
     },
     {
       "key": "5",
-      "title": "Remove USB Tethering WAN",
-      "description": "Brings wan_usb down, deletes it and removes it from the wan firewall zone.",
-      "usage_tip": "Multi-WAN (mwan3) still lists wan_usb until it is reconfigured."
+      "title": "Restore / Reset USB",
+      "description": "After confirmation, deletes wan_usb, its device binding and firewall membership, then restarts the network service. A second prompt can uninstall the USB driver packages.",
+      "usage_tip": "Enter keeps the current configuration. Enter on the package prompt keeps the drivers installed."
     },
     {
       "key": "6",
-      "title": "Refresh Detection",
-      "description": "Re-reads devices and interfaces.",
-      "usage_tip": "Use after plugging in a phone or modem."
+      "title": "Modem Mode Switch",
+      "description": "Lists modems still in storage mode with usbmode -l and switches them with usbmode -s.",
+      "usage_tip": "Needs usb-modeswitch from the full driver profile."
     },
     {
       "key": "7",
-      "title": "Install USB / Tethering Drivers",
-      "description": "Opens the USB package profile plan and installs it after confirmation.",
-      "usage_tip": "Same as Package Profiles -> 3."
+      "title": "Refresh",
+      "description": "Redraws the dashboard from the current USB and UCI state.",
+      "usage_tip": "Use this after enabling USB Tethering on the phone."
     },
     {
       "key": "8",
-      "title": "System Resources & Hardware Info",
-      "description": "Architecture, OpenWrt release, RAM and storage usage.",
-      "usage_tip": "Read-only."
+      "title": "System Resources",
+      "description": "Opens the system resource screen.",
+      "usage_tip": "RAM and flash figures come from the live router."
     },
     {
       "key": "0",

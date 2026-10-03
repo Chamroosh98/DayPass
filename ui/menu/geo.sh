@@ -13,13 +13,19 @@ geo_menu()
     echo "  ─────────────────────────────────────────────────────────── "
     echo
 
-    printf "  ⁉️ Select option [1-4] (Default: 1) : "
+    if command -v ui_nav_footer >/dev/null 2>&1; then
+        ui_nav_footer
+    fi
+    printf "  ⁉️ Select option [1-4] : "
     read -r choice </dev/tty
 
     GEOIP_URL=""
     GEOSITE_URL=""
 
     case "$choice" in
+        0) return 0 ;;
+        q|Q) command -v daypass_quit >/dev/null 2>&1 && daypass_quit; return 0 ;;
+        h|H) command -v ui_show_help >/dev/null 2>&1 && ui_show_help "packages"; geo_menu; return ;;
         1|"")
             SELECTED_GEO="none"
             ;;

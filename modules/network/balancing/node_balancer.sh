@@ -177,11 +177,18 @@ set_balancer_mode() {
         echo "  🏓 2) Least Ping       (prefer lowest latency)"
         echo "  👨‍👩‍👧‍👦 3) Failover         (use next only if previous fails)"
         echo "  🤹 4) Random"
-        echo "  ───────────────────────────────────────────────────────────"
-        printf "  ⁉️ Select mode [1-4] or [h] Help : "
+        if command -v ui_nav_footer >/dev/null 2>&1; then
+            ui_nav_footer
+        fi
+        printf "  ⁉️ Select mode [1-4] : "
         read -r mode_choice </dev/tty
 
         case "$mode_choice" in
+            0) return 0 ;;
+            q|Q)
+                command -v daypass_quit >/dev/null 2>&1 && daypass_quit
+                return 0
+                ;;
             h|H)
                 if command -v show_help >/dev/null 2>&1; then
                     show_help "proxy_balancer_modes"

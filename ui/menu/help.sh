@@ -164,9 +164,13 @@ show_help() {
         done
 
         echo "  ───────────────────────────────────────────────────────────"
-        printf "  ${GRAY}Page ${YELLOW}%s${GRAY}/${YELLOW}%s${GRAY} | [n] Next | [p] Prev | [Enter/0] Back | [q] Quit DayPass${RESET}\n" \
-            "$HELP_PAGE" "$HELP_PAGES"
-        printf "  ⁉️ ${YELLOW}Option${RESET} ${GRAY}(n/p/0/q) :${RESET} "
+        _nav_muted="${COLOR_MUTED:-$GRAY}"
+        printf "  ${_nav_muted}Page %s/%s${RESET}\n" "$HELP_PAGE" "$HELP_PAGES"
+        printf "  ${_nav_muted}n) Next${RESET}\n"
+        printf "  ${_nav_muted}p) Previous${RESET}\n"
+        printf "  ${_nav_muted}0) Back / Skip${RESET}\n"
+        printf "  ${_nav_muted}q) Quit DayPass${RESET}\n"
+        printf "  ⁉️ Option : "
         read -r HELP_CMD </dev/tty || daypass_quit
 
         case "$HELP_CMD" in
@@ -183,7 +187,7 @@ show_help() {
                 daypass_quit
                 ;;
             *)
-                log_warn "Use [n] Next, [p] Prev, [Enter/0] Back or [q] Quit."
+                log_warn "Use a page key or a manual number."
                 sleep 1
                 ;;
         esac
@@ -251,9 +255,14 @@ help_menu() {
         done
 
         echo "  ───────────────────────────────────────────────────────────"
-        printf "  ${GRAY}Page ${YELLOW}%s${GRAY}/${YELLOW}%s${GRAY} | [n] Next | [p] Prev | [r] Refresh | [Enter/0] Back | [q] Quit DayPass${RESET}\n" \
-            "$HELP_PAGE" "$HELP_PAGES"
-        printf "  ⁉️ ${YELLOW}Manual number${RESET} ${GRAY}or action :${RESET} "
+        _nav_muted="${COLOR_MUTED:-$GRAY}"
+        printf "  ${_nav_muted}Page %s/%s${RESET}\n" "$HELP_PAGE" "$HELP_PAGES"
+        printf "  ${_nav_muted}n) Next${RESET}\n"
+        printf "  ${_nav_muted}p) Previous${RESET}\n"
+        printf "  ${_nav_muted}r) Refresh${RESET}\n"
+        printf "  ${_nav_muted}0) Back / Skip${RESET}\n"
+        printf "  ${_nav_muted}q) Quit DayPass${RESET}\n"
+        printf "  ⁉️ Manual number : "
         read -r HELP_CMD </dev/tty || daypass_quit
 
         case "$HELP_CMD" in

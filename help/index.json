@@ -23,9 +23,7 @@
       "title": "Main Menu",
       "summary": "Central entry point of DayPass. Every menu uses the same keys: a number opens an option, 0 goes back (or exits here), q quits DayPass and h opens the manual of the screen.",
       "item_count": 11,
-      "sources": [
-        "ui/menu/main.sh"
-      ],
+      "sources": ["ui/menu/main.sh"],
       "reachable_from": "Runs at the end of the installer / DayPass start"
     },
     {
@@ -45,11 +43,13 @@
       "file": "hardware.json",
       "module_id": "hardware",
       "title": "Hardware & USB Tethering Manager",
-      "summary": "Shows USB devices (lsusb, or sysfs when usbutils is missing), USB network interfaces by kernel driver (rndis_host, cdc_ether, cdc_ncm, ipheth = phone tethering; qmi_wwan, cdc_mbim = modems), modem ports and WAN metrics.",
+      "summary": "Two-column USB dashboard with device status, WAN metrics, separate Android and iOS driver installs, and a reset that can remove wan_usb and the driver packages.",
       "item_count": 11,
       "sources": [
         "ui/menu/hardware.sh",
-        "modules/network/interfaces/usb/usb_wan.sh"
+        "modules/network/interfaces/usb/dashboard.sh",
+        "modules/network/interfaces/usb/usb_wan.sh",
+        "modules/network/interfaces/usb/restore.sh"
       ],
       "reachable_from": "Main menu -> 2"
     },
@@ -59,9 +59,7 @@
       "title": "Network & Routing Configuration",
       "summary": "Manages the home Wi-Fi access point, the isolated guest network, the router LAN IP, multi-WAN balancing, live speed monitoring and DNS mode.",
       "item_count": 9,
-      "sources": [
-        "ui/menu/network.sh"
-      ],
+      "sources": ["ui/menu/network.sh"],
       "reachable_from": "Main menu -> 3"
     },
     {
@@ -70,9 +68,7 @@
       "title": "Wi-Fi Access Point (Home WiFi)",
       "summary": "Manages only the Access Point interfaces of the home Wi-Fi on every radio; station/WWAN interfaces are never modified.",
       "item_count": 3,
-      "sources": [
-        "modules/network/interfaces/wifi/wifi_ap.sh"
-      ],
+      "sources": ["modules/network/interfaces/wifi/wifi_ap.sh"],
       "reachable_from": "Network -> 1"
     },
     {
@@ -81,9 +77,7 @@
       "title": "Guest Network & Bandwidth Control",
       "summary": "Builds an isolated guest LAN on 192.168.200.0/24 with its own DHCP server, firewall zone and optional guest Wi-Fi.",
       "item_count": 5,
-      "sources": [
-        "ui/menu/network.sh (guest_menu)"
-      ],
+      "sources": ["ui/menu/network.sh (guest_menu)"],
       "reachable_from": "Network -> 2"
     },
     {
@@ -92,9 +86,7 @@
       "title": "Guest Bandwidth Control (QoS)",
       "summary": "Caps guest speed with either lightweight tc rules or SQM using the Cake algorithm. Known issues: the tc directions are swapped (the download value limits upload and vice versa) and SQM targets the interface name guest instead of the bridge device.",
       "item_count": 4,
-      "sources": [
-        "modules/network/qos/guest/qos.sh"
-      ],
+      "sources": ["modules/network/qos/guest/qos.sh"],
       "reachable_from": "Guest Network -> 3"
     },
     {
@@ -116,9 +108,7 @@
       "title": "DNS Resolution Recovery",
       "summary": "Temporary DNS switch that is offered by the network checker when domain resolution fails. It changes DNS only for the current session and is not a replacement for the permanent DNS Manager.",
       "item_count": 5,
-      "sources": [
-        "modules/network/dns/recovery.sh"
-      ],
+      "sources": ["modules/network/dns/recovery.sh"],
       "reachable_from": "Offered by the network checker when DNS resolution fails"
     },
     {
@@ -127,9 +117,7 @@
       "title": "Multi-WAN Load Balancer",
       "summary": "Adds USB tethering and a Wi-Fi hotspot as extra internet sources and writes an mwan3 setup over wan, wan_usb and wwan. Links are used in priority order: wan, then USB, then Wi-Fi.",
       "item_count": 6,
-      "sources": [
-        "modules/network/routing/load_balancing/load_balancer.sh"
-      ],
+      "sources": ["modules/network/routing/load_balancing/load_balancer.sh"],
       "reachable_from": "Network -> 4"
     },
     {
@@ -138,9 +126,7 @@
       "title": "Network Info & Speed Monitor",
       "summary": "Diagnostic panel that reports public IP details and can show live WAN bandwidth. The panel also reports offline state when no provider can be reached.",
       "item_count": 3,
-      "sources": [
-        "modules/network/diagnostics/network_info.sh"
-      ],
+      "sources": ["modules/network/diagnostics/network_info.sh"],
       "reachable_from": "Network -> 5"
     },
     {
@@ -149,9 +135,7 @@
       "title": "Proxy & Tunnel Engine Manager",
       "summary": "Transport engines and everything that acts on the active engine: nodes and subscriptions, traffic routing, routing profiles and Cloudflare Clean IP. Balancing and health checks are in Main menu -> 5.",
       "item_count": 8,
-      "sources": [
-        "ui/menu/proxy.sh"
-      ],
+      "sources": ["ui/menu/proxy.sh"],
       "reachable_from": "Main menu -> 4"
     },
     {
@@ -160,9 +144,7 @@
       "title": "Config Manager (Nodes & Subscriptions)",
       "summary": "Local node store for single share links and subscription links. Configs live in /etc/daypass/proxy/configs and the header shows the active transport engine.",
       "item_count": 10,
-      "sources": [
-        "modules/network/profiles/manager.sh"
-      ],
+      "sources": ["modules/network/profiles/manager.sh"],
       "reachable_from": "Proxy menu -> 2"
     },
     {
@@ -196,9 +178,7 @@
       "title": "Node Load Balancing",
       "summary": "Probes the nodes of the active transport engine and switches to the best one for the chosen mode. Nodes are Passwall nodes, WireGuard peers, OpenVPN instances or sing-box/Xray outbounds.",
       "item_count": 6,
-      "sources": [
-        "modules/network/balancing/node_balancer.sh"
-      ],
+      "sources": ["modules/network/balancing/node_balancer.sh"],
       "reachable_from": "Diagnostics -> 1"
     },
     {
@@ -218,9 +198,7 @@
       "title": "Node Health Checker",
       "summary": "Tests whether saved nodes are reachable by probing the host and port inside each share link (TCP connect, or a UDP probe for kcp, quic, hysteria and tuic links) and reports approximate latency in milliseconds. Results are only displayed and are not used by the balancer.",
       "item_count": 3,
-      "sources": [
-        "modules/network/connectivity/checker/health_checker.sh"
-      ],
+      "sources": ["modules/network/connectivity/checker/health_checker.sh"],
       "reachable_from": "Diagnostics -> 4"
     },
     {
@@ -229,9 +207,7 @@
       "title": "Routing Profiles",
       "summary": "Ready-made traffic profiles that apply a routing mode to the active transport engine and remember the active profile. The header shows the active profile and the current routing mode.",
       "item_count": 6,
-      "sources": [
-        "modules/network/profiles/profile_manager.sh"
-      ],
+      "sources": ["modules/network/profiles/profile_manager.sh"],
       "reachable_from": "Proxy menu -> 4"
     },
     {
@@ -240,9 +216,7 @@
       "title": "Clean IP Manager (Cloudflare)",
       "summary": "Scans candidate Cloudflare IPs on a config's own port, then rewrites the address inside the share link when the config can really be fronted by Cloudflare: vless, vmess or trojan over ws, httpupgrade, h2, grpc, xhttp or splithttp. Reality, QUIC protocols (hysteria, hysteria2, tuic, naive+quic) and shadowsocks are refused and left untouched. The header shows the detected proxy core.",
       "item_count": 4,
-      "sources": [
-        "modules/network/relays/cloudflare/menu.sh"
-      ],
+      "sources": ["modules/network/relays/cloudflare/menu.sh"],
       "reachable_from": "Proxy menu -> 5"
     },
     {
@@ -251,9 +225,7 @@
       "title": "Clean IP Test Mode",
       "summary": "Test depth that Find Clean IP for a Config asks for before scanning the candidate IP list.",
       "item_count": 2,
-      "sources": [
-        "modules/network/relays/cloudflare/scanner.sh"
-      ],
+      "sources": ["modules/network/relays/cloudflare/scanner.sh"],
       "reachable_from": "Clean IP Manager -> 1"
     },
     {
@@ -301,9 +273,7 @@
       "title": "Service Manager",
       "summary": "Service helpers for the core network stack: enable, start, stop and status checks used by other modules. post_install_services_init bundles them for a post-deployment pass and has no interactive menu, so the entries below describe the services it controls rather than menu numbers.",
       "item_count": 4,
-      "sources": [
-        "modules/service/service_manager.sh"
-      ],
+      "sources": ["modules/service/service_manager.sh"],
       "reachable_from": "Runs automatically after deployment (no menu)"
     }
   ],

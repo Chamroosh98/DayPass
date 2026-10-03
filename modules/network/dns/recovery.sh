@@ -75,13 +75,19 @@ dns_fix_menu()
             echo "   4) 🚫 Skip                                           "
             MAX_OPT="4"
         fi
-        echo "  ───────────────────────────────────────────────────────────"
-        echo
+        if command -v ui_nav_footer >/dev/null 2>&1; then
+            ui_nav_footer
+        fi
 
-        printf "  ⁉️ Select option [1-%s] (Default: 1) or [h] Help : " "$MAX_OPT"
+        printf "  ⁉️ Select option [1-%s] : " "$MAX_OPT"
         read -r dns_choice </dev/tty
 
         case "$dns_choice" in
+            0) return 0 ;;
+            q|Q)
+                command -v daypass_quit >/dev/null 2>&1 && daypass_quit
+                return 0
+                ;;
             h|H)
                 if command -v show_help >/dev/null 2>&1; then
                     show_help "$HELP_MODULE_ID"

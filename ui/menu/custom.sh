@@ -10,8 +10,9 @@ show_custom_help()
     echo "     replaces previously selected translations for clean config."
     echo "  🔹 ${YELLOW}[n] / [p]:${RESET} Navigate to Next or Previous page."
     echo "  🔹 ${YELLOW}[d]:${RESET} Save your current selection and proceed to Review."
-    echo "  🔹 ${YELLOW}[0]:${RESET} Cancel selection and go back."
-    echo "  🔹 ${YELLOW}[q]:${RESET} Quit DayPass."
+    _nav_muted="${COLOR_MUTED:-$GRAY}"
+    printf "  ${_nav_muted}0) Back / Skip${RESET}\n"
+    printf "  ${_nav_muted}q) Quit DayPass${RESET}\n"
     echo "  ──────────────────────────────────────────────────────────"
     echo "  💡 ${CYAN}Pro-Tip:${RESET} Combining Sing-box and Xray together is supported,"
     echo "     but recommended mainly for powerful hardware (ARM64 / x86)."
@@ -144,11 +145,15 @@ handle_custom_profile()
 
         FIRST_RENDER=0
 
-        echo "  ${GRAY}──────────────────────────────────────────────────────────${RESET}"
-        echo "  ${GRAY}[${CYAN}n${RESET}${GRAY}] Next | [${CYAN}p${RESET}${GRAY}] Prev | [${YELLOW}h${RESET}${GRAY}] Help | [${RED}0${RESET}${GRAY}] Back | [${RED}q${RESET}${GRAY}] Quit | [${GREEN}d${RESET}${GRAY}] Save & Done${RESET}"
-        echo
+        _nav_muted="${COLOR_MUTED:-$GRAY}"
+        printf "  ${_nav_muted}n) Next page${RESET}\n"
+        printf "  ${_nav_muted}p) Previous page${RESET}\n"
+        printf "  ${_nav_muted}d) Save and continue${RESET}\n"
+        if command -v ui_nav_footer >/dev/null 2>&1; then
+            ui_nav_footer
+        fi
 
-        printf "  ⁉️ ${YELLOW}Toggle Item${RESET} ${GRAY}(1-$((item_no - 1))) or Action (${CYAN}n${RESET}${GRAY}/${CYAN}p${RESET}${GRAY}/${YELLOW}h${RESET}${GRAY}/${RED}0${RESET}${GRAY}/${RED}q${RESET}${GRAY}/${GREEN}d${RESET}${GRAY}) :${RESET} "
+        printf "  ⁉️ Toggle item [1-%s] : " "$((item_no - 1))"
         read -r cmd </dev/tty || daypass_quit
 
         case "$cmd" in

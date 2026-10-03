@@ -60,7 +60,10 @@ clean_ip_for_config() {
     echo "  🧪 Test mode :"
     echo "  👼🏻 1) Basic TCP only"
     echo "  👩🏻‍🔬 2) Advanced (Xray/Sing-box aware - placeholder)"
-    printf "  ⁉️ Select mode [1-2] (default: 1) or [h] Help : "
+    if command -v ui_nav_footer >/dev/null 2>&1; then
+        ui_nav_footer
+    fi
+    printf "  ⁉️ Select mode [1-2] : "
     read -r mode_choice </dev/tty
 
     while [ "$mode_choice" = "h" ] || [ "$mode_choice" = "H" ]; do
@@ -74,9 +77,20 @@ clean_ip_for_config() {
         echo "  🧪 Test mode :"
         echo "  👼🏻 1) Basic TCP only"
         echo "  👩🏻‍🔬 2) Advanced (Xray/Sing-box aware - placeholder)"
-        printf "  ⁉️ Select mode [1-2] (default: 1) or [h] Help : "
+        if command -v ui_nav_footer >/dev/null 2>&1; then
+            ui_nav_footer
+        fi
+        printf "  ⁉️ Select mode [1-2] : "
         read -r mode_choice </dev/tty
     done
+
+    case "$mode_choice" in
+        0) log_info "Cancelled."; return 0 ;;
+        q|Q)
+            command -v daypass_quit >/dev/null 2>&1 && daypass_quit
+            return 0
+            ;;
+    esac
 
     local mode="basic"
     [ "$mode_choice" = "2" ] && mode="advanced"

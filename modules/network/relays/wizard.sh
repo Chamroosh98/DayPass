@@ -117,12 +117,35 @@ network_bootstrap_from_menu() {
 network_bootstrap_offer() {
     local _choice
 
-    render_persistent_header
-    _nb_banner
-    _nb_menu
+    while true; do
+        render_persistent_header
+        _nb_banner
+        _nb_menu
+        if command -v ui_nav_footer >/dev/null 2>&1; then
+            ui_nav_footer
+        fi
+        printf "  How should package downloads be prepared? [1-3] : "
+        if ! read -r _choice </dev/tty; then
+            return 0
+        fi
 
-    printf "  How should package downloads be prepared? ${DIM}[1-3]${RESET} : "
-    read -r _choice </dev/tty
+        case "$_choice" in
+            h|H)
+                if command -v ui_show_help >/dev/null 2>&1; then
+                    ui_show_help "bootstrap_wizard"
+                fi
+                continue
+                ;;
+            q|Q)
+                command -v daypass_quit >/dev/null 2>&1 && daypass_quit
+                return 0
+                ;;
+            0)
+                return 0
+                ;;
+        esac
+        break
+    done
 
     case "$_choice" in
         1)

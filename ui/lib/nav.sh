@@ -34,7 +34,7 @@ ui_read() {
 
 # $1 highest option number
 ui_prompt() {
-    ui_read "Select option [0-$1], [q] Quit or [h] Help"
+    ui_read "Select option [0-$1]"
 }
 
 ui_pause() {
@@ -44,12 +44,14 @@ ui_pause() {
 
 # $1 "root" | "main" (back to main menu) | anything else (back one level)
 ui_nav_footer() {
+    _nav_muted="${COLOR_MUTED:-${GRAY:-\033[90m}}"
     case "${1:-}" in
-        root) printf "  🚪 ${YELLOW}0)${RESET} ${WHITE}Exit DayPass${RESET}\n" ;;
-        main) printf "  🚪 ${YELLOW}0)${RESET} ${WHITE}Back to Main Menu${RESET}\n" ;;
-        *)    printf "  🚪 ${YELLOW}0)${RESET} ${WHITE}Back${RESET}\n" ;;
+        root) printf "  ${_nav_muted}0) Exit DayPass${RESET}\n" ;;
+        main) printf "  ${_nav_muted}0) Back to Main Menu${RESET}\n" ;;
+        *)    printf "  ${_nav_muted}0) Back / Skip${RESET}\n" ;;
     esac
-    printf "  ${DIM}${CYAN}   q)${RESET} ${WHITE}Quit DayPass${RESET}   ${DIM}${CYAN}h)${RESET} ${WHITE}Help${RESET}\n"
+    printf "  ${_nav_muted}q) Quit DayPass${RESET}\n"
+    printf "  ${_nav_muted}h) Help${RESET}\n"
     echo "  ───────────────────────────────────────────────────────────"
     echo
 }

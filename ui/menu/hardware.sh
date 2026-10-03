@@ -70,7 +70,7 @@ _hw_pick_tether_device() {
 
     if [ "$count" -eq 0 ]; then
         log_warn "No tethering interface detected."
-        ui_read "Device name to bind anyway [usb0], [0] Cancel"
+        ui_read "Device name [usb0]"
         case "$UI_CHOICE" in
             0) return 1 ;;
             q|Q) daypass_quit ;;
@@ -89,7 +89,7 @@ _hw_pick_tether_device() {
         printf "  %s) %s (%s)\n" "$i" "$dev" "$(usb_net_driver "$dev")"
         i=$((i + 1))
     done
-    ui_read "Select device [1-$count], [0] Cancel"
+    ui_read "Select device [1-$count]"
     case "$UI_CHOICE" in
         0|'') return 1 ;;
         q|Q) daypass_quit ;;
@@ -104,9 +104,19 @@ _hw_pick_tether_device() {
 }
 
 hardware_setup_tethering() {
+    if command -v usb_mtp_waiting >/dev/null 2>&1 && usb_mtp_waiting; then
+        log_warn "Phone is in MTP mode. Enable USB Tethering on the phone first."
+        ui_read "Create the WAN interface anyway? [y/N]"
+        case "$UI_CHOICE" in
+            y|Y) ;;
+            q|Q) daypass_quit ;;
+            *) return 0 ;;
+        esac
+    fi
+
     _hw_pick_tether_device || return 0
 
-    ui_read "Route metric for wan_usb [${USB_WAN_DEFAULT_METRIC}] (lower = preferred)"
+    ui_read "Route metric [${USB_WAN_DEFAULT_METRIC}]"
     case "$UI_CHOICE" in
         q|Q) daypass_quit ;;
         '') UI_CHOICE="$USB_WAN_DEFAULT_METRIC" ;;
@@ -125,41 +135,12 @@ hardware_toggle_tethering() {
 }
 
 hardware_failover_menu() {
-    local wan_metric
-
-    usb_wan_exists || { log_warn "USB WAN is not configured. Use option 1 first."; return 0; }
-    wan_metric=$(uci -q get network.wan.metric)
-
-    echo
-    ui_title "🧭 USB WAN Failover Rules"
-    echo "  1) USB as Backup   (wan_usb metric 20, used when wan is down)"
-    echo "  2) USB as Primary  (wan_usb metric 5, wan metric 10)"
-    echo "  3) Custom metric"
-    echo "  🚪 0) Back"
-    ui_read "Select option [0-3]"
-
-    case "$UI_CHOICE" in
-        1)
-            if [ -n "$wan_metric" ] && [ "$wan_metric" -ge 20 ] 2>/dev/null; then
-                usb_wan_set_metric wan_usb $((wan_metric + 10))
-            else
-                usb_wan_set_metric wan_usb 20
-            fi
-            ;;
-        2)
-            usb_wan_set_metric wan_usb 5
-            if [ "$(uci -q get network.wan)" = "interface" ]; then
-                usb_wan_set_metric wan 10
-            fi
-            ;;
-        3)
-            ui_read "Metric for wan_usb"
-            case "$UI_CHOICE" in q|Q) daypass_quit ;; esac
-            usb_wan_set_metric wan_usb "$UI_CHOICE"
-            ;;
-        q|Q) daypass_quit ;;
-        *) return 0 ;;
-    esac
+    if command -v usb_metric_menu >/dev/null 2>&1; then
+        usb_metric_menu
+        return 0
+    fi
+    log_error "USB metric module not found!"
+    return 1
 }
 
 hardware_modeswitch() {
@@ -177,7 +158,7 @@ hardware_modeswitch() {
     fi
 
     printf '%s\n' "$list" | sed 's/^/  • /'
-    ui_read "Switch these devices to modem mode now? [y/N]"
+    ui_read "Switch these devices to modem mode? [y/N]"
     case "$UI_CHOICE" in
         y|Y)
             if usbmode -s >/dev/null 2>&1; then
@@ -191,7 +172,7 @@ hardware_modeswitch() {
 }
 
 hardware_remove_tethering() {
-    ui_read "Remove wan_usb interface and its firewall binding? [y/N]"
+    ui_read "Remove wan_usb? [y/N]"
     case "$UI_CHOICE" in
         y|Y) remove_usb_wan ;;
         q|Q) daypass_quit ;;
@@ -209,28 +190,28 @@ hardware_menu() {
 
     while true; do
         render_persistent_header
-        show_hardware_status
-
-        echo "  📶 1) Setup USB Tethering WAN (DHCP client)"
-        echo "  🔀 2) Toggle USB Tethering Interface ($(usb_wan_state))"
-        echo "  🧭 3) Failover Metric Rules"
-        echo "  📟 4) USB ModeSwitch (modem storage -> modem mode)"
-        echo "  🗑️ 5) Remove USB Tethering WAN"
-        echo "  🔄 6) Refresh Detection"
-        echo "  📦 7) Install USB / Tethering Drivers"
-        echo "  📊 8) System Resources & Hardware Info"
-        ui_nav_footer main
-
-        ui_prompt 8
+        if command -v usb_render_dashboard >/dev/null 2>&1; then
+            usb_render_dashboard
+        else
+            show_hardware_status
+        fi
+        echo
+        ui_read "Select option"
 
         case "$UI_CHOICE" in
             1) hardware_setup_tethering ;;
             2) hardware_toggle_tethering ;;
-            3) hardware_failover_menu ;;
-            4) hardware_modeswitch ;;
-            5) hardware_remove_tethering ;;
-            6) continue ;;
-            7) ui_run install_profile_interactive "Package Profiles" usb; continue ;;
+            3) hardware_failover_menu; continue ;;
+            4) ui_run usb_driver_menu "USB Drivers"; continue ;;
+            5)
+                if command -v usb_restore_settings >/dev/null 2>&1; then
+                    usb_restore_settings || true
+                else
+                    hardware_remove_tethering
+                fi
+                ;;
+            6) hardware_modeswitch ;;
+            7) continue ;;
             8) ui_run show_system_resources_menu "System Resources"; continue ;;
             0) return 0 ;;
             *)

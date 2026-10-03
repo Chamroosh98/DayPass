@@ -203,7 +203,10 @@ show_system_resources_menu()
     echo "  ──────────────────────────────────────────────────────────"
     echo
 
-    printf "  ${GRAY}Press [h] Help, [q] Quit or [Enter/0] Back ...${RESET}"
+    if command -v ui_nav_footer >/dev/null 2>&1; then
+        ui_nav_footer
+    fi
+    printf "  ⁉️ Select option : "
     read -r res_choice </dev/tty || daypass_quit
     case "$res_choice" in
         q|Q) daypass_quit ;;

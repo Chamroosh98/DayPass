@@ -141,6 +141,100 @@ usb_wan_set_enabled() {
     return 0
 }
 
+# WAN-like UCI interfaces, one name per line.
+usb_metric_ifaces() {
+    local iface
+
+    uci show network 2>/dev/null | sed -n 's/^network\.\([A-Za-z0-9_]*\)=interface$/\1/p' | while IFS= read -r iface; do
+        case "$iface" in
+            wan*|wwan*) printf '%s\n' "$iface" ;;
+        esac
+    done
+}
+
+# Interactive metric editor. Lower metric is preferred. Never calls exit.
+usb_metric_menu() {
+    local list count i iface metric current
+
+    while true; do
+        if command -v render_persistent_header >/dev/null 2>&1; then
+            render_persistent_header
+        fi
+        echo "  WAN metrics"
+        echo "  Lower metric is preferred."
+        echo
+        list=$(usb_metric_ifaces)
+        count=0
+        if [ -n "$list" ]; then
+            i=1
+            for iface in $list; do
+                metric=$(uci -q get "network.$iface.metric")
+                [ -n "$metric" ] || metric="default"
+                if [ "$(uci -q get "network.$iface.disabled")" = "1" ]; then
+                    printf "  %s) %-12s metric %-8s disabled\n" "$i" "$iface" "$metric"
+                else
+                    printf "  %s) %-12s metric %-8s enabled\n" "$i" "$iface" "$metric"
+                fi
+                i=$((i + 1))
+                count=$((count + 1))
+            done
+        else
+            echo "  No WAN interfaces found."
+        fi
+        if command -v ui_nav_footer >/dev/null 2>&1; then
+            ui_nav_footer
+        fi
+        if command -v ui_read >/dev/null 2>&1; then
+            ui_read "Select option"
+        else
+            printf "  Select option : "
+            read -r UI_CHOICE </dev/tty || return 0
+        fi
+
+        case "$UI_CHOICE" in
+            0|'') return 0 ;;
+            q|Q)
+                command -v daypass_quit >/dev/null 2>&1 && daypass_quit
+                return 0
+                ;;
+            h|H)
+                command -v ui_show_help >/dev/null 2>&1 && ui_show_help "hardware"
+                continue
+                ;;
+        esac
+
+        case "$UI_CHOICE" in
+            *[!0-9]*) log_warn "Invalid option!"; continue ;;
+        esac
+        [ "$UI_CHOICE" -ge 1 ] && [ "$UI_CHOICE" -le "$count" ] || { log_warn "Invalid option!"; continue; }
+
+        i=1
+        iface=""
+        for iface in $list; do
+            [ "$i" = "$UI_CHOICE" ] && break
+            i=$((i + 1))
+        done
+
+        current=$(uci -q get "network.$iface.metric")
+        if command -v ui_read >/dev/null 2>&1; then
+            ui_read "Metric for $iface [${current:-20}]"
+        else
+            printf "  Metric for %s : " "$iface"
+            read -r UI_CHOICE </dev/tty || return 0
+        fi
+        case "$UI_CHOICE" in
+            0|'') continue ;;
+            q|Q)
+                command -v daypass_quit >/dev/null 2>&1 && daypass_quit
+                return 0
+                ;;
+            '') UI_CHOICE="${current:-20}" ;;
+        esac
+        usb_wan_set_metric "$iface" "$UI_CHOICE" || true
+        command -v ui_pause >/dev/null 2>&1 && ui_pause
+    done
+}
+
 # Usage: usb_wan_set_metric <interface> <metric>
 usb_wan_set_metric() {
     local iface="$1"

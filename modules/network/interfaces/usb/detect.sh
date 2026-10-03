@@ -129,6 +129,33 @@ usb_device_list() {
     done
 }
 
+# 0 when a phone is attached as MTP/PTP and no tethering interface exists.
+usb_mtp_waiting() {
+    local cls drv
+
+    if usb_tether_interfaces >/dev/null 2>&1; then
+        return 1
+    fi
+    if [ -e /sys/class/net/usb0 ]; then
+        return 1
+    fi
+
+    for cls in /sys/bus/usb/devices/*/bInterfaceClass; do
+        [ -f "$cls" ] || continue
+        case "$(cat "$cls" 2>/dev/null)" in
+            06|6) return 0 ;;
+        esac
+    done
+
+    for drv in /sys/bus/usb/devices/*/driver; do
+        [ -L "$drv" ] || continue
+        case "$(readlink "$drv" 2>/dev/null)" in
+            *mtp*|*f_mtp*) return 0 ;;
+        esac
+    done
+    return 1
+}
+
 # Modem control / serial ports (QMI, MBIM, AT)
 usb_modem_ports() {
     ls /dev/cdc-wdm* /dev/ttyUSB* /dev/ttyACM* 2>/dev/null | tr '\n' ' '

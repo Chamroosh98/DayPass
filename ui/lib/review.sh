@@ -43,7 +43,10 @@ review_install()
     echo
 
     while true; do
-        ui_read "Proceed with deployment? [Y/n], [0] Back or [q] Quit"
+        if command -v ui_nav_footer >/dev/null 2>&1; then
+            ui_nav_footer
+        fi
+        ui_read "Proceed with deployment? [Y/n]"
         confirm="$UI_CHOICE"
 
         case "$confirm" in

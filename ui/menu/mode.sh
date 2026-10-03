@@ -17,7 +17,7 @@ menu_mode()
     echo "  ───────────────────────────────────────────────────────────"
     ui_nav_footer
 
-    ui_read "Select option [0-2] (Default: 1), [q] Quit or [h] Help"
+    ui_prompt 2
     choice="$UI_CHOICE"
 
     case "$choice" in
