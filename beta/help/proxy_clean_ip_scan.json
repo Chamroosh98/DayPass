@@ -1,0 +1,19 @@
+{
+  "module_id": "proxy_clean_ip_scan",
+  "title": "Clean IP Test Mode",
+  "summary": "Test depth that Find Clean IP for a Config asks for before scanning the candidate IP list.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Basic TCP only",
+      "description": "Opens a TCP connection to each candidate on the config port and measures rough latency.",
+      "usage_tip": "Fastest option and the default; good for a first pass."
+    },
+    {
+      "key": "2",
+      "title": "Advanced (Xray/Sing-box aware)",
+      "description": "Core-aware test that currently falls back to the basic TCP check.",
+      "usage_tip": "Still a placeholder, so results match Basic mode for now."
+    }
+  ]
+}

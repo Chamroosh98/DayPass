@@ -1,0 +1,2268 @@
+{
+  "metadata": {
+    "project_name": "DayPass",
+    "version": "v2.1.1",
+    "schema_version": "2.0.0",
+    "last_updated": "2026-10-01",
+    "target_environment": "Terminal / OpenWrt POSIX Shell",
+    "version_source": "ui/banner.sh (DAYPASS_VERSION)",
+    "description": "Single machine-readable reference for DayPass: navigation tree, categories, articles, terminology, OSI/TCP-IP layer mapping and audited known issues. Every module path, function, UCI option and tool listed here exists in the DayPass codebase.",
+    "companion_manuals": "help/index.json lists the per-screen manuals (help/<module_id>.json) rendered by ui/menu/help.sh when the user presses h.",
+    "state_root": "/etc/daypass",
+    "text_format": {
+      "encoding": "UTF-8",
+      "markup": "plain",
+      "ansi": "none embedded; the printer applies colors (see ui/lib/styles.sh)",
+      "wrap_width": 66,
+      "wrap_note": "Strings are unwrapped prose; printers should wrap at 66 columns like help_wrap in ui/menu/help.sh."
+    },
+    "flags_note": "Values under navigation.flags are lookup keys for help viewers and jq scripts. DayPass itself does not parse command-line flags yet."
+  },
+  "navigation": {
+    "root": "main",
+    "tree": [
+      {
+        "category_id": "proxy",
+        "title": "Proxy Management",
+        "flag": "--help-proxy",
+        "menu_path": "Main menu -> 4",
+        "subcategories": [
+          {
+            "subcategory_id": "proxy_nodes",
+            "title": "Nodes & Subscriptions",
+            "flag": "--help-nodes",
+            "articles": ["config_manager", "transport_bridge"]
+          },
+          {
+            "subcategory_id": "proxy_routing",
+            "title": "Routing & Profiles",
+            "flag": "--help-routing",
+            "articles": ["traffic_routing", "routing_profiles"]
+          },
+          {
+            "subcategory_id": "proxy_balancing",
+            "title": "Balancing & Health",
+            "flag": "--help-balancer",
+            "articles": ["node_balancer", "node_health_checker"]
+          },
+          {
+            "subcategory_id": "proxy_clean_ip",
+            "title": "Cloudflare Clean IP",
+            "flag": "--help-clean-ip",
+            "articles": ["clean_ip_manager"]
+          }
+        ]
+      },
+      {
+        "category_id": "dns",
+        "title": "DNS & Evasion",
+        "flag": "--help-dns",
+        "menu_path": "Main menu -> 3 -> 6",
+        "subcategories": [
+          {
+            "subcategory_id": "dns_persistent",
+            "title": "DNS Manager (persistent)",
+            "flag": "--help-dns-manager",
+            "articles": ["dns_manager"]
+          },
+          {
+            "subcategory_id": "dns_recovery",
+            "title": "DNS Recovery (temporary)",
+            "flag": "--help-dns-recovery",
+            "articles": ["dns_recovery"]
+          }
+        ]
+      },
+      {
+        "category_id": "network",
+        "title": "Network & Routing",
+        "flag": "--help-network",
+        "menu_path": "Main menu -> 3",
+        "subcategories": [
+          {
+            "subcategory_id": "network_lan_wifi",
+            "title": "LAN & Home Wi-Fi",
+            "flag": "--help-lan",
+            "articles": ["wifi_access_point", "lan_ip"]
+          },
+          {
+            "subcategory_id": "network_multiwan",
+            "title": "Multi-WAN",
+            "flag": "--help-multiwan",
+            "articles": ["multiwan_load_balancer", "wifi_wan"]
+          },
+          {
+            "subcategory_id": "network_diagnostics",
+            "title": "Diagnostics",
+            "flag": "--help-diagnostics",
+            "articles": ["network_info", "network_checker"]
+          }
+        ]
+      },
+      {
+        "category_id": "qos_guest",
+        "title": "QoS & Guest Isolation",
+        "flag": "--help-guest",
+        "menu_path": "Main menu -> 3 -> 2",
+        "subcategories": [
+          {
+            "subcategory_id": "guest_isolation",
+            "title": "Guest Network & Wi-Fi",
+            "flag": "--help-guest-network",
+            "articles": ["guest_network", "guest_wifi"]
+          },
+          {
+            "subcategory_id": "guest_qos",
+            "title": "Guest Bandwidth (QoS)",
+            "flag": "--help-qos",
+            "articles": ["guest_qos"]
+          }
+        ]
+      },
+      {
+        "category_id": "hardware",
+        "title": "Hardware / USB",
+        "flag": "--help-hardware",
+        "menu_path": "Main menu -> 2",
+        "subcategories": [
+          {
+            "subcategory_id": "hardware_usb",
+            "title": "USB Tethering",
+            "flag": "--help-usb",
+            "articles": ["usb_tethering_wan"]
+          },
+          {
+            "subcategory_id": "hardware_resources",
+            "title": "System Resources",
+            "flag": "--help-resources",
+            "articles": ["system_resources"]
+          }
+        ]
+      },
+      {
+        "category_id": "system",
+        "title": "System Updates & Maintenance",
+        "flag": "--help-system",
+        "menu_path": "Main menu -> 1 / 6",
+        "subcategories": [
+          {
+            "subcategory_id": "system_install",
+            "title": "Install & Update",
+            "flag": "--help-install",
+            "articles": ["package_install", "package_update", "service_manager"]
+          },
+          {
+            "subcategory_id": "system_maintenance",
+            "title": "Maintenance & Recovery",
+            "flag": "--help-maintenance",
+            "articles": ["maintenance"]
+          }
+        ]
+      },
+      {
+        "category_id": "bootstrap",
+        "title": "Pre-flight Bootstrap & Mirrors",
+        "flag": "--help-bootstrap",
+        "menu_path": "Runs before package work (installer pipeline)",
+        "subcategories": [
+          {
+            "subcategory_id": "bootstrap_wizard",
+            "title": "Bootstrap Wizard",
+            "flag": "--help-wizard",
+            "articles": ["bootstrap_wizard"]
+          },
+          {
+            "subcategory_id": "bootstrap_relays",
+            "title": "Proxy & Worker Relays",
+            "flag": "--help-relays",
+            "articles": ["local_proxy_bootstrap", "worker_mirror"]
+          }
+        ]
+      }
+    ],
+    "flags": {
+      "--help-balancer": {
+        "type": "subcategory",
+        "target": "proxy_balancing"
+      },
+      "--help-bootstrap": {
+        "type": "category",
+        "target": "bootstrap"
+      },
+      "--help-bootstrap-wizard": {
+        "type": "article",
+        "target": "bootstrap_wizard"
+      },
+      "--help-clean-ip": {
+        "type": "subcategory",
+        "target": "proxy_clean_ip"
+      },
+      "--help-clean-ip-manager": {
+        "type": "article",
+        "target": "clean_ip_manager"
+      },
+      "--help-config-manager": {
+        "type": "article",
+        "target": "config_manager"
+      },
+      "--help-diagnostics": {
+        "type": "subcategory",
+        "target": "network_diagnostics"
+      },
+      "--help-dns": {
+        "type": "category",
+        "target": "dns"
+      },
+      "--help-dns-manager": {
+        "type": "subcategory",
+        "target": "dns_persistent",
+        "article_id": "dns_manager"
+      },
+      "--help-dns-recovery": {
+        "type": "subcategory",
+        "target": "dns_recovery",
+        "article_id": "dns_recovery"
+      },
+      "--help-guest": {
+        "type": "category",
+        "target": "qos_guest"
+      },
+      "--help-guest-network": {
+        "type": "subcategory",
+        "target": "guest_isolation",
+        "article_id": "guest_network"
+      },
+      "--help-guest-qos": {
+        "type": "article",
+        "target": "guest_qos"
+      },
+      "--help-guest-wifi": {
+        "type": "article",
+        "target": "guest_wifi"
+      },
+      "--help-hardware": {
+        "type": "category",
+        "target": "hardware"
+      },
+      "--help-install": {
+        "type": "subcategory",
+        "target": "system_install"
+      },
+      "--help-issues": {
+        "type": "section",
+        "target": "known_issues"
+      },
+      "--help-lan": {
+        "type": "subcategory",
+        "target": "network_lan_wifi"
+      },
+      "--help-lan-ip": {
+        "type": "article",
+        "target": "lan_ip"
+      },
+      "--help-layers": {
+        "type": "section",
+        "target": "network_layers"
+      },
+      "--help-local-proxy-bootstrap": {
+        "type": "article",
+        "target": "local_proxy_bootstrap"
+      },
+      "--help-maintenance": {
+        "type": "subcategory",
+        "target": "system_maintenance",
+        "article_id": "maintenance"
+      },
+      "--help-multiwan": {
+        "type": "subcategory",
+        "target": "network_multiwan"
+      },
+      "--help-multiwan-load-balancer": {
+        "type": "article",
+        "target": "multiwan_load_balancer"
+      },
+      "--help-network": {
+        "type": "category",
+        "target": "network"
+      },
+      "--help-network-checker": {
+        "type": "article",
+        "target": "network_checker"
+      },
+      "--help-network-info": {
+        "type": "article",
+        "target": "network_info"
+      },
+      "--help-node-balancer": {
+        "type": "article",
+        "target": "node_balancer"
+      },
+      "--help-node-health-checker": {
+        "type": "article",
+        "target": "node_health_checker"
+      },
+      "--help-nodes": {
+        "type": "subcategory",
+        "target": "proxy_nodes"
+      },
+      "--help-package-install": {
+        "type": "article",
+        "target": "package_install"
+      },
+      "--help-package-update": {
+        "type": "article",
+        "target": "package_update"
+      },
+      "--help-transport-bridge": {
+        "type": "article",
+        "target": "transport_bridge"
+      },
+      "--help-proxy": {
+        "type": "category",
+        "target": "proxy"
+      },
+      "--help-qos": {
+        "type": "subcategory",
+        "target": "guest_qos"
+      },
+      "--help-relays": {
+        "type": "subcategory",
+        "target": "bootstrap_relays"
+      },
+      "--help-resources": {
+        "type": "subcategory",
+        "target": "hardware_resources"
+      },
+      "--help-routing": {
+        "type": "subcategory",
+        "target": "proxy_routing"
+      },
+      "--help-routing-profiles": {
+        "type": "article",
+        "target": "routing_profiles"
+      },
+      "--help-service-manager": {
+        "type": "article",
+        "target": "service_manager"
+      },
+      "--help-system": {
+        "type": "category",
+        "target": "system"
+      },
+      "--help-system-resources": {
+        "type": "article",
+        "target": "system_resources"
+      },
+      "--help-terms": {
+        "type": "section",
+        "target": "terminology"
+      },
+      "--help-traffic-routing": {
+        "type": "article",
+        "target": "traffic_routing"
+      },
+      "--help-usb": {
+        "type": "subcategory",
+        "target": "hardware_usb"
+      },
+      "--help-usb-tethering-wan": {
+        "type": "article",
+        "target": "usb_tethering_wan"
+      },
+      "--help-wifi-access-point": {
+        "type": "article",
+        "target": "wifi_access_point"
+      },
+      "--help-wifi-wan": {
+        "type": "article",
+        "target": "wifi_wan"
+      },
+      "--help-wizard": {
+        "type": "subcategory",
+        "target": "bootstrap_wizard"
+      },
+      "--help-worker-mirror": {
+        "type": "article",
+        "target": "worker_mirror"
+      }
+    }
+  },
+  "categories": [
+    {
+      "id": "proxy",
+      "title": "Proxy Management",
+      "summary": "Local node and subscription store, pushes to Passwall 1/2, routing modes, profiles, node balancing, TCP health checks and Cloudflare Clean IP.",
+      "menu_path": "Main menu -> 4 (balancing: Main menu -> 5)",
+      "ui_entry": "ui/menu/proxy.sh (proxy_menu)",
+      "manuals": [
+        "proxy",
+        "proxy_config_manager",
+        "proxy_routing",
+        "proxy_profiles",
+        "proxy_balancer",
+        "proxy_balancer_modes",
+        "proxy_health_checker",
+        "proxy_clean_ip",
+        "proxy_clean_ip_scan"
+      ],
+      "articles": [
+        "config_manager",
+        "transport_bridge",
+        "traffic_routing",
+        "routing_profiles",
+        "node_balancer",
+        "node_health_checker",
+        "clean_ip_manager"
+      ]
+    },
+    {
+      "id": "dns",
+      "title": "DNS & Evasion",
+      "summary": "Persistent DNS modes (system, secure DoT/DoH, tunnel, hybrid) through dnsmasq and Passwall, plus a temporary resolv.conf recovery used by the network checker.",
+      "menu_path": "Main menu -> 3 -> 6",
+      "ui_entry": "modules/network/dns/ui/menu.sh (dns_menu)",
+      "manuals": ["network_dns", "network_dns_recovery"],
+      "articles": ["dns_manager", "dns_recovery"]
+    },
+    {
+      "id": "network",
+      "title": "Network & Routing",
+      "summary": "Home Wi-Fi access point, router LAN subnet, mwan3 multi-WAN, Wi-Fi station WAN, public IP info and the pre-flight connectivity check.",
+      "menu_path": "Main menu -> 3",
+      "ui_entry": "ui/menu/network.sh (network_menu)",
+      "manuals": [
+        "network",
+        "network_wifi_ap",
+        "network_multiwan",
+        "network_info"
+      ],
+      "articles": [
+        "wifi_access_point",
+        "lan_ip",
+        "multiwan_load_balancer",
+        "wifi_wan",
+        "network_info",
+        "network_checker"
+      ]
+    },
+    {
+      "id": "qos_guest",
+      "title": "QoS & Guest Isolation",
+      "summary": "Isolated guest LAN 192.168.200.0/24 with its own firewall zone and DHCP, guest SSID with client isolation, and guest bandwidth limits via tc or SQM/Cake.",
+      "menu_path": "Main menu -> 3 -> 2",
+      "ui_entry": "ui/menu/network.sh (guest_menu)",
+      "manuals": ["network_guest", "network_guest_qos"],
+      "articles": ["guest_network", "guest_wifi", "guest_qos"]
+    },
+    {
+      "id": "hardware",
+      "title": "Hardware / USB",
+      "summary": "USB tethering as an extra WAN and a read-only view of architecture, OpenWrt release, RAM and storage.",
+      "menu_path": "Main menu -> 2 (USB tethering, modems, resources); Multi-WAN -> 2 (USB WAN)",
+      "ui_entry": "modules/system/resource_checker.sh (show_system_resources_menu)",
+      "manuals": ["system", "network_multiwan"],
+      "articles": ["usb_tethering_wan", "system_resources"]
+    },
+    {
+      "id": "system",
+      "title": "System Updates & Maintenance",
+      "summary": "Package profile installer (Passwall 1/2, engine, language, geo data), package updates, post-install service start and maintenance tools.",
+      "menu_path": "Main menu -> 1 / 6",
+      "ui_entry": "ui/menu/main.sh (main_menu)",
+      "manuals": ["main", "system", "service"],
+      "articles": [
+        "package_install",
+        "package_update",
+        "service_manager",
+        "maintenance"
+      ]
+    },
+    {
+      "id": "bootstrap",
+      "title": "Pre-flight Bootstrap & Mirrors",
+      "summary": "Before any package work, choose how the router reaches OpenWrt feeds: a local HTTP proxy (reverse SSH tunnel), a Cloudflare Worker mirror, or a direct connection.",
+      "menu_path": "Main menu -> 8, or startup only when no mirror or proxy is set (network_bootstrap_startup)",
+      "ui_entry": "modules/network/relays/wizard.sh (network_bootstrap_startup)",
+      "manuals": [],
+      "articles": ["bootstrap_wizard", "local_proxy_bootstrap", "worker_mirror"]
+    }
+  ],
+  "articles": {
+    "config_manager": {
+      "title": "Config Manager (Nodes & Subscriptions)",
+      "category": "proxy",
+      "subcategory": "proxy_nodes",
+      "menu_path": "Main menu -> 4 -> 2",
+      "manual": "proxy_config_manager",
+      "modules": [
+        "modules/network/profiles/manager.sh",
+        "modules/network/profiles/storage.sh",
+        "modules/network/profiles/subscription.sh"
+      ],
+      "functions": [
+        "config_manager_menu",
+        "list_configs",
+        "add_manual_config",
+        "toggle_config",
+        "remove_config",
+        "validate_share_link",
+        "detect_protocol_from_link",
+        "add_subscription",
+        "list_subscriptions",
+        "update_subscription",
+        "update_all_subscriptions",
+        "clean_old_subscription_nodes"
+      ],
+      "summary": "Stores share links as JSON files and manages subscription URLs. Nodes reach the active engine only when you push them.",
+      "behavior": [
+        "Accepted link schemes: vless://, vmess://, trojan://, ss://, hysteria2://, hy2://. The push importer also understands ssr, hysteria v1, tuic, anytls and naive links, but they cannot be stored here yet.",
+        "Each config is saved as /etc/daypass/proxy/configs/<name>.json with name, protocol, share_link, enabled and added_at.",
+        "Config names containing '..', '/', '\\', ';' or '&' are rejected.",
+        "Subscriptions are kept in /etc/daypass/proxy/subscriptions.json (name, url, last_update).",
+        "Update downloads with curl (15 s connect, 30 s total) or wget; content without '://' is base64-decoded.",
+        "Before an update, every config tagged with that subscription is deleted, then links are saved as <sub>_<protocol>_<n>."
+      ],
+      "state_files": [
+        "/etc/daypass/proxy/configs/*.json",
+        "/etc/daypass/proxy/subscriptions.json"
+      ],
+      "tools": ["jq", "curl", "wget", "base64", "xargs"],
+      "layers": ["L6_Presentation", "L7_Application"],
+      "known_issues": ["KI-01", "KI-14"],
+      "flag": "--help-config-manager"
+    },
+    "transport_bridge": {
+      "title": "Transport Bridge (engines, push nodes, probing)",
+      "category": "proxy",
+      "subcategory": "proxy_nodes",
+      "menu_path": "Main menu -> 4 -> 1 (also 4 -> 3 -> 5), and Main menu -> 4 -> 2 -> 7 / 8",
+      "manual": "proxy_transport",
+      "modules": [
+        "modules/network/transports/transport_bridge.sh",
+        "modules/network/transports/drivers/core_common.sh",
+        "modules/network/transports/drivers/passwall.sh",
+        "modules/network/transports/drivers/singbox.sh",
+        "modules/network/transports/drivers/xray.sh",
+        "modules/network/transports/drivers/wireguard.sh",
+        "modules/network/transports/drivers/openvpn.sh",
+        "ui/menu/proxy_engine.sh"
+      ],
+      "functions": [
+        "get_active_engine",
+        "set_active_engine",
+        "transport_detect_engines",
+        "transport_call",
+        "start_engine",
+        "stop_engine",
+        "status_engine",
+        "reload_rules",
+        "transport_tunnel_network",
+        "transport_tunnel_dns_route",
+        "transport_probe",
+        "url_decode",
+        "parse_share_link",
+        "transport_push_config",
+        "transport_push_all",
+        "push_config_to_passwall",
+        "push_all_to_passwall",
+        "detect_passwall_version",
+        "proxy_engine_menu",
+        "proxy_engine_actions_menu",
+        "show_transport_status"
+      ],
+      "summary": "Engine-neutral control layer. Each engine driver implements tdrv_<engine>_<hook> functions; routing, DNS and balancing call the active engine through them.",
+      "behavior": [
+        "Engines in auto-detect order: passwall2, passwall, singbox, xray_direct, wireguard, openvpn. The chosen engine is saved in /etc/daypass/transport/active_engine; without it the first detected engine is used.",
+        "Interception types: self (Passwall and Passwall2 install their own firewall rules), tproxy (sing-box, Xray: DayPass sends LAN traffic to the core's TPROXY inbound), tunnel (WireGuard, OpenVPN: DayPass policy-routes LAN traffic into the tunnel).",
+        "sing-box and Xray are detected only when their own init script and config file exist, because Passwall installs the same binaries as dependencies.",
+        "Per-engine overrides live in /etc/daypass/transport/<engine>.conf as key=value: conffile, tproxy_port, dns_port (sing-box/Xray), network (WireGuard/OpenVPN), device (OpenVPN, default tun0).",
+        "Node lists: Passwall 'nodes' sections, sing-box outbounds with a server plus WireGuard endpoint peers, Xray vnext/servers/peers outbounds, WireGuard wireguard_<iface> peers with endpoint_host, OpenVPN instances with a remote.",
+        "Node switching: Passwall sets @global[0].node (and tcp_node if present, plus udp_node when it is a real node id), or retargets daypass_shunt.default_node while Iran Direct is active; sing-box sets route.final; Xray moves the outbound to index 0; WireGuard disables the other endpoint peers; OpenVPN enables only the chosen instance. sing-box/Xray edits are validated with 'sing-box check' / 'xray run -test' and a .daypass.bak copy is kept.",
+        "Probing: TCP connect with nc (-z only when the local nc supports it, otherwise a plain connect) timed in milliseconds; UDP endpoints use ping and report unknown when ICMP is blocked.",
+        "Push (Config Manager 7 / 8) imports share links into Passwall or Passwall2 only, by writing the link to /tmp/links.conf and calling '/usr/share/<pkg>/subscribe.lua add DayPass'. The engine's own parser builds the node, which is what makes Reality (pbk/sid/spx), ssr, hysteria, hysteria2, tuic, anytls and naive nodes complete. New node ids are found by diffing the section list before and after; when the remarks already exist the fresh section is renamed back to the old id, so @global[0].node, daypass_shunt.default_node and the balancer node list keep resolving.",
+        "parse_share_link understands vless (including Reality pbk/sid/spx/fp/flow), vmess in both the base64 JSON and URI forms, trojan, ss (legacy base64 and SIP002), ssr, hysteria, hysteria2/hy2, tuic, anytls and naive (+https/+quic), with bracketed or bare IPv6 addresses, and exports PARSED_L4 so UDP transports are probed as UDP."
+      ],
+      "uci_touched": [
+        "passwall2.<nodes section>",
+        "passwall.<nodes section>",
+        "passwall(2).@global[0].node",
+        "network.<wireguard peer>.disabled",
+        "openvpn.<instance>.enabled",
+        "network.daypass_vpn",
+        "network.daypass_dns_route"
+      ],
+      "tools": [
+        "uci",
+        "jq",
+        "base64",
+        "sed",
+        "printf",
+        "nc",
+        "ping",
+        "wg",
+        "sing-box",
+        "xray",
+        "ifup",
+        "ifdown"
+      ],
+      "layers": [
+        "L3_Network",
+        "L4_Transport",
+        "L6_Presentation",
+        "L7_Application"
+      ],
+      "known_issues": [],
+      "flag": "--help-transport-bridge",
+      "state_files": [
+        "/etc/daypass/transport/active_engine",
+        "/etc/daypass/transport/<engine>.conf"
+      ]
+    },
+    "traffic_routing": {
+      "title": "Traffic Routing / Shunt Rules",
+      "category": "proxy",
+      "subcategory": "proxy_routing",
+      "menu_path": "Main menu -> 4 -> 3",
+      "manual": "proxy_routing",
+      "modules": ["modules/network/routing/core.sh"],
+      "functions": [
+        "apply_routing_mode",
+        "apply_iran_direct",
+        "apply_global_proxy",
+        "apply_direct_only",
+        "routing_reapply",
+        "show_routing_status",
+        "routing_menu"
+      ],
+      "summary": "Applies iran_direct, global_proxy or direct_only to the active transport engine and records it in /etc/daypass/proxy/routing/current_mode and current_engine.",
+      "behavior": [
+        "Passwall / Passwall2 (self): Iran Direct builds a shunt_rules section (daypass_ir_rule: domain_list geosite:category-ir and geosite:ir, ip_list geoip:ir) plus a node section daypass_shunt with protocol='_shunt', type taken from the selected node and default_node='<selected node>', maps daypass_ir_rule to '_direct', makes daypass_shunt the active node and sets enabled=1 with tcp_proxy_mode='proxy' and udp_proxy_mode='proxy' (Passwall 2 also localhost_proxy='0'). It refuses with an error when no proxy node is selected. Global Proxy sets enabled=1, tcp/udp_proxy_mode='proxy'; Direct Only sets enabled=0, tcp/udp_proxy_mode='disable'. Both move the engine off daypass_shunt back to the real node remembered in /etc/daypass/transport/<pkg>.conf (real_node). Any DayPass interception rules are removed.",
+        "sing-box / Xray (tproxy): writes /etc/daypass/proxy/routing/daypass.nft (table inet daypass, prerouting hook at mangle priority) that marks LAN TCP/UDP with 0x00010000/0x00ff0000 and sends it to the TPROXY port; routing table 2585 holds 'local 0.0.0.0/0 dev lo'.",
+        "WireGuard / OpenVPN (tunnel): the same chain marks LAN traffic 0x00020000/0x00ff0000; table 2586 holds a default route via the tunnel interface. A zone dp_vpn with masquerade and lan forwarding is added when the tunnel network is in no firewall zone.",
+        "Ingress is limited to network.lan.device (or lan_devices in routing.conf). Private, reserved, router-local and multicast destinations always bypass.",
+        "Iran Direct additionally bypasses the CIDRs in direct_v4.list / direct_v6.list when present; otherwise tunnel engines send everything through the tunnel and tproxy engines rely on their own rules.",
+        "IPv6 is intercepted only when routing.conf contains ipv6=1; otherwise IPv6 goes direct.",
+        "Rules persist through UCI: firewall include 'daypass_transport' (type nftables, position ruleset-post) and network rule/route sections daypass_rule4/6 and daypass_route4/6 at priority 900. The rule file is checked with 'nft -c' first; a failure for tproxy points to kmod-nft-tproxy.",
+        "Direct Only on tproxy/tunnel engines removes all DayPass rules and leaves the engine running. Switching engines or Reload Engine Rules re-applies the saved mode."
+      ],
+      "state_files": [
+        "/etc/daypass/proxy/routing/current_mode",
+        "/etc/daypass/proxy/routing/current_engine",
+        "/etc/daypass/proxy/routing/<mode>.rules",
+        "/etc/daypass/proxy/routing/daypass.nft",
+        "/etc/daypass/proxy/routing/routing.conf",
+        "/etc/daypass/proxy/routing/direct_v4.list",
+        "/etc/daypass/proxy/routing/direct_v6.list"
+      ],
+      "uci_touched": [
+        "passwall2.@global[0]",
+        "passwall.@global[0]",
+        "network.daypass_rule4",
+        "network.daypass_rule6",
+        "network.daypass_route4",
+        "network.daypass_route6",
+        "firewall.daypass_transport",
+        "firewall.daypass_vpn",
+        "firewall.daypass_vpn_fwd",
+        "passwall(2).daypass_shunt (protocol _shunt, default_node)",
+        "passwall(2).daypass_ir_rule (shunt_rules)"
+      ],
+      "tools": [
+        "uci",
+        "nft",
+        "/etc/init.d/network",
+        "/etc/init.d/firewall",
+        "/etc/init.d/passwall2",
+        "/etc/init.d/passwall"
+      ],
+      "layers": ["L3_Network", "L4_Transport", "L7_Application"],
+      "known_issues": [],
+      "flag": "--help-traffic-routing"
+    },
+    "routing_profiles": {
+      "title": "Routing Profiles",
+      "category": "proxy",
+      "subcategory": "proxy_routing",
+      "menu_path": "Main menu -> 4 -> 4",
+      "manual": "proxy_profiles",
+      "modules": ["modules/network/profiles/profile_manager.sh"],
+      "functions": [
+        "show_active_profile",
+        "list_profiles",
+        "apply_profile",
+        "profile_manager_menu"
+      ],
+      "summary": "Named shortcuts that call a routing mode and store the profile name in /etc/daypass/proxy/profiles/active.",
+      "behavior": [
+        "Balanced, Gaming and Streaming all call apply_iran_direct; they differ only in the saved profile name and the message shown.",
+        "Global Proxy calls apply_global_proxy; Direct Only calls apply_direct_only.",
+        "If the routing module is not loaded, only the mode name is written locally and a warning is shown.",
+        "The profile name is written before the routing mode is applied, so it is kept even when the mode is refused (for example Iran Direct on Passwall with no node selected)."
+      ],
+      "state_files": [
+        "/etc/daypass/proxy/profiles/active",
+        "/etc/daypass/proxy/routing/current_mode"
+      ],
+      "tools": ["uci"],
+      "layers": ["L7_Application"],
+      "known_issues": ["KI-05"],
+      "flag": "--help-routing-profiles"
+    },
+    "node_balancer": {
+      "title": "Node Load Balancing",
+      "category": "proxy",
+      "subcategory": "proxy_balancing",
+      "menu_path": "Main menu -> 5 -> 1",
+      "manual": "proxy_balancer",
+      "modules": ["modules/network/balancing/node_balancer.sh"],
+      "functions": [
+        "show_balancer_status",
+        "select_nodes",
+        "set_balancer_mode",
+        "probe_nodes",
+        "probe_selected_nodes",
+        "apply_balancer",
+        "disable_balancer",
+        "node_balancer_menu"
+      ],
+      "summary": "Probes the selected nodes of the active transport engine and switches the engine to one of them according to the mode.",
+      "behavior": [
+        "Select lists the active engine's nodes and stores engine|node_id lines in /etc/daypass/proxy/balancer/nodes.list; old name-only lines are ignored with a warning.",
+        "Apply probes every selected node, writes balancer/probe.last and picks: failover = first reachable in list order; least-ping = lowest measured time; round-robin = next reachable after balancer/last_index; random = random reachable node.",
+        "Nodes confirmed up are preferred; UDP nodes without ICMP reply (unknown) are used only when none is confirmed up. If no node answers the active node is unchanged.",
+        "Switching uses the engine's select_node hook; the chosen id is saved in balancer/current. Apply is a single run, not a background daemon.",
+        "Apply and Disable remove the unused passwall(2).daypass_balancer section written by older releases."
+      ],
+      "state_files": [
+        "/etc/daypass/proxy/balancer/nodes.list",
+        "/etc/daypass/proxy/balancer/mode",
+        "/etc/daypass/proxy/balancer/last_index",
+        "/etc/daypass/proxy/balancer/probe.last",
+        "/etc/daypass/proxy/balancer/current"
+      ],
+      "uci_touched": [
+        "passwall(2).@global[0].node",
+        "network.<wireguard peer>.disabled",
+        "openvpn.<instance>.enabled"
+      ],
+      "tools": ["uci", "jq", "nc", "ping", "awk"],
+      "layers": ["L3_Network", "L4_Transport", "L7_Application"],
+      "known_issues": ["KI-01"],
+      "flag": "--help-node-balancer"
+    },
+    "node_health_checker": {
+      "title": "Node Health Checker",
+      "category": "proxy",
+      "subcategory": "proxy_balancing",
+      "menu_path": "Main menu -> 5 -> 4",
+      "manual": "proxy_health_checker",
+      "modules": ["modules/network/connectivity/checker/health_checker.sh"],
+      "functions": [
+        "extract_host_port",
+        "test_node",
+        "test_all_nodes",
+        "test_selected_nodes",
+        "health_checker_menu"
+      ],
+      "summary": "Reachability test against the host:port found in each share link.",
+      "behavior": [
+        "Host, port and L4 protocol come from parse_share_link; when the bridge is not loaded a sed fallback reads '@host:port' or '//host:port' and finally the first ':NN-NNNNN' in the link.",
+        "Probing goes through transport_probe, so UDP links (kcp, quic, hysteria, hysteria2, tuic) are probed as UDP and report unknown when ICMP is blocked instead of down. Without the bridge it falls back to 'nc -w 3 host port </dev/null', which BusyBox nc supports.",
+        "Latency in ms is printed only when 'date +%s%N' returns nanoseconds; otherwise the result is 'Reachable'.",
+        "Configs whose JSON has enabled=false are skipped.",
+        "Results are printed only; nothing is saved."
+      ],
+      "tools": ["nc", "timeout", "date", "sed", "jq"],
+      "layers": ["L4_Transport"],
+      "known_issues": [],
+      "flag": "--help-node-health-checker"
+    },
+    "clean_ip_manager": {
+      "title": "Clean IP Manager (Cloudflare)",
+      "category": "proxy",
+      "subcategory": "proxy_clean_ip",
+      "menu_path": "Main menu -> 4 -> 5",
+      "manual": "proxy_clean_ip",
+      "modules": [
+        "modules/network/relays/cloudflare/core.sh",
+        "modules/network/relays/cloudflare/link_utils.sh",
+        "modules/network/relays/cloudflare/scanner.sh",
+        "modules/network/relays/cloudflare/applier.sh",
+        "modules/network/relays/cloudflare/menu.sh"
+      ],
+      "functions": [
+        "detect_proxy_core",
+        "extract_address_from_link",
+        "extract_port_from_link",
+        "replace_address_in_link",
+        "test_ip_basic",
+        "measure_latency",
+        "test_ip_advanced",
+        "ensure_candidate_file",
+        "scan_candidate_ips",
+        "edit_candidates",
+        "apply_clean_ip_to_config",
+        "clean_ip_for_config",
+        "clean_ip_menu"
+      ],
+      "summary": "Tests candidate IPs on a config's own port and swaps the address of its share link when the config can be fronted by Cloudflare.",
+      "behavior": [
+        "Proxy core shown in the header: xray, sing-box or none (command -v).",
+        "Port comes from the share link; 443 is used when none is found.",
+        "Default candidates: 1.1.1.1, 1.0.0.1, 104.16.0.1 to 104.22.0.1 and 104.24.0.1, stored in /etc/daypass/proxy/clean_ip/candidates.txt.",
+        "Advanced mode is a placeholder and runs the same TCP test as Basic.",
+        "Reachable IPs are saved as '<ms> <ip>' in last_results.txt, sorted by latency; the top 10 are shown.",
+        "replace_address_in_link only rewrites vless, vmess and trojan links on a CDN-frontable transport (ws, websocket, httpupgrade, h2, h2c, http, grpc, xhttp, splithttp). It refuses Reality (security=reality), QUIC/UDP protocols (hysteria, hysteria2, hy2, tuic, naive+quic), shadowsocks and ssr, a transport Cloudflare cannot carry, and a link that has neither sni nor host while its address is a bare IP literal. The reason is reported in CF_REPLACE_NOTE.",
+        "When the link carried no sni and no host, the original domain is pinned as sni (TLS) or host (plaintext) so the handshake keeps matching; an existing sni, host or path is never changed.",
+        "A refusal is a hard failure: the stored config keeps its current share link and no clean_ip field is written.",
+        "Applying writes the new share_link and a clean_ip field into the config JSON.",
+        "You can push the updated config to the active engine right after applying; the push refreshes the existing node in place."
+      ],
+      "state_files": [
+        "/etc/daypass/proxy/clean_ip/candidates.txt",
+        "/etc/daypass/proxy/clean_ip/last_results.txt"
+      ],
+      "tools": ["nc", "timeout", "date", "sed", "jq", "sort", "awk"],
+      "layers": ["L3_Network", "L4_Transport", "L6_Presentation"],
+      "known_issues": ["KI-09", "KI-13"],
+      "flag": "--help-clean-ip-manager"
+    },
+    "dns_manager": {
+      "title": "DNS Manager",
+      "category": "dns",
+      "subcategory": "dns_persistent",
+      "menu_path": "Main menu -> 3 -> 6",
+      "manual": "network_dns",
+      "modules": [
+        "modules/network/dns/core.sh",
+        "modules/network/dns/apply.sh",
+        "modules/network/dns/modes/system.sh",
+        "modules/network/dns/modes/secure.sh",
+        "modules/network/dns/modes/tunnel.sh",
+        "modules/network/dns/modes/hybrid.sh",
+        "modules/network/dns/ui/menu.sh",
+        "modules/network/transports/transport_bridge.sh"
+      ],
+      "functions": [
+        "dns_menu",
+        "apply_dns_mode",
+        "apply_dns_system",
+        "apply_dns_secure",
+        "apply_dns_tunnel",
+        "apply_dns_hybrid",
+        "show_dns_status",
+        "dns_engine",
+        "dns_engine_available",
+        "dns_engine_configure",
+        "dns_engine_endpoint",
+        "dns_engine_release"
+      ],
+      "summary": "Persistent router DNS policy through dnsmasq upstreams and the active transport engine's DNS hooks. The mode is saved only after a successful apply.",
+      "behavior": [
+        "system: clears dnsmasq noresolv/server/strictorder and releases engine DNS (Passwall dns_redirect=0; WireGuard/OpenVPN DNS host route removed).",
+        "secure: first found of Stubby (127.0.0.1#5453), https-dns-proxy (listen_port, default 5053), engine DoH (Passwall, or a sing-box/Xray dns-in inbound); otherwise plaintext 1.1.1.1, 1.0.0.1, 8.8.8.8.",
+        "tunnel: requires an engine with a DNS endpoint. Passwall: dns_redirect=1, remote_dns=1.1.1.1 over tcp, dnsmasq forwards to 127.0.0.1#<Passwall DNS port>. sing-box/Xray: forwards to 127.0.0.1#<dns-in port>. WireGuard/OpenVPN: adds route network.daypass_dns_route 1.1.1.1/32 via the tunnel and forwards to 1.1.1.1.",
+        "hybrid: strictorder=1; primary is the engine endpoint, else Stubby, else https-dns-proxy; then 1.1.1.1 (unless already primary) and 8.8.8.8 as ordered fallbacks.",
+        "Passwall DNS port is read from dns_listen_port, dns_port, listen_port or dns_listen; defaults are 7913 (Passwall 1) and 15353 (Passwall 2).",
+        "DoH endpoint: https://cloudflare-dns.com/dns-query."
+      ],
+      "state_files": ["/etc/daypass/dns/mode"],
+      "uci_touched": [
+        "dhcp.@dnsmasq[0].noresolv",
+        "dhcp.@dnsmasq[0].server",
+        "dhcp.@dnsmasq[0].strictorder",
+        "passwall(2).@global*/dns_redirect",
+        "network.daypass_dns_route",
+        "passwall(2) remote_dns/remote_dns_protocol/remote_dns_doh/direct_dns/direct_dns_protocol/direct_dns_doh; dns_mode only on Passwall 1 (udp, tcp, dns2socks, sing-box or xray, never doh)"
+      ],
+      "tools": [
+        "uci",
+        "dnsmasq",
+        "stubby",
+        "https-dns-proxy",
+        "passwall",
+        "passwall2",
+        "sing-box",
+        "xray"
+      ],
+      "layers": ["L6_Presentation", "L7_Application"],
+      "known_issues": [],
+      "flag": "--help-dns-manager"
+    },
+    "dns_recovery": {
+      "title": "DNS Resolution Recovery",
+      "category": "dns",
+      "subcategory": "dns_recovery",
+      "menu_path": "Offered by the network checker when DNS fails but 1.1.1.1 answers ping",
+      "manual": "network_dns_recovery",
+      "modules": ["modules/network/dns/recovery.sh"],
+      "functions": ["apply_dns", "restore_dns", "dns_fix_menu"],
+      "summary": "Temporary resolver switch for package managers; not a replacement for the DNS Manager.",
+      "behavior": [
+        "Backs up /etc/resolv.conf once to /etc/resolv.conf.daypass.bak, then writes 'nameserver <ip>'.",
+        "Also replaces network.wan.dns with the chosen resolver (not committed).",
+        "Choices: 1.1.1.1 (default), 8.8.8.8, 9.9.9.9; Restore appears only when a backup exists."
+      ],
+      "state_files": ["/etc/resolv.conf", "/etc/resolv.conf.daypass.bak"],
+      "uci_touched": ["network.wan.dns"],
+      "tools": ["uci", "cp"],
+      "layers": ["L7_Application"],
+      "known_issues": [],
+      "flag": "--help-dns-recovery"
+    },
+    "wifi_access_point": {
+      "title": "Wi-Fi Access Point (Home WiFi)",
+      "category": "network",
+      "subcategory": "network_lan_wifi",
+      "menu_path": "Main menu -> 3 -> 1",
+      "manual": "network_wifi_ap",
+      "modules": ["modules/network/interfaces/wifi/wifi_ap.sh"],
+      "functions": ["show_ap_status", "setup_wifi_ap", "wifi_ap_menu"],
+      "summary": "Creates or updates one AP (ap_<radio>) per radio on the lan network; station interfaces are not touched.",
+      "behavior": [
+        "Runs 'wifi config' if no radio section exists yet.",
+        "SSID strategy: unified (default 'DayPass') or separate per band (DayPass-2.4G / DayPass-5G).",
+        "Encryption is psk2 (WPA2-PSK); the password must be at least 8 characters.",
+        "Band is read from band or hwmode; values matching 5g/a/ac/ax get the 5 GHz SSID.",
+        "Applies with 'wifi reload', falling back to a network restart."
+      ],
+      "uci_touched": ["wireless.<radio>.disabled", "wireless.ap_<radio>"],
+      "tools": ["uci", "wifi"],
+      "layers": ["L1_Physical", "L2_DataLink"],
+      "known_issues": [],
+      "flag": "--help-wifi-access-point"
+    },
+    "lan_ip": {
+      "title": "Change Local Router LAN IP",
+      "category": "network",
+      "subcategory": "network_lan_wifi",
+      "menu_path": "Main menu -> 3 -> 3",
+      "manual": "network",
+      "modules": ["modules/network/interfaces/lan/lan_ip.sh"],
+      "functions": ["validate_ip", "change_lan_ip_menu"],
+      "summary": "Moves the router to a new /24 LAN address and resets the LAN DHCP pool.",
+      "behavior": [
+        "Netmask is forced to 255.255.255.0; the last octet must be 1-254.",
+        "DHCP: start=100, limit=150 (.100-.249), leasetime=12h, ignore=0.",
+        "On confirm, clears /tmp/dhcp.leases and /tmp/hosts/dhcp*, restarts network and dnsmasq in the background and exits DayPass."
+      ],
+      "uci_touched": [
+        "network.lan.ipaddr",
+        "network.lan.netmask",
+        "dhcp.lan.*"
+      ],
+      "tools": ["uci", "/etc/init.d/network", "/etc/init.d/dnsmasq"],
+      "layers": ["L3_Network", "L7_Application"],
+      "known_issues": [],
+      "flag": "--help-lan-ip"
+    },
+    "multiwan_load_balancer": {
+      "title": "Multi-WAN Load Balancer (mwan3)",
+      "category": "network",
+      "subcategory": "network_multiwan",
+      "menu_path": "Main menu -> 3 -> 4",
+      "manual": "network_multiwan",
+      "modules": ["modules/network/routing/load_balancing/load_balancer.sh"],
+      "functions": ["configure_mwan3_engine", "load_balancer_menu"],
+      "summary": "Writes an mwan3 configuration over wan, wan_usb and wwan and restarts mwan3.",
+      "behavior": [
+        "globals.mmx_mask='0x3f00' (the firewall-mark bitmask mwan3 uses internally).",
+        "Each interface: family ipv4, track_ip 1.1.1.1 and 8.8.8.8, reliability 1, timeout 2, interval 5.",
+        "Members: wan_m (metric 1, weight 5), usb_m (metric 2, weight 4), wwan_m (metric 3, weight 3).",
+        "Policies 'balanced' and 'failover' both list all three members; default_rule_v4 (0.0.0.0/0) uses 'balanced'.",
+        "Because the members have different metrics, mwan3 sends traffic over the lowest-metric link that is up, so 'balanced' acts as priority failover wan -> wan_usb -> wwan.",
+        "Option 1 calls install_mwan3_deps, which is not defined anywhere in DayPass."
+      ],
+      "uci_touched": [
+        "mwan3.globals",
+        "mwan3.wan",
+        "mwan3.wan_usb",
+        "mwan3.wwan",
+        "mwan3.wan_m",
+        "mwan3.usb_m",
+        "mwan3.wwan_m",
+        "mwan3.balanced",
+        "mwan3.failover",
+        "mwan3.default_rule_v4"
+      ],
+      "tools": ["mwan3", "uci", "ping (mwan3 track)"],
+      "layers": ["L3_Network"],
+      "known_issues": ["KI-02", "KI-10"],
+      "flag": "--help-multiwan-load-balancer"
+    },
+    "wifi_wan": {
+      "title": "Wi-Fi Hotspot WAN (Station Mode)",
+      "category": "network",
+      "subcategory": "network_multiwan",
+      "menu_path": "Main menu -> 3 -> 4 -> 3",
+      "manual": "network_multiwan",
+      "modules": ["modules/network/interfaces/wifi/wifi_wan.sh"],
+      "functions": ["setup_wifi_wan"],
+      "summary": "Joins a hotspot as a station and uses it as WAN 'wwan'.",
+      "behavior": [
+        "network.wwan: proto dhcp, metric 30.",
+        "wireless.wwan_sta: mode sta on the chosen radio; psk2 with a password, otherwise encryption none.",
+        "Adds wwan to the firewall zone named 'wan' and reloads Wi-Fi."
+      ],
+      "uci_touched": [
+        "network.wwan",
+        "wireless.wwan_sta",
+        "firewall.<wan zone>.network"
+      ],
+      "tools": ["uci", "wifi"],
+      "layers": ["L1_Physical", "L2_DataLink", "L3_Network"],
+      "known_issues": [],
+      "flag": "--help-wifi-wan"
+    },
+    "network_info": {
+      "title": "Network Info & Speed Monitor",
+      "category": "network",
+      "subcategory": "network_diagnostics",
+      "menu_path": "Main menu -> 3 -> 5",
+      "manual": "network_info",
+      "modules": ["modules/network/diagnostics/network_info.sh"],
+      "functions": [
+        "country_flag",
+        "fetch_ip_data",
+        "show_full_network_info",
+        "show_live_speed",
+        "network_info_menu"
+      ],
+      "summary": "Public IP, country, city, ISP and ASN, plus a once-per-second WAN rate monitor.",
+      "behavior": [
+        "HTTP client order: curl, uclient-fetch, wget; jq is required.",
+        "Provider order: ipwho.is, ipapi.co, ifconfig.co.",
+        "Speed monitor interface: network.wan.device or ifname, then the default-route device, then eth0; reads /sys/class/net/<if>/statistics rx_bytes and tx_bytes."
+      ],
+      "tools": ["curl", "uclient-fetch", "wget", "jq", "ip", "awk"],
+      "layers": ["L1_Physical", "L7_Application"],
+      "known_issues": [],
+      "flag": "--help-network-info"
+    },
+    "network_checker": {
+      "title": "Network Health Check (pre-flight)",
+      "category": "network",
+      "subcategory": "network_diagnostics",
+      "menu_path": "Runs in the installer pipeline after the bootstrap wizard (network_check)",
+      "manual": null,
+      "modules": [
+        "modules/network/connectivity/diagnostics/network_checker.sh"
+      ],
+      "functions": [
+        "spin_sleep",
+        "redraw_row",
+        "run_cell",
+        "process_host",
+        "network_check"
+      ],
+      "summary": "DNS, ICMP and HTTPS checks against google.com, github.com, openwrt.org and cloudflare.com with an overall score.",
+      "behavior": [
+        "DNS: nslookup, else host, else ping name resolution.",
+        "Ping: 'ping -c 2 -W 2'; 0% loss green, partial yellow, 100% red.",
+        "HTTPS: curl time_total (< 2 s green, otherwise yellow), else uclient-fetch, else wget --spider.",
+        "If DNS fails and 1.1.1.1 answers ping, DNS Resolution Recovery is offered.",
+        "Red HTTPS results with working DNS are reported as possible censorship/DPI."
+      ],
+      "tools": [
+        "nslookup",
+        "host",
+        "ping",
+        "curl",
+        "uclient-fetch",
+        "wget",
+        "awk"
+      ],
+      "layers": ["L3_Network", "L6_Presentation", "L7_Application"],
+      "known_issues": [],
+      "flag": "--help-network-checker"
+    },
+    "guest_network": {
+      "title": "Guest Network (Interface + Firewall)",
+      "category": "qos_guest",
+      "subcategory": "guest_isolation",
+      "menu_path": "Main menu -> 3 -> 2 -> 1",
+      "manual": "network_guest",
+      "modules": ["modules/network/interfaces/guest/network.sh"],
+      "functions": ["setup_guest_network", "remove_guest_network"],
+      "summary": "Static guest interface 192.168.200.1/24 with an isolated firewall zone and its own DHCP.",
+      "behavior": [
+        "DHCP: start 100, limit 150, leasetime 12h, force 1.",
+        "Zone guest: input REJECT, output ACCEPT, forward REJECT, masq 0; forwarding guest -> wan.",
+        "Rules: Allow-Guest-DNS (tcp/udp 53), Allow-Guest-DHCP (udp 67-68), Block-Guest-to-LAN (REJECT).",
+        "Remove deletes these sections and every wifi-iface whose network is guest."
+      ],
+      "uci_touched": [
+        "network.guest",
+        "dhcp.guest",
+        "firewall.guest",
+        "firewall.guest_to_wan",
+        "firewall.guest_dns",
+        "firewall.guest_dhcp",
+        "firewall.guest_block_lan"
+      ],
+      "tools": [
+        "uci",
+        "/etc/init.d/network",
+        "/etc/init.d/firewall",
+        "/etc/init.d/dnsmasq",
+        "wifi"
+      ],
+      "layers": ["L3_Network", "L4_Transport"],
+      "known_issues": [],
+      "flag": "--help-guest-network"
+    },
+    "guest_wifi": {
+      "title": "Guest Wi-Fi",
+      "category": "qos_guest",
+      "subcategory": "guest_isolation",
+      "menu_path": "Main menu -> 3 -> 2 -> 2",
+      "manual": "network_guest",
+      "modules": ["modules/network/interfaces/guest/network.sh"],
+      "functions": ["setup_guest_wifi"],
+      "summary": "One guest AP (guest_<radio>) per radio with client isolation.",
+      "behavior": [
+        "Creates the guest network first if it does not exist.",
+        "Default SSID 'DayPass-Guest'; psk2 with a password of 8+ characters; isolate=1."
+      ],
+      "uci_touched": ["wireless.guest_<radio>"],
+      "tools": ["uci", "wifi"],
+      "layers": ["L2_DataLink"],
+      "known_issues": [],
+      "flag": "--help-guest-wifi"
+    },
+    "guest_qos": {
+      "title": "Guest Bandwidth Control (QoS)",
+      "category": "qos_guest",
+      "subcategory": "guest_qos",
+      "menu_path": "Main menu -> 3 -> 2 -> 3",
+      "manual": "network_guest_qos",
+      "modules": ["modules/network/qos/guest/qos.sh"],
+      "functions": [
+        "setup_simple_qos",
+        "setup_sqm_qos",
+        "remove_guest_qos",
+        "guest_qos_menu"
+      ],
+      "summary": "Guest rate limits with plain tc or SQM with Cake.",
+      "behavior": [
+        "Simple: writes /etc/guest_qos.sh for br-guest (or guest); the 'download' value is an ingress police filter, the 'upload' value an HTB class with sfq; added to /etc/rc.local. Defaults 10/5 Mbps.",
+        "Installs kmod-sched and tc when tc is missing.",
+        "SQM: installs sqm-scripts (plus luci-app-sqm on opkg), writes sqm.guest with qdisc cake, script piece_of_cake.qos, linklayer none. Defaults 15/5 Mbps.",
+        "Remove deletes the script, its rc.local line, sqm.guest and the live qdiscs on br-guest and guest."
+      ],
+      "state_files": ["/etc/guest_qos.sh", "/etc/rc.local"],
+      "uci_touched": ["sqm.guest"],
+      "tools": ["tc", "kmod-sched", "sqm-scripts", "opkg", "apk"],
+      "layers": ["L2_DataLink", "L3_Network"],
+      "known_issues": ["KI-11", "KI-12"],
+      "flag": "--help-guest-qos"
+    },
+    "usb_tethering_wan": {
+      "title": "USB Tethering WAN",
+      "category": "hardware",
+      "subcategory": "hardware_usb",
+      "menu_path": "Main menu -> 2 -> 1 / 2 / 3 / 5 (also Main menu -> 3 -> 4 -> 2)",
+      "manual": "hardware",
+      "modules": [
+        "modules/network/interfaces/usb/deps.sh",
+        "modules/network/interfaces/usb/detect.sh",
+        "modules/network/interfaces/usb/usb_wan.sh",
+        "modules/network/interfaces/usb/restore.sh",
+        "modules/network/interfaces/usb/dashboard.sh",
+        "ui/menu/hardware.sh"
+      ],
+      "functions": [
+        "ensure_usb_tether_deps",
+        "usb_dmesg_interfaces",
+        "usb_net_interfaces",
+        "usb_tether_interfaces",
+        "detect_usb_device",
+        "usb_device_list",
+        "usb_modem_ports",
+        "setup_usb_wan",
+        "usb_wan_set_enabled",
+        "usb_wan_set_metric",
+        "remove_usb_wan",
+        "hardware_menu"
+      ],
+      "summary": "Detects USB phones and modems and registers a tethered phone as WAN 'wan_usb' with a chosen metric.",
+      "behavior": [
+        "USB network interfaces are classified by the kernel driver behind /sys/class/net/<dev>/device: rndis_host, cdc_ether, cdc_ncm, cdc_eem, cdc_subset and ipheth are phone tethering; qmi_wwan, cdc_mbim, huawei_cdc_ncm and sierra_net are modems. dmesg can also name a USB-registered interface such as eth1. A plain Ethernet port is not used.",
+        "Without a driver link the name fallback is usb0, usb1, rndis0; usb0 is used when nothing is found so the interface binds when the phone appears.",
+        "setup_usb_wan [device] [metric]: network.wan_usb proto dhcp, metric (default 20), added to the firewall zone named 'wan' (firewall reloaded), brought up with ifup.",
+        "Option 3 lists WAN interfaces and writes network.<iface>.metric. A lower metric is preferred. Restore deletes wan_usb and its firewall membership, restarts the network service, and can uninstall kmod-usb-net-* and usbmuxd.",
+        "ModeSwitch uses usbmode -l / usbmode -s from usb-modeswitch."
+      ],
+      "uci_touched": ["network.wan_usb", "firewall.<wan zone>.network"],
+      "tools": ["uci", "ifup", "ifdown", "lsusb", "usbmode", "readlink"],
+      "layers": ["L1_Physical", "L2_DataLink", "L3_Network"],
+      "known_issues": [],
+      "flag": "--help-usb-tethering-wan"
+    },
+    "system_resources": {
+      "title": "System Resources & Hardware Info",
+      "category": "hardware",
+      "subcategory": "hardware_resources",
+      "menu_path": "Main menu -> 2 -> 8",
+      "manual": "system",
+      "modules": [
+        "modules/system/resource_checker.sh",
+        "modules/system/arch_check.sh"
+      ],
+      "functions": [
+        "show_system_resources_menu",
+        "get_free_ram_bytes",
+        "get_free_flash_bytes",
+        "get_total_ram_bytes",
+        "get_total_flash_bytes",
+        "check_version"
+      ],
+      "summary": "Read-only architecture, OpenWrt release, package manager, RAM and /overlay storage summary.",
+      "behavior": [
+        "RAM from /proc/meminfo; storage from 'df -k /overlay'; release from /etc/openwrt_release.",
+        "Package manager: apk if the apk command exists, otherwise opkg; the OpenWrt major version comes from DISTRIB_RELEASE (fallback 25 for apk, 24 for opkg)."
+      ],
+      "tools": ["df", "awk", "/proc/meminfo"],
+      "layers": [],
+      "known_issues": [],
+      "flag": "--help-system-resources"
+    },
+    "package_install": {
+      "title": "Install Package Profiles",
+      "category": "system",
+      "subcategory": "system_install",
+      "menu_path": "Main menu -> 1",
+      "manual": "main",
+      "modules": [
+        "ui/menu/packages.sh",
+        "ui/menu/mode.sh",
+        "ui/menu/engine.sh",
+        "ui/menu/language.sh",
+        "ui/menu/geo.sh",
+        "ui/menu/custom.sh",
+        "ui/review.sh",
+        "installer/pkg/resolver.sh",
+        "installer/pkg/installer.sh",
+        "config/package_profiles.json"
+      ],
+      "functions": [
+        "packages_menu",
+        "proxy_install_wizard",
+        "install_profile_interactive",
+        "menu_mode",
+        "engine_menu",
+        "language_menu",
+        "geo_menu",
+        "handle_custom_profile",
+        "load_package_profiles",
+        "list_package_profiles",
+        "resolve_profile",
+        "install_profile",
+        "resolve_packages",
+        "review_install",
+        "deploy_targeted_packages",
+        "rollback_failed_install"
+      ],
+      "summary": "Installs the package profiles declared in config/package_profiles.json: the Passwall wizard, VPN & tunnels, USB & hardware drivers and network tools.",
+      "behavior": [
+        "Profiles come from config/package_profiles.json, which the build embeds in install.sh as daypass_embedded_profiles and load_package_profiles reads (a downloaded copy wins when available).",
+        "resolve_profile prints the resolved package plan (name, source, optional, alternatives) before anything is installed; a failed required package rolls the profile back.",
+        "The Passwall wizard (option 1) asks for Passwall 1 or Passwall 2, then Recommended or Custom packages. Engines: Auto, Xray (xray-core) or Sing-box (sing-box).",
+        "Passwall 2 languages: fa, en, zh-cn, ru (luci-i18n-passwall2-*).",
+        "Geo data: Skip, Official (v2ray-geoip / v2ray-geosite), Iran Full or Iran Lite (Chocolate4U/Iran-v2ray-rules geoip/geosite .dat).",
+        "A successful wizard deployment also installs the DayPass login banner through system_banner_post_install."
+      ],
+      "state_files": [
+        "/etc/daypass/install.log",
+        "/etc/banner",
+        "/etc/banner.daypass-orig"
+      ],
+      "tools": ["opkg", "apk", "curl", "wget", "uclient-fetch"],
+      "layers": ["L7_Application"],
+      "known_issues": [],
+      "flag": "--help-package-install"
+    },
+    "package_update": {
+      "title": "Check & Update Packages",
+      "category": "system",
+      "subcategory": "system_install",
+      "menu_path": "Main menu -> 1 -> 5 / Main menu -> 6 -> 5",
+      "manual": "main",
+      "modules": ["installer/pkg/updater.sh"],
+      "functions": ["update_packages_menu", "inspect_and_confirm_updates"],
+      "summary": "Shows an inspection table of DayPass packages and upgrades them after confirmation.",
+      "behavior": [
+        "Package list comes from /etc/daypass/install.log; without it the screen asks you to install first.",
+        "If nothing needs updating the screen reports up-to-date; answering n cancels.",
+        "Confirmed updates are deployed with deploy_targeted_packages."
+      ],
+      "state_files": ["/etc/daypass/install.log"],
+      "tools": ["opkg", "apk"],
+      "layers": ["L7_Application"],
+      "known_issues": [],
+      "flag": "--help-package-update"
+    },
+    "service_manager": {
+      "title": "Service Manager (post-install)",
+      "category": "system",
+      "subcategory": "system_install",
+      "menu_path": "No menu (helper functions called by other modules)",
+      "manual": "service",
+      "modules": ["modules/service/service_manager.sh"],
+      "functions": [
+        "service_exists",
+        "service_enable",
+        "service_start",
+        "service_stop",
+        "service_is_running",
+        "post_install_services_init"
+      ],
+      "summary": "Service helpers (exists, enable, start, stop, running) plus a post-deployment pass that enables the selected Passwall service and reloads dnsmasq and the firewall.",
+      "behavior": [
+        "SELECTED_PROFILE passwall2 (default) or passwall decides which init script is enabled and restarted; sing-box, Xray, WireGuard and OpenVPN are not covered.",
+        "Running state: init.d status, then pgrep -f, then ps | grep.",
+        "post_install_services_init is only reached by running modules/service/service_manager.sh directly; the interactive deployment does not call it."
+      ],
+      "tools": ["/etc/init.d/*", "pgrep", "ps"],
+      "layers": [],
+      "known_issues": ["KI-15"],
+      "flag": "--help-service-manager"
+    },
+    "maintenance": {
+      "title": "Maintenance & Recovery",
+      "category": "system",
+      "subcategory": "system_maintenance",
+      "menu_path": "Main menu -> 6 -> 1",
+      "manual": "system",
+      "modules": [
+        "modules/system/maintenance.sh",
+        "modules/system/backup_restore.sh",
+        "modules/system/banner.sh",
+        "installer/pkg/purge.sh",
+        "installer/pkg/manifest_manager.sh"
+      ],
+      "functions": [
+        "mf_export_json",
+        "mf_unregister_module",
+        "mf_register_module",
+        "mf_record_install",
+        "purge_packages",
+        "purge_menu",
+        "purge_daypass_packages",
+        "clean_daypass_cache",
+        "backup_system_config",
+        "factory_reset_system",
+        "maintenance_menu",
+        "backup_configs",
+        "restore_configs",
+        "system_banner_manage",
+        "install_system_banner",
+        "restore_system_banner",
+        "system_banner_render",
+        "system_banner_status",
+        "system_banner_is_daypass",
+        "system_banner_post_install"
+      ],
+      "summary": "Purge tracked packages, clean caches, back up the system configuration, factory reset or manage the SSH login banner.",
+      "behavior": [
+        "Purge reads /etc/daypass/installed_manifest.json (and manifest.d). Each recorded module lists title, category, packages, configs and services. Purging a module stops those services, removes its packages, deletes its UCI files, flushes LuCI, then drops the module from the registry. A legacy install.log is imported on first use.",
+        "Cache clean removes *.apk, *.ipk and *.part from /etc/daypass.",
+        "Backup: 'sysupgrade -b /tmp/backup-<timestamp>.tar.gz'.",
+        "Factory reset requires typing RESET, then runs 'firstboot -y && reboot'.",
+        "Login banner (option 5): install writes the DayPass ASCII banner, version, firmware release, build target and the Jan 8-9 2026 memorial line to /etc/banner, after copying the stock banner to /etc/banner.daypass-orig the first time. The write is atomic (temp file plus mv) and skipped when the rendered banner already matches. Preview prints it without touching the file and Restore copies the backup back and removes it.",
+        "The banner is also installed once after a successful deployment through system_banner_post_install, which DAYPASS_SKIP_BANNER=1 disables."
+      ],
+      "state_files": [
+        "/etc/daypass/install.log",
+        "/tmp/backup-*.tar.gz",
+        "/etc/banner",
+        "/etc/banner.daypass-orig",
+        "/etc/daypass/installed_manifest.json",
+        "/etc/daypass/manifest.d/*"
+      ],
+      "tools": [
+        "opkg",
+        "apk",
+        "sysupgrade",
+        "firstboot",
+        "reboot",
+        "cmp",
+        "sed",
+        "date",
+        "uname"
+      ],
+      "layers": [],
+      "known_issues": [],
+      "flag": "--help-maintenance"
+    },
+    "bootstrap_wizard": {
+      "title": "Network Bootstrap Wizard",
+      "category": "bootstrap",
+      "subcategory": "bootstrap_wizard",
+      "menu_path": "Main menu -> 8; startup only when feeds and http_proxy are still official",
+      "manual": null,
+      "modules": ["modules/network/relays/wizard.sh"],
+      "functions": [
+        "network_bootstrap_startup",
+        "network_bootstrap_from_menu",
+        "network_bootstrap_offer"
+      ],
+      "summary": "Asks how to reach package mirrors. Startup skips the wizard when a custom feed host or http_proxy is already set, and the main menu can open it later.",
+      "behavior": [
+        "On startup, /etc/opkg/distfeeds.conf and /etc/apk/repositories are scanned for a host other than downloads.openwrt.org. http_proxy, https_proxy, HTTP_PROXY and HTTPS_PROXY count as well. A hit prints [+] Active package mirror detected: [URL] -> Bypassing Bootstrap Wizard. and goes to the main menu.",
+        "Main menu -> 8 opens the wizard. If a mirror or proxy is already set, it prints [!] Active configuration found: [host] and asks ⁉️ Overwrite existing mirror settings? [y/N]. Enter or n keeps the current settings.",
+        "1: local HTTP/HTTPS proxy (proxy_bootstrap_setup).",
+        "2: Cloudflare Worker mirror (worker_bootstrap_offer -> worker_mirror_menu: paste worker.js in the dashboard, import the hostname, or restore).",
+        "3 or Enter: direct connection; feeds are unchanged."
+      ],
+      "tools": [],
+      "layers": ["L5_Session", "L7_Application"],
+      "known_issues": [],
+      "flag": "--help-bootstrap-wizard"
+    },
+    "local_proxy_bootstrap": {
+      "title": "Local Proxy Bootstrap (reverse SSH tunnel)",
+      "category": "bootstrap",
+      "subcategory": "bootstrap_relays",
+      "menu_path": "Bootstrap wizard -> 1",
+      "manual": null,
+      "modules": ["modules/network/relays/ssh/reverse_tunnel.sh"],
+      "functions": [
+        "proxy_bootstrap_offer",
+        "proxy_bootstrap_setup",
+        "proxy_bootstrap_status",
+        "proxy_bootstrap_clear"
+      ],
+      "summary": "Exports proxy environment variables so DayPass downloads go through a local HTTP proxy.",
+      "behavior": [
+        "Default port 2585 on 127.0.0.1. Enter keeps 2585. 0, b, back, c, or cancel skips setup and leaves http_proxy / https_proxy unchanged. Other ports outside 1-65535 are rejected.",
+        "Exports http_proxy, https_proxy, HTTP_PROXY, HTTPS_PROXY and no_proxy/NO_PROXY=localhost,127.0.0.1,::1 for the current session only.",
+        "The manual screen shows the client-side command: ssh -R 2585:127.0.0.1:<VPN_PORT_ON_PC> root@<ROUTER_IP> -N. DayPass does not start or keep this tunnel alive."
+      ],
+      "tools": ["ssh (on the user's PC)"],
+      "layers": ["L5_Session", "L7_Application"],
+      "known_issues": [],
+      "flag": "--help-local-proxy-bootstrap"
+    },
+    "worker_mirror": {
+      "title": "Cloudflare Worker Mirror",
+      "category": "bootstrap",
+      "subcategory": "bootstrap_relays",
+      "menu_path": "Bootstrap wizard -> 2",
+      "manual": null,
+      "modules": [
+        "modules/network/relays/cloudflare/worker.sh",
+        "config/worker.js",
+        "cf-worker/worker.js",
+        "cf-worker/wrangler.toml"
+      ],
+      "functions": [
+        "worker_mirror_menu",
+        "worker_bootstrap_offer",
+        "worker_browser_deploy",
+        "worker_import_domain",
+        "worker_bootstrap_apply",
+        "worker_bootstrap_restore",
+        "worker_bootstrap_status"
+      ],
+      "summary": "Menu that points the package feeds at a Cloudflare Worker mirror. The user pastes config/worker.js into the Cloudflare dashboard editor, then imports the *.workers.dev hostname. Feeds can be restored to the OpenWrt defaults. The router never asks for a Cloudflare Account ID or API token.",
+      "behavior": [
+        "Files: /etc/opkg/distfeeds.conf and /etc/apk/repositories; a .bak copy is made once and later rewrites start from it, so switching hosts or restoring is always possible. http:// upstream entries become https:// because workers.dev is TLS only; feeds that do not point at downloads.openwrt.org are left alone.",
+        "Option 1 (Deploy to Cloudflare): does not contact Cloudflare. It tells the user to open Workers & Pages → Create Application → Start with Hello World → Deploy, then in Edit Code delete the Hello World placeholder, paste DayPass worker.js, and Save and Deploy. Cloudflare shows a *.workers.dev hostname. The screen also prints a raw GitHub URL for config/worker.js on the current branch (WORKER_REPO_SLUG and help_branch: beta when REPO_URL ends in /beta, otherwise main) so the script can be copied from a phone or PC. The user then chooses Import Worker Domain / URL and pastes that hostname.",
+        "Option 2 (import): the input is normalised (scheme, port and path stripped) and validated (A-Z a-z 0-9 '.' '_' '-', at least one dot). Default host: openwrt.daypass.workers.dev, override with WORKER_MIRROR_HOST.",
+        "Health check: GET https://<host>/daypass-health must answer with \"mirror\":\"daypass-openwrt\". A genuine mirror is applied straight away; a host that answers something else, or does not answer at all, needs an explicit y/N confirmation. Feed files are never touched before that gate passes.",
+        "After the mirror feeds are applied, curl and ca-certificates are installed in the background (opkg update && opkg install, or apk add) when curl is not already present.",
+        "Option 3 (restore): copies the .bak files back and clears the saved host.",
+        "The applied host is remembered in /etc/daypass/worker/host (and source: import or verified)."
+      ],
+      "state_files": [
+        "/etc/opkg/distfeeds.conf(.bak)",
+        "/etc/apk/repositories(.bak)",
+        "/etc/daypass/worker/host",
+        "/etc/daypass/worker/source"
+      ],
+      "tools": ["sed", "curl", "wget", "uclient-fetch", "tr", "cat"],
+      "layers": ["L6_Presentation", "L7_Application"],
+      "known_issues": [],
+      "flag": "--help-worker-mirror"
+    }
+  },
+  "terminology": {
+    "APK": {
+      "expansion": "Alpine Package Keeper",
+      "definition": "Package manager used by DayPass on OpenWrt 25.",
+      "used_in": ["package_install", "maintenance", "worker_mirror"]
+    },
+    "ASN": {
+      "expansion": "Autonomous System Number",
+      "definition": "Number identifying the network (usually the ISP) that announces an IP address. Shown by Network Info.",
+      "used_in": ["network_info"]
+    },
+    "Base64": {
+      "expansion": "Base64 encoding",
+      "definition": "Text encoding of binary data. DayPass decodes base64 subscription bodies and vmess:// link payloads.",
+      "used_in": ["config_manager", "transport_bridge"]
+    },
+    "Bufferbloat": {
+      "expansion": "Bufferbloat",
+      "definition": "Latency rise caused by oversized queues under load. SQM with Cake is the DayPass option aimed at it; DayPass does not measure it.",
+      "used_in": ["guest_qos"]
+    },
+    "Cake": {
+      "expansion": "Common Applications Kept Enhanced",
+      "definition": "Queue discipline used by the SQM guest profile (piece_of_cake.qos).",
+      "used_in": ["guest_qos"]
+    },
+    "Clean IP": {
+      "expansion": "Clean IP",
+      "definition": "A Cloudflare edge IP that is still reachable from your network, used in place of a blocked address in a share link.",
+      "used_in": ["clean_ip_manager"]
+    },
+    "DHCP": {
+      "expansion": "Dynamic Host Configuration Protocol",
+      "definition": "Hands out LAN addresses. DayPass sets pools on lan (.100-.249) and guest.",
+      "used_in": ["lan_ip", "guest_network"]
+    },
+    "dnsmasq": {
+      "expansion": "dnsmasq",
+      "definition": "OpenWrt DNS forwarder and DHCP server. DNS modes change its upstream servers.",
+      "used_in": ["dns_manager", "service_manager", "lan_ip"]
+    },
+    "DoH": {
+      "expansion": "DNS over HTTPS",
+      "definition": "DNS inside HTTPS. DayPass uses https://cloudflare-dns.com/dns-query via Passwall, or a local https-dns-proxy.",
+      "used_in": ["dns_manager"]
+    },
+    "DoT": {
+      "expansion": "DNS over TLS",
+      "definition": "DNS inside TLS on port 853. DayPass uses it through a local Stubby stub on 127.0.0.1#5453.",
+      "used_in": ["dns_manager"]
+    },
+    "DPI": {
+      "expansion": "Deep Packet Inspection",
+      "definition": "Inspecting packet content beyond headers to classify or block traffic. The network checker reports possible DPI when HTTPS fails while DNS works.",
+      "used_in": ["network_checker"]
+    },
+    "Failover": {
+      "expansion": "Failover",
+      "definition": "Using a backup path only when the primary fails. Used by mwan3 metrics and as a node balancer mode name.",
+      "used_in": ["multiwan_load_balancer", "node_balancer"]
+    },
+    "FW-Mark": {
+      "expansion": "Firewall Mark (fwmark)",
+      "definition": "Kernel packet mark used for policy routing. DayPass only sets mwan3 mmx_mask=0x3f00; it writes no mark rules itself.",
+      "used_in": ["multiwan_load_balancer"]
+    },
+    "GFWList": {
+      "expansion": "GFW List",
+      "definition": "Domain list mode in Passwall. DayPass no longer uses it: tcp_proxy_mode and udp_proxy_mode only accept 'disable' or 'proxy', so Iran Direct is built from a _shunt node with Iran shunt rules instead.",
+      "used_in": ["traffic_routing"]
+    },
+    "Geo database": {
+      "expansion": "geoip.dat / geosite.dat",
+      "definition": "IP and domain category files used by Xray/sing-box routing. DayPass can install official or Iran rule sets.",
+      "used_in": ["package_install"]
+    },
+    "HTB": {
+      "expansion": "Hierarchical Token Bucket",
+      "definition": "tc qdisc used for the guest upload class in Simple QoS.",
+      "used_in": ["guest_qos"]
+    },
+    "Hysteria2": {
+      "expansion": "Hysteria 2",
+      "definition": "QUIC (UDP) based proxy protocol; accepted as hysteria2:// or hy2:// links.",
+      "used_in": ["config_manager", "transport_bridge"]
+    },
+    "ICMP": {
+      "expansion": "Internet Control Message Protocol",
+      "definition": "Protocol behind ping. Used by the network checker and by mwan3 link tracking.",
+      "used_in": ["network_checker", "multiwan_load_balancer"]
+    },
+    "mwan3": {
+      "expansion": "mwan3",
+      "definition": "OpenWrt multi-WAN manager with policy routing and link tracking.",
+      "used_in": ["multiwan_load_balancer"]
+    },
+    "OPKG": {
+      "expansion": "OpenWrt package manager",
+      "definition": "Package manager used by DayPass on OpenWrt 24.",
+      "used_in": ["package_install", "maintenance", "worker_mirror"]
+    },
+    "Passwall": {
+      "expansion": "luci-app-passwall / luci-app-passwall2",
+      "definition": "OpenWrt proxy frontend; one of the DayPass transport engines, managed through UCI.",
+      "used_in": [
+        "transport_bridge",
+        "traffic_routing",
+        "dns_manager",
+        "node_balancer",
+        "service_manager"
+      ]
+    },
+    "Reverse SSH tunnel": {
+      "expansion": "ssh -R",
+      "definition": "Forwards a port on the router back to a proxy on your PC. DayPass prints the command and uses the forwarded port as an HTTP proxy.",
+      "used_in": ["local_proxy_bootstrap"]
+    },
+    "RNDIS": {
+      "expansion": "Remote Network Driver Interface Specification",
+      "definition": "USB networking protocol used by many Android phones for tethering; its device (rndis0) is one of the names DayPass looks for.",
+      "used_in": ["usb_tethering_wan"]
+    },
+    "Share link": {
+      "expansion": "Proxy share link / URI",
+      "definition": "One-line node definition such as vless://uuid@host:port?...#name.",
+      "used_in": [
+        "config_manager",
+        "transport_bridge",
+        "clean_ip_manager",
+        "node_health_checker"
+      ]
+    },
+    "Shunt": {
+      "expansion": "Shunt routing",
+      "definition": "Splitting traffic between direct and proxy paths by destination.",
+      "used_in": ["traffic_routing", "routing_profiles"]
+    },
+    "SNI": {
+      "expansion": "Server Name Indication",
+      "definition": "Hostname sent in the TLS ClientHello; readable by censors. DayPass passes the link's sni to Passwall (tls_serverName) and Clean IP leaves it unchanged.",
+      "used_in": ["transport_bridge", "clean_ip_manager"]
+    },
+    "SQM": {
+      "expansion": "Smart Queue Management",
+      "definition": "OpenWrt sqm-scripts package; shapes an interface with an AQM qdisc such as Cake.",
+      "used_in": ["guest_qos"]
+    },
+    "Stubby": {
+      "expansion": "Stubby",
+      "definition": "Local DoT stub resolver. DayPass expects it on port 5453.",
+      "used_in": ["dns_manager"]
+    },
+    "tc": {
+      "expansion": "traffic control",
+      "definition": "Linux tool for queueing disciplines and policing; used by Simple Guest QoS.",
+      "used_in": ["guest_qos"]
+    },
+    "TPROXY": {
+      "expansion": "Transparent Proxy (kernel target)",
+      "definition": "Kernel transparent-proxy target. DayPass uses it (nft 'tproxy ip to 127.0.0.1:<port>') to send LAN traffic to a sing-box or Xray inbound; Passwall sets up its own. Needs kmod-nft-tproxy.",
+      "used_in": ["traffic_routing", "transport_bridge"]
+    },
+    "UCI": {
+      "expansion": "Unified Configuration Interface",
+      "definition": "OpenWrt configuration system (/etc/config). Almost every DayPass change is a uci set/commit.",
+      "used_in": [
+        "dns_manager",
+        "traffic_routing",
+        "guest_network",
+        "multiwan_load_balancer",
+        "transport_bridge"
+      ]
+    },
+    "Worker mirror": {
+      "expansion": "Cloudflare Worker reverse proxy",
+      "definition": "Worker script 'daypass-mirror' (config/worker.js) that proxies downloads.openwrt.org through the Cloudflare edge: Range requests for resumed package downloads, a long edge cache for .ipk/.apk, short-lived indexes, and a /daypass-health identity endpoint.",
+      "used_in": ["worker_mirror", "bootstrap_wizard"]
+    },
+    "WPA2-PSK": {
+      "expansion": "Wi-Fi Protected Access 2, pre-shared key",
+      "definition": "UCI encryption 'psk2'; the only encryption DayPass sets for AP, guest and station interfaces.",
+      "used_in": ["wifi_access_point", "guest_wifi", "wifi_wan"]
+    },
+    "WWAN": {
+      "expansion": "Wireless WAN",
+      "definition": "Using a Wi-Fi station link as an internet uplink (interface wwan).",
+      "used_in": ["wifi_wan", "multiwan_load_balancer"]
+    },
+    "Transport engine": {
+      "expansion": "DayPass transport driver",
+      "definition": "The proxy or VPN program DayPass drives for routing, DNS and balancing: passwall, passwall2, singbox, xray_direct, wireguard or openvpn.",
+      "used_in": [
+        "transport_bridge",
+        "traffic_routing",
+        "dns_manager",
+        "node_balancer"
+      ]
+    },
+    "fwmark": {
+      "expansion": "Firewall mark (skb mark)",
+      "definition": "Packet mark set by nftables and matched by ip rules. DayPass owns bits 0x00ff0000: 0x00010000 = TPROXY (table 2585), 0x00020000 = tunnel (table 2586).",
+      "used_in": ["traffic_routing"]
+    },
+    "Shunt node": {
+      "expansion": "protocol='_shunt'",
+      "definition": "Passwall pseudo node that routes per rule: a default_node for everything else plus shunt_rules sections mapped to a node id or to '_direct'. DayPass Iran Direct creates daypass_shunt with daypass_ir_rule mapped to '_direct'.",
+      "used_in": ["traffic_routing", "transport_bridge"]
+    },
+    "System banner": {
+      "expansion": "/etc/banner",
+      "definition": "Text OpenWrt prints on every SSH and console login. DayPass replaces it with its own ASCII banner, version, firmware target and memorial line, keeping the original in /etc/banner.daypass-orig.",
+      "used_in": ["maintenance", "package_install"]
+    }
+  },
+  "network_layers": {
+    "model_note": "OSI layers L1-L7 mapped to the 4-layer TCP/IP model. Only components that exist in DayPass are listed; items DayPass does not implement are listed under not_implemented.",
+    "tcp_ip_model": [
+      {
+        "tcp_ip_layer": "Link",
+        "osi_layers": ["L1_Physical", "L2_DataLink"]
+      },
+      {
+        "tcp_ip_layer": "Internet",
+        "osi_layers": ["L3_Network"]
+      },
+      {
+        "tcp_ip_layer": "Transport",
+        "osi_layers": ["L4_Transport"]
+      },
+      {
+        "tcp_ip_layer": "Application",
+        "osi_layers": ["L5_Session", "L6_Presentation", "L7_Application"]
+      }
+    ],
+    "layers": [
+      {
+        "layer_id": "L1_Physical",
+        "layer_number": 1,
+        "layer_name": "Physical",
+        "tcp_ip_layer": "Link",
+        "threat_model_censorship": [
+          "Shutdown or heavy throttling of the fixed line at the access network.",
+          "Loss of a single uplink leaves the router with no path out."
+        ],
+        "daypass_capabilities": [
+          "Detects a USB tethering device (usb0, usb1, rndis0, eth1, eth2) for an alternative uplink.",
+          "Enables Wi-Fi radios (disabled='0') and runs 'wifi config' when none are defined.",
+          "Reads rx_bytes / tx_bytes from /sys/class/net for the live WAN speed monitor."
+        ],
+        "associated_modules": [
+          "modules/network/interfaces/usb/usb_wan.sh",
+          "modules/network/interfaces/wifi/wifi_ap.sh",
+          "modules/network/interfaces/wifi/wifi_wan.sh",
+          "modules/network/diagnostics/network_info.sh"
+        ],
+        "underlying_tools": ["ip link", "wifi", "uci", "/sys/class/net"],
+        "articles": [
+          "usb_tethering_wan",
+          "wifi_access_point",
+          "wifi_wan",
+          "network_info"
+        ]
+      },
+      {
+        "layer_id": "L2_DataLink",
+        "layer_number": 2,
+        "layer_name": "Data Link",
+        "tcp_ip_layer": "Link",
+        "threat_model_censorship": [
+          "Local eavesdropping on open or weakly protected Wi-Fi.",
+          "Guest devices reaching LAN devices on the same segment."
+        ],
+        "daypass_capabilities": [
+          "WPA2-PSK (psk2) on home AP, guest AP and station interfaces; open station only when no password is given.",
+          "Client isolation (isolate=1) on guest Wi-Fi; guest traffic sits on its own bridge (br-guest).",
+          "USB tethering link over RNDIS/usb devices registered as wan_usb.",
+          "Device queue control on br-guest: tc HTB/sfq and ingress police (Simple QoS) or SQM with Cake."
+        ],
+        "associated_modules": [
+          "modules/network/interfaces/wifi/wifi_ap.sh",
+          "modules/network/interfaces/wifi/wifi_wan.sh",
+          "modules/network/interfaces/guest/network.sh",
+          "modules/network/interfaces/usb/usb_wan.sh",
+          "modules/network/qos/guest/qos.sh"
+        ],
+        "underlying_tools": ["wifi", "uci", "tc", "kmod-sched", "sqm-scripts"],
+        "articles": [
+          "wifi_access_point",
+          "guest_wifi",
+          "usb_tethering_wan",
+          "guest_qos"
+        ]
+      },
+      {
+        "layer_id": "L3_Network",
+        "layer_number": 3,
+        "layer_name": "Network",
+        "tcp_ip_layer": "Internet",
+        "threat_model_censorship": [
+          "IP blocking or blackholing of proxy servers and CDN edge ranges.",
+          "ICMP filtering and per-link throttling or outages."
+        ],
+        "daypass_capabilities": [
+          "LAN addressing: router /24 subnet and guest subnet 192.168.200.0/24.",
+          "Firewall zone isolation: guest input/forward REJECT, guest -> wan forwarding, Block-Guest-to-LAN.",
+          "mwan3 over wan / wan_usb / wwan with member metrics 1/2/3, ICMP tracking of 1.1.1.1 and 8.8.8.8, and mmx_mask 0x3f00 (mwan3's fwmark mask).",
+          "Interface metrics: wan_usb 20, wwan 30.",
+          "Clean IP: replaces a blocked address in a share link with a reachable Cloudflare IP.",
+          "ICMP reachability check (ping) in the network checker."
+        ],
+        "associated_modules": [
+          "modules/network/interfaces/lan/lan_ip.sh",
+          "modules/network/interfaces/guest/network.sh",
+          "modules/network/routing/load_balancing/load_balancer.sh",
+          "modules/network/relays/cloudflare/applier.sh",
+          "modules/network/relays/cloudflare/link_utils.sh",
+          "modules/network/connectivity/diagnostics/network_checker.sh"
+        ],
+        "underlying_tools": [
+          "uci",
+          "mwan3",
+          "ping",
+          "ip route",
+          "firewall (fw3/fw4 via uci)"
+        ],
+        "articles": [
+          "lan_ip",
+          "guest_network",
+          "multiwan_load_balancer",
+          "clean_ip_manager",
+          "network_checker"
+        ]
+      },
+      {
+        "layer_id": "L4_Transport",
+        "layer_number": 4,
+        "layer_name": "Transport",
+        "tcp_ip_layer": "Transport",
+        "threat_model_censorship": [
+          "Port blocking and TCP reset injection toward proxy endpoints.",
+          "UDP throttling that affects QUIC-based protocols such as Hysteria2."
+        ],
+        "daypass_capabilities": [
+          "TCP connect probes to each node's host:port (3 s timeout) and UDP probes for kcp/quic/hysteria/tuic endpoints, through transport_probe.",
+          "Clean IP scan on the config's own port (443 when none is present).",
+          "Guest firewall rules for tcp/udp 53 and udp 67-68.",
+          "Passwall TCP/UDP proxy modes: tcp_proxy_mode and udp_proxy_mode are only set to 'proxy' or 'disable'; per-destination routing comes from the _shunt node."
+        ],
+        "associated_modules": [
+          "modules/network/connectivity/checker/health_checker.sh",
+          "modules/network/relays/cloudflare/scanner.sh",
+          "modules/network/interfaces/guest/network.sh",
+          "modules/network/routing/core.sh"
+        ],
+        "underlying_tools": ["nc", "timeout", "uci"],
+        "articles": [
+          "node_health_checker",
+          "clean_ip_manager",
+          "guest_network",
+          "traffic_routing"
+        ]
+      },
+      {
+        "layer_id": "L5_Session",
+        "layer_number": 5,
+        "layer_name": "Session",
+        "tcp_ip_layer": "Application",
+        "threat_model_censorship": [
+          "Blocking or resetting long-lived sessions such as SSH.",
+          "Package downloads that cannot complete over a filtered direct session."
+        ],
+        "daypass_capabilities": [
+          "Reverse SSH tunnel guidance (ssh -R 2585:127.0.0.1:<port>) run by the user on their PC.",
+          "Session-scoped proxy environment (http_proxy, https_proxy and upper-case variants) with no_proxy for localhost.",
+          "DayPass does not implement tunnel keep-alive or reconnection."
+        ],
+        "associated_modules": [
+          "modules/network/relays/ssh/reverse_tunnel.sh",
+          "modules/network/relays/wizard.sh"
+        ],
+        "underlying_tools": [
+          "ssh (client side)",
+          "shell environment variables"
+        ],
+        "articles": ["local_proxy_bootstrap", "bootstrap_wizard"]
+      },
+      {
+        "layer_id": "L6_Presentation",
+        "layer_number": 6,
+        "layer_name": "Presentation",
+        "tcp_ip_layer": "Application",
+        "threat_model_censorship": [
+          "Reading plaintext DNS queries.",
+          "Filtering by the TLS SNI hostname and TLS fingerprint."
+        ],
+        "daypass_capabilities": [
+          "Encrypted DNS: Passwall DoH (cloudflare-dns.com), Stubby DoT stub (5453), https-dns-proxy (5053).",
+          "Base64 decoding of subscription bodies and vmess:// JSON.",
+          "Parses TLS fields from links (security, sni, fp) and writes tls / tls_serverName (and fingerprint on Passwall 2).",
+          "Clean IP keeps SNI, Host and Path parameters when the address is swapped.",
+          "HTTPS reachability timing in the network checker and HTTPS probe of the Worker mirror."
+        ],
+        "associated_modules": [
+          "modules/network/dns/core.sh",
+          "modules/network/dns/modes/secure.sh",
+          "modules/network/dns/modes/hybrid.sh",
+          "modules/network/profiles/subscription.sh",
+          "modules/network/transports/transport_bridge.sh",
+          "modules/network/relays/cloudflare/applier.sh",
+          "modules/network/connectivity/diagnostics/network_checker.sh",
+          "modules/network/relays/cloudflare/worker.sh"
+        ],
+        "underlying_tools": [
+          "stubby",
+          "https-dns-proxy",
+          "base64",
+          "jq",
+          "curl",
+          "wget",
+          "uclient-fetch"
+        ],
+        "articles": [
+          "dns_manager",
+          "config_manager",
+          "transport_bridge",
+          "clean_ip_manager",
+          "network_checker",
+          "worker_mirror"
+        ]
+      },
+      {
+        "layer_id": "L7_Application",
+        "layer_number": 7,
+        "layer_name": "Application",
+        "tcp_ip_layer": "Application",
+        "threat_model_censorship": [
+          "DNS hijacking and poisoning by the ISP resolver.",
+          "Domain and URL blocking, including OpenWrt package feeds (downloads.openwrt.org).",
+          "Protocol classification of proxy traffic (DPI)."
+        ],
+        "daypass_capabilities": [
+          "DNS Manager: dnsmasq upstream control (noresolv, server list, strictorder) and Passwall dns_redirect.",
+          "DNS Recovery: temporary /etc/resolv.conf override with backup/restore.",
+          "Passwall 1/2 node management and routing modes; engines Xray or sing-box installed by the profile installer.",
+          "Geo databases (official or Iran Full/Lite rule sets) chosen at install.",
+          "Cloudflare Worker mirror rewrite of opkg/apk feeds.",
+          "Network checker (nslookup, HTTPS) and public IP providers (ipwho.is, ipapi.co, ifconfig.co).",
+          "DHCP server settings for lan and guest."
+        ],
+        "associated_modules": [
+          "modules/network/dns/ui/menu.sh",
+          "modules/network/dns/apply.sh",
+          "modules/network/dns/recovery.sh",
+          "modules/network/transports/transport_bridge.sh",
+          "modules/network/routing/core.sh",
+          "modules/network/profiles/profile_manager.sh",
+          "modules/network/balancing/node_balancer.sh",
+          "modules/network/relays/cloudflare/worker.sh",
+          "modules/network/diagnostics/network_info.sh",
+          "modules/network/connectivity/diagnostics/network_checker.sh",
+          "ui/menu/geo.sh",
+          "ui/menu/engine.sh"
+        ],
+        "underlying_tools": [
+          "dnsmasq",
+          "uci",
+          "passwall",
+          "passwall2",
+          "xray",
+          "sing-box",
+          "curl",
+          "wget",
+          "uclient-fetch",
+          "nslookup",
+          "jq",
+          "opkg",
+          "apk"
+        ],
+        "articles": [
+          "dns_manager",
+          "dns_recovery",
+          "transport_bridge",
+          "traffic_routing",
+          "routing_profiles",
+          "node_balancer",
+          "package_install",
+          "worker_mirror",
+          "network_info",
+          "network_checker"
+        ]
+      }
+    ],
+    "not_implemented": [
+      {
+        "item": "TPROXY / nftables / iptables rules",
+        "status": "absent",
+        "note": "DayPass writes no packet-filter rules directly; transparent proxying is left to Passwall."
+      },
+      {
+        "item": "FW-Mark rules",
+        "status": "absent",
+        "note": "Only mwan3 globals.mmx_mask is set; no mark rules are written."
+      },
+      {
+        "item": "WPA3 / SAE",
+        "status": "absent",
+        "note": "All Wi-Fi interfaces use psk2 (WPA2-PSK)."
+      },
+      {
+        "item": "mtr / traceroute",
+        "status": "absent",
+        "note": "Diagnostics use nslookup, ping and HTTPS only."
+      },
+      {
+        "item": "openssl",
+        "status": "absent",
+        "note": "TLS is handled by curl/wget/uclient-fetch and the proxy engines."
+      },
+      {
+        "item": "Tunnel keep-alive",
+        "status": "absent",
+        "note": "The reverse SSH tunnel is started and maintained by the user."
+      }
+    ]
+  },
+  "known_issues": [
+    {
+      "id": "KI-01",
+      "severity": "high",
+      "module": "modules/network/profiles/storage.sh",
+      "functions": ["list_configs", "toggle_config"],
+      "summary": "jq '.enabled // true' returns true when enabled is false.",
+      "effect": "Disabled configs are listed as ON and the toggle writes false again instead of re-enabling them. The health checker is no longer affected: it tests the value itself."
+    },
+    {
+      "id": "KI-02",
+      "severity": "high",
+      "module": "modules/network/routing/load_balancing/load_balancer.sh",
+      "functions": ["load_balancer_menu"],
+      "summary": "install_mwan3_deps is not defined anywhere.",
+      "effect": "Multi-WAN option 1 only prints 'Dependency installer not found.'; mwan3 must be installed manually."
+    },
+    {
+      "id": "KI-05",
+      "severity": "low",
+      "module": "modules/network/profiles/profile_manager.sh",
+      "functions": ["apply_profile"],
+      "summary": "Balanced, Gaming and Streaming apply the same Iran Direct mode.",
+      "effect": "Only the saved profile name differs."
+    },
+    {
+      "id": "KI-09",
+      "severity": "low",
+      "module": "modules/network/relays/cloudflare/menu.sh",
+      "functions": ["clean_ip_for_config"],
+      "summary": "Config list does not filter disabled configs.",
+      "effect": "Disabled configs can be selected for a Clean IP scan."
+    },
+    {
+      "id": "KI-10",
+      "severity": "low",
+      "module": "modules/network/routing/load_balancing/load_balancer.sh",
+      "functions": ["configure_mwan3_engine"],
+      "summary": "Members use different metrics in the 'balanced' policy.",
+      "effect": "Traffic uses one link at a time in priority order instead of being spread across links."
+    },
+    {
+      "id": "KI-11",
+      "severity": "medium",
+      "module": "modules/network/qos/guest/qos.sh",
+      "functions": ["setup_simple_qos", "setup_sqm_qos"],
+      "summary": "Shaping is applied on the guest LAN side, where ingress is traffic sent by guests.",
+      "effect": "The 'download' value limits guest uploads and the 'upload' value limits guest downloads."
+    },
+    {
+      "id": "KI-12",
+      "severity": "medium",
+      "module": "modules/network/qos/guest/qos.sh",
+      "functions": ["setup_sqm_qos"],
+      "summary": "sqm.guest.interface is set to the logical name 'guest'.",
+      "effect": "SQM expects a device name such as br-guest; verify on the router that the queue is actually attached."
+    },
+    {
+      "id": "KI-13",
+      "severity": "high",
+      "module": "modules/network/relays/cloudflare/scanner.sh",
+      "functions": ["test_ip_basic"],
+      "summary": "The candidate IP test runs 'nc -z -w <timeout>' without checking whether nc supports -z.",
+      "effect": "On BusyBox builds nc rejects -z, so every candidate is reported unreachable and no clean IP is ever found. The /dev/tcp fallback is only used when nc is missing entirely."
+    },
+    {
+      "id": "KI-14",
+      "severity": "medium",
+      "module": "modules/network/profiles/storage.sh",
+      "functions": ["validate_share_link", "detect_protocol_from_link"],
+      "summary": "Only vless, vmess, trojan, ss and hysteria2 links are accepted.",
+      "effect": "ssr, hysteria v1, tuic, anytls and naive links cannot be saved, although parse_share_link and the push importer handle them."
+    },
+    {
+      "id": "KI-15",
+      "severity": "low",
+      "module": "modules/service/service_manager.sh",
+      "functions": ["post_install_services_init"],
+      "summary": "No module calls post_install_services_init.",
+      "effect": "After an interactive deployment the engine service is not enabled or started, and dnsmasq and the firewall are not reloaded, unless the script is run directly."
+    }
+  ],
+  "audit": {
+    "audited_on": "2026-10-01",
+    "sources": [
+      "help/*.json",
+      "modules/**/*.sh",
+      "ui/menu/*.sh",
+      "ui/lib/help.sh",
+      "installer/**/*.sh",
+      "config/package_profiles.json",
+      "modules/system/banner.sh",
+      ".github/actions/engine/template.go",
+      "config/worker.js"
+    ],
+    "manual_corrections": [
+      {
+        "manual": "network_multiwan",
+        "change": "Option 1 marked as missing installer; usb1 added to USB device list; metrics added; balanced policy behaviour corrected.",
+        "status": "applied"
+      },
+      {
+        "manual": "network",
+        "change": "Multi-WAN tip no longer says dependencies can be installed from DayPass.",
+        "status": "applied"
+      },
+      {
+        "manual": "network_info",
+        "change": "Back option returns to Network Settings.",
+        "status": "applied"
+      },
+      {
+        "manual": "proxy_routing",
+        "change": "Iran Direct and Show current rules describe what is actually written.",
+        "status": "applied"
+      },
+      {
+        "manual": "proxy_profiles",
+        "change": "Balanced/Gaming/Streaming described as the same Iran Direct mode.",
+        "status": "applied"
+      },
+      {
+        "manual": "proxy_balancer",
+        "change": "Apply describes the DayPass-owned UCI section and its limits.",
+        "status": "applied"
+      },
+      {
+        "manual": "proxy_balancer_modes",
+        "change": "Removed the claim that the health checker feeds Least Ping.",
+        "status": "applied"
+      },
+      {
+        "manual": "proxy_config_manager",
+        "change": "Toggle, push and remove describe current behaviour.",
+        "status": "applied"
+      },
+      {
+        "manual": "proxy_health_checker",
+        "change": "Latency and nc requirements stated.",
+        "status": "applied"
+      },
+      {
+        "manual": "proxy_clean_ip",
+        "change": "Push-after-apply duplicate skip noted.",
+        "status": "applied"
+      },
+      {
+        "manual": "network_guest_qos",
+        "change": "Direction and SQM device caveats added.",
+        "status": "applied"
+      },
+      {
+        "manual": "index",
+        "change": "Summaries synced and reference_manual pointer added.",
+        "status": "applied"
+      },
+      {
+        "manual": "proxy_routing",
+        "change": "Routing modes described per engine; Transport Engine option 5 added.",
+        "status": "applied"
+      },
+      {
+        "manual": "proxy_transport",
+        "change": "New manual for the transport engine menu.",
+        "status": "applied"
+      },
+      {
+        "manual": "proxy_balancer",
+        "change": "Apply probes and switches nodes; Probe option 5 added; KI-03 resolved.",
+        "status": "applied"
+      },
+      {
+        "manual": "network_dns",
+        "change": "Tunnel and secure modes use the active transport engine.",
+        "status": "applied"
+      },
+      {
+        "manual": "proxy_routing",
+        "change": "Iran Direct documented as the _shunt node plus Iran shunt rules; Direct Only restores the real node; the gfwlist claim removed.",
+        "status": "applied"
+      },
+      {
+        "manual": "proxy_profiles",
+        "change": "Profiles described against the active engine instead of Passwall; refusal without a selected node noted.",
+        "status": "applied"
+      },
+      {
+        "manual": "proxy_clean_ip",
+        "change": "Transport and protocol limits of the address swap, SNI/Host pinning and the refusal behaviour documented.",
+        "status": "applied"
+      },
+      {
+        "manual": "proxy_health_checker",
+        "change": "Probe described through transport_probe (no nc -z); disabled configs are skipped.",
+        "status": "applied"
+      },
+      {
+        "manual": "proxy_config_manager",
+        "change": "Push described as the engine's subscribe.lua importer that refreshes a node in place; storable link types clarified.",
+        "status": "applied"
+      },
+      {
+        "manual": "system",
+        "change": "SSH login banner added as option 5.",
+        "status": "applied"
+      },
+      {
+        "manual": "service",
+        "change": "Summary no longer claims the post-install pass runs automatically.",
+        "status": "applied"
+      },
+      {
+        "manual": "daypass",
+        "change": "Stale ui/menu/passwall.sh and package_menu references replaced by the modular package profile flow; KI-04/06/07/08 moved to resolved_issues; KI-13/14/15 added; banner, _shunt and system banner terminology documented.",
+        "status": "applied"
+      },
+      {
+        "manual": "daypass",
+        "change": "Worker mirror rewritten as a 3-option menu (import / Cloudflare API deploy / restore) with the /daypass-health gate, and config/worker.js documented (Range+resume, edge cache tiers, CORS, health endpoint).",
+        "status": "applied"
+      }
+    ]
+  },
+  "resolved_issues": [
+    {
+      "id": "KI-04",
+      "resolved_in": "phase 3",
+      "module": "modules/network/transports/drivers/passwall.sh",
+      "summary": "Iran Direct wrote the invalid value tcp_proxy_mode='gfwlist'.",
+      "resolution": "_pw_apply_iran_direct now builds daypass_ir_rule (shunt_rules) and the daypass_shunt node with protocol='_shunt' and default_node set to the selected node, and keeps tcp/udp_proxy_mode at 'proxy'."
+    },
+    {
+      "id": "KI-06",
+      "resolved_in": "phase 3",
+      "module": "modules/network/transports/drivers/passwall.sh",
+      "summary": "Pushing a config whose remarks already existed was skipped, so a Clean IP swap never reached the engine.",
+      "resolution": "_pw_push_node re-imports through subscribe.lua and renames the new section back to the previous node id, so the node is refreshed in place."
+    },
+    {
+      "id": "KI-07",
+      "resolved_in": "phase 3",
+      "module": "modules/network/transports/transport_bridge.sh",
+      "summary": "ss:// and hysteria2:// links were parsed for remarks only, so nodes were created without address and port.",
+      "resolution": "parse_share_link covers vless, vmess, trojan, ss, ssr, hysteria, hysteria2, tuic, anytls and naive, and the push itself is delegated to the engine's subscribe.lua importer."
+    },
+    {
+      "id": "KI-08",
+      "resolved_in": "phase 3",
+      "module": "modules/network/connectivity/checker/health_checker.sh",
+      "summary": "The node probe relied on 'nc -z', which BusyBox nc does not support.",
+      "resolution": "test_node calls transport_probe and falls back to 'nc -w 3 host port </dev/null'; UDP links are probed as UDP."
+    }
+  ]
+}

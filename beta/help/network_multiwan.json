@@ -1,0 +1,43 @@
+{
+  "module_id": "network_multiwan",
+  "title": "Multi-WAN Load Balancer",
+  "summary": "Adds USB tethering and a Wi-Fi hotspot as extra internet sources and writes an mwan3 setup over wan, wan_usb and wwan. Links are used in priority order: wan, then USB, then Wi-Fi.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Install Dependencies",
+      "description": "Calls an mwan3 dependency installer that is not part of this DayPass build, so it only prints a warning.",
+      "usage_tip": "Install mwan3 yourself with opkg or apk before applying load balancing."
+    },
+    {
+      "key": "2",
+      "title": "Setup USB Tethering WAN",
+      "description": "Registers the first USB tethering interface (detected by kernel driver: rndis_host, cdc_ether, cdc_ncm, ipheth; fallback usb0) as wan_usb with metric 20.",
+      "usage_tip": "Hardware & USB Tethering (Main menu -> 2) offers device choice, metrics and toggling."
+    },
+    {
+      "key": "3",
+      "title": "Setup Wi-Fi Hotspot WAN",
+      "description": "Connects the router as a client to a phone hotspot or another Wi-Fi network and adds it as wwan with metric 30.",
+      "usage_tip": "Station mode never touches your Access Point interfaces."
+    },
+    {
+      "key": "4",
+      "title": "Apply mwan3 Load Balancing",
+      "description": "Writes balanced and failover policies over wan, wan_usb and wwan, tracks 1.1.1.1 and 8.8.8.8, then restarts mwan3.",
+      "usage_tip": "The links have different priorities, so traffic moves to the next link only when the current one goes down."
+    },
+    {
+      "key": "5",
+      "title": "Show mwan3 Status",
+      "description": "Prints the current mwan3 interface and policy status.",
+      "usage_tip": "Use it to confirm which links are online right now."
+    },
+    {
+      "key": "0",
+      "title": "Back",
+      "description": "Returns to Network Settings.",
+      "usage_tip": "Existing WAN interfaces keep working."
+    }
+  ]
+}

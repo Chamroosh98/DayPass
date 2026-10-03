@@ -1,0 +1,37 @@
+{
+  "module_id": "network_dns_recovery",
+  "title": "DNS Resolution Recovery",
+  "summary": "Temporary DNS switch that is offered by the network checker when domain resolution fails. It changes DNS only for the current session and is not a replacement for the permanent DNS Manager.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Cloudflare DNS (1.1.1.1)",
+      "description": "Writes 1.1.1.1 into /etc/resolv.conf and adds it as a temporary WAN DNS server.",
+      "usage_tip": "Default choice. The original resolv.conf is backed up before the change."
+    },
+    {
+      "key": "2",
+      "title": "Google DNS (8.8.8.8)",
+      "description": "Switches resolution to Google Public DNS for the current session.",
+      "usage_tip": "Handy when Cloudflare is filtered by the upstream provider."
+    },
+    {
+      "key": "3",
+      "title": "Quad9 DNS (9.9.9.9)",
+      "description": "Switches resolution to Quad9 and keeps the previous DNS in a backup file.",
+      "usage_tip": "A malware-filtering alternative if the first two providers fail."
+    },
+    {
+      "key": "4",
+      "title": "Restore Original DNS",
+      "description": "Restores the backed-up resolv.conf and removes the temporary WAN DNS entry.",
+      "usage_tip": "This option appears only when a backup exists; otherwise 4 means Skip."
+    },
+    {
+      "key": "5",
+      "title": "Skip",
+      "description": "Leaves DNS completely untouched and exits the recovery prompt.",
+      "usage_tip": "Choose it when only HTTPS looks broken and DNS works fine."
+    }
+  ]
+}
