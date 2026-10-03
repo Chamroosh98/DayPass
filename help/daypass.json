@@ -1427,10 +1427,14 @@
       "menu_path": "Main menu -> 2 -> 1 / 2 / 3 / 5 (also Main menu -> 3 -> 4 -> 2)",
       "manual": "hardware",
       "modules": [
+        "modules/network/interfaces/usb/deps.sh",
+        "modules/network/interfaces/usb/detect.sh",
         "modules/network/interfaces/usb/usb_wan.sh",
         "ui/menu/hardware.sh"
       ],
       "functions": [
+        "ensure_usb_tether_deps",
+        "usb_dmesg_interfaces",
         "usb_net_interfaces",
         "usb_tether_interfaces",
         "detect_usb_device",
@@ -1444,7 +1448,7 @@
       ],
       "summary": "Detects USB phones and modems and registers a tethered phone as WAN 'wan_usb' with a chosen metric.",
       "behavior": [
-        "USB network interfaces are classified by the kernel driver behind /sys/class/net/<dev>/device: rndis_host, cdc_ether, cdc_ncm, cdc_eem, cdc_subset and ipheth are phone tethering; qmi_wwan, cdc_mbim, huawei_cdc_ncm and sierra_net are modems. Non-USB ports (e.g. eth1) are never picked.",
+        "USB network interfaces are classified by the kernel driver behind /sys/class/net/<dev>/device: rndis_host, cdc_ether, cdc_ncm, cdc_eem, cdc_subset and ipheth are phone tethering; qmi_wwan, cdc_mbim, huawei_cdc_ncm and sierra_net are modems. dmesg can also name a USB-registered interface such as eth1. A plain Ethernet port is not used.",
         "Without a driver link the name fallback is usb0, usb1, rndis0; usb0 is used when nothing is found so the interface binds when the phone appears.",
         "setup_usb_wan [device] [metric]: network.wan_usb proto dhcp, metric (default 20), added to the firewall zone named 'wan' (firewall reloaded), brought up with ifup.",
         "Toggle sets or clears network.wan_usb.disabled with ifdown / ifup. Failover presets: backup = metric 20 (wan + 10 when wan >= 20), primary = wan_usb 5 and wan 10.",
