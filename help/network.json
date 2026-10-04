@@ -24,8 +24,8 @@
     {
       "key": "4",
       "title": "Multi-WAN Load Balancer (mwan3)",
-      "description": "Adds USB tethering and Wi-Fi hotspot WAN next to the wired WAN and configures mwan3 with priority failover.",
-      "usage_tip": "Install the mwan3 package yourself before applying load balancing."
+      "description": "Finds every WAN interface and configures mwan3 to share traffic across them, with a metric menu for failover order.",
+      "usage_tip": "Option 1 inside that menu installs mwan3 when it is missing."
     },
     {
       "key": "5",

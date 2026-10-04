@@ -963,31 +963,28 @@
       "menu_path": "Main menu -> 3 -> 4",
       "manual": "network_multiwan",
       "modules": ["modules/network/routing/load_balancing/load_balancer.sh"],
-      "functions": ["configure_mwan3_engine", "load_balancer_menu"],
-      "summary": "Writes an mwan3 configuration over wan, wan_usb and wwan and restarts mwan3.",
+      "functions": ["configure_mwan3_engine", "mwan_discover_ifaces", "mwan_metric_menu", "install_mwan3_deps", "load_balancer_menu"],
+      "summary": "Discovers every WAN and writes an mwan3 policy that shares traffic equally, with ping tracking on each link.",
       "behavior": [
-        "globals.mmx_mask='0x3f00' (the firewall-mark bitmask mwan3 uses internally).",
-        "Each interface: family ipv4, track_ip 1.1.1.1 and 8.8.8.8, reliability 1, timeout 2, interval 5.",
-        "Members: wan_m (metric 1, weight 5), usb_m (metric 2, weight 4), wwan_m (metric 3, weight 3).",
-        "Policies 'balanced' and 'failover' both list all three members; default_rule_v4 (0.0.0.0/0) uses 'balanced'.",
-        "Because the members have different metrics, mwan3 sends traffic over the lowest-metric link that is up, so 'balanced' acts as priority failover wan -> wan_usb -> wwan.",
-        "Option 1 calls install_mwan3_deps, which is not defined anywhere in DayPass."
+        "WAN interfaces come from the firewall zone named wan, plus any network interface named wan, wan_* (wan_usb, wan_usb2, wan_lan2) or wwan. wan6 and dhcpv6 interfaces are skipped. Disabled interfaces are listed but not added to mwan3.",
+        "globals.mmx_mask='0x3f00'.",
+        "Each enabled WAN gets an mwan3 interface with track_ip 1.1.1.1 and 8.8.8.8, reliability 1, timeout 2, interval 5, and a member of metric 1 and weight 1.",
+        "Policy balanced lists every member. Policy failover lists the same interfaces ordered by network.<iface>.metric (unset metrics sort last).",
+        "default_rule_v4 (0.0.0.0/0) uses balanced. Option 1 installs mwan3 with opkg or apk. Option 6 edits metrics."
       ],
       "uci_touched": [
         "mwan3.globals",
-        "mwan3.wan",
-        "mwan3.wan_usb",
-        "mwan3.wwan",
-        "mwan3.wan_m",
-        "mwan3.usb_m",
-        "mwan3.wwan_m",
+        "mwan3.<iface>",
+        "mwan3.<iface>_m",
+        "mwan3.<iface>_fo",
         "mwan3.balanced",
         "mwan3.failover",
-        "mwan3.default_rule_v4"
+        "mwan3.default_rule_v4",
+        "network.<iface>.metric"
       ],
       "tools": ["mwan3", "uci", "ping (mwan3 track)"],
       "layers": ["L3_Network"],
-      "known_issues": ["KI-02", "KI-10"],
+      "known_issues": ["KI-10"],
       "flag": "--help-multiwan-load-balancer"
     },
     "wifi_wan": {
@@ -1020,21 +1017,30 @@
       "subcategory": "network_diagnostics",
       "menu_path": "Main menu -> 3 -> 5",
       "manual": "network_info",
-      "modules": ["modules/network/diagnostics/network_info.sh"],
+      "modules": [
+        "modules/network/info/discover.sh",
+        "modules/network/info/fetch.sh",
+        "modules/network/info/ui.sh",
+        "modules/network/info/panel.sh",
+        "modules/network/info/speed.sh",
+        "modules/network/info/network_info.sh"
+      ],
       "functions": [
-        "country_flag",
-        "fetch_ip_data",
-        "show_full_network_info",
-        "show_live_speed",
+        "net_get_active_ifaces",
+        "net_fetch_iface_ip",
+        "net_render_standalone_ui",
+        "net_render_multiwan_ui",
+        "net_monitor_live_speed",
         "network_info_menu"
       ],
-      "summary": "Public IP, country, city, ISP and ASN, plus a once-per-second WAN rate monitor.",
+      "summary": "Looks up every WAN's public IP and ISP with curl bound to that interface, then draws one card or a list.",
       "behavior": [
-        "HTTP client order: curl, uclient-fetch, wget; jq is required.",
-        "Provider order: ipwho.is, ipapi.co, ifconfig.co.",
-        "Speed monitor interface: network.wan.device or ifname, then the default-route device, then eth0; reads /sys/class/net/<if>/statistics rx_bytes and tx_bytes."
+        "WAN names come from the firewall zone wan and from interfaces named wan, wan_* or wwan. Disabled and dhcpv6 interfaces are skipped.",
+        "Each query is curl -fsS --connect-timeout 2 --max-time 4 --interface <linux device>. Providers are ipwho.is, then ipapi.co. jq reads the ISP name.",
+        "One enabled WAN draws a single card. Two or more draw a single-column list with IP, ISP, metric and mwan3 online/offline.",
+        "The speed monitor reads rx_bytes and tx_bytes on the first active WAN device."
       ],
-      "tools": ["curl", "uclient-fetch", "wget", "jq", "ip", "awk"],
+      "tools": ["curl", "jq", "uci", "ubus", "ip", "awk"],
       "layers": ["L1_Physical", "L7_Application"],
       "known_issues": [],
       "flag": "--help-network-info"
@@ -1740,7 +1746,7 @@
           "modules/network/interfaces/usb/usb_wan.sh",
           "modules/network/interfaces/wifi/wifi_ap.sh",
           "modules/network/interfaces/wifi/wifi_wan.sh",
-          "modules/network/diagnostics/network_info.sh"
+          "modules/network/info/network_info.sh"
         ],
         "underlying_tools": ["ip link", "wifi", "uci", "/sys/class/net"],
         "articles": [
@@ -1792,7 +1798,7 @@
         "daypass_capabilities": [
           "LAN addressing: router /24 subnet and guest subnet 192.168.200.0/24.",
           "Firewall zone isolation: guest input/forward REJECT, guest -> wan forwarding, Block-Guest-to-LAN.",
-          "mwan3 over wan / wan_usb / wwan with member metrics 1/2/3, ICMP tracking of 1.1.1.1 and 8.8.8.8, and mmx_mask 0x3f00 (mwan3's fwmark mask).",
+          "mwan3 over every enabled WAN (firewall zone wan, plus wan, wan_usb, wan_usb2, wan_lan2, wwan). Balanced members use weight 1. Each interface tracks 1.1.1.1 and 8.8.8.8. mmx_mask is 0x3f00.",
           "Interface metrics: wan_usb 20, wwan 30.",
           "Clean IP: replaces a blocked address in a share link with a reachable Cloudflare IP.",
           "ICMP reachability check (ping) in the network checker."
@@ -1945,7 +1951,7 @@
           "modules/network/profiles/profile_manager.sh",
           "modules/network/balancing/node_balancer.sh",
           "modules/network/relays/cloudflare/worker.sh",
-          "modules/network/diagnostics/network_info.sh",
+          "modules/network/info/network_info.sh",
           "modules/network/connectivity/diagnostics/network_checker.sh",
           "ui/menu/geo.sh",
           "ui/menu/engine.sh"
@@ -2026,8 +2032,8 @@
       "severity": "high",
       "module": "modules/network/routing/load_balancing/load_balancer.sh",
       "functions": ["load_balancer_menu"],
-      "summary": "install_mwan3_deps is not defined anywhere.",
-      "effect": "Multi-WAN option 1 only prints 'Dependency installer not found.'; mwan3 must be installed manually."
+      "summary": "Option 1 installs mwan3 with opkg or apk when the package is missing.",
+      "effect": "OpenWrt 24 uses opkg. OpenWrt 25 uses apk. A failed install leaves the saved mwan3 config in place so it can be applied again after the package is available."
     },
     {
       "id": "KI-05",

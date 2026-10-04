@@ -1,13 +1,13 @@
 {
   "module_id": "network_multiwan",
   "title": "Multi-WAN Load Balancer",
-  "summary": "Adds USB tethering and a Wi-Fi hotspot as extra internet sources and writes an mwan3 setup over wan, wan_usb and wwan. Links are used in priority order: wan, then USB, then Wi-Fi.",
+  "summary": "Finds every WAN (wired, USB, Wi-Fi, extra Ethernet) and writes an mwan3 policy that shares traffic across all of them. A metric menu sets failover priority.",
   "items": [
     {
       "key": "1",
       "title": "Install Dependencies",
-      "description": "Calls an mwan3 dependency installer that is not part of this DayPass build, so it only prints a warning.",
-      "usage_tip": "Install mwan3 yourself with opkg or apk before applying load balancing."
+      "description": "Installs mwan3 with opkg on OpenWrt 24 or apk on OpenWrt 25 when it is not already present.",
+      "usage_tip": "Skip this when mwan3 status already runs."
     },
     {
       "key": "2",
@@ -23,15 +23,21 @@
     },
     {
       "key": "4",
-      "title": "Apply mwan3 Load Balancing",
-      "description": "Writes balanced and failover policies over wan, wan_usb and wwan, tracks 1.1.1.1 and 8.8.8.8, then restarts mwan3.",
-      "usage_tip": "The links have different priorities, so traffic moves to the next link only when the current one goes down."
+      "title": "Apply Dynamic Load Balancing",
+      "description": "Finds every enabled WAN, tracks 1.1.1.1 and 8.8.8.8 on each, and builds a balanced policy with weight 1 on every link.",
+      "usage_tip": "A link that stops answering those pings is dropped until it recovers."
     },
     {
       "key": "5",
       "title": "Show mwan3 Status",
       "description": "Prints the current mwan3 interface and policy status.",
       "usage_tip": "Use it to confirm which links are online right now."
+    },
+    {
+      "key": "6",
+      "title": "WAN Metrics",
+      "description": "Lists every discovered WAN and writes network.<iface>.metric.",
+      "usage_tip": "A lower metric is preferred. The failover policy follows that order."
     },
     {
       "key": "0",

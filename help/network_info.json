@@ -1,7 +1,7 @@
 {
   "module_id": "network_info",
   "title": "Network Info & Speed Monitor",
-  "summary": "Diagnostic panel that reports public IP details and can show live WAN bandwidth. The panel also reports offline state when no provider can be reached.",
+  "summary": "One WAN is a single card. Several WANs are a list of public IP, ISP, metric and mwan3 status. Each lookup uses curl on that interface.",
   "items": [
     {
       "key": "1",
@@ -12,7 +12,7 @@
     {
       "key": "2",
       "title": "Refresh Information",
-      "description": "Re-queries public IP providers (ipwho.is, ipapi.co, ifconfig.co) for IP, country, ISP and ASN.",
+      "description": "Re-queries each WAN through curl bound to that interface (ipwho.is, then ipapi.co) for IP, country, ISP and ASN.",
       "usage_tip": "Use it after switching WAN or reconnecting a tunnel."
     },
     {

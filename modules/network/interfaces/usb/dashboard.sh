@@ -31,7 +31,7 @@ usb_render_dashboard() {
     fi
 
     if command -v usb_mtp_waiting >/dev/null 2>&1 && usb_mtp_waiting; then
-        echo "  📶 Phone is in MTP mode. Enable USB Tethering on the phone."
+        echo "  📶 Phone is in MTP mode!! Enable USB Tethering on the phone."
     fi
 
     echo "  📱 Interfaces"
@@ -65,7 +65,7 @@ usb_render_dashboard() {
     echo "  🔀 2) Toggle Interface ($state)"
     echo "  📶 3) Failover & Metrics"
     echo "  📌 4) Install Drivers"
-    echo "  🧹 5) Restore / Reset USB"
+    echo "  ♻️ 5) Restore / Reset USB"
     echo "  📟 6) Modem Mode Switch"
     echo "  🔄 7) Refresh"
     echo "  📊 8) System Resources"

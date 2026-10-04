@@ -115,8 +115,8 @@
       "file": "network_multiwan.json",
       "module_id": "network_multiwan",
       "title": "Multi-WAN Load Balancer",
-      "summary": "Adds USB tethering and a Wi-Fi hotspot as extra internet sources and writes an mwan3 setup over wan, wan_usb and wwan. Links are used in priority order: wan, then USB, then Wi-Fi.",
-      "item_count": 6,
+      "summary": "Finds every WAN and writes an mwan3 policy that shares traffic across all of them. A metric menu sets failover priority.",
+      "item_count": 7,
       "sources": ["modules/network/routing/load_balancing/load_balancer.sh"],
       "reachable_from": "Network -> 4"
     },
@@ -124,9 +124,16 @@
       "file": "network_info.json",
       "module_id": "network_info",
       "title": "Network Info & Speed Monitor",
-      "summary": "Diagnostic panel that reports public IP details and can show live WAN bandwidth. The panel also reports offline state when no provider can be reached.",
+      "summary": "Shows each WAN's public IP and ISP. One link is a single card. Several links are a list. Queries use curl on that interface.",
       "item_count": 3,
-      "sources": ["modules/network/diagnostics/network_info.sh"],
+      "sources": [
+        "modules/network/info/discover.sh",
+        "modules/network/info/fetch.sh",
+        "modules/network/info/ui.sh",
+        "modules/network/info/panel.sh",
+        "modules/network/info/speed.sh",
+        "modules/network/info/network_info.sh"
+      ],
       "reachable_from": "Network -> 5"
     },
     {

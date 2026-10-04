@@ -63,7 +63,12 @@ func generateInstallScript(outputFile string) error {
 		"modules/system/arch_check.sh",
 
 		// 5. Network - Host
-		"modules/network/diagnostics/network_info.sh",
+		"modules/network/info/discover.sh",
+		"modules/network/info/fetch.sh",
+		"ui/menu/network_ip.sh",
+		"modules/network/info/panel.sh",
+		"modules/network/info/speed.sh",
+		"modules/network/info/network_info.sh",
 		"modules/network/dns/recovery.sh",
 		"modules/network/interfaces/lan/lan_ip.sh",
 		"modules/network/interfaces/usb/deps.sh",
@@ -141,7 +146,7 @@ func generateInstallScript(outputFile string) error {
 		"ui/lib/review.sh",
 		"ui/menu/packages.sh",
 		"ui/menu/hardware.sh",
-		"ui/menu/network.sh",
+		"ui/menu/guest_network.sh",
 		"ui/menu/proxy_engine.sh",
 		"ui/menu/proxy.sh",
 		"ui/menu/diagnostics.sh",
