@@ -69,14 +69,8 @@ _hw_pick_tether_device() {
     count=$(printf '%s\n' "$list" | grep -c .)
 
     if [ "$count" -eq 0 ]; then
-        log_warn "No tethering interface detected."
-        ui_read "Device name [usb0]"
-        case "$UI_CHOICE" in
-            0) return 1 ;;
-            q|Q) daypass_quit ;;
-        esac
-        HW_DEVICE="${UI_CHOICE:-usb0}"
-        return 0
+        echo "  ❌ No active USB Network Hardware detected! Please connect your phone/dongle, turn on USB Tethering, and try again."
+        return 1
     fi
 
     if [ "$count" -eq 1 ]; then
@@ -104,17 +98,17 @@ _hw_pick_tether_device() {
 }
 
 hardware_setup_tethering() {
-    if command -v usb_mtp_waiting >/dev/null 2>&1 && usb_mtp_waiting; then
-        log_warn "Phone is in MTP mode. Enable USB Tethering on the phone first."
-        ui_read "Create the WAN interface anyway? [y/N]"
-        case "$UI_CHOICE" in
-            y|Y) ;;
-            q|Q) daypass_quit ;;
-            *) return 0 ;;
-        esac
+    if ! command -v usb_net_hardware_present >/dev/null 2>&1 || ! usb_net_hardware_present; then
+        echo "  ❌ No active USB Network Hardware detected! Please connect your phone/dongle, turn on USB Tethering, and try again."
+        return 1
     fi
 
-    _hw_pick_tether_device || return 0
+    if command -v usb_mtp_waiting >/dev/null 2>&1 && usb_mtp_waiting; then
+        log_warn "Phone is in MTP mode. Enable USB Tethering on the phone first."
+        return 1
+    fi
+
+    _hw_pick_tether_device || return 1
 
     ui_read "Route metric [${USB_WAN_DEFAULT_METRIC}]"
     case "$UI_CHOICE" in

@@ -7,13 +7,13 @@
       "key": "1",
       "title": "Install Drivers (RNDIS / CDC-Ether / NCM)",
       "description": "Installs the kernel modules OpenWrt needs before a phone can appear as a USB network device. 1 is RNDIS, CDC-Ether and CDC-NCM. 2 is ipheth and usbmuxd. 3 is both plus QMI, MBIM and usb-modeswitch.",
-      "usage_tip": "Run this before Setup USB Tethering. Install only the phone you use. The full suite is the larger option."
+      "usage_tip": "Each line shows Installed, Partial, or Not Installed. A complete set is skipped so the router does not download it again."
     },
     {
       "key": "2",
       "title": "Setup USB Tethering",
-      "description": "Creates network.wan_usb (proto dhcp) on a detected tethering device, adds it to the firewall wan zone and brings it up.",
-      "usage_tip": "Install drivers first. If the phone is in MTP mode, enable USB Tethering on the phone. Creating the interface anyway requires an explicit yes."
+      "description": "Creates network.wan_usb only when a live USB network device is present (usb0, rndis, ncm, or USB-backed eth). Adds it to the firewall wan zone and brings it up.",
+      "usage_tip": "Install drivers first. If nothing is plugged in, Setup stops and does not write /etc/config/network. Use Refresh Status after enabling tethering on the phone."
     },
     {
       "key": "3",
@@ -41,8 +41,8 @@
     },
     {
       "key": "7",
-      "title": "Refresh",
-      "description": "Redraws the dashboard from the current USB and UCI state.",
+      "title": "Refresh Status",
+      "description": "Redraws the dashboard from the current USB and UCI state without leaving the menu.",
       "usage_tip": "Use this after enabling USB Tethering on the phone."
     },
     {

@@ -71,12 +71,11 @@ usb_wan_state() {
 
 # Create or update USB tethering WAN interface.
 # Usage: setup_usb_wan [device] [metric]
-# Returns 0 when the UCI interface is written, 1 when UCI is unavailable.
+# Returns 0 when the UCI interface is written, 1 when hardware is missing or UCI fails.
 setup_usb_wan() {
     local usb_dev="${1:-}"
     local metric="${2:-$USB_WAN_DEFAULT_METRIC}"
     local zone
-    local usb_guessed=0
 
     log_info "Setting up USB Tethering WAN interface ..."
 
@@ -86,20 +85,22 @@ setup_usb_wan() {
         log_warn "USB dependency module is not loaded."
     fi
 
+    if [ -n "$usb_dev" ] && [ ! -e "/sys/class/net/$usb_dev" ]; then
+        usb_dev=""
+    fi
     if [ -z "$usb_dev" ]; then
-        if command -v detect_usb_device >/dev/null 2>&1; then
+        if command -v usb_active_net_dev >/dev/null 2>&1; then
+            usb_dev=$(usb_active_net_dev) || usb_dev=""
+        elif command -v detect_usb_device >/dev/null 2>&1; then
             usb_dev=$(detect_usb_device) || usb_dev=""
         fi
     fi
-
-    if [ -z "$usb_dev" ]; then
-        log_warn "No USB tethering device detected."
-        log_warn "Connect your phone and enable USB Tethering first."
-        usb_dev="usb0"
-        usb_guessed=1
-    else
-        log_success "Using USB device : $usb_dev"
+    if [ -z "$usb_dev" ] || [ ! -e "/sys/class/net/$usb_dev" ]; then
+        echo "  ❌ No active USB Network Hardware detected! Please connect your phone/dongle, turn on USB Tethering, and try again."
+        return 1
     fi
+
+    log_success "Using USB device : $usb_dev"
 
     command -v uci >/dev/null 2>&1 || { log_error "uci is not available."; return 1; }
 
@@ -121,11 +122,7 @@ setup_usb_wan() {
     fi
 
     ifup $USB_WAN_IFACE >/dev/null 2>&1 || true
-    if [ "$usb_guessed" -eq 1 ]; then
-        log_warn "USB WAN interface [$USB_WAN_IFACE] configured for device [$usb_dev], but no USB device is connected yet. Plug in your phone with tethering enabled, then re-run Setup (or use Refresh) to pick it up."
-    else
-        log_success "USB WAN interface [$USB_WAN_IFACE] is ready (device $usb_dev, metric $metric)!"
-    fi
+    log_success "USB WAN interface [$USB_WAN_IFACE] is ready (device $usb_dev, metric $metric)!"
     return 0
 }
 
@@ -147,37 +144,67 @@ usb_wan_set_enabled() {
     return 0
 }
 
-# One-line hardware, interface, and metric summaries for the status card.
+# One-line hardware, interface, and failover summaries for the status card.
 usb_status_hardware() {
-    local line
+    local line dev driver kind label
 
-    line=$(usb_device_list 2>/dev/null | head -n 1)
+    line=$(usb_net_interfaces 2>/dev/null | head -n 1)
     if [ -n "$line" ]; then
-        printf '%s\n' "$line"
+        IFS='|' read -r dev driver kind <<EOF
+$line
+EOF
+        if command -v usb_net_kind_label >/dev/null 2>&1; then
+            label=$(usb_net_kind_label "$driver")
+        else
+            label="$driver"
+        fi
+        printf '%s\n' "✔ $label ($dev)"
+        return 0
+    fi
+    dev=$(usb_active_net_dev 2>/dev/null || true)
+    if [ -n "$dev" ]; then
+        printf '%s\n' "✔ USB-net ($dev)"
         return 0
     fi
     if command -v usb_mtp_waiting >/dev/null 2>&1 && usb_mtp_waiting; then
-        printf '%s\n' "phone in MTP mode"
+        printf '%s\n' "❌ Not Connected (phone in MTP mode)"
         return 0
     fi
-    printf '%s\n' "none"
+    printf '%s\n' "❌ Not Connected"
 }
 
 usb_status_interface() {
-    local out="" dev driver kind
+    local dev carrier
 
-    while IFS='|' read -r dev driver kind; do
-        [ -n "$dev" ] || continue
-        if [ -n "$out" ]; then
-            out="$out, $dev ($kind)"
-        else
-            out="$dev ($kind)"
+    if command -v usb_wan_exists >/dev/null 2>&1 && usb_wan_exists; then
+        if [ "$(uci -q get "network.${USB_WAN_IFACE}.disabled")" = "1" ]; then
+            printf '%s\n' "⚠️ Defined (Down)"
+            return 0
         fi
-    done <<EOF
-$(usb_net_interfaces 2>/dev/null | head -n 4)
-EOF
-    [ -n "$out" ] || out="none"
-    printf '%s\n' "$out"
+        dev=$(uci -q get "network.${USB_WAN_IFACE}.device")
+        [ -n "$dev" ] || dev=$(uci -q get "network.${USB_WAN_IFACE}.ifname")
+        if [ -z "$dev" ] || [ ! -e "/sys/class/net/$dev" ]; then
+            printf '%s\n' "⚠️ Defined (Down)"
+            return 0
+        fi
+        carrier=$(cat "/sys/class/net/$dev/operstate" 2>/dev/null)
+        case "$carrier" in
+            up) printf '%s\n' "🟢 UP" ;;
+            *)  printf '%s\n' "🔴 DOWN" ;;
+        esac
+        return 0
+    fi
+
+    dev=$(usb_active_net_dev 2>/dev/null || true)
+    if [ -n "$dev" ] && [ -e "/sys/class/net/$dev" ]; then
+        carrier=$(cat "/sys/class/net/$dev/operstate" 2>/dev/null)
+        case "$carrier" in
+            up) printf '%s\n' "🟢 UP" ;;
+            *)  printf '%s\n' "🔴 DOWN" ;;
+        esac
+        return 0
+    fi
+    printf '%s\n' "🔴 DOWN"
 }
 
 usb_status_metrics() {
@@ -214,9 +241,9 @@ usb_status_metrics() {
 usb_render_status_card() {
     echo "  📡 USB & Network Status"
     ui_divider
-    echo "  🔌 Hardware  : $(usb_status_hardware)"
-    echo "  📱 Interface : $(usb_status_interface)"
-    echo "  ⚖️ Metrics   : $(usb_status_metrics)"
+    echo "  🔌 Hardware           : $(usb_status_hardware)"
+    echo "  📱 Interface          : $(usb_status_interface)"
+    echo "  ⚖️ Failover Priority : $(usb_status_metrics)"
 }
 
 # WAN-like UCI interfaces, one name per line.

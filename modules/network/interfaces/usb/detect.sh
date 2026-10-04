@@ -38,6 +38,64 @@ usb_net_interfaces() {
     done
 }
 
+# Friendly label for a USB network kernel driver.
+usb_net_kind_label() {
+    case "$1" in
+        rndis_host)      printf '%s\n' "Android RNDIS" ;;
+        cdc_ether)       printf '%s\n' "Android CDC-Ether" ;;
+        cdc_ncm)         printf '%s\n' "Android NCM" ;;
+        cdc_eem|cdc_subset) printf '%s\n' "Android USB-net" ;;
+        ipheth)          printf '%s\n' "iPhone" ;;
+        qmi_wwan)        printf '%s\n' "QMI Modem" ;;
+        cdc_mbim)        printf '%s\n' "MBIM Modem" ;;
+        huawei_cdc_ncm)  printf '%s\n' "Huawei Modem" ;;
+        sierra_net)      printf '%s\n' "Sierra Modem" ;;
+        *)               printf '%s\n' "${1:-USB-net}" ;;
+    esac
+}
+
+# 0 when a live USB network device is in sysfs (usb*, rndis*, ncm*, enx*, or USB-backed eth*).
+usb_net_hardware_present() {
+    usb_active_net_dev >/dev/null 2>&1
+}
+
+# Prints the first live USB network device name. Returns 1 when none.
+usb_active_net_dev() {
+    local path dev line
+
+    line=$(usb_net_interfaces 2>/dev/null | head -n 1)
+    if [ -n "$line" ]; then
+        printf '%s\n' "${line%%|*}"
+        return 0
+    fi
+
+    for path in /sys/class/net/usb* /sys/class/net/rndis* /sys/class/net/ncm* /sys/class/net/enx*; do
+        [ -e "$path" ] || continue
+        dev="${path##*/}"
+        case "$dev" in
+            usb*|rndis*|ncm*|enx*)
+                printf '%s\n' "$dev"
+                return 0
+                ;;
+        esac
+    done
+
+    for path in /sys/class/net/eth*; do
+        [ -e "$path" ] || continue
+        dev="${path##*/}"
+        usb_net_driver "$dev" >/dev/null 2>&1 || continue
+        printf '%s\n' "$dev"
+        return 0
+    done
+
+    dev=$(usb_dmesg_interfaces 2>/dev/null | head -n 1)
+    if [ -n "$dev" ] && [ -e "/sys/class/net/$dev" ]; then
+        printf '%s\n' "$dev"
+        return 0
+    fi
+    return 1
+}
+
 # Tethering devices from sysfs, one per line. Returns 1 when none exist.
 usb_tether_interfaces() {
     local dev

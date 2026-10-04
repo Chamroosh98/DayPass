@@ -15,7 +15,7 @@ usb_render_operations() {
     echo "  4) 🔀 Toggle Interface Status ($state)"
     echo "  5) ♻️ Restore / Reset USB Stack"
     echo "  6) 📟 Modem Mode Switch"
-    echo "  7) 🔄 Refresh"
+    echo "  7) 🔄 Refresh Status"
     echo "  8) 📈 System Resources"
 }
 
@@ -33,9 +33,9 @@ usb_render_dashboard() {
     else
         echo "  📡 USB & Network Status"
         ui_divider
-        echo "  🔌 Hardware  : unavailable"
-        echo "  📱 Interface : unavailable"
-        echo "  ⚖️ Metrics   : none"
+        echo "  🔌 Hardware           : unavailable"
+        echo "  📱 Interface          : unavailable"
+        echo "  ⚖️ Failover Priority : none"
     fi
     echo
     usb_render_operations "$state"
