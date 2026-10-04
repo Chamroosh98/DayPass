@@ -8,15 +8,18 @@ test_ip_basic() {
     local port="$2"
     local timeout_sec="${3:-3}"
 
-    if command -v nc >/dev/null 2>&1; then
-        if nc -z -w "$timeout_sec" "$ip" "$port" >/dev/null 2>&1; then
+    if command -v curl >/dev/null 2>&1; then
+        if curl -s -o /dev/null --connect-timeout "$timeout_sec" "telnet://$ip:$port"; then
             return 0
         fi
         return 1
     fi
 
-    if timeout "$timeout_sec" sh -c "echo > /dev/tcp/$ip/$port" 2>/dev/null; then
-        return 0
+    if command -v nc >/dev/null 2>&1; then
+        if nc -w "$timeout_sec" "$ip" "$port" </dev/null >/dev/null 2>&1; then
+            return 0
+        fi
+        return 1
     fi
 
     return 1

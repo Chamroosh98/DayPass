@@ -46,15 +46,16 @@ ui_pause() {
 ui_nav_footer() {
     _nav_muted="${COLOR_MUTED:-${GRAY:-\033[90m}}"
     case "${1:-}" in
-        root) printf "  ${_nav_muted}0) Exit DayPass${RESET}\n" ;;
-        main) printf "  ${_nav_muted}0) Back to Main Menu${RESET}\n" ;;
-        *)    printf "  ${_nav_muted}0) Back / Skip${RESET}\n" ;;
+        root) _nav_back="0) Exit DayPass" ;;
+        main) _nav_back="0) Back to Main Menu" ;;
+        *)    _nav_back="0) Back / Skip" ;;
     esac
-    if [ "${1:-}" != "root" ]; then
-        printf "  ${_nav_muted}q) Quit DayPass${RESET}\n"
-    fi
-    printf "  ${_nav_muted}h) Help${RESET}\n"
     echo "  ───────────────────────────────────────────────────────────"
+    if [ "${1:-}" != "root" ]; then
+        printf "  ${_nav_muted}%s    %s    %s${RESET}\n" "$_nav_back" "q) Quit DayPass" "h) Help"
+    else
+        printf "  ${_nav_muted}%s    %s${RESET}\n" "$_nav_back" "h) Help"
+    fi
     echo
 }
 

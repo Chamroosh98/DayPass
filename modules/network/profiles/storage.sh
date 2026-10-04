@@ -22,7 +22,7 @@ list_configs() {
         count=$((count + 1))
         name=$(basename "$file" .json)
         protocol=$(jq -r '.protocol // "unknown"' "$file" 2>/dev/null)
-        enabled=$(jq -r '.enabled // true' "$file" 2>/dev/null)
+        enabled=$(jq -r 'if .enabled == false then "false" else "true" end' "$file" 2>/dev/null)
         subscription=$(jq -r '.subscription // empty' "$file" 2>/dev/null)
 
         status="${GREEN}ON${RESET}"
@@ -193,7 +193,7 @@ toggle_config() {
     fi
 
     local current
-    current=$(jq -r '.enabled // true' "$file" 2>/dev/null)
+    current=$(jq -r 'if .enabled == false then "false" else "true" end' "$file" 2>/dev/null)
 
     local new_value
     if [ "$current" = "true" ]; then

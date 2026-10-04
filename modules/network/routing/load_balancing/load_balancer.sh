@@ -313,24 +313,22 @@ mwan_metric_menu() {
 
 load_balancer_menu() {
     local HELP_MODULE_ID="network_multiwan"
-    local iface metric
+    local iface metric list
 
     while true; do
         render_persistent_header
         echo "  ⚖️ Multi-WAN Load Balancer"
         echo "  ───────────────────────────────────────────────────────────"
         echo "  🌐 Detected WAN interfaces"
-        if mwan_discover_ifaces >/dev/null 2>&1; then
-            metric=""
-            for iface in $(mwan_discover_ifaces); do
+        list=$(mwan_discover_ifaces)
+        if [ -z "$list" ]; then
+            echo "     none"
+        else
+            for iface in $list; do
                 metric=$(uci -q get "network.$iface.metric")
                 [ -n "$metric" ] || metric="default"
                 echo "     $iface  metric $metric"
-                metric="x"
             done
-            [ -n "$metric" ] || echo "     none"
-        else
-            echo "     none"
         fi
         echo
         echo "  📌 1) Install Dependencies"
