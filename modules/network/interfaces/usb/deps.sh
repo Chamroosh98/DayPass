@@ -54,11 +54,21 @@ _usb_dep_update() {
         return 0
     fi
     if command -v opkg >/dev/null 2>&1; then
-        opkg update >/dev/null 2>&1 || true
+        (opkg update >/dev/null 2>&1) &
+        if command -v ui_spinner >/dev/null 2>&1; then
+            ui_spinner $! "Updating package database ..." || true
+        else
+            wait $! || true
+        fi
         return 0
     fi
     if command -v apk >/dev/null 2>&1; then
-        apk update >/dev/null 2>&1 || true
+        (apk update >/dev/null 2>&1) &
+        if command -v ui_spinner >/dev/null 2>&1; then
+            ui_spinner $! "Updating package database ..." || true
+        else
+            wait $! || true
+        fi
         return 0
     fi
     return 1

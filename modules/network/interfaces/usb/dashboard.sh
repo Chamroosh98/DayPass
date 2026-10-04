@@ -9,11 +9,11 @@ usb_render_operations() {
 
     echo "  🛠️ Operations"
     ui_divider
-    echo "  1) 📱 Setup USB Tethering"
-    echo "  2) 🔀 Toggle Interface ($state)"
-    echo "  3) 📶 Failover & Metrics"
-    echo "  4) 📌 Install Drivers"
-    echo "  5) ♻️ Restore / Reset USB"
+    echo "  1) 📌 Install Drivers (RNDIS / CDC-Ether / NCM)"
+    echo "  2) 📱 Setup USB Tethering"
+    echo "  3) 📶 Failover & Metrics Configuration"
+    echo "  4) 🔀 Toggle Interface Status ($state)"
+    echo "  5) ♻️ Restore / Reset USB Stack"
     echo "  6) 📟 Modem Mode Switch"
     echo "  7) 🔄 Refresh"
     echo "  8) 📈 System Resources"

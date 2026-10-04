@@ -79,6 +79,49 @@ ui_title() {
     ui_divider
 }
 
+# $1 PID of a background job  $2 message
+# Animates on one line until the PID exits, then returns that job's status.
+ui_spinner() {
+    _sp_pid="$1"
+    _sp_msg="${2:-Working ...}"
+    _sp_st=0
+
+    case "$_sp_pid" in
+        ''|*[!0-9]*) return 1 ;;
+    esac
+
+    if command -v tput >/dev/null 2>&1; then
+        tput civis 2>/dev/null || printf '\033[?25l'
+    else
+        printf '\033[?25l'
+    fi
+
+    set -- ⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏
+    while kill -0 "$_sp_pid" 2>/dev/null; do
+        printf '\r  %s %s\033[K' "$1" "$_sp_msg"
+        shift
+        [ "$#" -gt 0 ] || set -- ⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏
+        if sleep 0.1 2>/dev/null; then
+            :
+        elif command -v usleep >/dev/null 2>&1; then
+            usleep 100000 2>/dev/null || sleep 1
+        else
+            sleep 1
+        fi
+    done
+
+    printf '\r\033[K'
+    if command -v tput >/dev/null 2>&1; then
+        tput cnorm 2>/dev/null || printf '\033[?25h'
+    else
+        printf '\033[?25h'
+    fi
+
+    wait "$_sp_pid" 2>/dev/null
+    _sp_st=$?
+    return "$_sp_st"
+}
+
 ui_show_help() {
     if command -v show_help >/dev/null 2>&1; then
         show_help "$1"

@@ -215,20 +215,28 @@ deploy_targeted_packages()
                 : > "$DAYPASS_APK_LOG"
                 (apk add --allow-untrusted --no-progress $INSTALL_FILES >"$DAYPASS_APK_LOG" 2>&1) &
                 BG_PID=$!
-                if command -v show_timer_progress >/dev/null 2>&1; then
+                if command -v ui_spinner >/dev/null 2>&1; then
+                    ui_spinner "$BG_PID" "Installing packages ..."
+                elif command -v show_timer_progress >/dev/null 2>&1; then
                     show_timer_progress "$BG_PID" "applying APK package bundle"
+                    wait "$BG_PID"
+                else
+                    wait "$BG_PID"
                 fi
-                wait "$BG_PID"
                 [ $? -eq 0 ] && INSTALL_SUCCESS=1
                 ;;
             opkg|*)
                 : > "$DAYPASS_OPKG_LOG"
                 (opkg install --force-checksum $INSTALL_FILES >"$DAYPASS_OPKG_LOG" 2>&1) &
                 BG_PID=$!
-                if command -v show_timer_progress >/dev/null 2>&1; then
+                if command -v ui_spinner >/dev/null 2>&1; then
+                    ui_spinner "$BG_PID" "Installing packages ..."
+                elif command -v show_timer_progress >/dev/null 2>&1; then
                     show_timer_progress "$BG_PID" "applying OPKG package bundle"
+                    wait "$BG_PID"
+                else
+                    wait "$BG_PID"
                 fi
-                wait "$BG_PID"
                 [ $? -eq 0 ] && INSTALL_SUCCESS=1
                 ;;
         esac

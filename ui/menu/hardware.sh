@@ -130,7 +130,7 @@ hardware_toggle_tethering() {
     case "$(usb_wan_state)" in
         enabled)  usb_wan_set_enabled 0 ;;
         disabled) usb_wan_set_enabled 1 ;;
-        *)        log_warn "USB WAN is not configured. Use option 1 first." ;;
+        *)        log_warn "USB WAN is not configured. Use option 2 first." ;;
     esac
 }
 
@@ -199,10 +199,10 @@ hardware_menu() {
         ui_read "Select option"
 
         case "$UI_CHOICE" in
-            1) hardware_setup_tethering ;;
-            2) hardware_toggle_tethering ;;
+            1) ui_run usb_driver_menu "USB Drivers"; continue ;;
+            2) hardware_setup_tethering ;;
             3) hardware_failover_menu; continue ;;
-            4) ui_run usb_driver_menu "USB Drivers"; continue ;;
+            4) hardware_toggle_tethering ;;
             5)
                 if command -v usb_restore_settings >/dev/null 2>&1; then
                     usb_restore_settings || true

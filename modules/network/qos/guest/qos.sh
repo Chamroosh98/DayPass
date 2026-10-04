@@ -33,7 +33,12 @@ setup_simple_qos() {
         if [ "${PKG_MANAGER:-opkg}" = "apk" ]; then
             apk add kmod-sched tc >/dev/null 2>&1
         else
-            opkg update >/dev/null 2>&1
+            (opkg update >/dev/null 2>&1) &
+            if command -v ui_spinner >/dev/null 2>&1; then
+                ui_spinner $! "Updating package database ..." || true
+            else
+                wait $! || true
+            fi
             opkg install kmod-sched tc >/dev/null 2>&1
         fi
     fi
@@ -88,7 +93,12 @@ setup_sqm_qos() {
     if [ "${PKG_MANAGER:-opkg}" = "apk" ]; then
         apk add sqm-scripts >/dev/null 2>&1 || true
     else
-        opkg update >/dev/null 2>&1
+        (opkg update >/dev/null 2>&1) &
+        if command -v ui_spinner >/dev/null 2>&1; then
+            ui_spinner $! "Updating package database ..." || true
+        else
+            wait $! || true
+        fi
         opkg install sqm-scripts luci-app-sqm >/dev/null 2>&1 || true
     fi
 

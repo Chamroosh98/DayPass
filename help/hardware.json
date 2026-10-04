@@ -5,31 +5,31 @@
   "items": [
     {
       "key": "1",
-      "title": "Setup USB Tethering",
-      "description": "Creates network.wan_usb (proto dhcp) on a detected tethering device, adds it to the firewall wan zone and brings it up.",
-      "usage_tip": "If the phone is in MTP mode, enable USB Tethering first. Creating the interface anyway requires an explicit yes."
+      "title": "Install Drivers (RNDIS / CDC-Ether / NCM)",
+      "description": "Installs the kernel modules OpenWrt needs before a phone can appear as a USB network device. 1 is RNDIS, CDC-Ether and CDC-NCM. 2 is ipheth and usbmuxd. 3 is both plus QMI, MBIM and usb-modeswitch.",
+      "usage_tip": "Run this before Setup USB Tethering. Install only the phone you use. The full suite is the larger option."
     },
     {
       "key": "2",
-      "title": "Toggle Interface",
-      "description": "Enables or disables network.wan_usb.",
-      "usage_tip": "Create the interface with option 1 before toggling it."
+      "title": "Setup USB Tethering",
+      "description": "Creates network.wan_usb (proto dhcp) on a detected tethering device, adds it to the firewall wan zone and brings it up.",
+      "usage_tip": "Install drivers first. If the phone is in MTP mode, enable USB Tethering on the phone. Creating the interface anyway requires an explicit yes."
     },
     {
       "key": "3",
-      "title": "Failover & Metrics",
+      "title": "Failover & Metrics Configuration",
       "description": "Lists wan, wan_usb, wan6 and other WAN interfaces with their metrics. Choosing one writes network.<iface>.metric.",
       "usage_tip": "A lower metric is preferred. Enter on the metric prompt leaves that interface unchanged."
     },
     {
       "key": "4",
-      "title": "Install Drivers",
-      "description": "1 installs RNDIS, CDC-Ether and CDC-NCM. 2 installs ipheth and usbmuxd. 3 installs both plus QMI, MBIM and usb-modeswitch.",
-      "usage_tip": "Install only the phone you use. The full suite is the larger option."
+      "title": "Toggle Interface Status",
+      "description": "Enables or disables network.wan_usb.",
+      "usage_tip": "Create the interface with option 2 before toggling it."
     },
     {
       "key": "5",
-      "title": "Restore / Reset USB",
+      "title": "Restore / Reset USB Stack",
       "description": "After confirmation, deletes wan_usb, its device binding and firewall membership, then restarts the network service. A second prompt can uninstall the USB driver packages.",
       "usage_tip": "Enter keeps the current configuration. Enter on the package prompt keeps the drivers installed."
     },

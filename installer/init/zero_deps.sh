@@ -136,22 +136,31 @@ deploy_system_dependencies()
 
     (pkg_update >/dev/null 2>&1) &
     BG_PID=$!
-    if command -v show_timer_progress >/dev/null 2>&1; then
+    if command -v ui_spinner >/dev/null 2>&1; then
+        ui_spinner "$BG_PID" "Updating package database ..."
+    elif command -v show_timer_progress >/dev/null 2>&1; then
         show_timer_progress "$BG_PID" "refreshing package index"
+        wait "$BG_PID"
+    else
+        wait "$BG_PID"
     fi
-    wait "$BG_PID"
 
     if [ -n "$MISSING_PACKAGES" ]; then
         for pkg in $MISSING_PACKAGES; do
             (pkg_install "$pkg" >> "$DEP_LOG" 2>&1) &
             BG_PID=$!
 
-            if command -v show_timer_progress >/dev/null 2>&1; then
+            if command -v ui_spinner >/dev/null 2>&1; then
+                ui_spinner "$BG_PID" "Installing [$pkg] ..."
+                INSTALL_STATUS=$?
+            elif command -v show_timer_progress >/dev/null 2>&1; then
                 show_timer_progress "$BG_PID" "installing core tool [$pkg]"
+                wait "$BG_PID"
+                INSTALL_STATUS=$?
+            else
+                wait "$BG_PID"
+                INSTALL_STATUS=$?
             fi
-
-            wait "$BG_PID"
-            INSTALL_STATUS=$?
 
             if [ "$INSTALL_STATUS" -eq 0 ]; then
                 log_success "Package [$pkg] installed successfully."

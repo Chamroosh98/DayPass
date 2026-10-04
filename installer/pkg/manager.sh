@@ -30,9 +30,21 @@ pkg_update()
 
     if [ "$PKG_MANAGER" = "apk" ]; then
         # Standard update first; if IPv6/DNS issues occur, fall back to IPv4
-        if ! apk update --network-timeout 5 >/dev/null 2>&1; then
+        (apk update --network-timeout 5 >/dev/null 2>&1) &
+        if command -v ui_spinner >/dev/null 2>&1; then
+            ui_spinner $! "Updating package database ..."
+        else
+            wait $!
+        fi
+        if [ $? -ne 0 ]; then
             log_warn "Standard APK update failed/timed out! Attempting fallback via IPv4 ..." 2>/dev/null
-            if ! apk update --force-ipv4 --network-timeout 5 >/dev/null 2>&1; then
+            (apk update --force-ipv4 --network-timeout 5 >/dev/null 2>&1) &
+            if command -v ui_spinner >/dev/null 2>&1; then
+                ui_spinner $! "Updating package database ..."
+            else
+                wait $!
+            fi
+            if [ $? -ne 0 ]; then
                 log_warn "APK update encountered repository warnings. Proceeding with local cache ..." 2>/dev/null
             else
                 log_success "APK indexes updated successfully using IPv4 fallback." 2>/dev/null
@@ -42,7 +54,13 @@ pkg_update()
         fi
 
     elif [ "$PKG_MANAGER" = "opkg" ]; then
-        if ! opkg update >/dev/null 2>&1; then
+        (opkg update >/dev/null 2>&1) &
+        if command -v ui_spinner >/dev/null 2>&1; then
+            ui_spinner $! "Updating package database ..."
+        else
+            wait $!
+        fi
+        if [ $? -ne 0 ]; then
             log_warn "OPKG update encountered minor mirror warnings. Proceeding anyway ..." 2>/dev/null
         else
             log_success "OPKG package indexes updated successfully." 2>/dev/null

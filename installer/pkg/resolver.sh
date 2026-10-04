@@ -451,9 +451,15 @@ _pr_refresh_index()
 
     _pr_log INFO "Refreshing package indexes with [$PKG_MANAGER] ..."
     case "$PKG_MANAGER" in
-        apk)  apk update >/dev/null 2>&1 </dev/null ;;
-        opkg) opkg update >/dev/null 2>&1 </dev/null ;;
+        apk)  (apk update >/dev/null 2>&1 </dev/null) & ;;
+        opkg) (opkg update >/dev/null 2>&1 </dev/null) & ;;
+        *)    return 0 ;;
     esac
+    if command -v ui_spinner >/dev/null 2>&1; then
+        ui_spinner $! "Updating package database ..." || true
+    else
+        wait $! || true
+    fi
     return 0
 }
 

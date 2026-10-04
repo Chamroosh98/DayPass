@@ -91,9 +91,19 @@ install_mwan3_deps() {
     if command -v pkg_update >/dev/null 2>&1; then
         pkg_update >/dev/null 2>&1 || true
     elif command -v opkg >/dev/null 2>&1; then
-        opkg update >/dev/null 2>&1 || true
+        (opkg update >/dev/null 2>&1) &
+        if command -v ui_spinner >/dev/null 2>&1; then
+            ui_spinner $! "Updating package database ..." || true
+        else
+            wait $! || true
+        fi
     elif command -v apk >/dev/null 2>&1; then
-        apk update >/dev/null 2>&1 || true
+        (apk update >/dev/null 2>&1) &
+        if command -v ui_spinner >/dev/null 2>&1; then
+            ui_spinner $! "Updating package database ..." || true
+        else
+            wait $! || true
+        fi
     fi
 
     if command -v pkg_install >/dev/null 2>&1 && pkg_install mwan3; then
