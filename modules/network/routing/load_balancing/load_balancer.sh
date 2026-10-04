@@ -214,34 +214,78 @@ configure_mwan3_engine() {
     return 0
 }
 
+# $1 interface name. One emoji, so the metric column stays aligned.
+_mwan_metric_icon() {
+    case "$1" in
+        wan6*)    printf '%s\n' "🌐" ;;
+        wan_usb*) printf '%s\n' "📱" ;;
+        wwan*)    printf '%s\n' "📶" ;;
+        wan|wan_*) printf '%s\n' "🔌" ;;
+        *)        printf '%s\n' "🌐" ;;
+    esac
+}
+
+# $1 index  $2 iface  $3 metric  $4 enabled|disabled  $5 1 when this is the last row
+mwan_render_metric_row() {
+    local i="$1" iface="$2" metric="$3" state="$4" last="$5"
+    local icon name branch st
+
+    icon=$(_mwan_metric_icon "$iface")
+    name="$iface"
+    while [ "${#name}" -lt 12 ]; do
+        name="$name "
+    done
+    while [ "${#metric}" -lt 7 ]; do
+        metric="$metric "
+    done
+    if [ "$last" = "1" ]; then
+        branch="└──"
+    else
+        branch="├──"
+    fi
+    case "$state" in
+        enabled) st="🟢 enabled" ;;
+        *)       st="🔴 disabled" ;;
+    esac
+    echo "  $i) $icon $name $branch Metric: $metric │ Status: $st"
+}
+
 # View and set network.<iface>.metric for every discovered WAN.
 mwan_metric_menu() {
-    local list count i iface metric current
+    local list count i iface metric current state last
 
     while true; do
         if command -v render_persistent_header >/dev/null 2>&1; then
             render_persistent_header
         fi
-        echo "  🧭 WAN Metrics"
-        echo "  A lower metric is preferred."
+        echo "  ⚖️ WAN Metrics & Failover Configuration"
+        echo "  💡 Note: Lower metric values are preferred by the routing engine."
         echo
         list=$(mwan_discover_ifaces)
         count=0
-        i=1
-        if [ -n "$list" ]; then
+        for iface in $list; do
+            count=$((count + 1))
+        done
+        if [ "$count" -eq 0 ]; then
+            echo "  No WAN interfaces found."
+        else
+            i=1
             for iface in $list; do
                 metric=$(uci -q get "network.$iface.metric")
                 [ -n "$metric" ] || metric="default"
                 if mwan_iface_enabled "$iface"; then
-                    echo "  $i) $iface  metric $metric  enabled"
+                    state="enabled"
                 else
-                    echo "  $i) $iface  metric $metric  disabled"
+                    state="disabled"
                 fi
+                if [ "$i" -eq "$count" ]; then
+                    last=1
+                else
+                    last=0
+                fi
+                mwan_render_metric_row "$i" "$iface" "$metric" "$state" "$last"
                 i=$((i + 1))
-                count=$((count + 1))
             done
-        else
-            echo "  No WAN interfaces found."
         fi
         if command -v ui_nav_footer >/dev/null 2>&1; then
             ui_nav_footer

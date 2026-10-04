@@ -1,0 +1,73 @@
+{
+  "module_id": "hardware",
+  "title": "Hardware & USB Tethering Manager",
+  "summary": "USB status first, then the operations menu. Drivers install as Android, iOS, or the full suite.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Setup USB Tethering",
+      "description": "Creates network.wan_usb (proto dhcp) on a detected tethering device, adds it to the firewall wan zone and brings it up.",
+      "usage_tip": "If the phone is in MTP mode, enable USB Tethering first. Creating the interface anyway requires an explicit yes."
+    },
+    {
+      "key": "2",
+      "title": "Toggle Interface",
+      "description": "Enables or disables network.wan_usb.",
+      "usage_tip": "Create the interface with option 1 before toggling it."
+    },
+    {
+      "key": "3",
+      "title": "Failover & Metrics",
+      "description": "Lists wan, wan_usb, wan6 and other WAN interfaces with their metrics. Choosing one writes network.<iface>.metric.",
+      "usage_tip": "A lower metric is preferred. Enter on the metric prompt leaves that interface unchanged."
+    },
+    {
+      "key": "4",
+      "title": "Install Drivers",
+      "description": "1 installs RNDIS, CDC-Ether and CDC-NCM. 2 installs ipheth and usbmuxd. 3 installs both plus QMI, MBIM and usb-modeswitch.",
+      "usage_tip": "Install only the phone you use. The full suite is the larger option."
+    },
+    {
+      "key": "5",
+      "title": "Restore / Reset USB",
+      "description": "After confirmation, deletes wan_usb, its device binding and firewall membership, then restarts the network service. A second prompt can uninstall the USB driver packages.",
+      "usage_tip": "Enter keeps the current configuration. Enter on the package prompt keeps the drivers installed."
+    },
+    {
+      "key": "6",
+      "title": "Modem Mode Switch",
+      "description": "Lists modems still in storage mode with usbmode -l and switches them with usbmode -s.",
+      "usage_tip": "Needs usb-modeswitch from the full driver profile."
+    },
+    {
+      "key": "7",
+      "title": "Refresh",
+      "description": "Redraws the dashboard from the current USB and UCI state.",
+      "usage_tip": "Use this after enabling USB Tethering on the phone."
+    },
+    {
+      "key": "8",
+      "title": "System Resources",
+      "description": "Opens the system resource screen.",
+      "usage_tip": "RAM and flash figures come from the live router."
+    },
+    {
+      "key": "0",
+      "title": "Back to Main Menu",
+      "description": "Returns to the main menu.",
+      "usage_tip": "Nothing is changed by leaving this menu."
+    },
+    {
+      "key": "q",
+      "title": "Quit DayPass",
+      "description": "Ends the DayPass session from any menu.",
+      "usage_tip": "Ctrl+C does the same and restores the terminal."
+    },
+    {
+      "key": "h",
+      "title": "Help",
+      "description": "Opens the manual of the current screen.",
+      "usage_tip": "Enter or 0 inside a manual returns to the screen you came from; q quits DayPass."
+    }
+  ]
+}

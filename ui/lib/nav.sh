@@ -50,12 +50,20 @@ ui_nav_footer() {
         main) _nav_back="0) Back to Main Menu" ;;
         *)    _nav_back="0) Back / Skip" ;;
     esac
-    echo "  ───────────────────────────────────────────────────────────"
     if [ "${1:-}" != "root" ]; then
-        printf "  ${_nav_muted}%s    %s    %s${RESET}\n" "$_nav_back" "q) Quit DayPass" "h) Help"
+        _nav_line="$_nav_back   q) Quit DayPass   h) Help"
     else
-        printf "  ${_nav_muted}%s    %s${RESET}\n" "$_nav_back" "h) Help"
+        _nav_line="$_nav_back   h) Help"
     fi
+    _nav_rule=""
+    _nav_i=0
+    while [ "$_nav_i" -lt "${#_nav_line}" ]; do
+        _nav_rule="${_nav_rule}─"
+        _nav_i=$((_nav_i + 1))
+    done
+    echo
+    echo "  $_nav_rule"
+    printf "  ${_nav_muted}%s${RESET}\n" "$_nav_line"
     echo
 }
 

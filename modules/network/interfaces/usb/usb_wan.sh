@@ -147,6 +147,109 @@ usb_wan_set_enabled() {
     return 0
 }
 
+# Right column. Hardware, interfaces, and metrics as one tree.
+# No header, footer, or outer border; the hardware menu prints those.
+usb_render_status_tree() {
+    local hw ifs list line dev driver kind metric icon
+    local n total i name
+
+    echo "  🔌 Hardware"
+    hw=$(usb_device_list 2>/dev/null | head -n 3)
+    n=0
+    if [ -n "$hw" ]; then
+        n=$(printf '%s\n' "$hw" | grep -c .)
+    fi
+    total=$n
+    if command -v usb_mtp_waiting >/dev/null 2>&1 && usb_mtp_waiting; then
+        total=$((total + 1))
+    fi
+    if [ "$total" -eq 0 ]; then
+        echo "  └── 🔌 none"
+    else
+        i=0
+        if [ -n "$hw" ]; then
+            printf '%s\n' "$hw" | while IFS= read -r line; do
+                [ -n "$line" ] || continue
+                i=$((i + 1))
+                if [ "$i" -eq "$total" ]; then
+                    echo "  └── 🔌 $line"
+                else
+                    echo "  ├── 🔌 $line"
+                fi
+            done
+        fi
+        if [ "$total" -gt "$n" ]; then
+            echo "  └── 📶 Enable USB tethering on the phone"
+        fi
+    fi
+
+    echo "  ─────────────"
+    echo "  📱 Interfaces"
+    ifs=$(usb_net_interfaces 2>/dev/null | head -n 4)
+    n=0
+    if [ -n "$ifs" ]; then
+        n=$(printf '%s\n' "$ifs" | grep -c .)
+    fi
+    if [ "$n" -eq 0 ]; then
+        echo "  └── 📱 none"
+    else
+        i=0
+        printf '%s\n' "$ifs" | while IFS='|' read -r dev driver kind; do
+            [ -n "$dev" ] || continue
+            i=$((i + 1))
+            case "$kind" in
+                modem) icon="📟" ;;
+                *)     icon="📱" ;;
+            esac
+            if [ "$i" -eq "$n" ]; then
+                echo "  └── $icon $dev"
+                echo "      ├── 🔧 Driver : $driver"
+                echo "      └── 📶 Kind   : $kind"
+            else
+                echo "  ├── $icon $dev"
+                echo "  │   ├── 🔧 Driver : $driver"
+                echo "  │   └── 📶 Kind   : $kind"
+            fi
+        done
+    fi
+
+    echo "  ─────────────"
+    echo "  ⚖️ Metrics"
+    list=""
+    if command -v usb_metric_ifaces >/dev/null 2>&1; then
+        list=$(usb_metric_ifaces 2>/dev/null | head -n 6)
+    fi
+    n=0
+    if [ -n "$list" ]; then
+        n=$(printf '%s\n' "$list" | grep -c .)
+    fi
+    if [ "$n" -eq 0 ]; then
+        echo "  └── ⚖️ none"
+    else
+        i=0
+        for line in $list; do
+            i=$((i + 1))
+            metric=$(uci -q get "network.$line.metric")
+            [ -n "$metric" ] || metric="-"
+            if command -v _net_iface_icon >/dev/null 2>&1; then
+                icon=$(_net_iface_icon "$line")
+            else
+                icon="🌐"
+            fi
+            name="$line"
+            while [ "${#name}" -lt 12 ]; do
+                name="$name "
+            done
+            if [ "$i" -eq "$n" ]; then
+                echo "  └── $icon $name : $metric"
+            else
+                echo "  ├── $icon $name : $metric"
+            fi
+            [ "$i" -ge 6 ] && break
+        done
+    fi
+}
+
 # WAN-like UCI interfaces, one name per line.
 usb_metric_ifaces() {
     local iface
@@ -160,32 +263,44 @@ usb_metric_ifaces() {
 
 # Interactive metric editor. Lower metric is preferred. Never calls exit.
 usb_metric_menu() {
-    local list count i iface metric current
+    local list count i iface metric current state last
 
     while true; do
         if command -v render_persistent_header >/dev/null 2>&1; then
             render_persistent_header
         fi
-        echo "  WAN metrics"
-        echo "  Lower metric is preferred."
+        echo "  ⚖️ WAN Metrics & Failover Configuration"
+        echo "  💡 Note: Lower metric values are preferred by the routing engine."
         echo
         list=$(usb_metric_ifaces)
         count=0
-        if [ -n "$list" ]; then
+        for iface in $list; do
+            count=$((count + 1))
+        done
+        if [ "$count" -eq 0 ]; then
+            echo "  No WAN interfaces found."
+        else
             i=1
             for iface in $list; do
                 metric=$(uci -q get "network.$iface.metric")
                 [ -n "$metric" ] || metric="default"
                 if [ "$(uci -q get "network.$iface.disabled")" = "1" ]; then
-                    printf "  %s) %-12s metric %-8s disabled\n" "$i" "$iface" "$metric"
+                    state="disabled"
                 else
-                    printf "  %s) %-12s metric %-8s enabled\n" "$i" "$iface" "$metric"
+                    state="enabled"
+                fi
+                if [ "$i" -eq "$count" ]; then
+                    last=1
+                else
+                    last=0
+                fi
+                if command -v mwan_render_metric_row >/dev/null 2>&1; then
+                    mwan_render_metric_row "$i" "$iface" "$metric" "$state" "$last"
+                else
+                    echo "  $i) $iface  metric $metric  $state"
                 fi
                 i=$((i + 1))
-                count=$((count + 1))
             done
-        else
-            echo "  No WAN interfaces found."
         fi
         if command -v ui_nav_footer >/dev/null 2>&1; then
             ui_nav_footer

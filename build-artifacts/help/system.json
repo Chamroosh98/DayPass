@@ -1,0 +1,43 @@
+{
+  "module_id": "system",
+  "title": "Maintenance & Recovery",
+  "summary": "Repair and clean-up tools for the system module. The same module also powers the read-only Hardware & Resource Status screen (main menu option 5), which shows architecture, OpenWrt release, RAM and storage usage.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Purge DayPass Installed Packages",
+      "description": "Lists recorded modules from /etc/daypass/installed_manifest.json. Purge a whole suite (stop services, opkg --autoremove / apk del, drop UCI files, flush LuCI) or pick individual packages. The module is then removed from the manifest.",
+      "usage_tip": "A leftover install.log from older DayPass builds is imported into the manifest the first time you open this screen."
+    },
+    {
+      "key": "2",
+      "title": "Clean Temporary Cache & Downloads",
+      "description": "Deletes leftover .ipk, .apk and .part files from the DayPass directory.",
+      "usage_tip": "Run it before a large install to free flash space."
+    },
+    {
+      "key": "3",
+      "title": "Backup System Configuration",
+      "description": "Creates a timestamped sysupgrade archive of the current OpenWrt configuration in /tmp.",
+      "usage_tip": "Copy the archive off the router: /tmp does not survive a reboot."
+    },
+    {
+      "key": "4",
+      "title": "Factory Reset OpenWrt (Firstboot)",
+      "description": "Erases all user configuration and reboots the router with clean defaults.",
+      "usage_tip": "You must type RESET to confirm. There is no undo."
+    },
+    {
+      "key": "5",
+      "title": "SSH Login Banner (install / restore)",
+      "description": "Shows the current state of /etc/banner and lets you install or refresh the DayPass banner, preview it, or put the original OpenWrt banner back.",
+      "usage_tip": "The stock banner is copied to /etc/banner.daypass-orig the first time, so Restore always has something to return to. Installing it again only refreshes the version and firmware lines."
+    },
+    {
+      "key": "0",
+      "title": "Back",
+      "description": "Returns to the previous menu.",
+      "usage_tip": "Nothing is changed by leaving this menu."
+    }
+  ]
+}

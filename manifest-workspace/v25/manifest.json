@@ -1,0 +1,43 @@
+{
+  "release": "25.12",
+  "generated_at": "2026-10-04T08:31:43Z",
+  "download_base": "https://cdn.jsdelivr.net/gh/Chamroosh98/DayPass@packages/v25",
+  "architectures": [
+    {
+      "name": "x86_64",
+      "feeds": {}
+    },
+    {
+      "name": "mipsel_24kc",
+      "feeds": {}
+    },
+    {
+      "name": "i386_pentium4",
+      "feeds": {}
+    },
+    {
+      "name": "aarch64_cortex-a53",
+      "feeds": {}
+    },
+    {
+      "name": "aarch64_cortex-a72",
+      "feeds": {}
+    },
+    {
+      "name": "aarch64_cortex-a76",
+      "feeds": {}
+    },
+    {
+      "name": "aarch64_generic",
+      "feeds": {}
+    },
+    {
+      "name": "arm_cortex-a7_neon-vfpv4",
+      "feeds": {}
+    },
+    {
+      "name": "arm_cortex-a9_vfpv3-d16",
+      "feeds": {}
+    }
+  ]
+}
