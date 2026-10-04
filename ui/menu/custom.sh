@@ -16,7 +16,6 @@ show_custom_help()
     echo "  ──────────────────────────────────────────────────────────"
     echo "  💡 ${CYAN}Pro-Tip:${RESET} Combining Sing-box and Xray together is supported,"
     echo "     but recommended mainly for powerful hardware (ARM64 / x86)."
-    echo "  ──────────────────────────────────────────────────────────"
     echo
     printf "  ${GRAY}Press [ENTER] to return to selection menu ...${RESET}"
     read -r _ </dev/tty || daypass_quit

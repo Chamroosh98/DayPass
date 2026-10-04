@@ -14,7 +14,6 @@ menu_mode()
     echo "  ───────────────────────────────────────────────────────────"
     echo "  1) ⚡ Recommended (Quick & Pre-configured for users)       "
     echo "  2) 🛠️ Custom      (Advanced package selection)             "
-    echo "  ───────────────────────────────────────────────────────────"
     ui_nav_footer
 
     ui_prompt 2
