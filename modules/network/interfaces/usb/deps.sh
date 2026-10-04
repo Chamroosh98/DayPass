@@ -102,31 +102,38 @@ _usb_pkg_mod() {
     esac
 }
 
-# 0 when $1 is on this router (opkg/apk, DayPass record, or loaded module).
+# 0 only when $1 is actually on the router (opkg list-installed or apk).
+# DayPass records, lsmod, and binaries are not proof of the package.
 _usb_pkg_installed() {
     _ud_pkg="$1"
-    _ud_mod="${2:-$(_usb_pkg_mod "$1")}"
-    _ud_rec=""
 
-    if command -v pkg_installed >/dev/null 2>&1 && pkg_installed "$_ud_pkg"; then
-        return 0
-    fi
+    [ -n "$_ud_pkg" ] || return 1
     if command -v opkg >/dev/null 2>&1; then
         opkg list-installed "$_ud_pkg" 2>/dev/null | grep -q "^${_ud_pkg} " && return 0
     fi
     if command -v apk >/dev/null 2>&1 && apk info -e "$_ud_pkg" >/dev/null 2>&1; then
         return 0
     fi
-    if command -v _pr_is_installed >/dev/null 2>&1 && _pr_is_installed "$_ud_pkg"; then
-        return 0
-    fi
-    if command -v mf_module_packages >/dev/null 2>&1; then
-        _ud_rec="$(mf_module_packages usb 2>/dev/null) $(mf_module_packages hardware 2>/dev/null)"
-        for _ud_w in $_ud_rec; do
-            [ "$_ud_w" = "$_ud_pkg" ] && return 0
-        done
-    fi
-    usb_dep_present "$_ud_pkg" "$_ud_mod"
+    # OpenWrt ships NCM as kmod-usb-net-cdc-ncm; treat either name as present.
+    case "$_ud_pkg" in
+        kmod-usb-net-ncm)
+            if command -v opkg >/dev/null 2>&1; then
+                opkg list-installed kmod-usb-net-cdc-ncm 2>/dev/null | grep -q "^kmod-usb-net-cdc-ncm " && return 0
+            fi
+            if command -v apk >/dev/null 2>&1 && apk info -e kmod-usb-net-cdc-ncm >/dev/null 2>&1; then
+                return 0
+            fi
+            ;;
+        kmod-usb-net-cdc-ncm)
+            if command -v opkg >/dev/null 2>&1; then
+                opkg list-installed kmod-usb-net-ncm 2>/dev/null | grep -q "^kmod-usb-net-ncm " && return 0
+            fi
+            if command -v apk >/dev/null 2>&1 && apk info -e kmod-usb-net-ncm >/dev/null 2>&1; then
+                return 0
+            fi
+            ;;
+    esac
+    return 1
 }
 
 # Prints missing package names for $1 (android|ios|modem|full).
@@ -142,15 +149,27 @@ _usb_set_missing() {
 }
 
 # Prints installed | partial | missing for $1 driver set.
+# [✔ Installed] only when every required package is on the router.
 usb_driver_set_state() {
     _ud_hit=0
     _ud_miss=0
     _ud_pkg=""
-    _ud_mod=""
+    _ud_list=""
 
-    for _ud_pkg in $(usb_driver_packages "$1"); do
-        _ud_mod=$(_usb_pkg_mod "$_ud_pkg")
-        if _usb_pkg_installed "$_ud_pkg" "$_ud_mod"; then
+    case "$1" in
+        android)
+            _ud_list="kmod-usb-net-rndis kmod-usb-net-cdc-ether kmod-usb-net-ncm"
+            ;;
+        ios)
+            _ud_list="kmod-usb-net-ipheth usbmuxd libimobiledevice"
+            ;;
+        *)
+            _ud_list=$(usb_driver_packages "$1")
+            ;;
+    esac
+
+    for _ud_pkg in $_ud_list; do
+        if _usb_pkg_installed "$_ud_pkg"; then
             _ud_hit=$((${_ud_hit:-0} + 1))
         else
             _ud_miss=$((${_ud_miss:-0} + 1))
