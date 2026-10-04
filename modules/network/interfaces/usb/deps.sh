@@ -167,10 +167,16 @@ usb_driver_set_state() {
 
 usb_driver_badge() {
     case "$1" in
-        installed) printf '%s%s[✔ Installed]%s' "${GREEN:-}" "${BOLD:-}" "${RESET:-}" ;;
-        partial)   printf '%s[⚡ Partial]%s' "${YELLOW:-}" "${RESET:-}" ;;
-        *)         printf '%s[✖ Not Installed]%s' "${GRAY:-${COLOR_MUTED:-}}" "${RESET:-}" ;;
+        installed) printf '%s%s[✔ Installed]%s' "$GREEN" "$BOLD" "$RESET" ;;
+        partial)   printf '%s[⚡ Partial]%s' "$YELLOW" "$RESET" ;;
+        *)         printf '%s[✖ Not Installed]%s' "$GRAY" "$RESET" ;;
     esac
+}
+
+# $1 emoji  $2 ASCII option text (e.g. "1) Android ...")  $3 state
+# Emoji stays outside %-s so printf width cannot clip it. Badges share one column.
+_usb_driver_menu_row() {
+    printf "  %s %-*s  %b\n" "$1" 48 "$2" "$(usb_driver_badge "$3")"
 }
 
 # $1 android | ios | modem | full
@@ -241,22 +247,48 @@ _usb_offer_driver_set() {
 
 _usb_dep_remove_one() {
     _ud_pkg="$1"
-    if command -v pkg_installed >/dev/null 2>&1 && ! pkg_installed "$_ud_pkg"; then
-        return 0
+    _ud_had=0
+
+    if command -v opkg >/dev/null 2>&1 \
+        && opkg list-installed "$_ud_pkg" 2>/dev/null | grep -q "^${_ud_pkg} "; then
+        _ud_had=1
+        opkg remove "$_ud_pkg" >/dev/null 2>&1 || return 1
     fi
-    if command -v opkg >/dev/null 2>&1 && opkg remove "$_ud_pkg" >/dev/null 2>&1; then
-        return 0
+    if command -v apk >/dev/null 2>&1 && apk info -e "$_ud_pkg" >/dev/null 2>&1; then
+        _ud_had=1
+        apk del "$_ud_pkg" >/dev/null 2>&1 || return 1
     fi
-    if command -v apk >/dev/null 2>&1 && apk del "$_ud_pkg" >/dev/null 2>&1; then
-        return 0
+    [ "$_ud_had" -eq 0 ] && return 0
+    if command -v opkg >/dev/null 2>&1 \
+        && opkg list-installed "$_ud_pkg" 2>/dev/null | grep -q "^${_ud_pkg} "; then
+        return 1
     fi
-    command -v pkg_installed >/dev/null 2>&1 && ! pkg_installed "$_ud_pkg"
+    if command -v apk >/dev/null 2>&1 && apk info -e "$_ud_pkg" >/dev/null 2>&1; then
+        return 1
+    fi
+    return 0
 }
 
-# Remove the Android, iOS and modem packages. Missing packages are fine.
+# Packages DayPass may have installed, plus common tether/modem extras.
+usb_purge_package_list() {
+    printf '%s %s %s %s\n' \
+        "$(usb_driver_packages full 2>/dev/null)" \
+        "kmod-usb-net-ncm kmod-usb-net-cdc-eem kmod-usb-net-cdc-subset" \
+        "libimobiledevice libplist libusbmuxd" \
+        "kmod-usb-serial-option kmod-usb-serial-wwan kmod-usb-wwan"
+}
+
+# Remove Android, iOS, modem, and extra tether packages. Missing names are fine.
 usb_purge_driver_packages() {
     _ud_failed=0
-    for _ud_pkg in $(usb_driver_packages full); do
+    _ud_seen=" "
+    _ud_pkg=""
+
+    for _ud_pkg in $(usb_purge_package_list); do
+        case " $_ud_seen " in
+            *" $_ud_pkg "*) continue ;;
+        esac
+        _ud_seen="$_ud_seen $_ud_pkg "
         _usb_dep_remove_one "$_ud_pkg" || _ud_failed=1
     done
     [ "$_ud_failed" -eq 0 ]
@@ -274,12 +306,12 @@ usb_driver_menu() {
             command -v ui_divider >/dev/null 2>&1 && ui_divider
         fi
         echo
-        printf "  📱 1) Android Drivers (RNDIS / CDC-Ether / NCM)  %b\n" \
-            "$(usb_driver_badge "$(usb_driver_set_state android)")"
-        printf "  🍏 2) iPhone/iOS Drivers (ipheth & usbmuxd)  %b\n" \
-            "$(usb_driver_badge "$(usb_driver_set_state ios)")"
-        printf "  📦 3) Full Hardware Suite (Android + iOS + Modems)  %b\n" \
-            "$(usb_driver_badge "$(usb_driver_set_state full)")"
+        _usb_driver_menu_row "📱" "1) Android Drivers (RNDIS / CDC-Ether / NCM)" \
+            "$(usb_driver_set_state android)"
+        _usb_driver_menu_row "🍏" "2) iPhone/iOS Drivers (ipheth & usbmuxd)" \
+            "$(usb_driver_set_state ios)"
+        _usb_driver_menu_row "📦" "3) Full Hardware Suite (Android + iOS + Modems)" \
+            "$(usb_driver_set_state full)"
         if command -v ui_nav_footer >/dev/null 2>&1; then
             ui_nav_footer
         fi

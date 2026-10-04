@@ -69,7 +69,7 @@ _hw_pick_tether_device() {
     count=$(printf '%s\n' "$list" | grep -c .)
 
     if [ "$count" -eq 0 ]; then
-        echo "  ❌ No active USB Network Hardware detected! Please connect your phone/dongle, turn on USB Tethering, and try again."
+        printf "  ${RED}❌ No active USB Network Hardware detected! Please connect your phone/dongle, turn on USB Tethering, and try again.${RESET}\n"
         return 1
     fi
 
@@ -99,7 +99,7 @@ _hw_pick_tether_device() {
 
 hardware_setup_tethering() {
     if ! command -v usb_net_hardware_present >/dev/null 2>&1 || ! usb_net_hardware_present; then
-        echo "  ❌ No active USB Network Hardware detected! Please connect your phone/dongle, turn on USB Tethering, and try again."
+        printf "  ${RED}❌ No active USB Network Hardware detected! Please connect your phone/dongle, turn on USB Tethering, and try again.${RESET}\n"
         return 1
     fi
 

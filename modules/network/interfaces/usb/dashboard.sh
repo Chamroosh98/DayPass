@@ -33,11 +33,11 @@ usb_render_dashboard() {
     else
         echo "  📡 USB & Network Status"
         ui_divider
-        echo "  🔌 Hardware           : unavailable"
-        echo "  📱 Interface          : unavailable"
-        echo "  ⚖️ Failover Priority : none"
+        echo "  🔌 Hardware            : unavailable"
+        echo "  📱 Interface           : unavailable"
+        echo "  ⚖️ Failover Priority   : none"
     fi
-    echo
+    ui_divider
     usb_render_operations "$state"
     return 0
 }

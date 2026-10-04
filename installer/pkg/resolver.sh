@@ -441,8 +441,8 @@ _pr_is_installed()
         apk)  apk info -e "$1" >/dev/null 2>&1 ;;
         opkg) opkg status "$1" 2>/dev/null | grep -q "Status: .* installed" ;;
         *)    return 1 ;;
-    esac
-}
+        esac
+    }
 
 _pr_refresh_index()
 {

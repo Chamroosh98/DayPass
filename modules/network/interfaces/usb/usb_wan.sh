@@ -96,7 +96,7 @@ setup_usb_wan() {
         fi
     fi
     if [ -z "$usb_dev" ] || [ ! -e "/sys/class/net/$usb_dev" ]; then
-        echo "  ❌ No active USB Network Hardware detected! Please connect your phone/dongle, turn on USB Tethering, and try again."
+        printf "  ${RED}❌ No active USB Network Hardware detected! Please connect your phone/dongle, turn on USB Tethering, and try again.${RESET}\n"
         return 1
     fi
 
@@ -158,19 +158,19 @@ EOF
         else
             label="$driver"
         fi
-        printf '%s\n' "✔ $label ($dev)"
+        printf '%s✔ %s (%s)%s\n' "$GREEN" "$label" "$dev" "$RESET"
         return 0
     fi
     dev=$(usb_active_net_dev 2>/dev/null || true)
     if [ -n "$dev" ]; then
-        printf '%s\n' "✔ USB-net ($dev)"
+        printf '%s✔ USB-net (%s)%s\n' "$GREEN" "$dev" "$RESET"
         return 0
     fi
     if command -v usb_mtp_waiting >/dev/null 2>&1 && usb_mtp_waiting; then
-        printf '%s\n' "❌ Not Connected (phone in MTP mode)"
+        printf '%s❌ Not Connected (phone in MTP mode)%s\n' "$RED" "$RESET"
         return 0
     fi
-    printf '%s\n' "❌ Not Connected"
+    printf '%s❌ Not Connected%s\n' "$RED" "$RESET"
 }
 
 usb_status_interface() {
@@ -178,19 +178,19 @@ usb_status_interface() {
 
     if command -v usb_wan_exists >/dev/null 2>&1 && usb_wan_exists; then
         if [ "$(uci -q get "network.${USB_WAN_IFACE}.disabled")" = "1" ]; then
-            printf '%s\n' "⚠️ Defined (Down)"
+            printf '%s⚠️ Defined (Down)%s\n' "$YELLOW" "$RESET"
             return 0
         fi
         dev=$(uci -q get "network.${USB_WAN_IFACE}.device")
         [ -n "$dev" ] || dev=$(uci -q get "network.${USB_WAN_IFACE}.ifname")
         if [ -z "$dev" ] || [ ! -e "/sys/class/net/$dev" ]; then
-            printf '%s\n' "⚠️ Defined (Down)"
+            printf '%s⚠️ Defined (Down)%s\n' "$YELLOW" "$RESET"
             return 0
         fi
         carrier=$(cat "/sys/class/net/$dev/operstate" 2>/dev/null)
         case "$carrier" in
-            up) printf '%s\n' "🟢 UP" ;;
-            *)  printf '%s\n' "🔴 DOWN" ;;
+            up) printf '%s🟢 UP%s\n' "$GREEN" "$RESET" ;;
+            *)  printf '%s🔴 DOWN%s\n' "$RED" "$RESET" ;;
         esac
         return 0
     fi
@@ -199,12 +199,12 @@ usb_status_interface() {
     if [ -n "$dev" ] && [ -e "/sys/class/net/$dev" ]; then
         carrier=$(cat "/sys/class/net/$dev/operstate" 2>/dev/null)
         case "$carrier" in
-            up) printf '%s\n' "🟢 UP" ;;
-            *)  printf '%s\n' "🔴 DOWN" ;;
+            up) printf '%s🟢 UP%s\n' "$GREEN" "$RESET" ;;
+            *)  printf '%s🔴 DOWN%s\n' "$RED" "$RESET" ;;
         esac
         return 0
     fi
-    printf '%s\n' "🔴 DOWN"
+    printf '%s🔴 DOWN%s\n' "$RED" "$RESET"
 }
 
 usb_status_metrics() {
@@ -241,9 +241,9 @@ usb_status_metrics() {
 usb_render_status_card() {
     echo "  📡 USB & Network Status"
     ui_divider
-    echo "  🔌 Hardware           : $(usb_status_hardware)"
-    echo "  📱 Interface          : $(usb_status_interface)"
-    echo "  ⚖️ Failover Priority : $(usb_status_metrics)"
+    echo "  🔌 Hardware            : $(usb_status_hardware)"
+    echo "  📱 Interface           : $(usb_status_interface)"
+    echo "  ⚖️ Failover Priority   : $(usb_status_metrics)"
 }
 
 # WAN-like UCI interfaces, one name per line.
