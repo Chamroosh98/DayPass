@@ -1,29 +1,33 @@
 #!/bin/sh
 # DayPass - Network info screens. Printing only; no HTTP here.
 
-# Display columns of $1. Emoji (4-byte UTF-8) count as 2. Never truncates.
+# Display columns of $1. A 4-byte emoji counts as 2. BusyBox awk only; no od.
 _net_disp_width() {
-    local s="$1" w=0 b n=0
+    local s="$1" w=""
 
     [ -n "$s" ] || { printf '%s\n' "0"; return 0; }
-    for b in $(printf '%s' "$s" | od -An -tu1); do
-        if [ "$n" -gt 0 ]; then
-            n=$((n - 1))
-            continue
-        fi
-        if [ "$b" -lt 128 ]; then
-            w=$((w + 1))
-        elif [ "$b" -lt 224 ]; then
-            w=$((w + 1))
-            n=1
-        elif [ "$b" -lt 240 ]; then
-            w=$((w + 1))
-            n=2
-        else
-            w=$((w + 2))
-            n=3
-        fi
-    done
+    w=$(printf '%s' "$s" | LC_ALL=C awk '
+        BEGIN {
+            for (i = 0; i < 256; i++) ord[sprintf("%c", i)] = i
+            w = 0
+            n = 0
+        }
+        {
+            for (i = 1; i <= length($0); i++) {
+                b = ord[substr($0, i, 1)]
+                if (b == "") b = 0
+                if (n > 0) { n--; continue }
+                if (b < 128) { w++ }
+                else if (b < 224) { w++; n = 1 }
+                else if (b < 240) { w++; n = 2 }
+                else { w += 2; n = 3 }
+            }
+        }
+        END { print w + 0 }
+    ' 2>/dev/null)
+    case "$w" in
+        ''|*[!0-9]*) w=${#s} ;;
+    esac
     printf '%s\n' "$w"
 }
 
@@ -42,6 +46,7 @@ _net_pad() {
 # $1 uci name
 _net_iface_icon() {
     case "$1" in
+        wan6*)    printf '%s\n' "🌐" ;;
         wan_usb*) printf '%s\n' "📱" ;;
         wwan*)    printf '%s\n' "📶" ;;
         wan|wan_*) printf '%s\n' "🔌" ;;

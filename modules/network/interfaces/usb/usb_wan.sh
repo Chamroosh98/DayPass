@@ -151,7 +151,7 @@ usb_wan_set_enabled() {
 # No header, footer, or outer border; the hardware menu prints those.
 usb_render_status_tree() {
     local hw ifs list line dev driver kind metric icon
-    local n total i name
+    local n total i name wide
 
     echo "  🔌 Hardware"
     hw=$(usb_device_list 2>/dev/null | head -n 3)
@@ -214,14 +214,18 @@ usb_render_status_tree() {
     fi
 
     echo "  ─────────────"
-    echo "  ⚖️ Metrics"
+    echo "  ⚖️ WAN Metrics"
     list=""
     if command -v usb_metric_ifaces >/dev/null 2>&1; then
         list=$(usb_metric_ifaces 2>/dev/null | head -n 6)
     fi
     n=0
+    wide=0
     if [ -n "$list" ]; then
         n=$(printf '%s\n' "$list" | grep -c .)
+        for line in $list; do
+            [ "${#line}" -gt "$wide" ] && wide=${#line}
+        done
     fi
     if [ "$n" -eq 0 ]; then
         echo "  └── ⚖️ none"
@@ -230,14 +234,19 @@ usb_render_status_tree() {
         for line in $list; do
             i=$((i + 1))
             metric=$(uci -q get "network.$line.metric")
-            [ -n "$metric" ] || metric="-"
+            [ -n "$metric" ] || metric="default"
             if command -v _net_iface_icon >/dev/null 2>&1; then
                 icon=$(_net_iface_icon "$line")
             else
-                icon="🌐"
+                case "$line" in
+                    wan6*) icon="🌐" ;;
+                    wan_usb*) icon="📱" ;;
+                    wwan*) icon="📶" ;;
+                    *) icon="🔌" ;;
+                esac
             fi
             name="$line"
-            while [ "${#name}" -lt 12 ]; do
+            while [ "${#name}" -lt "$wide" ]; do
                 name="$name "
             done
             if [ "$i" -eq "$n" ]; then
