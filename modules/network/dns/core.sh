@@ -126,7 +126,7 @@ show_dns_status() {
     mode=$(get_dns_mode)
 
     echo "  🧭 Current DNS Status"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     echo "  🫀 Active Mode : ${GREEN}${mode}${RESET}"
     echo "  🛡️  Engine     : ${CYAN}$(dns_engine_label)${RESET}"
 
@@ -136,5 +136,5 @@ show_dns_status() {
     else
         echo "  📡 dnsmasq    : ${GRAY}system / WAN resolvers${RESET}"
     fi
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 }

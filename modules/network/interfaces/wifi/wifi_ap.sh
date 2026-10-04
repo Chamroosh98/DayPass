@@ -10,7 +10,7 @@
 # ------------------------------------------------------------
 show_ap_status() {
     echo "  📶 Current Access Point Status"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 
     local found=0
     for sec in $(uci show wireless 2>/dev/null | grep "=wifi-iface" | cut -d'.' -f2 | cut -d'=' -f1); do
@@ -39,7 +39,7 @@ show_ap_status() {
     done
 
     [ "$found" -eq 0 ] && echo "  ${GRAY}No Access Point configured yet!${RESET}"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 }
 
 # ------------------------------------------------------------
@@ -49,10 +49,10 @@ setup_wifi_ap() {
     render_persistent_header
 
     echo "  📡 Wi-Fi Access Point Configuration"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     echo "  ${GRAY}This module only manages Access Point (home Wi-Fi).${RESET}"
     echo "  ${GRAY}Station / WWAN interfaces will not be modified.${RESET}"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     echo
 
     # Detect radios
@@ -95,7 +95,7 @@ setup_wifi_ap() {
     echo "  ⚙️ SSID Naming Strategy :"
     echo "     1) Unified SSID for all bands (Smart Connect)"
     echo "     2) Separate SSID per band (2.4G + 5G)"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     printf "  ⁉️ Select [1/2] (default: 1) : "
     read -r ssid_mode </dev/tty
     [ -z "$ssid_mode" ] && ssid_mode=1
@@ -176,7 +176,7 @@ wifi_ap_menu() {
         render_persistent_header
 
         echo "  📡 Wi-Fi Access Point Manager"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         echo "  👀 1) Show current AP status"
         echo "  🛜 2) Create / Update Access Point (AP)"
         ui_nav_footer

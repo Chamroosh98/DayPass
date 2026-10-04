@@ -112,7 +112,7 @@ setup_guest_wifi() {
     render_persistent_header
 
     echo "  👥 Guest WiFi Configuration"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 
     # Make sure guest network exists
     if ! uci -q get network.guest >/dev/null; then
@@ -171,7 +171,7 @@ guest_network_menu() {
         render_persistent_header
 
         echo "  👥 Guest Network Manager"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         echo "  1) Setup Guest Network (Interface + Firewall)"
         echo "  2) Setup Guest WiFi"
         echo "  3) Remove Guest Network completely"

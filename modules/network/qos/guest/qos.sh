@@ -154,7 +154,7 @@ guest_qos_menu() {
         render_persistent_header
 
         echo "  🚦 Guest Bandwidth Control (QoS)"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         echo "  1) Simple Limit (tc) - Lightweight"
         echo "  2) Advanced Limit (SQM + Cake) - Better quality"
         echo "  3) Remove all Guest QoS"

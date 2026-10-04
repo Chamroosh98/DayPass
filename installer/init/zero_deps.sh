@@ -58,7 +58,7 @@ scan_required_tools()
     MISSING_COUNT=0
 
     echo "  🔎 Required Tool Validation"
-    echo "  ──────────────────────────────────────────────────────────"
+    ui_divider
 
     for pkg in $TARGET_PACKAGES; do
         if tool_is_available "$pkg"; then
@@ -71,7 +71,7 @@ scan_required_tools()
         fi
     done
 
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     printf "  Summary : %d tool(s) ready, %d missing\n" "$PRESENT_COUNT" "$MISSING_COUNT"
     echo
 }

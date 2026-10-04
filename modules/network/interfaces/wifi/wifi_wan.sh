@@ -9,10 +9,10 @@ setup_wifi_wan() {
     render_persistent_header
 
     echo "  📡 Wi-Fi WAN (Station Mode)"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     echo "  ${GRAY:-}Connect this router to a phone hotspot or another Wi-Fi${RESET}"
     echo "  ${GRAY:-}network to use it as an internet source (WWAN)!${RESET}"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     echo
 
     # List radios

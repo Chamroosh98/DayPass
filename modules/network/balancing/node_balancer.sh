@@ -56,7 +56,7 @@ show_balancer_status() {
     local mode engine count names id current legacy
 
     echo "  ⚖️  Current Node Balancer Status"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 
     if [ -f "$BALANCER_DIR/mode" ]; then
         mode=$(cat "$BALANCER_DIR/mode")
@@ -91,7 +91,7 @@ EOF
         current=$(transport_call "$engine" active_node 2>/dev/null)
         [ -n "$current" ] && echo "  🎯 Current Node : ${GREEN}$(_nb_node_name "$engine" "$current")${RESET}"
     fi
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 }
 
 # ------------------------------------------------------------
@@ -115,7 +115,7 @@ select_nodes() {
 
     echo
     echo "  📋 Available Nodes ($(transport_engine_label "$engine")) :"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 
     i=1
     while IFS='|' read -r id name proto host port _; do
@@ -126,7 +126,7 @@ select_nodes() {
 $nodes
 EOF
 
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     printf "  🧶 Enter node numbers to include (e.g. 1 3 4) : "
     read -r selected </dev/tty
 
@@ -172,7 +172,7 @@ set_balancer_mode() {
     while true; do
         echo
         echo "  ⚖️  Select Load Balancing Mode :"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         echo "  ⏳ 1) Round-Robin      (distribute equally)"
         echo "  🏓 2) Least Ping       (prefer lowest latency)"
         echo "  👨‍👩‍👧‍👦 3) Failover         (use next only if previous fails)"
@@ -389,7 +389,7 @@ node_balancer_menu() {
         render_persistent_header
 
         echo "  🧶 Node Load Balancing"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         show_balancer_status
         echo
         echo "  💆‍♀️ 1) Select Nodes for Balancing"

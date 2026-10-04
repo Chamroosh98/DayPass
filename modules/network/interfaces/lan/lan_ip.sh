@@ -27,13 +27,13 @@ change_lan_ip_menu()
     CURRENT_NETMASK=$(uci -q get network.lan.netmask || echo "255.255.255.0")
 
     echo "  🌐 Local LAN IP Subnet Configuration"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     echo "  ➡️ Current Router LAN IP : ${CYAN}${CURRENT_IP}${RESET}"
     echo "  ➡️ Current Netmask       : ${CYAN}${CURRENT_NETMASK}${RESET}"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     echo "  ${GRAY}💡 Note : Changing LAN IP prevents IP Conflicts if your${RESET}"
     echo "  ${GRAY}upstream ISP Modem is also using 192.168.1.1 .${RESET}"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     echo
 
     printf "  ⁉️ Do you want to change the Router LAN IP? [y/N] : "

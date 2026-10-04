@@ -1,5 +1,5 @@
 #!/bin/sh
-# DayPass - Collect WAN lookups, then draw the open two-column screen.
+# DayPass - Collect WAN lookups, then draw the stacked status card.
 # The menu prints the global header and footer. This file does not.
 
 # Fetch every active WAN into $1 (snapshot path). $2 is the interface count.
@@ -45,7 +45,7 @@ EOF
     done
 }
 
-# Fetch every active WAN, then draw operations beside the tree.
+# Fetch every active WAN, then draw the status card and operations.
 net_show_panel() {
     local list count iface snap
 
@@ -53,12 +53,12 @@ net_show_panel() {
     : > "$snap"
 
     if ! command -v curl >/dev/null 2>&1; then
-        net_render_columns "$snap" 0 "curl is required for interface queries."
+        net_render_panel "$snap" 0 "curl is required for interface queries."
         rm -f "$snap"
         return 0
     fi
     if ! command -v jq >/dev/null 2>&1; then
-        net_render_columns "$snap" 0 "jq is required to read provider details."
+        net_render_panel "$snap" 0 "jq is required to read provider details."
         rm -f "$snap"
         return 0
     fi
@@ -70,6 +70,6 @@ net_show_panel() {
     done
 
     _net_fill_snapshot "$snap" "$count" "$list"
-    net_render_columns "$snap" "$count"
+    net_render_panel "$snap" "$count"
     rm -f "$snap"
 }

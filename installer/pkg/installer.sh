@@ -287,12 +287,13 @@ render_applied_components()
     [ -s "$1" ] || return 0
 
     echo
-    printf '  ┌─ Applied Package Components ────────────────────────┐\n'
+    echo "  📦 Applied Package Components"
+    ui_divider
     while IFS='	' read -r _rc_name _rc_note; do
         [ -n "$_rc_name" ] || continue
-        printf "  │  ${GREEN}✔${RESET} %-26.26s %-22.22s│\n" "$_rc_name" "$_rc_note"
+        printf "  ${GREEN}✔${RESET} %s  %s\n" "$_rc_name" "$_rc_note"
     done < "$1"
-    printf '  └─────────────────────────────────────────────────────┘\n'
+    ui_divider
     echo
 }
 

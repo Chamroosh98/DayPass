@@ -219,11 +219,11 @@ purge_packages() {
 
     echo
     printf "  ${YELLOW}⚠️ The following will be removed${RESET}\n"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     _pu_print_list "Packages" "$_pu_targets"
     _pu_print_list "Services" "$PURGE_SERVICES"
     _pu_print_list "UCI configs" "$PURGE_CONFIGS"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     printf "  ${GRAY}LuCI index cache will be flushed and rpcd restarted.${RESET}\n"
     echo
 
@@ -343,13 +343,13 @@ _pu_pick_packages() {
 
     echo
     printf "  ${BOLD}Select packages to remove${RESET}\n"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     _pu_i=0
     for _pu_pkg in $_pu_pool; do
         _pu_i=$((_pu_i + 1))
         printf "  ${CYAN}%s${RESET}) %s\n" "$_pu_i" "$_pu_pkg"
     done
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     printf "  ${GRAY}Numbers separated by spaces, [a] all, [0] cancel${RESET}\n"
     printf "  ⁉️ Selection : "
     read -r _pu_sel </dev/tty || return 1
@@ -390,13 +390,13 @@ _pu_category_menu() {
     while true; do
         render_persistent_header
         printf "  🧹 ${BOLD}%s${RESET}\n" "$_pu_title"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         [ -n "$_pu_id" ] && command -v mf_module_category >/dev/null 2>&1 && \
             printf "  ${GRAY}Category : %s${RESET}\n" "$(mf_module_category "$_pu_id")"
         for _pu_pkg in $_pu_pkgs; do
             printf "    • %s\n" "$_pu_pkg"
         done
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         printf "  ${CYAN}1${RESET}) Purge this entire module\n"
         printf "  ${CYAN}2${RESET}) Choose individual packages\n"
         ui_nav_footer
@@ -436,7 +436,7 @@ purge_menu() {
     while true; do
         render_persistent_header
         printf "  🧹 ${BOLD}Purge DayPass Installed Modules${RESET}\n"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
 
         _pu_ids=""
         if command -v mf_has_modules >/dev/null 2>&1 && mf_has_modules; then

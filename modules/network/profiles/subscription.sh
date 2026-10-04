@@ -198,11 +198,11 @@ update_all_subscriptions() {
 # ------------------------------------------------------------
 list_subscriptions() {
     echo "  💳 Saved Subscriptions"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 
     if [ ! -f "$SUBS_FILE" ]; then
         echo "  ${GRAY}No subscriptions found!${RESET}"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         return 0
     fi
 
@@ -211,7 +211,7 @@ list_subscriptions() {
 
     if [ "$total" -eq 0 ]; then
         echo "  ${GRAY}No subscriptions found!${RESET}"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         return 0
     fi
 
@@ -223,5 +223,5 @@ list_subscriptions() {
         i=$((i + 1))
     done
 
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 }

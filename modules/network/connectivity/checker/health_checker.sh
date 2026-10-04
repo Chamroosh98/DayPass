@@ -139,7 +139,7 @@ test_node() {
 test_all_nodes() {
     echo
     echo "  🩺 Checking all nodes ..."
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 
     local total=0
     local ok=0
@@ -158,7 +158,7 @@ test_all_nodes() {
         fi
     done
 
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     if [ "$skipped" -gt 0 ]; then
         echo "  Result : ${GREEN}$ok${RESET} / $total reachable  ${GRAY}($skipped disabled)${RESET}"
     else
@@ -173,7 +173,7 @@ test_all_nodes() {
 test_selected_nodes() {
     echo
     echo "  📋 Available Configs :"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 
     local configs=""
     local i=1
@@ -198,7 +198,7 @@ test_selected_nodes() {
         return 1
     fi
 
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     printf "  💊 Enter node numbers to check (e.g. 1 2 4) : "
     read -r selected </dev/tty
 
@@ -209,7 +209,7 @@ test_selected_nodes() {
 
     echo
     echo "  🩺 Checking selected nodes ..."
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 
     local idx=1
     for name in $configs; do
@@ -221,7 +221,7 @@ test_selected_nodes() {
         idx=$((idx + 1))
     done
 
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 }
 
 
@@ -234,7 +234,7 @@ health_checker_menu() {
         render_persistent_header
 
         echo "  🩺 Node Health Checker"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         echo "  🔭 1) Check All Nodes"
         echo "  🔬 2) Check Selected Nodes"
         ui_nav_footer

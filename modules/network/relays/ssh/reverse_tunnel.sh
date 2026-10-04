@@ -13,10 +13,10 @@ PROXY_HOST="127.0.0.1"
 _pb_banner() {
     echo
     echo "  ${CYAN}${RESET}${BOLD}🌐 Optional Network Proxy Bootstrap${RESET}"
-    echo "  ${CYAN}─────────────────────────────────────────────────────────${RESET}"
+    ui_divider "$CYAN"
     echo "  ${CYAN}${RESET}Routing DayPass traffic through a local proxy helps"
     echo "  ${CYAN}${RESET}avoid ISP filtering and broken package downloads!  "
-    echo "  ${CYAN}─────────────────────────────────────────────────────────${RESET}"
+    ui_divider "$CYAN"
     echo
 }
 
@@ -25,7 +25,7 @@ _pb_manual() {
     render_persistent_header
     echo
     echo "  ${BOLD}${WHITE}📖 Manual Setup${RESET}"
-    echo "  ${DIM}──────────────────────────────────────────────────────────${RESET}"
+    ui_divider "$DIM"
     echo
     echo "  ${BOLD}${CYAN}🪟 Windows users :${RESET}"
     echo "  ${WHITE}1) Open your VPN / proxy client and enable a local${RESET}"
@@ -46,7 +46,7 @@ _pb_manual() {
     echo
     echo "  ${GRAY}ℹ️  Once the tunnel is up, all package downloads will${RESET}"
     echo "  ${GRAY}flow through ${PROXY_HOST}:${PROXY_DEFAULT_PORT}.${RESET}"
-    echo "  ${DIM}──────────────────────────────────────────────────────────${RESET}"
+    ui_divider "$DIM"
     echo
 }
 

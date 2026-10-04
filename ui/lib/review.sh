@@ -14,7 +14,7 @@ review_install()
     command -v mf_title_for >/dev/null 2>&1 && _rv_title="$(mf_title_for "${SELECTED_PROFILE:-proxy}")"
 
     echo "  📊 ${_rv_title} — Installation Plan"
-    echo "  ─────────────────────────────────────────────────────────────"
+    ui_divider
     printf "  👤 %-18s : %s\n" "Module" "${SELECTED_PROFILE:-N/A}"
     command -v mf_category_for >/dev/null 2>&1 && \
         printf "  📂 %-18s : %s\n" "Category" "$(mf_category_for "${SELECTED_PROFILE:-proxy}")"
@@ -25,7 +25,7 @@ review_install()
         printf "  🗣️ %-18s : %s\n" "Language"        "${SELECTED_LANGUAGE:-fa}"
         printf "  🌐 %-18s : %s\n" "Geo Database"     "${SELECTED_GEO:-official}"
     fi
-    echo "  ─────────────────────────────────────────────────────────────"
+    ui_divider
 
     PKG_COUNT=$(echo $FINAL_PACKAGES | wc -w | tr -d ' ')
     echo "  📦 Targeted Packages (${PKG_COUNT:-0}) :"
@@ -39,7 +39,7 @@ review_install()
             echo "     ├─ 🔹 ${CYAN}$pkg${RESET}"
         fi
     done
-    echo "  ─────────────────────────────────────────────────────────────"
+    ui_divider
     echo
 
     while true; do

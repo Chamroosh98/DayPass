@@ -87,9 +87,9 @@ service_is_running()
 post_install_services_init()
 {
     echo
-    log_info "─────────────────────────────────────────────────────────── "
+    ui_divider
     log_info "Initiating Post-Install Service Operations"
-    log_info "─────────────────────────────────────────────────────────── "
+    ui_divider
     echo
 
     # 1. Start core proxy profiles if selected

@@ -15,9 +15,9 @@ config_manager_menu() {
         fi
 
         echo "  📦 Config Manager (Nodes & Subscriptions)"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         echo "  🛡️ Detected Engine : ${CYAN}$engine_label${RESET}"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         echo "  📋 1) List Configs"
         echo "  🤏 2) Add Manual Config"
         echo "  🎲 3) Toggle Enable/Disable Config"

@@ -160,17 +160,17 @@ network_check()
     render_persistent_header
     printf "  ${BOLD:-}${CYAN:-}🩺 Network Health Check${RESET:-}\n"
     
-    printf "  ${GRAY:-}──────────────────────────────────────────${RESET:-}\n"
+    ui_divider "${GRAY:-}"
 
     printf "  ${BOLD:-}%-16s %-6s %-7s %-6s${RESET:-}\n" "Host" "DNS" "Ping" "HTTPS"
-    printf "  ${GRAY:-}──────────────────────────────────────────${RESET:-}\n"
+    ui_divider "${GRAY:-}"
 
     process_host "google.com"
     process_host "github.com"
     process_host "openwrt.org"
     process_host "cloudflare.com"
 
-    printf "  ${GRAY:-}──────────────────────────────────────────${RESET:-}\n\n"
+    ui_divider "${GRAY:-}"
 
     PCT=0
     [ "$TOTAL_CHECKS" -gt 0 ] && PCT=$((GREEN_COUNT * 100 / TOTAL_CHECKS))

@@ -9,7 +9,7 @@ dns_menu() {
         render_persistent_header
 
         echo "  🧭 DNS Manager"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         show_dns_status
         echo
         echo "  1) System Default (WAN / ISP resolvers)"

@@ -60,9 +60,9 @@ dns_fix_menu()
     while true; do
         render_persistent_header
 
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         echo "   📡 DNS Resolution Recovery                                "
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         echo "   ☁️ 1) Cloudflare DNS   (1.1.1.1)                          "
         echo "   🔍 2) Google DNS       (8.8.8.8)                          "
         echo "   🛡️ 3) Quad9 DNS        (9.9.9.9)                          "

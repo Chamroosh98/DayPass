@@ -223,10 +223,10 @@ system_banner_post_install() {
 system_banner_manage() {
     echo
     printf "  🪧 ${BOLD}SSH / Console Login Banner${RESET}\n"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     printf "  📄 Banner file : ${CYAN}%s${RESET}\n" "$SYS_BANNER_FILE"
     printf "  🫀 Current     : ${GRAY}%s${RESET}\n" "$(system_banner_status)"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     printf "  ${GRAY}[i] Install / refresh the DayPass banner${RESET}\n"
     printf "  ${GRAY}[p] Preview it without writing anything${RESET}\n"
     printf "  ${GRAY}[r] Restore the original OpenWrt banner${RESET}\n"

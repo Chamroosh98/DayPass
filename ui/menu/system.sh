@@ -25,7 +25,7 @@ _system_log_render() {
     render_persistent_header
     ui_title "📜 Log Viewer — $label"
     printf "  ${GRAY}Source : logread${RESET}\n"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     printf "  ⁉️ ${YELLOW}Number of lines${RESET} ${GRAY}[50] :${RESET} "
 
     if ! read -r UI_CHOICE </dev/tty; then
@@ -46,18 +46,19 @@ _system_log_render() {
 
     echo
     if [ ! -s "$dest" ]; then
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         if [ -n "$filter" ]; then
             log_warn "No log entries found for the selected module."
         else
             log_info "Log buffer is empty."
         fi
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
     else
         shown=$(wc -l < "$dest" | tr -d ' ')
-        printf "  ────── Log Output (Last %s lines) ──────\n" "$shown"
+        echo "  📋 Log Output (Last $shown lines)"
+        ui_divider
         sed 's/^/  /' "$dest"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
     fi
 
     rm -f "$dest" 2>/dev/null
@@ -72,7 +73,7 @@ system_log_viewer() {
         if ! command -v logread >/dev/null 2>&1; then
             ui_title "📜 Log Viewer"
             log_warn "logread is not available on this system."
-            echo "  ───────────────────────────────────────────────────────────"
+            ui_divider
             return 0
         fi
 
@@ -110,10 +111,10 @@ system_restore_configs() {
 
     if [ -d "$BACKUP_DIR" ]; then
         ls -1t "$BACKUP_DIR"/daypass_config_backup_*.tar.gz 2>/dev/null | sed 's/^/  • /'
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
     else
         log_info "No backup directory yet."
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
     fi
 
     ui_read "Archive path [latest], [0] Cancel"

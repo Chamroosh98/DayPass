@@ -1,7 +1,7 @@
 #!/bin/sh
 # DayPass - Network info menu.
 # Discovery, queries, screens, and the speed monitor live in
-# discover.sh, fetch.sh, ui.sh, panel.sh, and speed.sh.
+# discover.sh, fetch.sh, network_ip.sh, panel.sh, and speed.sh.
 
 show_full_network_info() {
     net_show_panel

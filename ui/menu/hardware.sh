@@ -57,7 +57,7 @@ show_hardware_status() {
     if [ -f /etc/config/mwan3 ]; then
         echo "  ${GRAY}mwan3 is configured; its member metrics decide failover while it runs.${RESET}"
     fi
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 }
 
 # Sets HW_DEVICE to a tethering device picked by the user (empty = cancel)

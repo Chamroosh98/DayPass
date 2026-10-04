@@ -6,10 +6,6 @@ on:
       - beta
   workflow_dispatch:
 
-concurrency:
-  group: github-pages-deploy
-  cancel-in-progress: false
-
 permissions:
   contents: write
   pages: write
@@ -69,6 +65,9 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    concurrency:
+      group: github-pages-deploy
+      cancel-in-progress: false
     steps:
       - name: 🔎 Checkout Repository
         uses: actions/checkout@v4
@@ -92,7 +91,6 @@ jobs:
           mkdir -p merged-beta
           mkdir -p manifest-workspace
           mkdir -p build-artifacts
-          mkdir -p packages-branch-content
 
       - name: 📥 Download All Zip Artifacts
         uses: actions/download-artifact@v4
@@ -100,28 +98,6 @@ jobs:
           pattern: beta-*
           path: merged-beta/
           merge-multiple: true
-
-      - name: 📥 Download All Raw Packages Artifacts (For jsDeliver CDN)
-        uses: actions/download-artifact@v4
-        with:
-          pattern: raw-beta-*
-          path: packages-branch-content/
-          merge-multiple: false
-
-      - name: 📂 Restructure Architecture Folders for CDN Tree
-        run: |
-          cd packages-branch-content
-          for dir in raw-beta-v*; do
-            if [ -d "$dir" ]; then
-              raw_name="${dir#raw-beta-}"
-              ver="${raw_name%%-*}"
-              arch="${raw_name#*-}"
-              
-              mkdir -p "$ver"
-              mv "$dir" "$ver/$arch"
-              echo "✅ Restructured CDN Directory : 📂 $dir -> ⛏️ $ver/$arch"
-            fi
-          done
 
       - name: 🦫 Run Go Engine (Merger & Manifest Compiler)
         env:
@@ -227,15 +203,6 @@ jobs:
           clean: false         
           single-commit: true
 
-      - name: 🚀 Deploy Binary Packages to 'packages' Branch
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: packages-branch-content
-          branch: packages
-          target-folder: beta
-          clean: false
-          single-commit: true
-
       - name: 🧹 Purge jsDelivr Cache for Manifests & Packages
         run: |
           echo "🌐 Purging jsDelivr CDN cache for Beta ..."
@@ -260,4 +227,58 @@ jobs:
         with:
           name: |
             beta-*
+
+  deploy-packages:
+    needs: build
+    runs-on: ubuntu-latest
+    concurrency:
+      group: github-pages-deploy-packages
+      cancel-in-progress: false
+    steps:
+      - name: 🔎 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🏷️ Generate Beta Version
+        run: echo "VERSION=v$(date +%y.%m.%d)" >> $GITHUB_ENV
+
+      - name: 📁 Prepare Workspace Tree
+        run: |
+          mkdir -p packages-branch-content
+
+      - name: 📥 Download All Raw Packages Artifacts (For jsDeliver CDN)
+        uses: actions/download-artifact@v4
+        with:
+          pattern: raw-beta-*
+          path: packages-branch-content/
+          merge-multiple: false
+
+      - name: 📂 Restructure Architecture Folders for CDN Tree
+        run: |
+          cd packages-branch-content
+          for dir in raw-beta-v*; do
+            if [ -d "$dir" ]; then
+              raw_name="${dir#raw-beta-}"
+              ver="${raw_name%%-*}"
+              arch="${raw_name#*-}"
+              
+              mkdir -p "$ver"
+              mv "$dir" "$ver/$arch"
+              echo "✅ Restructured CDN Directory : 📂 $dir -> ⛏️ $ver/$arch"
+            fi
+          done
+
+      - name: 🚀 Deploy Binary Packages to 'packages' Branch
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: packages-branch-content
+          branch: packages
+          target-folder: beta
+          clean: false
+          single-commit: true
+
+      - name: 🧹 Delete Temporary Raw Package Artifacts
+        uses: geekyeggo/delete-artifact@v5
+        if: always()
+        with:
+          name: |
             raw-beta-*

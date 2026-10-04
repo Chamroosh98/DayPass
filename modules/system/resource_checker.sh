@@ -130,12 +130,12 @@ resource_compare()
 
     echo
     echo "  🤌🏻 DayPass Deployment Efficiency Summary"
-    echo "  ────────────────────────────────────────────────────────── "
+    ui_divider
     echo "    ├─ Total Downloaded Payload     : $(human_readable_bytes "$TOTAL_REQUIRED_BYTES")"
     echo "    ├─ Total Network Traffic Saved  : $(human_readable_bytes "$TOTAL_SAVED_BYTES") "
     echo "    ├─ Net Storage Consumed         : $(human_readable_bytes "$USED_FLASH")"
     echo "    └─ Free Storage Remaining       : $(human_readable_bytes "$AFTER_FREE_FLASH")"
-    echo "  ────────────────────────────────────────────────────────── "
+    ui_divider
     echo
 }
 
@@ -189,18 +189,18 @@ show_system_resources_menu()
     used_flash_b=$((tot_flash_b - free_flash_b))
 
     echo "  🖥️ System Hardware & Resource Status"
-    echo "  ──────────────────────────────────────────────────────────"
+    ui_divider
     printf "  🩻 Architecture      : ${CYAN}%s${RESET}\n" "${ARCH:-N/A}"
     printf "  💡 OpenWrt System    : ${CYAN}%s [%s]${RESET}\n" "$OW_VER" "${PKG_MANAGER:-opkg}"
-    echo "  ──────────────────────────────────────────────────────────"
+    ui_divider
     printf "  🧠 Total RAM         : %s\n" "$(human_readable_bytes "$tot_ram_b")"
     printf "     🟠 Used RAM       : ${YELLOW}%s${RESET}\n" "$(human_readable_bytes "$used_ram_b")"
     printf "     🟢 Free RAM       : ${GREEN}%s${RESET}\n" "$(human_readable_bytes "$free_ram_b")"
-    echo "  ──────────────────────────────────────────────────────────"
+    ui_divider
     printf "  💾 Total Storage     : %s\n" "$(human_readable_bytes "$tot_flash_b")"
     printf "     🟠 Used Storage   : ${YELLOW}%s${RESET}\n" "$(human_readable_bytes "$used_flash_b")"
     printf "     🟢 Free Storage   : ${GREEN}%s${RESET}\n" "$(human_readable_bytes "$free_flash_b")"
-    echo "  ──────────────────────────────────────────────────────────"
+    ui_divider
     echo
 
     if command -v ui_nav_footer >/dev/null 2>&1; then

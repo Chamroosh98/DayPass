@@ -39,10 +39,10 @@ _wb_hint() { printf '      %s%s%s\n' "$GRAY"   "$1" "$RESET"; }
 
 _wb_banner() {
     printf '  %s%s☁️ Cloudflare Worker Mirror%s\n' "$CYAN" "$BOLD" "$RESET"
-    printf '  %s─────────────────────────────────────────────────────────%s\n' "$CYAN" "$RESET"
+    ui_divider "$CYAN"
     printf '  %sPackage feeds are rewritten from %s%s\n' "$CYAN" "$WORKER_UPSTREAM_HOST" "$RESET"
     printf '  %sto your Worker so opkg / apk fetch through Cloudflare.%s\n' "$CYAN" "$RESET"
-    printf '  %s─────────────────────────────────────────────────────────%s\n' "$CYAN" "$RESET"
+    ui_divider "$CYAN"
     printf '\n'
 }
 
@@ -433,7 +433,7 @@ worker_import_domain() {
     _default="$(_wb_default_host)"
 
     printf '  %s🔗 Import Worker domain%s\n' "$BOLD" "$RESET"
-    printf '  %s─────────────────────────────────────────────────────────%s\n' "$GRAY" "$RESET"
+    ui_divider "$GRAY"
     _wb_hint "Accepted: my-worker.account.workers.dev, https://mirror.example.com"
     _wb_hint "The scheme, port and path are stripped automatically."
     printf '\n'
@@ -533,7 +533,7 @@ worker_mirror_menu() {
     while true; do
         _wb_header
         worker_bootstrap_status
-        printf '  %s─────────────────────────────────────────────────────────%s\n' "$GRAY" "$RESET"
+        ui_divider "$GRAY"
         printf '  %s🔗 1)%s Deploy to Cloudflare\n' "$WHITE" "$RESET"
         printf '  %s📥 2)%s Import Worker Domain / URL\n' "$WHITE" "$RESET"
         printf '  %s🔄 3)%s Restore Default OpenWrt Feeds\n' "$WHITE" "$RESET"

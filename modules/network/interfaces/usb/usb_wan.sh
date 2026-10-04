@@ -147,116 +147,76 @@ usb_wan_set_enabled() {
     return 0
 }
 
-# Right column. Hardware, interfaces, and metrics as one tree.
-# No header, footer, or outer border; the hardware menu prints those.
-usb_render_status_tree() {
-    local hw ifs list line dev driver kind metric icon
-    local n total i name wide
+# One-line hardware, interface, and metric summaries for the status card.
+usb_status_hardware() {
+    local line
 
-    echo "  🔌 Hardware"
-    hw=$(usb_device_list 2>/dev/null | head -n 3)
-    n=0
-    if [ -n "$hw" ]; then
-        n=$(printf '%s\n' "$hw" | grep -c .)
+    line=$(usb_device_list 2>/dev/null | head -n 1)
+    if [ -n "$line" ]; then
+        printf '%s\n' "$line"
+        return 0
     fi
-    total=$n
     if command -v usb_mtp_waiting >/dev/null 2>&1 && usb_mtp_waiting; then
-        total=$((total + 1))
+        printf '%s\n' "phone in MTP mode"
+        return 0
     fi
-    if [ "$total" -eq 0 ]; then
-        echo "  └── 🔌 none"
-    else
-        i=0
-        if [ -n "$hw" ]; then
-            printf '%s\n' "$hw" | while IFS= read -r line; do
-                [ -n "$line" ] || continue
-                i=$((i + 1))
-                if [ "$i" -eq "$total" ]; then
-                    echo "  └── 🔌 $line"
-                else
-                    echo "  ├── 🔌 $line"
-                fi
-            done
-        fi
-        if [ "$total" -gt "$n" ]; then
-            echo "  └── 📶 Enable USB tethering on the phone"
-        fi
-    fi
+    printf '%s\n' "none"
+}
 
-    echo "  ─────────────"
-    echo "  📱 Interfaces"
-    ifs=$(usb_net_interfaces 2>/dev/null | head -n 4)
-    n=0
-    if [ -n "$ifs" ]; then
-        n=$(printf '%s\n' "$ifs" | grep -c .)
+usb_status_interface() {
+    local out="" dev driver kind
+
+    while IFS='|' read -r dev driver kind; do
+        [ -n "$dev" ] || continue
+        if [ -n "$out" ]; then
+            out="$out, $dev ($kind)"
+        else
+            out="$dev ($kind)"
+        fi
+    done <<EOF
+$(usb_net_interfaces 2>/dev/null | head -n 4)
+EOF
+    [ -n "$out" ] || out="none"
+    printf '%s\n' "$out"
+}
+
+usb_status_metrics() {
+    local out="" iface metric icon
+
+    if ! command -v usb_metric_ifaces >/dev/null 2>&1; then
+        printf '%s\n' "none"
+        return 0
     fi
-    if [ "$n" -eq 0 ]; then
-        echo "  └── 📱 none"
-    else
-        i=0
-        printf '%s\n' "$ifs" | while IFS='|' read -r dev driver kind; do
-            [ -n "$dev" ] || continue
-            i=$((i + 1))
-            case "$kind" in
-                modem) icon="📟" ;;
-                *)     icon="📱" ;;
+    for iface in $(usb_metric_ifaces 2>/dev/null | head -n 6); do
+        metric=$(uci -q get "network.$iface.metric")
+        [ -n "$metric" ] || metric="default"
+        if command -v _net_iface_icon >/dev/null 2>&1; then
+            icon=$(_net_iface_icon "$iface")
+        else
+            case "$iface" in
+                wan6*)    icon="🌐" ;;
+                wan_usb*) icon="📱" ;;
+                wwan*)    icon="📶" ;;
+                *)        icon="🔌" ;;
             esac
-            if [ "$i" -eq "$n" ]; then
-                echo "  └── $icon $dev"
-                echo "      ├── 🔧 Driver : $driver"
-                echo "      └── 📶 Kind   : $kind"
-            else
-                echo "  ├── $icon $dev"
-                echo "  │   ├── 🔧 Driver : $driver"
-                echo "  │   └── 📶 Kind   : $kind"
-            fi
-        done
-    fi
+        fi
+        if [ -n "$out" ]; then
+            out="$out  │  $icon $iface ($metric)"
+        else
+            out="$icon $iface ($metric)"
+        fi
+    done
+    [ -n "$out" ] || out="none"
+    printf '%s\n' "$out"
+}
 
-    echo "  ─────────────"
-    echo "  ⚖️ WAN Metrics"
-    list=""
-    if command -v usb_metric_ifaces >/dev/null 2>&1; then
-        list=$(usb_metric_ifaces 2>/dev/null | head -n 6)
-    fi
-    n=0
-    wide=0
-    if [ -n "$list" ]; then
-        n=$(printf '%s\n' "$list" | grep -c .)
-        for line in $list; do
-            [ "${#line}" -gt "$wide" ] && wide=${#line}
-        done
-    fi
-    if [ "$n" -eq 0 ]; then
-        echo "  └── ⚖️ none"
-    else
-        i=0
-        for line in $list; do
-            i=$((i + 1))
-            metric=$(uci -q get "network.$line.metric")
-            [ -n "$metric" ] || metric="default"
-            if command -v _net_iface_icon >/dev/null 2>&1; then
-                icon=$(_net_iface_icon "$line")
-            else
-                case "$line" in
-                    wan6*) icon="🌐" ;;
-                    wan_usb*) icon="📱" ;;
-                    wwan*) icon="📶" ;;
-                    *) icon="🔌" ;;
-                esac
-            fi
-            name="$line"
-            while [ "${#name}" -lt "$wide" ]; do
-                name="$name "
-            done
-            if [ "$i" -eq "$n" ]; then
-                echo "  └── $icon $name : $metric"
-            else
-                echo "  ├── $icon $name : $metric"
-            fi
-            [ "$i" -ge 6 ] && break
-        done
-    fi
+# Status card only. The hardware menu prints the shared header and footer.
+usb_render_status_card() {
+    echo "  📡 USB & Network Status"
+    ui_divider
+    echo "  🔌 Hardware  : $(usb_status_hardware)"
+    echo "  📱 Interface : $(usb_status_interface)"
+    echo "  ⚖️ Metrics   : $(usb_status_metrics)"
 }
 
 # WAN-like UCI interfaces, one name per line.

@@ -5,11 +5,11 @@ engine_menu()
     render_persistent_header
 
     echo "  🕵️‍♀️ Select Proxy Engine                                    "
-    echo "  ───────────────────────────────────────────────────────── "
+    ui_divider
     echo "  1) ⚡ Auto      (Recommended)                             "
     echo "  2) ✖️ Xray      (Xray-core proxy engine)                  "
     echo "  3) 📦 Sing-box  (Sing-box proxy engine)                   "
-    echo "  ───────────────────────────────────────────────────────── "
+    ui_divider
     echo
 
     if command -v ui_nav_footer >/dev/null 2>&1; then

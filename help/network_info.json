@@ -1,7 +1,7 @@
 {
   "module_id": "network_info",
   "title": "Network Info & Speed Monitor",
-  "summary": "Operations sit on the left. Each WAN is a tree on the right: public IP, provider, and online or offline status. Each lookup uses curl on that interface.",
+  "summary": "A status card lists each WAN (public IP, provider, and online or offline). Operations sit under it. Each lookup uses curl on that interface.",
   "items": [
     {
       "key": "1",

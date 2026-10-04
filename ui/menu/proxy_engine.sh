@@ -47,7 +47,7 @@ show_transport_status() {
     done
 
     [ "$active" = "none" ] && echo "  ${GRAY}No supported engine detected.${RESET}"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 }
 
 # Makes $1 the active engine, offers to stop the previous one and
@@ -97,7 +97,7 @@ proxy_engine_show_nodes() {
     done << EOF
 $nodes
 EOF
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 }
 
 # Actions for one installed engine
@@ -124,14 +124,14 @@ proxy_engine_actions_menu() {
         else
             printf "  🎯 Active       : ${GRAY}no (active: %s)${RESET}\n" "$active"
         fi
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         echo "  🎯 1) Set as Active Engine"
         echo "  ▶️  2) Start"
         echo "  ⏹️  3) Stop"
         echo "  🔁 4) Restart"
         echo "  🔄 5) Reload Rules"
         echo "  🧶 6) Show Nodes / Endpoints"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         ui_nav_footer
 
         ui_prompt 6

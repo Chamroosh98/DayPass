@@ -114,7 +114,7 @@ scan_candidate_ips() {
 
     echo
     echo "  🔍 Scanning candidate IPs on port [$port] ..."
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 
     local total=0
     local ok=0
@@ -153,7 +153,7 @@ scan_candidate_ips() {
         fi
     done < "$CANDIDATE_FILE"
 
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     echo "  Result : ${GREEN}$ok${RESET} / $total IP(s) reachable ;)"
     echo
 
@@ -173,9 +173,9 @@ edit_candidates() {
     echo
     log_info "Candidate file : [$CANDIDATE_FILE]"
     echo "  Current list :"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     cat "$CANDIDATE_FILE"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     echo
     log_info "Edit this file manually, then rerun scan!"
 }

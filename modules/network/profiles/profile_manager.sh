@@ -17,7 +17,7 @@ mkdir -p "$ROUTING_DIR"
 
 show_active_profile() {
     echo "  🎭 Current Active Profile"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 
     if [ -f "$PROFILE_DIR/active" ]; then
         active=$(cat "$PROFILE_DIR/active")
@@ -33,7 +33,7 @@ show_active_profile() {
         echo "  🚦 Routing Mode   : ${GRAY}Not set${RESET}"
     fi
 
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 }
 
 
@@ -41,13 +41,13 @@ show_active_profile() {
 
 list_profiles() {
     echo "  🎭 Available Routing Profiles"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     echo "  ⚖️  1) Balanced       (Iran Direct + Foreign Proxy)"
     echo "  🕹️  2) Gaming         (Low latency focus)"
     echo "  📺  3) Streaming      (Better for video services)"
     echo "  🌎  4) Global Proxy   (All traffic through proxy)"
     echo "  🎯  5) Direct Only    (Disable proxy completely)"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 }
 
 
@@ -145,7 +145,7 @@ profile_manager_menu() {
         render_persistent_header
 
         echo "  🎭 Routing Profiles"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         show_active_profile
         echo
         list_profiles

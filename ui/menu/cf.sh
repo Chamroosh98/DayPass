@@ -6,7 +6,7 @@
 clean_ip_for_config() {
     echo
     echo "  📋 Available Configs :"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 
     local configs=""
     local i=1
@@ -24,7 +24,7 @@ clean_ip_for_config() {
         return 1
     fi
 
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     printf "  🎯 Select config number : "
     read -r choice </dev/tty
 
@@ -134,9 +134,9 @@ clean_ip_menu() {
         core=$(detect_proxy_core)
 
         echo "  🧼 Clean IP Manager (Cloudflare)"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         echo "  🛡️ Proxy Core : ${CYAN}$core${RESET}"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         echo "  🕵🏻‍♀️ 1) Find Clean IP for a Config"
         echo "  👫🏻 2) Show / Edit Candidate IP List"
         echo "  📺 3) Show Last Scan Results"
@@ -152,9 +152,9 @@ clean_ip_menu() {
                 if [ -f "$RESULT_FILE" ] && [ -s "$RESULT_FILE" ]; then
                     echo
                     echo "  🏆 Last Results :"
-                    echo "  ───────────────────────────────────────────────────────────"
+                    ui_divider
                     awk '{printf "   - %s  (%s ms)\n", $2, $1}' "$RESULT_FILE"
-                    echo "  ───────────────────────────────────────────────────────────"
+                    ui_divider
                 else
                     log_warn "No scan results yet!"
                 fi

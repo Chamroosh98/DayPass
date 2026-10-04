@@ -6,6 +6,19 @@
 #   h : Contextual help of the current screen
 # ============================================================
 
+# 2 spaces + exactly 60 box-drawing marks. Every screen uses this line.
+UI_DIVIDER="  ────────────────────────────────────────────────────────────"
+export UI_DIVIDER
+
+# Optional $1 is a color escape (CYAN, GRAY, DIM, ...).
+ui_divider() {
+    if [ -n "${1:-}" ]; then
+        printf '%s%s%s\n' "$1" "$UI_DIVIDER" "${RESET:-}"
+    else
+        printf '%s\n' "$UI_DIVIDER"
+    fi
+}
+
 daypass_quit() {
     echo
     printf "  ${GRAY}TNX for using DayPass! =)${RESET}\n"
@@ -55,21 +68,15 @@ ui_nav_footer() {
     else
         _nav_line="$_nav_back   h) Help"
     fi
-    _nav_rule=""
-    _nav_i=0
-    while [ "$_nav_i" -lt "${#_nav_line}" ]; do
-        _nav_rule="${_nav_rule}─"
-        _nav_i=$((_nav_i + 1))
-    done
     echo
-    echo "  $_nav_rule"
+    ui_divider
     printf "  ${_nav_muted}%s${RESET}\n" "$_nav_line"
     echo
 }
 
 ui_title() {
     echo "  $1"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 }
 
 ui_show_help() {

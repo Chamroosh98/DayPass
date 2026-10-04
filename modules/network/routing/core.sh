@@ -434,7 +434,7 @@ show_routing_status() {
     local mode engine intercept managed
 
     echo "  🚦 Current Routing Status"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 
     if [ -f "$ROUTING_DIR/current_mode" ]; then
         mode=$(cat "$ROUTING_DIR/current_mode")
@@ -458,7 +458,7 @@ show_routing_status() {
             echo "  🧱 DayPass Rules: $managed  ${GRAY}(IPv6 : $(_rt_opt ipv6 0))${RESET}"
         fi
     fi
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 }
 
 # ------------------------------------------------------------
@@ -471,7 +471,7 @@ routing_menu() {
         render_persistent_header
 
         echo "  🚦 Traffic Routing / Shunt Rules"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         show_routing_status
         echo
         echo "  👑 1) Iran Direct + Foreign Proxy   (Recommended)"

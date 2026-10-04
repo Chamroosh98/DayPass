@@ -9,9 +9,8 @@ proxy_install_wizard()
     render_persistent_header
 
     ui_title "🕵️‍♀️ Select Package Type"
-    echo "  🔒 1) Passwall-1  (Legacy Stable Release)"
-    echo "  🔒 2) Passwall-2  (Modern Release - Recommended)"
-    echo "  ───────────────────────────────────────────────────────────"
+    echo "  1) 🔒 Passwall-1  (Legacy Stable Release)"
+    echo "  2) 🔒 Passwall-2  (Modern Release - Recommended)"
     ui_nav_footer
 
     ui_prompt 2
@@ -95,7 +94,7 @@ install_profile_interactive()
 
     title="$(profile_display_title "$profile" 2>/dev/null || echo "$profile")"
     printf "  📦 ${BOLD}Profile Installation: %s${RESET}\n" "$title"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 
     rel_label="${OPENWRT_MAJOR:-${PROFILE_RELEASE:-?}}"
     log_info "Resolving package dependencies for OpenWrt [${rel_label}.x]..."

@@ -4,16 +4,16 @@ show_custom_help()
 {
     render_persistent_header
     echo "  📖 ${BOLD}Custom Selection Guide & Keyboard Shortcuts${RESET}"
-    echo "  ──────────────────────────────────────────────────────────"
+    ui_divider
     echo "  🔹 ${YELLOW}Toggle Item (1-6):${RESET} Enter item number to Select [✔] or Deselect [ ]."
     echo "  🔹 ${YELLOW}Language Notice:${RESET} Selecting a new language (e.g. -fa) automatically"
     echo "     replaces previously selected translations for clean config."
-    echo "  🔹 ${YELLOW}[n] / [p]:${RESET} Navigate to Next or Previous page."
-    echo "  🔹 ${YELLOW}[d]:${RESET} Save your current selection and proceed to Review."
+    echo "  🔹 ${YELLOW}[n] / [p]:${RESET} Next or previous page on the navigation bar."
+    echo "  🔹 ${YELLOW}[d]:${RESET} Save the current selection and continue to Review."
     _nav_muted="${COLOR_MUTED:-$GRAY}"
     printf "  ${_nav_muted}0) Back / Skip${RESET}\n"
     printf "  ${_nav_muted}q) Quit DayPass${RESET}\n"
-    echo "  ──────────────────────────────────────────────────────────"
+    ui_divider
     echo "  💡 ${CYAN}Pro-Tip:${RESET} Combining Sing-box and Xray together is supported,"
     echo "     but recommended mainly for powerful hardware (ARM64 / x86)."
     echo
@@ -66,6 +66,28 @@ toggle_custom_package()
     export SELECTED_PACKAGES
 }
 
+# One-line n / p / d bar. Prev is muted on page 1; Next is muted on the last page.
+custom_render_nav_bar() {
+    _muted="${COLOR_MUTED:-${GRAY:-\033[90m}}"
+    _page="${CURRENT_PAGE:-1}"
+    _pages="${TOTAL_PAGES:-1}"
+
+    echo "  🎮 Navigation & Actions"
+    ui_divider
+    if [ "$_page" -ge "$_pages" ]; then
+        _n="${_muted}[n] Next Page ➡️${RESET}"
+    else
+        _n="[n] Next Page ➡️"
+    fi
+    if [ "$_page" -le 1 ]; then
+        _p="${_muted}[p] Prev Page ⬅️${RESET}"
+    else
+        _p="[p] Prev Page ⬅️"
+    fi
+    _d="${GREEN}[d] 💾 Save & Continue${RESET}"
+    printf "  %b      %b      %b\n" "$_n" "$_p" "$_d"
+}
+
 handle_custom_profile()
 {
     if [ -z "$MANIFEST_FILE" ] || [ ! -f "$MANIFEST_FILE" ]; then
@@ -115,7 +137,7 @@ handle_custom_profile()
         done
 
         echo "  🛠️ ${BOLD}Custom Package Selection${RESET} ${GRAY}(Page ${YELLOW}$CURRENT_PAGE${RESET}${GRAY}/$TOTAL_PAGES | Selected : ${GREEN}$SEL_COUNT${RESET}${GRAY})${RESET}"
-        echo "  ${GRAY}──────────────────────────────────────────────────────────${RESET}"
+        ui_divider "$GRAY"
 
         START_IDX=$(( (CURRENT_PAGE - 1) * PAGE_SIZE + 1 ))
         END_IDX=$(( CURRENT_PAGE * PAGE_SIZE ))
@@ -144,15 +166,14 @@ handle_custom_profile()
 
         FIRST_RENDER=0
 
-        _nav_muted="${COLOR_MUTED:-$GRAY}"
-        printf "  ${_nav_muted}n) Next page${RESET}\n"
-        printf "  ${_nav_muted}p) Previous page${RESET}\n"
-        printf "  ${_nav_muted}d) Save and continue${RESET}\n"
+        custom_render_nav_bar
         if command -v ui_nav_footer >/dev/null 2>&1; then
             ui_nav_footer
         fi
 
-        printf "  ⁉️ Toggle item [1-%s] : " "$((item_no - 1))"
+        _last=$((${item_no:-1} - 1))
+        [ "$_last" -ge 1 ] || _last=1
+        printf "  ⁉️ Select option or toggle [1-%s] : " "$_last"
         read -r cmd </dev/tty || daypass_quit
 
         case "$cmd" in

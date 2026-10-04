@@ -131,6 +131,7 @@ func generateInstallScript(outputFile string) error {
 		"modules/system/resource_checker.sh",
 		"installer/pkg/resolver.sh",
 		"installer/pkg/package_catalog.sh",
+		"installer/pkg/profile_overview.sh",
 		"installer/pkg/manifest_manager.sh",
 		"installer/pkg/installer.sh",
 		"installer/pkg/updater.sh",

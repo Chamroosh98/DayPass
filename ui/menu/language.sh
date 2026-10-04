@@ -11,12 +11,12 @@ language_menu()
     render_persistent_header
 
     echo "  🕵️‍♀️ Select Language (Passwall 2)                             "
-    echo "  ─────────────────────────────────────────────────────────── "
+    ui_divider
     echo "  1) 🦁☀️ Persian  (fa)                                       "
     echo "  2) 🇬🇧   English  (en)                                       "
     echo "  3) 🇨🇳   Chinese  (zh)                                       "
     echo "  4) 🇷🇺   Russian  (ru)                                       "
-    echo "  ─────────────────────────────────────────────────────────── "
+    ui_divider
     echo
 
     if command -v ui_nav_footer >/dev/null 2>&1; then

@@ -15,7 +15,7 @@ proxy_menu() {
             else
                 echo "  🎯 Active Engine : ${GREEN}$(transport_engine_label "$active")${RESET}"
             fi
-            echo "  ───────────────────────────────────────────────────────────"
+            ui_divider
         fi
         echo "  🚀 1) Transport Engines (Passwall, sing-box, Xray, WireGuard, OpenVPN)"
         echo "  🧶 2) Config Manager (Nodes & Subscriptions)"

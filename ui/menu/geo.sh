@@ -5,12 +5,12 @@ geo_menu()
     render_persistent_header
 
     echo "  🕵️‍♀️ Select Geo Database                                      "
-    echo "  ─────────────────────────────────────────────────────────── "
+    ui_divider
     echo "  🫸🏻 1) Skip       (Do not install Geo databases)             "
     echo "  👔 2) Official   (Standard official release packages)       "
     echo "  🍺 3) Iran Full  (Custom ruleset - Full database)           "
     echo "  🍷 4) Iran Lite  (Custom ruleset - Compact database)        "
-    echo "  ─────────────────────────────────────────────────────────── "
+    ui_divider
     echo
 
     if command -v ui_nav_footer >/dev/null 2>&1; then

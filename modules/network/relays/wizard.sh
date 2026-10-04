@@ -10,10 +10,10 @@
 _nb_banner() {
     echo
     echo "  ${CYAN}${RESET}${BOLD}🌐 Network Bootstrap Wizard${RESET}"
-    echo "  ${CYAN}─────────────────────────────────────────────────────────${RESET}"
+    ui_divider "$CYAN"
     echo "  ${CYAN}${RESET}Choose how DayPass should reach package mirrors"
     echo "  ${CYAN}${RESET}before updating or installing software.          "
-    echo "  ${CYAN}─────────────────────────────────────────────────────────${RESET}"
+    ui_divider "$CYAN"
     echo
 }
 

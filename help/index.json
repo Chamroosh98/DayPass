@@ -124,7 +124,7 @@
       "file": "network_info.json",
       "module_id": "network_info",
       "title": "Network Info & Speed Monitor",
-      "summary": "Operations on the left, a tree of each WAN on the right: public IP, provider, and status. Queries use curl on that interface.",
+      "summary": "A status card lists each WAN (public IP, provider, and status). Operations sit under it. Queries use curl on that interface.",
       "item_count": 3,
       "sources": [
         "modules/network/info/discover.sh",

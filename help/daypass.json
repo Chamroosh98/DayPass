@@ -1028,16 +1028,16 @@
       "functions": [
         "net_get_active_ifaces",
         "net_fetch_iface_ip",
-        "net_render_left_menu",
-        "net_render_right_tree",
+        "net_render_status_card",
+        "net_render_panel",
         "net_monitor_live_speed",
         "network_info_menu"
       ],
-      "summary": "Looks up every WAN's public IP and ISP with curl bound to that interface, then draws operations beside a tree of each WAN.",
+      "summary": "Looks up every WAN's public IP and ISP with curl bound to that interface, then draws a status card and the operations list under it.",
       "behavior": [
         "WAN names come from the firewall zone wan and from interfaces named wan, wan_* or wwan. Disabled and dhcpv6 interfaces are skipped.",
         "Each query is curl -fsS --connect-timeout 2 --max-time 4 --interface <linux device>. Providers are ipwho.is, then ipapi.co. jq reads the ISP name.",
-        "The screen is two open columns. The left column is Live Speed and Refresh. The right column is one tree per WAN: IP, provider, and status with metric. The shared header and footer stay outside those columns.",
+        "The screen is a single stacked card. Status is on top. Live Speed and Refresh sit under it. The shared header and footer stay outside the card.",
         "The speed monitor reads rx_bytes and tx_bytes on the first active WAN device."
       ],
       "tools": ["curl", "jq", "uci", "ubus", "ip", "awk"],

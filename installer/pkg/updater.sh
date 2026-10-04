@@ -12,12 +12,12 @@ inspect_and_confirm_updates()
     fi
 
     echo "  📦 ${_in_title} Package Inspection Table"
-    echo "  ─────────────────────────────────────────────────────────── "
+    ui_divider
     [ -n "$_in_category" ] && printf "  ${GRAY}Category : %s${RESET}\n" "$_in_category"
     printf "  ${GRAY}Manifest : %s${RESET}\n" "${MANIFEST_REL:-unknown} / ${ARCH:-unknown}"
-    echo "  ─────────────────────────────────────────────────────────── "
+    ui_divider
     printf "   %-28s %-16s %-16s %-12s\n" "Package" "Installed" "Manifest Ver" "Action"
-    echo "  ─────────────────────────────────────────────────────────── "
+    ui_divider
 
     PACKAGES_TO_PROCESS=""
     UPGRADE_COUNT=0
@@ -66,9 +66,9 @@ inspect_and_confirm_updates()
             "$pkg" "$inst_ver_fmt" "$manif_ver_fmt" "$ACTION_STR"
     done
 
-    echo "  ─────────────────────────────────────────────────────────── "
+    ui_divider
     printf "   Summary : %d to install, %d to upgrade, %d skipped!\n" "$INSTALL_COUNT" "$UPGRADE_COUNT" "$SKIP_COUNT"
-    echo "  ─────────────────────────────────────────────────────────── "
+    ui_divider
     echo
 
     if [ -z "$PACKAGES_TO_PROCESS" ]; then
@@ -106,7 +106,7 @@ update_packages_menu()
 
     if command -v mf_has_modules >/dev/null 2>&1 && mf_has_modules; then
         echo "  📦 ${BOLD}Select a module to inspect${RESET}"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         _up_i=0
         _up_ids=""
         for _up_id in $(mf_module_ids); do

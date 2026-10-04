@@ -11,7 +11,7 @@ menu_mode()
     render_persistent_header
 
     echo "  🕵️‍♀️ Select Installation Mode                                "
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
     echo "  1) ⚡ Recommended (Quick & Pre-configured for users)       "
     echo "  2) 🛠️ Custom      (Advanced package selection)             "
     ui_nav_footer

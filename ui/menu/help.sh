@@ -127,11 +127,11 @@ show_help() {
         HELP_SUMMARY=$(jq -r '.summary // ""' "$HELP_FILE" 2>/dev/null)
 
         echo "  📖 ${BOLD}${HELP_TITLE}${RESET}"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         if [ -n "$HELP_SUMMARY" ]; then
             help_wrap "$HELP_SUMMARY" "  " 66
         fi
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
 
         jq -r \
             --argjson s "$(( (HELP_PAGE - 1) * HELP_PAGE_SIZE ))" \
@@ -158,12 +158,12 @@ show_help() {
                     fi
                     ;;
                 S)
-                    printf "  %s\n" "───────────────────────────────────────────────────────────"
+                    ui_divider
                     ;;
             esac
         done
 
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         _nav_muted="${COLOR_MUTED:-$GRAY}"
         printf "  ${_nav_muted}Page %s/%s${RESET}\n" "$HELP_PAGE" "$HELP_PAGES"
         printf "  ${_nav_muted}n) Next${RESET}\n"
@@ -205,7 +205,7 @@ help_menu() {
         render_persistent_header
 
         echo "  📖 ${BOLD}Help & Manuals${RESET}"
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
 
         if ! command -v jq >/dev/null 2>&1; then
             rm -f "$HELP_LIST_FILE" 2>/dev/null
@@ -254,7 +254,7 @@ help_menu() {
             fi
         done
 
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         _nav_muted="${COLOR_MUTED:-$GRAY}"
         printf "  ${_nav_muted}Page %s/%s${RESET}\n" "$HELP_PAGE" "$HELP_PAGES"
         printf "  ${_nav_muted}n) Next${RESET}\n"

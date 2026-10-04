@@ -63,7 +63,7 @@ maintenance_menu()
         render_persistent_header
         
         printf "  🛠️ ${BOLD}DayPass Maintenance & Recovery${RESET}\n"
-        printf "  ─────────────────────────────────────────────────────────── \n"
+        ui_divider
         printf "  🧹 1) Purge DayPass Installed Packages\n"
         printf "  🗑️ 2) Clean Temporary Cache & Downloads\n"
         printf "  💾 3) Backup System Configuration\n"

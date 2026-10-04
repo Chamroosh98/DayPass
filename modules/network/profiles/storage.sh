@@ -13,7 +13,7 @@ mkdir -p "$CONFIG_DIR"
 # ------------------------------------------------------------
 list_configs() {
     echo "  📋 Available Configs (DayPass storage)"
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 
     local count=0
     for file in "$CONFIG_DIR"/*.json; do
@@ -38,10 +38,10 @@ list_configs() {
     if [ "$count" -eq 0 ]; then
         echo "  ${GRAY}No configs found!${RESET}"
     else
-        echo "  ───────────────────────────────────────────────────────────"
+        ui_divider
         echo "  Total: $count config(s)"
     fi
-    echo "  ───────────────────────────────────────────────────────────"
+    ui_divider
 }
 
 # ------------------------------------------------------------
