@@ -15,10 +15,10 @@ network_info_menu() {
     local HELP_MODULE_ID="network_info"
 
     while true; do
+        if command -v render_persistent_header >/dev/null 2>&1; then
+            render_persistent_header
+        fi
         show_full_network_info
-
-        echo "  📊 1) Live Speed Monitor"
-        echo "  🔄 2) Refresh Information"
         ui_nav_footer
         ui_prompt 2
 

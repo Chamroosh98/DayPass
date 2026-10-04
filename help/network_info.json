@@ -1,7 +1,7 @@
 {
   "module_id": "network_info",
   "title": "Network Info & Speed Monitor",
-  "summary": "One WAN is a single card. Several WANs are a list of public IP, ISP, metric and mwan3 status. Each lookup uses curl on that interface.",
+  "summary": "Operations sit on the left. Each WAN is a tree on the right: public IP, provider, and online or offline status. Each lookup uses curl on that interface.",
   "items": [
     {
       "key": "1",

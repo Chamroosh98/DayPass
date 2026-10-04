@@ -124,7 +124,7 @@
       "file": "network_info.json",
       "module_id": "network_info",
       "title": "Network Info & Speed Monitor",
-      "summary": "Shows each WAN's public IP and ISP. One link is a single card. Several links are a list. Queries use curl on that interface.",
+      "summary": "Operations on the left, a tree of each WAN on the right: public IP, provider, and status. Queries use curl on that interface.",
       "item_count": 3,
       "sources": [
         "modules/network/info/discover.sh",

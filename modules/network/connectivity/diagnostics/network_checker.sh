@@ -158,7 +158,7 @@ network_check()
     DNS_FAILED=0
 
     render_persistent_header
-    printf "  ${BOLD:-}${CYAN:-}🔎 DayPass Network Health Check${RESET:-}\n"
+    printf "  ${BOLD:-}${CYAN:-}🩺 Network Health Check${RESET:-}\n"
     
     printf "  ${GRAY:-}──────────────────────────────────────────${RESET:-}\n"
 

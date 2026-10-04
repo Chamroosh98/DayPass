@@ -1020,7 +1020,7 @@
       "modules": [
         "modules/network/info/discover.sh",
         "modules/network/info/fetch.sh",
-        "modules/network/info/ui.sh",
+        "ui/menu/network_ip.sh",
         "modules/network/info/panel.sh",
         "modules/network/info/speed.sh",
         "modules/network/info/network_info.sh"
@@ -1028,16 +1028,16 @@
       "functions": [
         "net_get_active_ifaces",
         "net_fetch_iface_ip",
-        "net_render_standalone_ui",
-        "net_render_multiwan_ui",
+        "net_render_left_menu",
+        "net_render_right_tree",
         "net_monitor_live_speed",
         "network_info_menu"
       ],
-      "summary": "Looks up every WAN's public IP and ISP with curl bound to that interface, then draws one card or a list.",
+      "summary": "Looks up every WAN's public IP and ISP with curl bound to that interface, then draws operations beside a tree of each WAN.",
       "behavior": [
         "WAN names come from the firewall zone wan and from interfaces named wan, wan_* or wwan. Disabled and dhcpv6 interfaces are skipped.",
         "Each query is curl -fsS --connect-timeout 2 --max-time 4 --interface <linux device>. Providers are ipwho.is, then ipapi.co. jq reads the ISP name.",
-        "One enabled WAN draws a single card. Two or more draw a single-column list with IP, ISP, metric and mwan3 online/offline.",
+        "The screen is two open columns. The left column is Live Speed and Refresh. The right column is one tree per WAN: IP, provider, and status with metric. The shared header and footer stay outside those columns.",
         "The speed monitor reads rx_bytes and tx_bytes on the first active WAN device."
       ],
       "tools": ["curl", "jq", "uci", "ubus", "ip", "awk"],

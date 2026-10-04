@@ -1,82 +1,157 @@
 #!/bin/sh
 # DayPass - Network info screens. Printing only; no HTTP here.
 
+# Display columns of $1. Emoji (4-byte UTF-8) count as 2. Never truncates.
+_net_disp_width() {
+    local s="$1" w=0 b n=0
+
+    [ -n "$s" ] || { printf '%s\n' "0"; return 0; }
+    for b in $(printf '%s' "$s" | od -An -tu1); do
+        if [ "$n" -gt 0 ]; then
+            n=$((n - 1))
+            continue
+        fi
+        if [ "$b" -lt 128 ]; then
+            w=$((w + 1))
+        elif [ "$b" -lt 224 ]; then
+            w=$((w + 1))
+            n=1
+        elif [ "$b" -lt 240 ]; then
+            w=$((w + 1))
+            n=2
+        else
+            w=$((w + 2))
+            n=3
+        fi
+    done
+    printf '%s\n' "$w"
+}
+
+# Append spaces so $1 reaches display width $2. Longer lines are kept whole.
+_net_pad() {
+    local s="$1" width="$2" w=0
+
+    w=$(_net_disp_width "$s")
+    while [ "$w" -lt "$width" ]; do
+        s="$s "
+        w=$((w + 1))
+    done
+    printf '%s\n' "$s"
+}
+
 # $1 uci name
 _net_iface_icon() {
     case "$1" in
         wan_usb*) printf '%s\n' "📱" ;;
         wwan*)    printf '%s\n' "📶" ;;
-        wan_lan*) printf '%s\n' "🔌" ;;
+        wan|wan_*) printf '%s\n' "🔌" ;;
         *)        printf '%s\n' "🌐" ;;
     esac
 }
 
-# $1 iface  $2 linux dev  $3 metric  $4 fetch record
-net_render_standalone_ui() {
-    local iface="$1"
-    local dev="$2"
-    local metric="$3"
-    local data="$4"
-    local success ip country code flag city isp asn icon
+# One emoji, display width 2, so the tree colons stay aligned.
+_net_provider_icon() {
+    case "$1" in
+        IR) printf '%s\n' "🦁" ;;
+        "") printf '%s\n' "📶" ;;
+        *)  country_flag "$1" ;;
+    esac
+}
 
-    IFS='|' read -r success ip country code flag city isp asn <<EOF
-$data
-EOF
+# $1 interface count. Operations only; the shared footer is printed by the menu.
+net_render_left_menu() {
+    local count="${1:-0}"
 
-    icon=$(_net_iface_icon "$iface")
-    if [ "$code" = "IR" ] || [ -z "$flag" ]; then
-        flag=$(country_flag "$code")
+    echo "  📋 Operations"
+    echo "  ─────────────"
+    echo "  📊 1) Live Speed Monitor"
+    echo "  🔄 2) Refresh Information"
+    if [ "$count" -gt 1 ]; then
+        echo
+        echo "  ⚖️ Multi-WAN"
+        echo "  ─────────────"
+        echo "  $count interfaces"
     fi
-    [ -n "$metric" ] || metric="default"
-    [ -n "$dev" ] || dev="unknown"
-
-    echo "  🌐 Network Diagnostics"
-    echo "  ───────────────────────────────────────────────────────────"
-    echo "  $icon Interface : $iface ($dev)"
-    echo "  📊 Metric     : $metric"
-
-    if [ "$success" != "true" ] || [ -z "$ip" ]; then
-        echo "  🌐 Public IP  : offline"
-        echo "  📶 Status     : no answer on this interface"
-    else
-        echo "  🌐 Public IP  : $ip"
-        if [ -n "$city" ]; then
-            echo "  $flag Country    : $country ($city)"
-        else
-            echo "  $flag Country    : $country"
-        fi
-        [ -n "$isp" ] && echo "  📶 ISP        : $isp"
-        [ -n "$asn" ] && echo "  🔌 ASN        : $asn"
-    fi
-    echo "  ───────────────────────────────────────────────────────────"
 }
 
 # $1 snapshot file. Each line:
 # iface|dev|metric|mwan|success|ip|country|code|flag|city|isp|asn
-net_render_multiwan_ui() {
+net_render_right_tree() {
     local file="$1"
-    local iface dev metric mwan success ip country code flag city isp asn icon
+    local iface dev metric mwan success ip country code flag city isp asn
+    local icon picon st_icon st_txt prov first=1
 
-    echo "  🌐 Multi-WAN"
-    echo "  ───────────────────────────────────────────────────────────"
+    if [ ! -s "$file" ]; then
+        echo "  No WAN interface detected."
+        return 0
+    fi
+
     while IFS='|' read -r iface dev metric mwan success ip country code flag city isp asn; do
         [ -n "$iface" ] || continue
-        icon=$(_net_iface_icon "$iface")
-        if [ "$code" = "IR" ] || [ -z "$flag" ]; then
-            flag=$(country_flag "$code")
+        if [ "$first" -eq 0 ]; then
+            echo "  ─────────────"
         fi
-        [ -n "$metric" ] || metric="default"
+        first=0
+
+        icon=$(_net_iface_icon "$iface")
+        picon=$(_net_provider_icon "$code")
         [ -n "$dev" ] || dev="-"
-        [ "$success" = "true" ] && [ -n "$ip" ] || ip="offline"
-        [ -n "$isp" ] || isp="-"
-        echo "  $icon $iface"
-        echo "     Device  $dev"
-        echo "     IP      $ip"
-        echo "     ISP     $isp"
-        echo "     $flag $country"
-        echo "     Metric  $metric"
-        echo "     mwan3   $mwan"
-        echo
+        [ -n "$metric" ] || metric="default"
+        if [ "$success" = "true" ] && [ -n "$ip" ]; then
+            :
+        else
+            ip="unavailable"
+        fi
+        [ -n "$isp" ] || isp="—"
+        [ -n "$asn" ] || asn="—"
+        prov="$isp [$asn]"
+
+        case "$mwan" in
+            online)  st_icon="🟢"; st_txt="Online" ;;
+            offline) st_icon="🔴"; st_txt="Offline" ;;
+            unknown) st_icon="🟡"; st_txt="Unknown" ;;
+            *)       st_icon="⚪"; st_txt="Not tracked" ;;
+        esac
+
+        echo "  $icon $iface ($dev)"
+        echo "  ├── 📍 IP       : $ip"
+        echo "  ├── $picon Provider : $prov"
+        echo "  └── $st_icon Status   : $st_txt (Metric $metric)"
     done < "$file"
-    echo "  ───────────────────────────────────────────────────────────"
+
+    if [ "$first" -eq 1 ]; then
+        echo "  No WAN interface detected."
+    fi
+}
+
+# $1 left file  $2 right file  $3 display width of the left column
+_net_zip_columns() {
+    local leftf="$1" rightf="$2" width="$3"
+    local l r gotl gotr
+
+    while true; do
+        l=""; r=""; gotl=0; gotr=0
+        if IFS= read -r l <&3; then gotl=1; else l=""; fi
+        if IFS= read -r r <&4; then gotr=1; else r=""; fi
+        [ "$gotl" -eq 0 ] && [ "$gotr" -eq 0 ] && break
+        l=$(_net_pad "$l" "$width")
+        printf '%s │ %s\n' "$l" "$r"
+    done 3<"$leftf" 4<"$rightf"
+}
+
+# $1 snapshot  $2 interface count  $3 optional note shown instead of the tree
+net_render_columns() {
+    local snap="$1" count="$2" note="$3"
+    local left right
+
+    left="/tmp/daypass_netleft.$$"
+    right="/tmp/daypass_netright.$$"
+    net_render_left_menu "$count" > "$left"
+    if [ -n "$note" ]; then
+        printf '  %s\n' "$note" > "$right"
+    else
+        net_render_right_tree "$snap" > "$right"
+    fi
+    _net_zip_columns "$left" "$right" 32
+    rm -f "$left" "$right"
 }

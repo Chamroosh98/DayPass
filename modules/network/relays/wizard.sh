@@ -22,8 +22,6 @@ _nb_menu() {
     echo "  ${WHITE}☁️ 2)${RESET} Use Cloudflare Worker Mirror"
     echo "  ${WHITE}➡️ 3)${RESET} Proceed with Direct Connection ${DIM}(default)${RESET}"
     echo
-    echo "  ${DIM}─────────────────────────────────────────────────────────${RESET}"
-    echo
 }
 
 # Official OpenWrt feed host. Anything else in the feed files is a custom mirror.

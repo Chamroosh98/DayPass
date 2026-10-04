@@ -18,7 +18,6 @@ main_menu()
         echo "  🛠️ 6) System Maintenance & Backup"
         echo "  📖 7) Help & Manuals"
         echo "  🌐 8) Network Bootstrap Wizard"
-        echo "  ───────────────────────────────────────────────────────────"
         ui_nav_footer root
 
         ui_prompt 8
