@@ -281,15 +281,6 @@ usb_status_metrics() {
     printf '%s\n' "$out"
 }
 
-# Status card only. The hardware menu prints the shared header and footer.
-usb_render_status_card() {
-    echo "  📡 USB & Network Status"
-    ui_divider
-    echo "  🔌 Hardware            : $(usb_status_hardware)"
-    echo "  📱 Interface           : $(usb_status_interface)"
-    echo "  ⚖️ Failover Priority   : $(usb_status_metrics)"
-}
-
 # WAN-like UCI interfaces, one name per line.
 usb_metric_ifaces() {
     local iface
