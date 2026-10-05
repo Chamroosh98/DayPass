@@ -43,13 +43,14 @@
       "file": "hardware.json",
       "module_id": "hardware",
       "title": "Hardware & USB Tethering Manager",
-      "summary": "USB status, then the operations menu: tethering, WAN metrics, Android and iOS drivers, and a reset that removes wan_usb and uninstalls the USB driver packages.",
+      "summary": "USB tethering operations: drivers, setup, failover, toggle, reset, modem mode-switch, and a dedicated Network Interfaces State view.",
       "item_count": 11,
       "sources": [
         "ui/menu/hardware.sh",
         "modules/network/interfaces/usb/dashboard.sh",
         "modules/network/interfaces/usb/usb_wan.sh",
-        "modules/network/interfaces/usb/restore.sh"
+        "modules/network/interfaces/usb/restore.sh",
+        "modules/network_state.sh"
       ],
       "reachable_from": "Main menu -> 2"
     },

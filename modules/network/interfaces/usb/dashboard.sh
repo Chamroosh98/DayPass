@@ -1,7 +1,6 @@
 #!/bin/sh
-# DayPass - USB tethering dashboard.
-# Status card, then operations. Echo only. The hardware menu
-# prints the shared header and footer.
+# DayPass - USB tethering operations menu.
+# Echo only. The hardware menu prints the shared header and footer.
 
 # $1 interface state (UP | DOWN | DISABLED | absent)
 usb_render_operations() {
@@ -15,11 +14,11 @@ usb_render_operations() {
     echo "  4) 🔀 Toggle Interface Status ($state)"
     echo "  5) ♻️ Restore / Reset USB Stack"
     echo "  6) 📟 Modem Mode Switch"
-    echo "  7) 🔄 Refresh Status"
+    echo "  7) 📡 Network Interfaces State"
     echo "  8) 📈 System Resources"
 }
 
-# Prints the dashboard. Returns 0.
+# Prints the operations list. Returns 0.
 usb_render_dashboard() {
     local state
 
@@ -28,16 +27,6 @@ usb_render_dashboard() {
         state=$(usb_wan_state)
     fi
 
-    if command -v usb_render_status_card >/dev/null 2>&1; then
-        usb_render_status_card
-    else
-        echo "  📡 USB & Network Status"
-        ui_divider
-        echo "  🔌 Hardware            : unavailable"
-        echo "  📱 Interface           : unavailable"
-        echo "  ⚖️ Failover Priority   : none"
-    fi
-    ui_divider
     usb_render_operations "$state"
     return 0
 }

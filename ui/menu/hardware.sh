@@ -224,7 +224,7 @@ hardware_menu() {
                 fi
                 ;;
             6) hardware_modeswitch ;;
-            7) continue ;;
+            7) ui_run network_interfaces_state "Network Interfaces State"; continue ;;
             8) ui_run show_system_resources_menu "System Resources"; continue ;;
             0) return 0 ;;
             *)

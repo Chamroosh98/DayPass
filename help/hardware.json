@@ -1,7 +1,7 @@
 {
   "module_id": "hardware",
   "title": "Hardware & USB Tethering Manager",
-  "summary": "USB status first, then the operations menu. Drivers install as Android, iOS, or the full suite.",
+  "summary": "USB tethering operations: drivers, setup, failover, toggle, reset, modem mode-switch, and a dedicated Network Interfaces State view.",
   "items": [
     {
       "key": "1",
@@ -13,7 +13,7 @@
       "key": "2",
       "title": "Setup USB Tethering",
       "description": "Creates network.wan_usb only when a live USB network device is present (usb0, rndis, ncm, or USB-backed eth). Adds it to the firewall wan zone and brings it up.",
-      "usage_tip": "Install drivers first. If nothing is plugged in, Setup stops and does not write /etc/config/network. Use Refresh Status after enabling tethering on the phone."
+      "usage_tip": "Install drivers first. If nothing is plugged in, Setup stops and does not write /etc/config/network. Open Network Interfaces State after enabling tethering on the phone."
     },
     {
       "key": "3",
@@ -41,9 +41,9 @@
     },
     {
       "key": "7",
-      "title": "Refresh Status",
-      "description": "Redraws the dashboard from the current USB and UCI state without leaving the menu.",
-      "usage_tip": "Use this after enabling USB Tethering on the phone."
+      "title": "Network Interfaces State",
+      "description": "Full-screen list of every UCI network interface (lan, wan, wan6, wan_usb, …) with device, protocol, live ubus status and metric.",
+      "usage_tip": "Enter returns to the Hardware menu. Status is 🟢 UP (with IP), 🔴 DOWN, or ⚠️ DISABLED."
     },
     {
       "key": "8",
