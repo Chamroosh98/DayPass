@@ -22,8 +22,8 @@
       "module_id": "main",
       "title": "Main Menu",
       "summary": "Central entry point of DayPass. Every menu uses the same keys: a number opens an option, 0 goes back (or exits here), q quits DayPass and h opens the manual of the screen.",
-      "item_count": 11,
-      "sources": ["ui/menu/main.sh"],
+      "item_count": 12,
+      "sources": ["ui/menu/main.sh", "modules/network_state.sh"],
       "reachable_from": "Runs at the end of the installer / DayPass start"
     },
     {

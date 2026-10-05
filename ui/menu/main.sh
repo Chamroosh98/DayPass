@@ -18,9 +18,10 @@ main_menu()
         echo "  🛠️ 6) System Maintenance & Backup"
         echo "  📖 7) Help & Manuals"
         echo "  🌐 8) Network Bootstrap Wizard"
+        echo "  📡 9) Network Interfaces State"
         ui_nav_footer root
 
-        ui_prompt 8
+        ui_prompt 9
 
         case "$UI_CHOICE" in
             1) ui_run packages_menu "Package Profiles" ;;
@@ -31,6 +32,7 @@ main_menu()
             6) ui_run system_menu "System Maintenance" ;;
             7) ui_run help_menu "Help" ;;
             8) ui_run network_bootstrap_from_menu "Network Bootstrap" ;;
+            9) ui_run network_interfaces_state "Network Interfaces State" ;;
             0) daypass_quit ;;
             *)
                 ui_nav_common "$UI_CHOICE" "$HELP_MODULE_ID" && continue

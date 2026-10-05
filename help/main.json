@@ -52,6 +52,12 @@
       "usage_tip": "Startup skips this wizard when /etc/opkg/distfeeds.conf or http_proxy already points somewhere other than downloads.openwrt.org."
     },
     {
+      "key": "9",
+      "title": "Network Interfaces State",
+      "description": "Full-screen list of every UCI interface with device, protocol, IP, live status, metric, and which interfaces carry the default route or mwan3 balanced traffic.",
+      "usage_tip": "Enter returns to the main menu. Active routes are marked [🚀 Active / Routing Traffic]."
+    },
+    {
       "key": "0",
       "title": "Exit DayPass",
       "description": "Closes the DayPass session without changing anything.",
