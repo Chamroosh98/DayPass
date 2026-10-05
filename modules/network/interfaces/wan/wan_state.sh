@@ -199,11 +199,10 @@ _ns_render_iface() {
     fi
 
     icon=$(_ns_iface_icon "$iface")
-    echo "  $icon $iface"
+    echo "  $icon $iface ($device)"
     if command -v ui_divider >/dev/null 2>&1; then
         ui_divider
     fi
-    echo "  Device     : $device"
     echo "  Protocol   : $proto | $ip"
     echo "  Status     : $status_line"
     echo "  Metric     : $metric"
