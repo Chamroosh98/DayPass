@@ -148,6 +148,14 @@ _usb_set_missing() {
     done
 }
 
+# 0 when USB host controller packages are on the router (core + usb2 or usb3).
+_usb_host_controller_present() {
+    _usb_pkg_installed kmod-usb-core || return 1
+    _usb_pkg_installed kmod-usb2 && return 0
+    _usb_pkg_installed kmod-usb3 && return 0
+    return 1
+}
+
 # Prints installed | partial | missing for $1 driver set.
 # [✔ Installed] only when every required package is on the router.
 usb_driver_set_state() {
@@ -177,7 +185,7 @@ usb_driver_set_state() {
     done
     if [ "${_ud_hit:-0}" -eq 0 ]; then
         printf '%s\n' "missing"
-    elif [ "${_ud_miss:-0}" -eq 0 ]; then
+    elif [ "${_ud_miss:-0}" -eq 0 ] && _usb_host_controller_present; then
         printf '%s\n' "installed"
     else
         printf '%s\n' "partial"

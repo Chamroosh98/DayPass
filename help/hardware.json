@@ -24,20 +24,20 @@
     {
       "key": "4",
       "title": "Toggle Interface Status",
-      "description": "Enables or disables network.wan_usb.",
+      "description": "Enables or disables network.wan_usb. Enable runs ifup and reads live status from ubus (UP / DOWN / DISABLED).",
       "usage_tip": "Create the interface with option 2 before toggling it."
     },
     {
       "key": "5",
       "title": "Restore / Reset USB Stack",
-      "description": "After confirmation, deletes wan_usb from /etc/config/network, uninstalls Android, iOS and modem USB packages, unloads tether modules, and restarts network plus usbmode.",
+      "description": "After confirmation, deletes wan_usb from /etc/config/network, uninstalls Android, iOS and modem USB packages, unloads tether modules, and restarts the network service.",
       "usage_tip": "Enter keeps the current configuration. Yes runs the full cleanup, including opkg remove of the USB driver packages."
     },
     {
       "key": "6",
       "title": "Modem Mode Switch",
-      "description": "Lists modems still in storage mode with usbmode -l and switches them with usbmode -s.",
-      "usage_tip": "Needs usb-modeswitch from the full driver profile."
+      "description": "Runs usb-modeswitch / usb_modeswitch (and usb_modeswitch_dispatcher when present) to move USB modems out of storage mode.",
+      "usage_tip": "If usb-modeswitch is missing, run opkg install usb-modeswitch or install USB drivers from option 1."
     },
     {
       "key": "7",

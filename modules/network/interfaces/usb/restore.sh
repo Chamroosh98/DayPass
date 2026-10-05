@@ -70,15 +70,10 @@ usb_restore_unload_modules() {
     return 0
 }
 
-# Restart usbmode / usbmuxd when those services exist.
+# Stop usbmuxd when that service exists.
 usb_restore_usb_subsystem() {
     if [ -x /etc/init.d/usbmuxd ]; then
         /etc/init.d/usbmuxd stop >/dev/null 2>&1 || true
-    fi
-    if [ -x /etc/init.d/usbmode ]; then
-        /etc/init.d/usbmode restart >/dev/null 2>&1 || true
-    elif command -v usbmode >/dev/null 2>&1; then
-        usbmode -s >/dev/null 2>&1 || true
     fi
     return 0
 }

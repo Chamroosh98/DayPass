@@ -3,7 +3,7 @@
 # Status card, then operations. Echo only. The hardware menu
 # prints the shared header and footer.
 
-# $1 interface state (enabled | disabled | absent)
+# $1 interface state (UP | DOWN | DISABLED | absent)
 usb_render_operations() {
     local state="${1:-absent}"
 

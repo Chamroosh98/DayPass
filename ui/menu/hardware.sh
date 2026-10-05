@@ -6,9 +6,11 @@
 # ============================================================
 
 _hw_metric() {
-    local m
-    m=$(uci -q get network.$1.metric)
-    echo "${m:-default}"
+    if command -v usb_iface_metric_text >/dev/null 2>&1; then
+        usb_iface_metric_text "$1"
+        return 0
+    fi
+    uci -q get "network.$1.metric" || echo "0 [default]"
 }
 
 show_hardware_status() {
@@ -122,8 +124,8 @@ hardware_setup_tethering() {
 
 hardware_toggle_tethering() {
     case "$(usb_wan_state)" in
-        enabled)  usb_wan_set_enabled 0 ;;
-        disabled) usb_wan_set_enabled 1 ;;
+        DISABLED) usb_wan_set_enabled 1 ;;
+        UP|DOWN)  usb_wan_set_enabled 0 ;;
         *)        log_warn "USB WAN is not configured. Use option 2 first." ;;
     esac
 }
@@ -137,32 +139,49 @@ hardware_failover_menu() {
     return 1
 }
 
+_hw_modeswitch_bin() {
+    if command -v usb_modeswitch >/dev/null 2>&1; then
+        printf '%s\n' "usb_modeswitch"
+        return 0
+    fi
+    if command -v usb-modeswitch >/dev/null 2>&1; then
+        printf '%s\n' "usb-modeswitch"
+        return 0
+    fi
+    return 1
+}
+
 hardware_modeswitch() {
-    local list
+    local bin path devpath rc=1
 
-    if ! command -v usbmode >/dev/null 2>&1; then
-        log_warn "usbmode not found. Install the USB profile (option 7) for usb-modeswitch."
+    bin=$(_hw_modeswitch_bin) || bin=""
+    if [ -z "$bin" ]; then
+        log_warn "usb-modeswitch not found. Run [opkg install usb-modeswitch] or install USB drivers from option 1."
         return 0
     fi
 
-    list=$(usbmode -l 2>/dev/null)
-    if [ -z "$list" ]; then
-        log_info "No USB device needs mode switching (modems in storage mode appear here)."
-        return 0
-    fi
-
-    printf '%s\n' "$list" | sed 's/^/  • /'
-    ui_read "Switch these devices to modem mode? [y/N]"
+    ui_read "Switch connected USB modems out of storage mode? [y/N]"
     case "$UI_CHOICE" in
-        y|Y)
-            if usbmode -s >/dev/null 2>&1; then
-                log_success "ModeSwitch sent. Re-check status in a few seconds."
-            else
-                log_error "usbmode -s failed!"
-            fi
-            ;;
+        y|Y) ;;
         q|Q) daypass_quit ;;
+        *) return 0 ;;
     esac
+
+    if command -v usb_modeswitch_dispatcher >/dev/null 2>&1; then
+        for path in /sys/bus/usb/devices/*; do
+            [ -e "$path/idVendor" ] || continue
+            devpath=$(readlink -f "$path" 2>/dev/null)
+            [ -n "$devpath" ] || continue
+            DEVPATH="${devpath#/sys}" usb_modeswitch_dispatcher --switch-mode >/dev/null 2>&1 && rc=0
+        done
+    else
+        "$bin" >/dev/null 2>&1 && rc=0
+    fi
+    if [ "$rc" -eq 0 ]; then
+        log_success "ModeSwitch sent. Re-check status in a few seconds."
+    else
+        log_warn "No USB device needed a mode switch, or the switch did not apply."
+    fi
 }
 
 hardware_remove_tethering() {

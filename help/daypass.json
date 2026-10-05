@@ -1196,11 +1196,11 @@
         "USB network interfaces are classified by the kernel driver behind /sys/class/net/<dev>/device: rndis_host, cdc_ether, cdc_ncm, cdc_eem, cdc_subset and ipheth are phone tethering; qmi_wwan, cdc_mbim, huawei_cdc_ncm and sierra_net are modems. dmesg can also name a USB-registered interface such as eth1. A plain Ethernet port is not used.",
         "Without a driver link the name fallback is usb0, usb1, rndis0; usb0 is used when nothing is found so the interface binds when the phone appears.",
         "setup_usb_wan [device] [metric]: network.wan_usb proto dhcp, metric (default 20), added to the firewall zone named 'wan' (firewall reloaded), brought up with ifup.",
-        "Option 3 lists WAN interfaces and writes network.<iface>.metric. A lower metric is preferred. Restore deletes wan_usb, uninstalls Android/iOS/modem USB packages, unloads tether modules, and restarts network plus usbmode.",
-        "ModeSwitch uses usbmode -l / usbmode -s from usb-modeswitch."
+        "Option 3 lists WAN interfaces and writes network.<iface>.metric. A lower metric is preferred. Restore deletes wan_usb, uninstalls Android/iOS/modem USB packages, unloads tether modules, and restarts the network service.",
+        "ModeSwitch uses usb-modeswitch / usb_modeswitch (option 1 installs the package if it is missing)."
       ],
       "uci_touched": ["network.wan_usb", "firewall.<wan zone>.network"],
-      "tools": ["uci", "ifup", "ifdown", "lsusb", "usbmode", "readlink"],
+      "tools": ["uci", "ifup", "ifdown", "lsusb", "usb_modeswitch", "ubus", "readlink"],
       "layers": ["L1_Physical", "L2_DataLink", "L3_Network"],
       "known_issues": [],
       "flag": "--help-usb-tethering-wan"
