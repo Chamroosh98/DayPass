@@ -259,6 +259,7 @@ _usb_offer_driver_set() {
     fi
     if [ $? -eq 0 ]; then
         log_success "$_ud_ok"
+        log_info "If your phone isn't detected after plugging it in, reboot the router once - newly installed USB kernel modules sometimes don't bind to the port until the next boot."
     else
         log_warn "$_ud_bad"
     fi
