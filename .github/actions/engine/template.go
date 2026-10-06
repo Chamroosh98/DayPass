@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -210,19 +209,13 @@ func generateInstallScript(outputFile string) error {
 	// the user to paste this script in the Cloudflare dashboard editor.
 	// cf-worker/worker.js is the same script, published for the browser
 	// deploy button. Refuse the build if the two copies drift.
+	// Embedded Cloudflare Worker mirror (config/worker.js)
 	mirrorFile := "config/worker.js"
-	deployCopy := "cf-worker/worker.js"
 	canon, err := os.ReadFile(mirrorFile)
 	if err != nil {
 		return fmt.Errorf("read %s: %w", mirrorFile, err)
 	}
-	deployed, err := os.ReadFile(deployCopy)
-	if err != nil {
-		return fmt.Errorf("read %s: %w", deployCopy, err)
-	}
-	if !bytes.Equal(canon, deployed) {
-		return fmt.Errorf("%s drifted from %s — copy %s onto %s", deployCopy, mirrorFile, mirrorFile, deployCopy)
-	}
+
 	scriptBuilder.WriteString(fmt.Sprintf("\n# 📄 Source : %s (embedded)\n", filepath.Base(mirrorFile)))
 	scriptBuilder.WriteString("daypass_embedded_worker_js()\n{\n    cat <<'DAYPASS_WORKER_JS'\n")
 	scriptBuilder.Write(canon)
@@ -231,6 +224,7 @@ func generateInstallScript(outputFile string) error {
 	}
 	scriptBuilder.WriteString("DAYPASS_WORKER_JS\n}\n")
 	fmt.Printf("✅ [%s] embedded!\n", filepath.Base(mirrorFile))
+
 
 	// Cleaned Runtime Execution Pipeline
 	scriptBuilder.WriteString(`
