@@ -119,15 +119,28 @@ _usb_dep_update() {
         apk)
             _usb_run_bounded 40 apk update --no-interactive --network-timeout 15
             _ub_st=$?
-            if [ "$_ub_st" -ne 0 ]; then
-                log_warn "apk update did not finish. Retrying over IPv4."
-                _usb_run_bounded 40 apk update --force-ipv4 --no-interactive --network-timeout 15
-                _ub_st=$?
+            if [ "$_ub_st" -ne 0 ] && [ "$_ub_st" -ne 124 ]; then
+                _ua_flag=""
+                if command -v pkg_ipv4_flag >/dev/null 2>&1; then
+                    _ua_flag=$(pkg_ipv4_flag apk) || _ua_flag=""
+                fi
+                if [ -n "$_ua_flag" ]; then
+                    log_warn "apk update did not finish. Retrying with $_ua_flag."
+                    _usb_run_bounded 40 apk update "$_ua_flag" --no-interactive --network-timeout 15
+                    _ub_st=$?
+                else
+                    log_warn "apk has no IPv4-only option on this build. Not retrying with a forced address family."
+                fi
             fi
             ;;
         opkg)
             _usb_run_bounded 40 opkg update
             _ub_st=$?
+            if [ "$_ub_st" -ne 0 ] && [ "$_ub_st" -ne 124 ]; then
+                log_warn "opkg update did not finish. Retrying with --force-ipv4."
+                _usb_run_bounded 40 opkg update --force-ipv4
+                _ub_st=$?
+            fi
             ;;
     esac
 
@@ -160,14 +173,27 @@ _usb_dep_install_one() {
             _usb_run_bounded 90 apk add --no-interactive --no-cache --allow-untrusted --network-timeout 20 "$_ud_pkg"
             _ub_st=$?
             if [ "$_ub_st" -ne 0 ] && [ "$_ub_st" -ne 124 ]; then
-                log_warn "apk add failed for $_ud_pkg. Retrying over IPv4."
-                _usb_run_bounded 90 apk add --force-ipv4 --no-interactive --no-cache --allow-untrusted --network-timeout 20 "$_ud_pkg"
-                _ub_st=$?
+                _ua_flag=""
+                if command -v pkg_ipv4_flag >/dev/null 2>&1; then
+                    _ua_flag=$(pkg_ipv4_flag apk) || _ua_flag=""
+                fi
+                if [ -n "$_ua_flag" ]; then
+                    log_warn "apk add failed for $_ud_pkg. Retrying with $_ua_flag."
+                    _usb_run_bounded 90 apk add "$_ua_flag" --no-interactive --no-cache --allow-untrusted --network-timeout 20 "$_ud_pkg"
+                    _ub_st=$?
+                else
+                    log_warn "apk has no IPv4-only option on this build. Not retrying $_ud_pkg with a forced address family."
+                fi
             fi
             ;;
         opkg)
             _usb_run_bounded 90 opkg install --force-checksum --force-overwrite "$_ud_pkg"
             _ub_st=$?
+            if [ "$_ub_st" -ne 0 ] && [ "$_ub_st" -ne 124 ]; then
+                log_warn "opkg install failed for $_ud_pkg. Retrying with --force-ipv4."
+                _usb_run_bounded 90 opkg install --force-ipv4 --force-checksum --force-overwrite "$_ud_pkg"
+                _ub_st=$?
+            fi
             ;;
     esac
 

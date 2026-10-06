@@ -21,6 +21,37 @@ detect_package_manager()
     export PKG_MANAGER
 }
 
+# $1 apk|opkg. Prints the IPv4-only flag that binary accepts, or nothing.
+# opkg accepts --force-ipv4. OpenWrt 25 apk does not; only --ipv4 or -4
+# are passed when `apk --help` actually lists them.
+pkg_ipv4_flag()
+{
+    _pf_help=""
+
+    case "$1" in
+        opkg)
+            printf '%s\n' "--force-ipv4"
+            return 0
+            ;;
+        apk)
+            _pf_help=$(apk --help 2>&1 || true)
+            case "$_pf_help" in
+                *--ipv4*)
+                    printf '%s\n' "--ipv4"
+                    return 0
+                    ;;
+            esac
+            case "$_pf_help" in
+                *" -4 "*|*" -4,"*|*"[-4"*|*"( -4)"*)
+                    printf '%s\n' "-4"
+                    return 0
+                    ;;
+            esac
+            ;;
+    esac
+    return 1
+}
+
 # Update package index with fallback logic for network/mirror failures
 pkg_update()
 {
@@ -37,17 +68,22 @@ pkg_update()
             wait $!
         fi
         if [ $? -ne 0 ]; then
-            log_warn "Standard APK update failed/timed out! Attempting fallback via IPv4 ..." 2>/dev/null
-            (apk update --force-ipv4 --network-timeout 5 >/dev/null 2>&1) &
-            if command -v ui_spinner >/dev/null 2>&1; then
-                ui_spinner $! "Updating package database ..."
+            _pf_flag=$(pkg_ipv4_flag apk) || _pf_flag=""
+            if [ -z "$_pf_flag" ]; then
+                log_warn "apk has no IPv4-only option on this build. Proceeding with the local cache ..." 2>/dev/null
             else
-                wait $!
-            fi
-            if [ $? -ne 0 ]; then
-                log_warn "APK update encountered repository warnings. Proceeding with local cache ..." 2>/dev/null
-            else
-                log_success "APK indexes updated successfully using IPv4 fallback." 2>/dev/null
+                log_warn "Standard APK update failed/timed out! Retrying with [$_pf_flag] ..." 2>/dev/null
+                (apk update "$_pf_flag" --network-timeout 5 >/dev/null 2>&1) &
+                if command -v ui_spinner >/dev/null 2>&1; then
+                    ui_spinner $! "Updating package database ..."
+                else
+                    wait $!
+                fi
+                if [ $? -ne 0 ]; then
+                    log_warn "APK update encountered repository warnings. Proceeding with local cache ..." 2>/dev/null
+                else
+                    log_success "APK indexes updated successfully using IPv4 fallback." 2>/dev/null
+                fi
             fi
         else
             log_success "APK package indexes updated successfully." 2>/dev/null
@@ -61,7 +97,18 @@ pkg_update()
             wait $!
         fi
         if [ $? -ne 0 ]; then
-            log_warn "OPKG update encountered minor mirror warnings. Proceeding anyway ..." 2>/dev/null
+            log_warn "OPKG update failed. Retrying with [--force-ipv4] ..." 2>/dev/null
+            (opkg update --force-ipv4 >/dev/null 2>&1) &
+            if command -v ui_spinner >/dev/null 2>&1; then
+                ui_spinner $! "Updating package database ..."
+            else
+                wait $!
+            fi
+            if [ $? -ne 0 ]; then
+                log_warn "OPKG update encountered minor mirror warnings. Proceeding anyway ..." 2>/dev/null
+            else
+                log_success "OPKG package indexes updated using IPv4." 2>/dev/null
+            fi
         else
             log_success "OPKG package indexes updated successfully." 2>/dev/null
         fi
@@ -149,11 +196,14 @@ pkg_install()
             return 0
         fi
 
-        # 2. Fallback attempt using IPv4 explicit routing if network fails
-        log_warn "Standard APK installation failed for [$PACKAGE_NAME]. Trying IPv4 fallback ..." 2>/dev/null
-        if apk add --force-ipv4 --no-cache --allow-untrusted "$PACKAGE_NAME" >/dev/null 2>&1; then
-            log_success "Package [$PACKAGE_NAME] installed successfully via APK (IPv4 fallback)." 2>/dev/null
-            return 0
+        # 2. IPv4 retry only when this apk build documents an address-family flag
+        _pf_flag=$(pkg_ipv4_flag apk) || _pf_flag=""
+        if [ -n "$_pf_flag" ]; then
+            log_warn "Standard APK installation failed for [$PACKAGE_NAME]. Retrying with [$_pf_flag] ..." 2>/dev/null
+            if apk add "$_pf_flag" --no-cache --allow-untrusted "$PACKAGE_NAME" >/dev/null 2>&1; then
+                log_success "Package [$PACKAGE_NAME] installed successfully via APK (IPv4 fallback)." 2>/dev/null
+                return 0
+            fi
         fi
 
         log_error "APK failed to install package : [$PACKAGE_NAME]" 2>/dev/null
