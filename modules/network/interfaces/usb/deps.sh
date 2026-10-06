@@ -165,6 +165,10 @@ _usb_dep_install_one() {
     _ub_st=1
 
     [ -n "$_ud_pkg" ] || return 1
+    if command -v pkg_installed >/dev/null 2>&1 && pkg_installed "$_ud_pkg"; then
+        printf '  [✓] %s is already installed. Skipping.\n' "$_ud_pkg"
+        return 0
+    fi
     _ub_pm=$(_usb_pm) || return 1
     log_info "Installing $_ud_pkg ..."
 
@@ -208,6 +212,7 @@ _usb_dep_install_one() {
         return 1
     fi
     log_success "$_ud_pkg installed."
+    command -v pkg_cache_add >/dev/null 2>&1 && pkg_cache_add "$_ud_pkg"
     return 0
 }
 

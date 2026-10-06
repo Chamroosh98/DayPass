@@ -88,6 +88,10 @@ install_mwan3_deps() {
     fi
 
     log_info "Installing mwan3 ..."
+    if command -v pkg_installed >/dev/null 2>&1 && pkg_installed mwan3; then
+        printf '  [✓] %s is already installed. Skipping.\n' "mwan3"
+        return 0
+    fi
     if command -v pkg_update >/dev/null 2>&1; then
         pkg_update >/dev/null 2>&1 || true
     elif command -v opkg >/dev/null 2>&1; then

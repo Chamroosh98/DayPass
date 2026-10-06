@@ -265,8 +265,8 @@ hardware_failover_menu() {
 }
 
 # $1 binary name  $2 package name
-# Returns 0 when the binary is already on PATH or pkg_install just provided it.
-# Other modules can call this before a feature that needs an optional tool.
+# Returns 0 when the binary or the package is already present.
+# Calls pkg_install at most once.
 ensure_binary() {
     local bin="$1"
     local pkg="$2"
@@ -274,13 +274,18 @@ ensure_binary() {
     [ -n "$bin" ] || return 1
     command -v "$bin" >/dev/null 2>&1 && return 0
     [ -n "$pkg" ] || return 1
+    if command -v pkg_installed >/dev/null 2>&1 && pkg_installed "$pkg"; then
+        printf '  [✓] %s is already installed. Skipping.\n' "$pkg"
+        return 0
+    fi
     if ! command -v pkg_install >/dev/null 2>&1; then
         log_error "Package installer is not available."
         return 1
     fi
     log_info "Installing [$pkg] ..."
     pkg_install "$pkg" || return 1
-    command -v "$bin" >/dev/null 2>&1
+    command -v "$bin" >/dev/null 2>&1 && return 0
+    command -v pkg_installed >/dev/null 2>&1 && pkg_installed "$pkg"
 }
 
 _hw_modeswitch_bin() {
@@ -300,9 +305,7 @@ hardware_modeswitch() {
 
     bin=$(_hw_modeswitch_bin) || bin=""
     if [ -z "$bin" ]; then
-        ensure_binary usb_modeswitch usb-modeswitch \
-            || ensure_binary usb-modeswitch usb-modeswitch \
-            || {
+        ensure_binary usb_modeswitch usb-modeswitch || {
                 log_warn "usb-modeswitch could not be installed."
                 return 1
             }

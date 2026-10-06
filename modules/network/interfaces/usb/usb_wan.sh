@@ -224,6 +224,21 @@ setup_usb_wan() {
 
     command -v uci >/dev/null 2>&1 || { log_error "uci is not available."; return 1; }
 
+    if [ "$(uci -q get "network.$USB_WAN_IFACE")" = "interface" ]; then
+        [ -n "$(uci -q get "network.$USB_WAN_IFACE.proto")" ] || uci set "network.$USB_WAN_IFACE.proto"="dhcp"
+        if [ -z "$(uci -q get "network.$USB_WAN_IFACE.device")" ] \
+            || [ ! -e "/sys/class/net/$(uci -q get "network.$USB_WAN_IFACE.device")" ]; then
+            uci set "network.$USB_WAN_IFACE.device"="$usb_dev"
+        fi
+        case "$(uci -q get "network.$USB_WAN_IFACE.metric")" in
+            ''|0) uci set "network.$USB_WAN_IFACE.metric"="$metric" ;;
+        esac
+        uci commit network || return 1
+        log_info "USB WAN [$USB_WAN_IFACE] already exists. Missing fields were filled in."
+        ifup "$USB_WAN_IFACE" >/dev/null 2>&1 || true
+        return 0
+    fi
+
     uci set network.$USB_WAN_IFACE=interface
     uci set network.$USB_WAN_IFACE.proto='dhcp'
     uci set network.$USB_WAN_IFACE.device="$usb_dev"

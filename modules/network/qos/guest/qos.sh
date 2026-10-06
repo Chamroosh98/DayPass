@@ -90,7 +90,9 @@ setup_sqm_qos() {
     fi
 
     # Install SQM if needed
-    if [ "${PKG_MANAGER:-opkg}" = "apk" ]; then
+    if command -v pkg_installed >/dev/null 2>&1 && pkg_installed sqm-scripts; then
+        printf '  [✓] %s is already installed. Skipping.\n' "sqm-scripts"
+    elif [ "${PKG_MANAGER:-opkg}" = "apk" ]; then
         apk add sqm-scripts >/dev/null 2>&1 || true
     else
         (opkg update >/dev/null 2>&1) &

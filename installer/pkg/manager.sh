@@ -171,13 +171,32 @@ pkg_installed()
 {
     PACKAGE_NAME="$1"
     [ -z "$PACKAGE_NAME" ] && return 1
+
+    if [ -f /tmp/daypass_pkg_cache ] && grep -qx "$PACKAGE_NAME" /tmp/daypass_pkg_cache 2>/dev/null; then
+        return 0
+    fi
+
     [ -z "${PKG_MANAGER:-}" ] && detect_package_manager
 
     if [ "$PKG_MANAGER" = "apk" ]; then
-        apk info -e "$PACKAGE_NAME" >/dev/null 2>&1
+        apk info -e "$PACKAGE_NAME" >/dev/null 2>&1 || return 1
     elif [ "$PKG_MANAGER" = "opkg" ]; then
-        opkg status "$PACKAGE_NAME" 2>/dev/null | grep -q "Status: .* installed"
+        opkg status "$PACKAGE_NAME" 2>/dev/null | grep -q "Status: .* installed" || return 1
+    else
+        return 1
     fi
+    printf '%s\n' "$PACKAGE_NAME" >> /tmp/daypass_pkg_cache
+    return 0
+}
+
+# Record a package that was just installed so later menus skip the package database.
+pkg_cache_add()
+{
+    [ -n "$1" ] || return 0
+    if [ -f /tmp/daypass_pkg_cache ] && grep -qx "$1" /tmp/daypass_pkg_cache 2>/dev/null; then
+        return 0
+    fi
+    printf '%s\n' "$1" >> /tmp/daypass_pkg_cache
 }
 
 # Install a specific single package via system package manager
@@ -187,11 +206,15 @@ pkg_install()
     [ -z "$PACKAGE_NAME" ] && return 1
     [ -z "${PKG_MANAGER:-}" ] && detect_package_manager
 
-    # log_info "Executing package installation : [$PACKAGE_NAME]" 2>/dev/null || echo "[INFO] Installing: $PACKAGE_NAME"
+    if pkg_installed "$PACKAGE_NAME"; then
+        printf '  [✓] %s is already installed. Skipping.\n' "$PACKAGE_NAME"
+        return 0
+    fi
 
     if [ "$PKG_MANAGER" = "apk" ]; then
         # 1. Try standard installation with untrusted keyring bypass
         if apk add --no-cache --allow-untrusted "$PACKAGE_NAME" >/dev/null 2>&1; then
+            pkg_cache_add "$PACKAGE_NAME"
             log_success "[$PACKAGE_NAME]" 2>/dev/null
             return 0
         fi
@@ -201,6 +224,7 @@ pkg_install()
         if [ -n "$_pf_flag" ]; then
             log_warn "Standard APK installation failed for [$PACKAGE_NAME]. Retrying with [$_pf_flag] ..." 2>/dev/null
             if apk add "$_pf_flag" --no-cache --allow-untrusted "$PACKAGE_NAME" >/dev/null 2>&1; then
+                pkg_cache_add "$PACKAGE_NAME"
                 log_success "Package [$PACKAGE_NAME] installed successfully via APK (IPv4 fallback)." 2>/dev/null
                 return 0
             fi
@@ -212,6 +236,7 @@ pkg_install()
     elif [ "$PKG_MANAGER" = "opkg" ]; then
         # Install with opkg bypassing unverified signature warnings
         if opkg install --force-checksum "$PACKAGE_NAME" >/dev/null 2>&1; then
+            pkg_cache_add "$PACKAGE_NAME"
             log_success "Package [$PACKAGE_NAME] installed successfully via OPKG!" 2>/dev/null
             return 0
         fi

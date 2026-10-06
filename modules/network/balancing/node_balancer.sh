@@ -85,9 +85,9 @@ EOF
     [ "${legacy:-0}" -gt 0 ] && echo "  ⚠️  ${YELLOW}$legacy old-format entr(ies) ignored - reselect nodes.${RESET}"
 
     if [ "$engine" = "none" ]; then
-        echo "  🛡️  Engine       : ${GRAY}none${RESET}"
+        echo "  🛡️ Engine       : ${GRAY}none${RESET}"
     else
-        echo "  🛡️  Engine       : ${CYAN}$(transport_engine_label "$engine")${RESET}"
+        echo "  🛡️ Engine       : ${CYAN}$(transport_engine_label "$engine")${RESET}"
         current=$(transport_call "$engine" active_node 2>/dev/null)
         [ -n "$current" ] && echo "  🎯 Current Node : ${GREEN}$(_nb_node_name "$engine" "$current")${RESET}"
     fi

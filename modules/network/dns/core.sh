@@ -128,7 +128,7 @@ show_dns_status() {
     echo "  🧭 Current DNS Status"
     ui_divider
     echo "  🫀 Active Mode : ${GREEN}${mode}${RESET}"
-    echo "  🛡️  Engine     : ${CYAN}$(dns_engine_label)${RESET}"
+    echo "  🛡️ Engine      : ${CYAN}$(dns_engine_label)${RESET}"
 
     upstream=$(uci -q get dhcp.@dnsmasq[0].server 2>/dev/null | tr '\n' ' ')
     if [ -n "$upstream" ]; then

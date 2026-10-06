@@ -445,17 +445,17 @@ show_routing_status() {
 
     engine=$(get_active_engine)
     if [ "$engine" = "none" ]; then
-        echo "  🛡️  Engine      : ${GRAY}none${RESET}"
+        echo "  🛡️ Engine      : ${GRAY}none${RESET}"
     else
         intercept=$(transport_call "$engine" interception)
-        echo "  🛡️  Engine      : ${CYAN}$(transport_engine_label "$engine")${RESET}  ${GRAY}[$intercept]${RESET}"
+        echo "  🛡️ Engine      : ${CYAN}$(transport_engine_label "$engine")${RESET}  ${GRAY}[$intercept]${RESET}"
         if [ "$intercept" != "self" ]; then
             if nft list table inet "$RT_NFT_TABLE" >/dev/null 2>&1; then
                 managed="${GREEN}loaded${RESET}"
             else
                 managed="${GRAY}not loaded${RESET}"
             fi
-            echo "  🧱 DayPass Rules: $managed  ${GRAY}(IPv6 : $(_rt_opt ipv6 0))${RESET}"
+            echo "  🧱 DayPass Rules : $managed  ${GRAY}(IPv6 : $(_rt_opt ipv6 0))${RESET}"
         fi
     fi
     ui_divider
