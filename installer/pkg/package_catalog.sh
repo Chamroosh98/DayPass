@@ -31,6 +31,12 @@ load_package_catalog() {
         fi
     fi
 
+    if [ -n "${DAYPASS_HOME:-}" ] && [ -s "$DAYPASS_HOME/config/package_catalog.json" ]; then
+        PACKAGE_CATALOG_FILE="$DAYPASS_HOME/config/package_catalog.json"
+        export PACKAGE_CATALOG_FILE
+        return 0
+    fi
+
     if [ -s "config/package_catalog.json" ]; then
         PACKAGE_CATALOG_FILE="config/package_catalog.json"
         export PACKAGE_CATALOG_FILE

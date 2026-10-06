@@ -102,7 +102,11 @@ load_package_profiles()
         rm -f "$_pr_cache.part"
     fi
 
-    for _pr_candidate in "config/package_profiles.json" "${DAYPASS_DIR:-/etc/daypass}/config/package_profiles.json"; do
+    for _pr_candidate in \
+        "${DAYPASS_HOME:-}/config/package_profiles.json" \
+        "config/package_profiles.json" \
+        "${DAYPASS_DIR:-/etc/daypass}/config/package_profiles.json"
+    do
         if _pr_valid_profiles_file "$_pr_candidate"; then
             PROFILES_FILE="$_pr_candidate"
             export PROFILES_FILE
@@ -763,9 +767,13 @@ resolve_packages()
 case "$0" in
     *package_resolver.sh|*/resolver.sh|resolver.sh)
         if [ -z "${DAYPASS_PROFILES_FILE:-}" ]; then
-            _pr_self_dir="$(cd "$(dirname "$0")" 2>/dev/null && pwd)"
-            [ -n "$_pr_self_dir" ] && [ -f "$_pr_self_dir/../../config/package_profiles.json" ] && \
-                DAYPASS_PROFILES_FILE="$_pr_self_dir/../../config/package_profiles.json"
+            if [ -n "${DAYPASS_HOME:-}" ] && [ -f "$DAYPASS_HOME/config/package_profiles.json" ]; then
+                DAYPASS_PROFILES_FILE="$DAYPASS_HOME/config/package_profiles.json"
+            else
+                _pr_self_dir="$(CDPATH= cd -- "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
+                [ -n "$_pr_self_dir" ] && [ -f "$_pr_self_dir/../../config/package_profiles.json" ] && \
+                    DAYPASS_PROFILES_FILE="$_pr_self_dir/../../config/package_profiles.json"
+            fi
         fi
 
         case "${1:-resolve}" in

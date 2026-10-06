@@ -30,8 +30,8 @@
     {
       "key": "5",
       "title": "Restore / Reset USB Stack",
-      "description": "After confirmation, deletes wan_usb from /etc/config/network, uninstalls Android, iOS and modem USB packages, unloads tether modules, and restarts the network service.",
-      "usage_tip": "Enter keeps the current configuration. Yes runs the full cleanup, including opkg remove of the USB driver packages."
+      "description": "After confirmation, deletes wan_usb and its firewall membership, uninstalls Android, iOS and modem USB packages, deletes /tmp/daypass_pkg_cache, unbinds usb0, rndis and cdc-wdm tether interfaces, unloads those kernel modules, and restarts the network service.",
+      "usage_tip": "Enter keeps the current configuration. Yes leaves the drivers menu to read the live package database, so a removed set shows Not Installed."
     },
     {
       "key": "6",

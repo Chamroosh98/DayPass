@@ -163,13 +163,7 @@ show_help() {
             esac
         done
 
-        ui_divider
-        _nav_muted="${COLOR_MUTED:-$GRAY}"
-        printf "  ${_nav_muted}Page %s/%s${RESET}\n" "$HELP_PAGE" "$HELP_PAGES"
-        printf "  ${_nav_muted}n) Next${RESET}\n"
-        printf "  ${_nav_muted}p) Previous${RESET}\n"
-        printf "  ${_nav_muted}0) Back / Skip${RESET}\n"
-        printf "  ${_nav_muted}q) Quit DayPass${RESET}\n"
+        render_pager_footer "$HELP_PAGE" "$HELP_PAGES"
         printf "  ⁉️ Option : "
         read -r HELP_CMD </dev/tty || daypass_quit
 
@@ -254,14 +248,7 @@ help_menu() {
             fi
         done
 
-        ui_divider
-        _nav_muted="${COLOR_MUTED:-$GRAY}"
-        printf "  ${_nav_muted}Page %s/%s${RESET}\n" "$HELP_PAGE" "$HELP_PAGES"
-        printf "  ${_nav_muted}n) Next${RESET}\n"
-        printf "  ${_nav_muted}p) Previous${RESET}\n"
-        printf "  ${_nav_muted}r) Refresh${RESET}\n"
-        printf "  ${_nav_muted}0) Back / Skip${RESET}\n"
-        printf "  ${_nav_muted}q) Quit DayPass${RESET}\n"
+        render_pager_footer "$HELP_PAGE" "$HELP_PAGES" "r) Refresh"
         printf "  ⁉️ Manual number : "
         read -r HELP_CMD </dev/tty || daypass_quit
 

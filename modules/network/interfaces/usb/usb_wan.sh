@@ -26,6 +26,11 @@ _usb_module_dir() {
         return 0
     fi
 
+    if [ -n "${DAYPASS_HOME:-}" ] && [ -f "$DAYPASS_HOME/modules/network/interfaces/usb/deps.sh" ]; then
+        printf '%s\n' "$DAYPASS_HOME/modules/network/interfaces/usb"
+        return 0
+    fi
+
     for dir in modules/network/interfaces/usb "$(pwd)/modules/network/interfaces/usb"; do
         if [ -f "$dir/deps.sh" ]; then
             printf '%s\n' "$dir"

@@ -66,26 +66,16 @@ toggle_custom_package()
     export SELECTED_PACKAGES
 }
 
-# One-line n / p / d bar. Prev is muted on page 1; Next is muted on the last page.
+# Same horizontal pager as the manuals, plus save and help.
 custom_render_nav_bar() {
-    _muted="${COLOR_MUTED:-${GRAY:-\033[90m}}"
-    _page="${CURRENT_PAGE:-1}"
-    _pages="${TOTAL_PAGES:-1}"
-
-    echo "  🎮 Navigation & Actions"
+    if command -v render_pager_footer >/dev/null 2>&1; then
+        render_pager_footer "${CURRENT_PAGE:-1}" "${TOTAL_PAGES:-1}" \
+            "${GREEN}d) Save & Continue${RESET}" \
+            "h) Help"
+        return 0
+    fi
     ui_divider
-    if [ "$_page" -ge "$_pages" ]; then
-        _n="${_muted}[n] Next Page ➡️${RESET}"
-    else
-        _n="[n] Next Page ➡️"
-    fi
-    if [ "$_page" -le 1 ]; then
-        _p="${_muted}[p] Prev Page ⬅️${RESET}"
-    else
-        _p="[p] Prev Page ⬅️"
-    fi
-    _d="${GREEN}[d] 💾 Save & Continue${RESET}"
-    printf "  %b      %b      %b\n" "$_n" "$_p" "$_d"
+    echo "  n) Next   p) Previous   0) Back / Skip   q) Quit DayPass   d) Save & Continue   h) Help"
 }
 
 handle_custom_profile()
@@ -93,12 +83,18 @@ handle_custom_profile()
     if [ -z "$MANIFEST_FILE" ] || [ ! -f "$MANIFEST_FILE" ]; then
         if [ -f "/tmp/manifest.json" ]; then
             MANIFEST_FILE="/tmp/manifest.json"
+        elif [ -n "${DAYPASS_HOME:-}" ] && [ -f "$DAYPASS_HOME/manifest.json" ]; then
+            MANIFEST_FILE="$DAYPASS_HOME/manifest.json"
         elif [ -f "manifest.json" ]; then
             MANIFEST_FILE="manifest.json"
         else
             OW_VER="25"
             [ "${PKG_MANAGER:-opkg}" = "opkg" ] && OW_VER="24"
-            MANIFEST_FILE="build-artifacts/v${OW_VER}/manifest.json"
+            if [ -n "${DAYPASS_HOME:-}" ] && [ -f "$DAYPASS_HOME/build-artifacts/v${OW_VER}/manifest.json" ]; then
+                MANIFEST_FILE="$DAYPASS_HOME/build-artifacts/v${OW_VER}/manifest.json"
+            else
+                MANIFEST_FILE="build-artifacts/v${OW_VER}/manifest.json"
+            fi
         fi
     fi
 
@@ -167,9 +163,6 @@ handle_custom_profile()
         FIRST_RENDER=0
 
         custom_render_nav_bar
-        if command -v ui_nav_footer >/dev/null 2>&1; then
-            ui_nav_footer
-        fi
 
         _last=$((${item_no:-1} - 1))
         [ "$_last" -ge 1 ] || _last=1

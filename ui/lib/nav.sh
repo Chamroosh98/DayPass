@@ -74,6 +74,46 @@ ui_nav_footer() {
     echo
 }
 
+# Horizontal pager. $1 current page, $2 page count, then optional extra actions.
+# Page 1 mutes Previous. The last page mutes Next and emphasizes Finish / Back.
+render_pager_footer() {
+    _pg_page="${1:-1}"
+    _pg_pages="${2:-1}"
+    _pg_muted="${COLOR_MUTED:-${GRAY:-\033[90m}}"
+    shift 2
+
+    case "$_pg_page" in *[!0-9]*) _pg_page=1 ;; esac
+    case "$_pg_pages" in *[!0-9]*) _pg_pages=1 ;; esac
+    [ "$_pg_pages" -ge 1 ] || _pg_pages=1
+    [ "$_pg_page" -ge 1 ] || _pg_page=1
+
+    if [ "$_pg_page" -ge "$_pg_pages" ]; then
+        _pg_next="${_pg_muted}n) Next${RESET}"
+        _pg_back="${BOLD}0) Finish / Back${RESET}"
+    else
+        _pg_next="n) Next"
+        _pg_back="0) Back / Skip"
+    fi
+    if [ "$_pg_page" -le 1 ]; then
+        _pg_prev="${_pg_muted}p) Previous${RESET}"
+    else
+        _pg_prev="p) Previous"
+    fi
+
+    _pg_line="${_pg_next}   ${_pg_prev}   ${_pg_back}   q) Quit DayPass"
+    for _pg_extra in "$@"; do
+        [ -n "$_pg_extra" ] || continue
+        _pg_line="${_pg_line}   ${_pg_extra}"
+    done
+
+    echo
+    ui_divider
+    printf '  📄 Page %s%s%s/%s%s%s\n' \
+        "${BOLD}${CYAN}" "$_pg_page" "${RESET}" \
+        "${YELLOW}" "$_pg_pages" "${RESET}"
+    printf '  %s\n' "$_pg_line"
+}
+
 ui_title() {
     echo "  $1"
     ui_divider

@@ -7,6 +7,28 @@ import (
 	"strings"
 )
 
+// First lines of install.sh. Resolves the script file even when $0 is a
+// bare PATH name (daypass typed from /root) or a symlink.
+const daypassHomeBootstrap = `# Dynamically detect absolute path to DayPass home directory.
+# $0 is often just "daypass" when the shell found it on PATH.
+_dp_invoked="$0"
+case "$_dp_invoked" in
+    */*) ;;
+    *)
+        _dp_via=$(command -v "$_dp_invoked" 2>/dev/null || true)
+        [ -n "$_dp_via" ] && _dp_invoked="$_dp_via"
+        ;;
+esac
+REAL_SCRIPT=$(readlink -f "$_dp_invoked" 2>/dev/null || echo "$_dp_invoked")
+case "$REAL_SCRIPT" in
+    /*) ;;
+    *) REAL_SCRIPT="$(pwd)/$REAL_SCRIPT" ;;
+esac
+DAYPASS_HOME=$(CDPATH= cd -- "$(dirname "$REAL_SCRIPT")" >/dev/null 2>&1 && pwd) || DAYPASS_HOME=$(pwd)
+export REAL_SCRIPT DAYPASS_HOME
+unset _dp_invoked _dp_via
+`
+
 func generateInstallScript(outputFile string) error {
 	fmt.Println("⌛ Processing Core Components with Go Engine for DayPass ...")
 
@@ -18,6 +40,8 @@ func generateInstallScript(outputFile string) error {
 
 	var scriptBuilder strings.Builder
 	scriptBuilder.WriteString("#!/bin/sh\n\n")
+	scriptBuilder.WriteString(daypassHomeBootstrap)
+	scriptBuilder.WriteString("\n")
 
 	scriptBuilder.WriteString("###############################################################################\n")
 	scriptBuilder.WriteString("# DayPass Installer (Auto-generated via Go Action)\n")
