@@ -122,12 +122,137 @@ hardware_setup_tethering() {
     setup_usb_wan "$HW_DEVICE" "$UI_CHOICE"
 }
 
+# UCI interface names, one per line. Skips loopback.
+_hw_toggle_ifaces() {
+    local iface
+
+    uci -q show network 2>/dev/null | sed -n 's/^network\.\([A-Za-z0-9_]*\)=interface$/\1/p' | while IFS= read -r iface; do
+        case "$iface" in
+            loopback|lo) continue ;;
+        esac
+        printf '%s\n' "$iface"
+    done
+}
+
+# UP when netifd reports the interface up, otherwise DOWN.
+_hw_iface_oper() {
+    local iface="$1"
+    local json=""
+
+    json=$(ubus call "network.interface.$iface" status 2>/dev/null || true)
+    if printf '%s' "$json" | grep -q '"up"[[:space:]]*:[[:space:]]*true'; then
+        printf '%s\n' "UP"
+        return 0
+    fi
+    if command -v ifstatus >/dev/null 2>&1; then
+        json=$(ifstatus "$iface" 2>/dev/null || true)
+        if printf '%s' "$json" | grep -q '"up"[[:space:]]*:[[:space:]]*true'; then
+            printf '%s\n' "UP"
+            return 0
+        fi
+    fi
+    printf '%s\n' "DOWN"
+}
+
+_hw_toggle_apply() {
+    local iface="$1"
+    local disabled oper
+
+    [ "$(uci -q get "network.$iface")" = "interface" ] || return 1
+    disabled=$(uci -q get "network.$iface.disabled")
+    oper=$(_hw_iface_oper "$iface")
+
+    if [ "$disabled" != "1" ] && [ "$oper" = "UP" ]; then
+        ifdown "$iface" >/dev/null 2>&1 || true
+        uci set "network.$iface.disabled"="1"
+        uci commit network || return 1
+        printf '  %s⚠️ Interface [%s] disabled and brought DOWN.%s\n' "$YELLOW" "$iface" "$RESET"
+        return 0
+    fi
+
+    uci set "network.$iface.disabled"="0"
+    uci commit network || return 1
+    ifup "$iface" >/dev/null 2>&1 || true
+    printf '  %s✅ Interface [%s] enabled and brought UP.%s\n' "$GREEN" "$iface" "$RESET"
+}
+
 hardware_toggle_tethering() {
-    case "$(usb_wan_state)" in
-        DISABLED) usb_wan_set_enabled 1 ;;
-        UP|DOWN)  usb_wan_set_enabled 0 ;;
-        *)        log_warn "USB WAN is not configured. Use option 2 first." ;;
-    esac
+    local list count i iface uci_st oper choice
+
+    while true; do
+        if command -v render_persistent_header >/dev/null 2>&1; then
+            render_persistent_header
+        fi
+        if command -v ui_title >/dev/null 2>&1; then
+            ui_title "🔀 Toggle Interface Status"
+        else
+            echo "  🔀 Toggle Interface Status"
+            command -v ui_divider >/dev/null 2>&1 && ui_divider
+        fi
+
+        list=$(_hw_toggle_ifaces)
+        count=0
+        if [ -z "$list" ]; then
+            echo "  No network interfaces found."
+        else
+            printf '  %s  %-12s  %-14s  %s\n' " # " "Interface" "UCI" "Oper"
+            command -v ui_divider >/dev/null 2>&1 && ui_divider
+            i=1
+            for iface in $list; do
+                count=$i
+                if [ "$(uci -q get "network.$iface.disabled")" = "1" ]; then
+                    uci_st="[Disabled]"
+                else
+                    uci_st="[Enabled]"
+                fi
+                oper=$(_hw_iface_oper "$iface")
+                if [ "$oper" = "UP" ]; then
+                    printf '  %2d) %-12s  %-14s  %s[UP]%s\n' "$i" "$iface" "$uci_st" "$GREEN" "$RESET"
+                else
+                    printf '  %2d) %-12s  %-14s  %s[DOWN]%s\n' "$i" "$iface" "$uci_st" "$RED" "$RESET"
+                fi
+                i=$((i + 1))
+            done
+        fi
+        echo
+        echo "  0) Back to Menu"
+        echo
+        if command -v ui_read >/dev/null 2>&1; then
+            ui_read "Select interface"
+        else
+            printf '  Select interface : '
+            read -r UI_CHOICE </dev/tty || return 0
+        fi
+
+        case "$UI_CHOICE" in
+            0|'') return 0 ;;
+            q|Q)
+                command -v daypass_quit >/dev/null 2>&1 && daypass_quit
+                return 0
+                ;;
+            h|H)
+                command -v ui_show_help >/dev/null 2>&1 && ui_show_help "hardware"
+                continue
+                ;;
+        esac
+
+        case "$UI_CHOICE" in
+            *[!0-9]*) log_warn "Invalid option!"; continue ;;
+        esac
+        [ "$UI_CHOICE" -ge 1 ] && [ "$UI_CHOICE" -le "$count" ] || {
+            log_warn "Invalid option!"
+            continue
+        }
+
+        i=1
+        iface=""
+        for choice in $list; do
+            [ "$i" = "$UI_CHOICE" ] && iface="$choice"
+            i=$((i + 1))
+        done
+        [ -n "$iface" ] || continue
+        _hw_toggle_apply "$iface" || log_error "Could not toggle [$iface]."
+    done
 }
 
 hardware_failover_menu() {
@@ -137,6 +262,25 @@ hardware_failover_menu() {
     fi
     log_error "USB metric module not found!"
     return 1
+}
+
+# $1 binary name  $2 package name
+# Returns 0 when the binary is already on PATH or pkg_install just provided it.
+# Other modules can call this before a feature that needs an optional tool.
+ensure_binary() {
+    local bin="$1"
+    local pkg="$2"
+
+    [ -n "$bin" ] || return 1
+    command -v "$bin" >/dev/null 2>&1 && return 0
+    [ -n "$pkg" ] || return 1
+    if ! command -v pkg_install >/dev/null 2>&1; then
+        log_error "Package installer is not available."
+        return 1
+    fi
+    log_info "Installing [$pkg] ..."
+    pkg_install "$pkg" || return 1
+    command -v "$bin" >/dev/null 2>&1
 }
 
 _hw_modeswitch_bin() {
@@ -156,8 +300,17 @@ hardware_modeswitch() {
 
     bin=$(_hw_modeswitch_bin) || bin=""
     if [ -z "$bin" ]; then
-        log_warn "usb-modeswitch not found. Run [opkg install usb-modeswitch] or install USB drivers from option 1."
-        return 0
+        ensure_binary usb_modeswitch usb-modeswitch \
+            || ensure_binary usb-modeswitch usb-modeswitch \
+            || {
+                log_warn "usb-modeswitch could not be installed."
+                return 1
+            }
+        bin=$(_hw_modeswitch_bin) || bin=""
+    fi
+    if [ -z "$bin" ]; then
+        log_warn "usb-modeswitch is installed but its binary was not found."
+        return 1
     fi
 
     ui_read "Switch connected USB modems out of storage mode? [y/N]"

@@ -88,21 +88,88 @@ _usb_ubus_route_metric() {
     printf '%s\n' "$m"
 }
 
-# Numeric metric for display. UCI wins; otherwise the live route or netifd 0.
-# Prints "N [default]" when the value is implicit (not set in UCI).
-usb_iface_metric_text() {
+# Suggested explicit metric. Lower wins. Unset and 0 are not usable priorities.
+usb_metric_plan() {
+    case "$1" in
+        wan)      printf '%s\n' "10" ;;
+        wan6)     printf '%s\n' "15" ;;
+        wan_usb)  printf '%s\n' "20" ;;
+        *)        return 1 ;;
+    esac
+}
+
+# Number to show and to offer in the prompt. Stored value when it is non-zero.
+usb_metric_effective() {
     local iface="$1"
-    local m json live
+    local m plan
 
     m=$(uci -q get "network.$iface.metric")
-    if [ -n "$m" ]; then
-        printf '%s\n' "$m"
+    case "$m" in
+        ''|0) ;;
+        *[!0-9]*) ;;
+        *)
+            printf '%s\n' "$m"
+            return 0
+            ;;
+    esac
+    plan=$(usb_metric_plan "$iface") || plan="20"
+    printf '%s\n' "$plan"
+}
+
+# Fixed label for the metrics table. "unset" marks a value not written to UCI yet.
+usb_metric_column() {
+    local iface="$1"
+    local m
+
+    m=$(uci -q get "network.$iface.metric")
+    case "$m" in
+        ''|0)
+            printf '%s unset\n' "$(usb_metric_effective "$iface")"
+            ;;
+        *[!0-9]*)
+            printf '%s unset\n' "$(usb_metric_effective "$iface")"
+            ;;
+        *)
+            printf '%s\n' "$m"
+            ;;
+    esac
+}
+
+# Write wan=10, wan6=15, wan_usb=20 when the UCI metric is missing or 0.
+# Existing non-zero metrics are left alone.
+usb_apply_explicit_metrics() {
+    local iface plan current changed=0
+
+    command -v uci >/dev/null 2>&1 || { log_error "uci is not available."; return 1; }
+
+    for iface in wan wan6 wan_usb; do
+        [ "$(uci -q get "network.$iface")" = "interface" ] || continue
+        plan=$(usb_metric_plan "$iface") || continue
+        current=$(uci -q get "network.$iface.metric")
+        case "$current" in
+            ''|0) ;;
+            *) continue ;;
+        esac
+        uci set "network.$iface.metric"="$plan" || return 1
+        changed=1
+        log_info "network.$iface.metric=$plan"
+        if [ "$(uci -q get "network.$iface.disabled")" != "1" ]; then
+            ifup "$iface" >/dev/null 2>&1 || true
+        fi
+    done
+
+    if [ "$changed" -eq 0 ]; then
+        log_info "Explicit metrics are already set."
         return 0
     fi
-    json=$(_usb_ubus_iface_json "$iface")
-    live=$(_usb_ubus_route_metric "$json") || live=""
-    [ -n "$live" ] || live="0"
-    printf '%s [default]\n' "$live"
+    uci commit network || return 1
+    log_success "Suggested metrics written (wan 10, wan6 15, wan_usb 20)."
+    return 0
+}
+
+# Numeric metric for display. A missing or zero UCI metric shows the planned value.
+usb_iface_metric_text() {
+    usb_metric_effective "$1"
 }
 
 # UP | DOWN | DISABLED | absent  — live netifd/ubus, not a static UCI label.
@@ -263,9 +330,10 @@ usb_status_metrics() {
             esac
         fi
         case "$metric" in
-            *" [default]")
-                metric="${metric% [default]}"
-                frag="$icon $iface ($metric) [default]"
+            *" unset")
+                metric="${metric% unset}"
+                metric="${metric% }"
+                frag="$icon $iface ($metric) unset"
                 ;;
             *)
                 frag="$icon $iface ($metric)"
@@ -313,7 +381,7 @@ usb_metric_menu() {
         else
             i=1
             for iface in $list; do
-                metric=$(usb_iface_metric_text "$iface")
+                metric=$(usb_metric_column "$iface")
                 if [ "$(uci -q get "network.$iface.disabled")" = "1" ]; then
                     state="disabled"
                 else
@@ -333,6 +401,7 @@ usb_metric_menu() {
             done
         fi
         if command -v ui_nav_footer >/dev/null 2>&1; then
+            echo "  a) Write suggested metrics (wan 10, wan6 15, wan_usb 20)"
             ui_nav_footer
         fi
         if command -v ui_read >/dev/null 2>&1; then
@@ -347,6 +416,12 @@ usb_metric_menu() {
             q|Q)
                 command -v daypass_quit >/dev/null 2>&1 && daypass_quit
                 return 0
+                ;;
+            a|A)
+                if command -v usb_apply_explicit_metrics >/dev/null 2>&1; then
+                    usb_apply_explicit_metrics || true
+                fi
+                continue
                 ;;
             h|H)
                 command -v ui_show_help >/dev/null 2>&1 && ui_show_help "hardware"
@@ -366,9 +441,9 @@ usb_metric_menu() {
             i=$((i + 1))
         done
 
-        current=$(uci -q get "network.$iface.metric")
+        current=$(usb_metric_effective "$iface")
         if command -v ui_read >/dev/null 2>&1; then
-            ui_read "Metric for $iface [${current:-20}]"
+            ui_read "Metric for $iface [${current}]"
         else
             printf "  Metric for %s : " "$iface"
             read -r UI_CHOICE </dev/tty || return 0
@@ -379,7 +454,12 @@ usb_metric_menu() {
                 command -v daypass_quit >/dev/null 2>&1 && daypass_quit
                 return 0
                 ;;
-            '') UI_CHOICE="${current:-20}" ;;
+            a|A)
+                usb_apply_explicit_metrics || true
+                command -v ui_pause >/dev/null 2>&1 && ui_pause
+                continue
+                ;;
+            '') UI_CHOICE="$current" ;;
         esac
         usb_wan_set_metric "$iface" "$UI_CHOICE" || true
         command -v ui_pause >/dev/null 2>&1 && ui_pause
@@ -393,6 +473,7 @@ usb_wan_set_metric() {
 
     case "$metric" in
         ''|*[!0-9]*) log_error "Invalid metric [$metric]!"; return 1 ;;
+        0) log_error "Metric must be greater than 0. Suggested: wan 10, wan6 15, wan_usb 20."; return 1 ;;
     esac
     [ "$(uci -q get network.$iface)" = "interface" ] || { log_error "Interface [$iface] not found!"; return 1; }
 

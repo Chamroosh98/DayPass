@@ -235,18 +235,16 @@ _mwan_metric_icon() {
     esac
 }
 
-# $1 index  $2 iface  $3 metric  $4 enabled|disabled  $5 1 when this is the last row
+# $1 index  $2 iface  $3 metric label  $4 enabled|disabled  $5 1 when this is the last row
+# Metric text is padded to 22 columns so the status pipe stays on one vertical line.
 mwan_render_metric_row() {
     local i="$1" iface="$2" metric="$3" state="$4" last="$5"
-    local icon name branch st
+    local icon name branch st metric_str
 
     icon=$(_mwan_metric_icon "$iface")
     name="$iface"
     while [ "${#name}" -lt 12 ]; do
         name="$name "
-    done
-    while [ "${#metric}" -lt 7 ]; do
-        metric="$metric "
     done
     if [ "$last" = "1" ]; then
         branch="└──"
@@ -257,7 +255,8 @@ mwan_render_metric_row() {
         enabled) st="🟢 enabled" ;;
         *)       st="🔴 disabled" ;;
     esac
-    echo "  $i) $icon $name $branch Metric: $metric │ Status: $st"
+    metric_str=$(printf 'Metric: %s' "$metric")
+    printf '  %s) %s %s %s %-22s | Status: %s\n' "$i" "$icon" "$name" "$branch" "$metric_str" "$st"
 }
 
 # View and set network.<iface>.metric for every discovered WAN.
@@ -281,8 +280,12 @@ mwan_metric_menu() {
         else
             i=1
             for iface in $list; do
-                metric=$(uci -q get "network.$iface.metric")
-                [ -n "$metric" ] || metric="default"
+                if command -v usb_metric_column >/dev/null 2>&1; then
+                    metric=$(usb_metric_column "$iface")
+                else
+                    metric=$(uci -q get "network.$iface.metric")
+                    [ -n "$metric" ] && [ "$metric" != "0" ] || metric="unset"
+                fi
                 if mwan_iface_enabled "$iface"; then
                     state="enabled"
                 else
@@ -298,6 +301,7 @@ mwan_metric_menu() {
             done
         fi
         if command -v ui_nav_footer >/dev/null 2>&1; then
+            echo "  a) Write suggested metrics (wan 10, wan6 15, wan_usb 20)"
             ui_nav_footer
         fi
         if command -v ui_read >/dev/null 2>&1; then
@@ -317,6 +321,12 @@ mwan_metric_menu() {
                 command -v ui_show_help >/dev/null 2>&1 && ui_show_help "network_multiwan"
                 continue
                 ;;
+            a|A)
+                if command -v usb_apply_explicit_metrics >/dev/null 2>&1; then
+                    usb_apply_explicit_metrics || true
+                fi
+                continue
+                ;;
         esac
 
         case "$UI_CHOICE" in
@@ -334,9 +344,14 @@ mwan_metric_menu() {
             i=$((i + 1))
         done
 
-        current=$(uci -q get "network.$iface.metric")
+        if command -v usb_metric_effective >/dev/null 2>&1; then
+            current=$(usb_metric_effective "$iface")
+        else
+            current=$(uci -q get "network.$iface.metric")
+            [ -n "$current" ] && [ "$current" != "0" ] || current="20"
+        fi
         if command -v ui_read >/dev/null 2>&1; then
-            ui_read "Metric for $iface [${current:-20}]"
+            ui_read "Metric for $iface [${current}]"
         else
             printf '  Metric for %s : ' "$iface"
             read -r UI_CHOICE </dev/tty || return 0
@@ -347,6 +362,7 @@ mwan_metric_menu() {
                 command -v daypass_quit >/dev/null 2>&1 && daypass_quit
                 return 0
                 ;;
+            '') UI_CHOICE="$current" ;;
         esac
         if command -v usb_wan_set_metric >/dev/null 2>&1; then
             usb_wan_set_metric "$iface" "$UI_CHOICE" || true

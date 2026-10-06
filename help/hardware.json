@@ -24,8 +24,8 @@
     {
       "key": "4",
       "title": "Toggle Interface Status",
-      "description": "Enables or disables network.wan_usb. Enable runs ifup and reads live status from ubus (UP / DOWN / DISABLED).",
-      "usage_tip": "Create the interface with option 2 before toggling it."
+      "description": "Lists every UCI network interface with UCI Enabled/Disabled and live UP/DOWN. Choosing one enables and runs ifup, or disables and runs ifdown.",
+      "usage_tip": "0 returns to the Hardware menu. An interface that is Disabled or DOWN is brought up. An interface that is Enabled and UP is brought down."
     },
     {
       "key": "5",
@@ -37,7 +37,7 @@
       "key": "6",
       "title": "Modem Mode Switch",
       "description": "Runs usb-modeswitch / usb_modeswitch (and usb_modeswitch_dispatcher when present) to move USB modems out of storage mode.",
-      "usage_tip": "If usb-modeswitch is missing, run opkg install usb-modeswitch or install USB drivers from option 1."
+      "usage_tip": "If usb-modeswitch is missing, DayPass installs the usb-modeswitch package and then runs it. No manual opkg or apk command is required."
     },
     {
       "key": "7",
