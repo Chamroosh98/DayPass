@@ -195,9 +195,7 @@ usb_wan_state() {
 setup_usb_wan() {
     local usb_dev="${1:-}"
     local metric="${2:-$USB_WAN_DEFAULT_METRIC}"
-    local zone
-
-    log_info "Setting up USB Tethering WAN interface ..."
+    local zone stored_dev stored_proto stored_metric exists=0
 
     if command -v ensure_usb_tether_deps >/dev/null 2>&1; then
         ensure_usb_tether_deps || log_warn "Some USB tethering packages could not be installed."
@@ -220,44 +218,52 @@ setup_usb_wan() {
         return 1
     fi
 
-    log_success "Using USB device : $usb_dev"
+    printf '  %s✔ Using USB device : %s%s\n' "$GREEN" "$usb_dev" "$RESET"
 
     command -v uci >/dev/null 2>&1 || { log_error "uci is not available."; return 1; }
 
     if [ "$(uci -q get "network.$USB_WAN_IFACE")" = "interface" ]; then
-        [ -n "$(uci -q get "network.$USB_WAN_IFACE.proto")" ] || uci set "network.$USB_WAN_IFACE.proto"="dhcp"
-        if [ -z "$(uci -q get "network.$USB_WAN_IFACE.device")" ] \
-            || [ ! -e "/sys/class/net/$(uci -q get "network.$USB_WAN_IFACE.device")" ]; then
+        exists=1
+        stored_proto=$(uci -q get "network.$USB_WAN_IFACE.proto")
+        stored_dev=$(uci -q get "network.$USB_WAN_IFACE.device")
+        stored_metric=$(uci -q get "network.$USB_WAN_IFACE.metric")
+        [ -n "$stored_proto" ] || uci set "network.$USB_WAN_IFACE.proto"="dhcp"
+        if [ -z "$stored_dev" ] || [ ! -e "/sys/class/net/$stored_dev" ]; then
             uci set "network.$USB_WAN_IFACE.device"="$usb_dev"
         fi
-        case "$(uci -q get "network.$USB_WAN_IFACE.metric")" in
+        case "$stored_metric" in
             ''|0) uci set "network.$USB_WAN_IFACE.metric"="$metric" ;;
+            *)
+                [ "$stored_metric" = "$metric" ] || uci set "network.$USB_WAN_IFACE.metric"="$metric"
+                ;;
         esac
-        uci commit network || return 1
-        log_info "USB WAN [$USB_WAN_IFACE] already exists. Missing fields were filled in."
-        ifup "$USB_WAN_IFACE" >/dev/null 2>&1 || true
-        return 0
+    else
+        uci set "network.$USB_WAN_IFACE"="interface"
+        uci set "network.$USB_WAN_IFACE.proto"="dhcp"
+        uci set "network.$USB_WAN_IFACE.device"="$usb_dev"
+        uci set "network.$USB_WAN_IFACE.metric"="$metric"
+        uci -q delete "network.$USB_WAN_IFACE.disabled"
     fi
-
-    uci set network.$USB_WAN_IFACE=interface
-    uci set network.$USB_WAN_IFACE.proto='dhcp'
-    uci set network.$USB_WAN_IFACE.device="$usb_dev"
-    uci set network.$USB_WAN_IFACE.metric="$metric"
-    uci -q delete network.$USB_WAN_IFACE.disabled
     uci commit network || return 1
 
     zone=$(_usb_wan_zone)
     if [ -n "$zone" ]; then
-        uci -q del_list firewall.$zone.network="$USB_WAN_IFACE"
-        uci add_list firewall.$zone.network="$USB_WAN_IFACE"
-        uci commit firewall
-        /etc/init.d/firewall reload >/dev/null 2>&1 || true
-    else
+        case " $(uci -q get "firewall.$zone.network") " in
+            *" $USB_WAN_IFACE "*) ;;
+            *)
+                uci add_list "firewall.$zone.network"="$USB_WAN_IFACE"
+                uci commit firewall
+                /etc/init.d/firewall reload >/dev/null 2>&1 || true
+                ;;
+        esac
+    elif [ "$exists" -eq 0 ]; then
         log_warn "Firewall zone [wan] not found; add [$USB_WAN_IFACE] to your WAN zone manually."
     fi
 
-    ifup $USB_WAN_IFACE >/dev/null 2>&1 || true
-    log_success "USB WAN interface [$USB_WAN_IFACE] is ready (device $usb_dev, metric $metric)!"
+    if [ "$(uci -q get "network.$USB_WAN_IFACE.disabled")" != "1" ]; then
+        ifup "$USB_WAN_IFACE" >/dev/null 2>&1 || true
+    fi
+    log_success "USB Tethering WAN interface [$USB_WAN_IFACE] is active and configured."
     return 0
 }
 

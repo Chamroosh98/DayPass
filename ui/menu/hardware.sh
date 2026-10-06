@@ -100,6 +100,29 @@ _hw_pick_tether_device() {
 }
 
 hardware_setup_tethering() {
+    local iface metric_default stored
+
+    iface="${USB_WAN_IFACE:-wan_usb}"
+    metric_default="${USB_WAN_DEFAULT_METRIC:-20}"
+    if [ "$(uci -q get "network.$iface")" = "interface" ]; then
+        log_info "USB WAN [$iface] already exists. Verifying configuration..."
+        stored=$(uci -q get "network.$iface.metric")
+        case "$stored" in
+            ''|0) ;;
+            *[!0-9]*) ;;
+            *) metric_default="$stored" ;;
+        esac
+    else
+        log_info "Creating new USB WAN interface [$iface]..."
+    fi
+
+    ui_read "Route metric [${metric_default}]"
+    case "$UI_CHOICE" in
+        q|Q) daypass_quit ;;
+        '') UI_CHOICE="$metric_default" ;;
+        *[!0-9]*) log_warn "Invalid metric!"; return 0 ;;
+    esac
+
     if ! command -v usb_net_hardware_present >/dev/null 2>&1 || ! usb_net_hardware_present; then
         printf "  ${RED}❌ No active USB Network Hardware detected! Please connect your phone/dongle, turn on USB Tethering, and try again.${RESET}\n"
         return 1
@@ -111,13 +134,6 @@ hardware_setup_tethering() {
     fi
 
     _hw_pick_tether_device || return 1
-
-    ui_read "Route metric [${USB_WAN_DEFAULT_METRIC}]"
-    case "$UI_CHOICE" in
-        q|Q) daypass_quit ;;
-        '') UI_CHOICE="$USB_WAN_DEFAULT_METRIC" ;;
-        *[!0-9]*) log_warn "Invalid metric!"; return 0 ;;
-    esac
 
     setup_usb_wan "$HW_DEVICE" "$UI_CHOICE"
 }
@@ -177,7 +193,7 @@ _hw_toggle_apply() {
 }
 
 hardware_toggle_tethering() {
-    local list count i iface uci_st oper choice
+    local list count i iface uci_plain uci_col oper oper_plain oper_col choice
 
     while true; do
         if command -v render_persistent_header >/dev/null 2>&1; then
@@ -192,31 +208,44 @@ hardware_toggle_tethering() {
 
         list=$(_hw_toggle_ifaces)
         count=0
+        printf '  %-4s %-12s  %-14s  %s\n' "#" "Interface" "UCI Status" "Link State (Oper)"
+        command -v ui_divider >/dev/null 2>&1 && ui_divider
         if [ -z "$list" ]; then
             echo "  No network interfaces found."
         else
-            printf '  %s  %-12s  %-14s  %s\n' " # " "Interface" "UCI" "Oper"
-            command -v ui_divider >/dev/null 2>&1 && ui_divider
             i=1
             for iface in $list; do
                 count=$i
                 if [ "$(uci -q get "network.$iface.disabled")" = "1" ]; then
-                    uci_st="[Disabled]"
+                    uci_plain="[Disabled]"
+                    uci_col="${GRAY}"
                 else
-                    uci_st="[Enabled]"
+                    uci_plain="[Enabled]"
+                    uci_col="${GREEN}"
                 fi
                 oper=$(_hw_iface_oper "$iface")
                 if [ "$oper" = "UP" ]; then
-                    printf '  %2d) %-12s  %-14s  %s[UP]%s\n' "$i" "$iface" "$uci_st" "$GREEN" "$RESET"
+                    oper_plain="[UP]"
+                    oper_col="${BOLD}${GREEN}"
                 else
-                    printf '  %2d) %-12s  %-14s  %s[DOWN]%s\n' "$i" "$iface" "$uci_st" "$RED" "$RESET"
+                    oper_plain="[DOWN]"
+                    oper_col="${BOLD}${RED}"
                 fi
+                printf '  %2d) %-12s  %s%-14s%s  %s%s%s\n' \
+                    "$i" "$iface" "$uci_col" "$uci_plain" "$RESET" "$oper_col" "$oper_plain" "$RESET"
                 i=$((i + 1))
             done
         fi
         echo
-        echo "  0) Back to Menu"
-        echo
+        printf '  %s💡 Hint: An interface can be [Enabled] in UCI but [DOWN] if physical device is disconnected.%s\n' \
+            "${GRAY}" "$RESET"
+        if command -v ui_nav_footer >/dev/null 2>&1; then
+            ui_nav_footer main
+        else
+            echo
+            echo "  0) Back to Main Menu   q) Quit DayPass   h) Help"
+            echo
+        fi
         if command -v ui_read >/dev/null 2>&1; then
             ui_read "Select interface"
         else
@@ -231,7 +260,20 @@ hardware_toggle_tethering() {
                 return 0
                 ;;
             h|H)
-                command -v ui_show_help >/dev/null 2>&1 && ui_show_help "hardware"
+                echo
+                echo "  UCI Status: administrative state in /etc/config/network."
+                printf '    %s[Enabled]%s   = active in config\n' "$GREEN" "$RESET"
+                printf '    %s[Disabled]%s  = suppressed in config\n' "$GRAY" "$RESET"
+                echo "  Oper Status: real-time network layer state."
+                printf '    %s[UP]%s     = connected and routing\n' "${BOLD}${GREEN}" "$RESET"
+                printf '    %s[DOWN]%s   = disconnected / no hardware link\n' "${BOLD}${RED}" "$RESET"
+                echo
+                if command -v ui_pause >/dev/null 2>&1; then
+                    ui_pause
+                else
+                    printf '  Press [Enter] to continue ...'
+                    read -r _ </dev/tty || return 0
+                fi
                 continue
                 ;;
         esac
