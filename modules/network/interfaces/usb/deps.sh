@@ -48,46 +48,141 @@ usb_deps_missing() {
     return "$_ud_missing"
 }
 
-_usb_dep_update() {
-    if command -v pkg_update >/dev/null 2>&1; then
-        pkg_update >/dev/null 2>&1 || true
+# apk when PKG_MANAGER says so, otherwise whichever binary exists.
+_usb_pm() {
+    case "${PKG_MANAGER:-}" in
+        apk|opkg)
+            printf '%s\n' "$PKG_MANAGER"
+            return 0
+            ;;
+    esac
+    if command -v apk >/dev/null 2>&1; then
+        printf '%s\n' "apk"
         return 0
     fi
     if command -v opkg >/dev/null 2>&1; then
-        (opkg update >/dev/null 2>&1) &
-        if command -v ui_spinner >/dev/null 2>&1; then
-            ui_spinner $! "Updating package database ..." || true
-        else
-            wait $! || true
-        fi
-        return 0
-    fi
-    if command -v apk >/dev/null 2>&1; then
-        (apk update >/dev/null 2>&1) &
-        if command -v ui_spinner >/dev/null 2>&1; then
-            ui_spinner $! "Updating package database ..." || true
-        else
-            wait $! || true
-        fi
+        printf '%s\n' "opkg"
         return 0
     fi
     return 1
 }
 
-# $1 package. Returns 0 on install, 1 when every installer failed.
+# Drop a lock only when no package manager process is holding it.
+_usb_clear_pkg_lock() {
+    if pidof opkg >/dev/null 2>&1 || pidof apk >/dev/null 2>&1; then
+        log_warn "A package manager process is already running."
+        return 0
+    fi
+    rm -f /var/lock/opkg.lock /lib/apk/db/lock /var/run/apk.lock /run/apk/db.lock 2>/dev/null
+}
+
+# $1 seconds, then the command. Returns 124 when the deadline passes.
+# Stdin is closed so opkg/apk cannot wait on a prompt. Output goes to the log.
+_usb_run_bounded() {
+    _ub_sec="$1"
+    _ub_n=0
+    _ub_pid=""
+    shift
+
+    : >/tmp/daypass_usb_pkg.log
+    "$@" </dev/null >>/tmp/daypass_usb_pkg.log 2>&1 &
+    _ub_pid=$!
+    while kill -0 "$_ub_pid" 2>/dev/null; do
+        _ub_n=$((_ub_n + 1))
+        if [ "$_ub_n" -ge "$_ub_sec" ]; then
+            kill "$_ub_pid" 2>/dev/null
+            sleep 1
+            kill -9 "$_ub_pid" 2>/dev/null
+            wait "$_ub_pid" 2>/dev/null
+            return 124
+        fi
+        sleep 1
+    done
+    wait "$_ub_pid"
+}
+
+_usb_show_pkg_log() {
+    [ -s /tmp/daypass_usb_pkg.log ] || return 0
+    log_warn "Package manager said:"
+    tail -n 6 /tmp/daypass_usb_pkg.log 2>/dev/null | sed 's/^/    /'
+}
+
+_usb_dep_update() {
+    _ub_pm=""
+    _ub_st=1
+
+    _ub_pm=$(_usb_pm) || return 1
+    _usb_clear_pkg_lock
+    log_info "Updating package indexes..."
+
+    case "$_ub_pm" in
+        apk)
+            _usb_run_bounded 40 apk update --no-interactive --network-timeout 15
+            _ub_st=$?
+            if [ "$_ub_st" -ne 0 ]; then
+                log_warn "apk update did not finish. Retrying over IPv4."
+                _usb_run_bounded 40 apk update --force-ipv4 --no-interactive --network-timeout 15
+                _ub_st=$?
+            fi
+            ;;
+        opkg)
+            _usb_run_bounded 40 opkg update
+            _ub_st=$?
+            ;;
+    esac
+
+    if [ "$_ub_st" -eq 124 ]; then
+        log_warn "Package index update timed out. The feed did not answer."
+        _usb_show_pkg_log
+        return 1
+    fi
+    if [ "$_ub_st" -ne 0 ]; then
+        log_warn "Package index update failed. Install will try the local cache."
+        _usb_show_pkg_log
+        return 1
+    fi
+    log_success "Package indexes updated."
+    return 0
+}
+
+# $1 package. Returns 0 on install, 1 when the install failed or timed out.
 _usb_dep_install_one() {
     _ud_pkg="$1"
+    _ub_pm=""
+    _ub_st=1
 
-    if command -v pkg_install >/dev/null 2>&1; then
-        pkg_install "$_ud_pkg" >/dev/null 2>&1 && return 0
+    [ -n "$_ud_pkg" ] || return 1
+    _ub_pm=$(_usb_pm) || return 1
+    log_info "Installing $_ud_pkg ..."
+
+    case "$_ub_pm" in
+        apk)
+            _usb_run_bounded 90 apk add --no-interactive --no-cache --allow-untrusted --network-timeout 20 "$_ud_pkg"
+            _ub_st=$?
+            if [ "$_ub_st" -ne 0 ] && [ "$_ub_st" -ne 124 ]; then
+                log_warn "apk add failed for $_ud_pkg. Retrying over IPv4."
+                _usb_run_bounded 90 apk add --force-ipv4 --no-interactive --no-cache --allow-untrusted --network-timeout 20 "$_ud_pkg"
+                _ub_st=$?
+            fi
+            ;;
+        opkg)
+            _usb_run_bounded 90 opkg install --force-checksum --force-overwrite "$_ud_pkg"
+            _ub_st=$?
+            ;;
+    esac
+
+    if [ "$_ub_st" -eq 124 ]; then
+        log_warn "Timed out installing $_ud_pkg."
+        _usb_show_pkg_log
+        return 1
     fi
-    if command -v opkg >/dev/null 2>&1; then
-        opkg install "$_ud_pkg" >/dev/null 2>&1 && return 0
+    if [ "$_ub_st" -ne 0 ]; then
+        log_warn "Could not install $_ud_pkg."
+        _usb_show_pkg_log
+        return 1
     fi
-    if command -v apk >/dev/null 2>&1; then
-        apk add --allow-untrusted "$_ud_pkg" >/dev/null 2>&1 && return 0
-    fi
-    return 1
+    log_success "$_ud_pkg installed."
+    return 0
 }
 
 # $1 package name -> kernel module or usbmuxd binary, or empty
@@ -259,13 +354,7 @@ _usb_offer_driver_set() {
         return 0
     fi
 
-    (usb_install_driver_set "$_ud_set" >/dev/null 2>&1) &
-    if command -v ui_spinner >/dev/null 2>&1; then
-        ui_spinner $! "Installing selected USB drivers..."
-    else
-        wait $!
-    fi
-    if [ $? -eq 0 ]; then
+    if usb_install_driver_set "$_ud_set"; then
         log_success "$_ud_ok"
         log_info "If your phone isn't detected after plugging it in, reboot the router once - newly installed USB kernel modules sometimes don't bind to the port until the next boot."
     else
