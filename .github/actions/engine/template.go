@@ -123,6 +123,7 @@ func generateInstallScript(outputFile string) error {
 		"modules/system/backup_restore.sh",
 		"ui/lib/banner.sh",
 		"modules/system/banner.sh",
+		"modules/system/daypass_cli.sh",
 		"modules/system/maintenance.sh",
 		"modules/service/service_manager.sh",
 
@@ -233,6 +234,11 @@ func generateInstallScript(outputFile string) error {
 # Runtime Execution Pipeline
 ###############################################################################
 DEPLOYMENT_FAILED=0
+
+# 0. Persistent CLI: install /usr/bin/daypass, or handle update / version / uninstall
+if command -v daypass_cli_dispatch >/dev/null 2>&1; then
+    daypass_cli_dispatch "$@"
+fi
 
 # 1. Pre-flight network bootstrap (skipped when a mirror or proxy is already set)
 network_bootstrap_startup
