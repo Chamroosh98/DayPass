@@ -4,22 +4,28 @@ geo_menu()
 {
     render_persistent_header
 
-    echo "  🕵️‍♀️ Select Geo Database                                     "
-    echo "  ─────────────────────────────────────────────────────────── "
+    echo "  🕵️‍♀️ Select Geo Database                                      "
+    ui_divider
     echo "  🫸🏻 1) Skip       (Do not install Geo databases)             "
     echo "  👔 2) Official   (Standard official release packages)       "
     echo "  🍺 3) Iran Full  (Custom ruleset - Full database)           "
     echo "  🍷 4) Iran Lite  (Custom ruleset - Compact database)        "
-    echo "  ─────────────────────────────────────────────────────────── "
+    ui_divider
     echo
 
-    printf "  ⁉️ Select option [1-4] (Default: 1) : "
+    if command -v ui_nav_footer >/dev/null 2>&1; then
+        ui_nav_footer
+    fi
+    printf "  ⁉️ Select option [1-4] : "
     read -r choice </dev/tty
 
     GEOIP_URL=""
     GEOSITE_URL=""
 
     case "$choice" in
+        0) return 0 ;;
+        q|Q) command -v daypass_quit >/dev/null 2>&1 && daypass_quit; return 0 ;;
+        h|H) command -v ui_show_help >/dev/null 2>&1 && ui_show_help "packages"; geo_menu; return ;;
         1|"")
             SELECTED_GEO="none"
             ;;

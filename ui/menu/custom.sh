@@ -4,20 +4,21 @@ show_custom_help()
 {
     render_persistent_header
     echo "  📖 ${BOLD}Custom Selection Guide & Keyboard Shortcuts${RESET}"
-    echo "  ──────────────────────────────────────────────────────────"
+    ui_divider
     echo "  🔹 ${YELLOW}Toggle Item (1-6):${RESET} Enter item number to Select [✔] or Deselect [ ]."
     echo "  🔹 ${YELLOW}Language Notice:${RESET} Selecting a new language (e.g. -fa) automatically"
     echo "     replaces previously selected translations for clean config."
-    echo "  🔹 ${YELLOW}[n] / [p]:${RESET} Navigate to Next or Previous page."
-    echo "  🔹 ${YELLOW}[d]:${RESET} Save your current selection and proceed to Review."
-    echo "  🔹 ${YELLOW}[q]:${RESET} Cancel and return to main menu."
-    echo "  ──────────────────────────────────────────────────────────"
+    echo "  🔹 ${YELLOW}[n] / [p]:${RESET} Next or previous page on the navigation bar."
+    echo "  🔹 ${YELLOW}[d]:${RESET} Save the current selection and continue to Review."
+    _nav_muted="${COLOR_MUTED:-$GRAY}"
+    printf "  ${_nav_muted}0) Back / Skip${RESET}\n"
+    printf "  ${_nav_muted}q) Quit DayPass${RESET}\n"
+    ui_divider
     echo "  💡 ${CYAN}Pro-Tip:${RESET} Combining Sing-box and Xray together is supported,"
     echo "     but recommended mainly for powerful hardware (ARM64 / x86)."
-    echo "  ──────────────────────────────────────────────────────────"
     echo
     printf "  ${GRAY}Press [ENTER] to return to selection menu ...${RESET}"
-    read -r _ </dev/tty
+    read -r _ </dev/tty || daypass_quit
 }
 
 toggle_custom_package()
@@ -65,17 +66,35 @@ toggle_custom_package()
     export SELECTED_PACKAGES
 }
 
+# Same horizontal pager as the manuals, plus save and help.
+custom_render_nav_bar() {
+    if command -v render_pager_footer >/dev/null 2>&1; then
+        render_pager_footer "${CURRENT_PAGE:-1}" "${TOTAL_PAGES:-1}" \
+            "${GREEN}d) Save & Continue${RESET}" \
+            "h) Help"
+        return 0
+    fi
+    ui_divider
+    echo "  n) Next   p) Previous   0) Back / Skip   q) Quit DayPass   d) Save & Continue   h) Help"
+}
+
 handle_custom_profile()
 {
     if [ -z "$MANIFEST_FILE" ] || [ ! -f "$MANIFEST_FILE" ]; then
         if [ -f "/tmp/manifest.json" ]; then
             MANIFEST_FILE="/tmp/manifest.json"
+        elif [ -n "${DAYPASS_HOME:-}" ] && [ -f "$DAYPASS_HOME/manifest.json" ]; then
+            MANIFEST_FILE="$DAYPASS_HOME/manifest.json"
         elif [ -f "manifest.json" ]; then
             MANIFEST_FILE="manifest.json"
         else
             OW_VER="25"
             [ "${PKG_MANAGER:-opkg}" = "opkg" ] && OW_VER="24"
-            MANIFEST_FILE="build-artifacts/v${OW_VER}/manifest.json"
+            if [ -n "${DAYPASS_HOME:-}" ] && [ -f "$DAYPASS_HOME/build-artifacts/v${OW_VER}/manifest.json" ]; then
+                MANIFEST_FILE="$DAYPASS_HOME/build-artifacts/v${OW_VER}/manifest.json"
+            else
+                MANIFEST_FILE="build-artifacts/v${OW_VER}/manifest.json"
+            fi
         fi
     fi
 
@@ -114,7 +133,7 @@ handle_custom_profile()
         done
 
         echo "  🛠️ ${BOLD}Custom Package Selection${RESET} ${GRAY}(Page ${YELLOW}$CURRENT_PAGE${RESET}${GRAY}/$TOTAL_PAGES | Selected : ${GREEN}$SEL_COUNT${RESET}${GRAY})${RESET}"
-        echo "  ${GRAY}──────────────────────────────────────────────────────────${RESET}"
+        ui_divider "$GRAY"
 
         START_IDX=$(( (CURRENT_PAGE - 1) * PAGE_SIZE + 1 ))
         END_IDX=$(( CURRENT_PAGE * PAGE_SIZE ))
@@ -143,12 +162,12 @@ handle_custom_profile()
 
         FIRST_RENDER=0
 
-        echo "  ${GRAY}──────────────────────────────────────────────────────────${RESET}"
-        echo "  ${GRAY}[${CYAN}n${RESET}${GRAY}] Next | [${CYAN}p${RESET}${GRAY}] Prev | [${YELLOW}h${RESET}${GRAY}] Help | [${RED}q${RESET}${GRAY}] Cancel | [${GREEN}d${RESET}${GRAY}] Save & Done${RESET}"
-        echo
+        custom_render_nav_bar
 
-        printf "  ⁉️ ${YELLOW}Toggle Item${RESET} ${GRAY}(1-$((item_no - 1))) or Action (${CYAN}n${RESET}${GRAY}/${CYAN}p${RESET}${GRAY}/${YELLOW}h${RESET}${GRAY}/${RED}q${RESET}${GRAY}/${GREEN}d${RESET}${GRAY}) :${RESET} "
-        read -r cmd </dev/tty
+        _last=$((${item_no:-1} - 1))
+        [ "$_last" -ge 1 ] || _last=1
+        printf "  ⁉️ Select option or toggle [1-%s] : " "$_last"
+        read -r cmd </dev/tty || daypass_quit
 
         case "$cmd" in
             n|N)
@@ -161,6 +180,9 @@ handle_custom_profile()
                 show_custom_help
                 ;;
             q|Q)
+                daypass_quit
+                ;;
+            0)
                 log_warn "Custom selection cancelled."
                 SELECTED_PACKAGES=""
                 return 1

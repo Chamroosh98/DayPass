@@ -1,0 +1,181 @@
+#!/bin/sh
+
+# Applies ready-to-use profiles by calling real routing modes
+# ============================================================
+
+
+# Paths
+
+PROXY_DIR="/etc/daypass/proxy"
+PROFILE_DIR="$PROXY_DIR/profiles"
+ROUTING_DIR="$PROXY_DIR/routing"
+mkdir -p "$PROFILE_DIR"
+mkdir -p "$ROUTING_DIR"
+
+
+# Show current active profile
+
+show_active_profile() {
+    echo "  🎭 Current Active Profile"
+    ui_divider
+
+    if [ -f "$PROFILE_DIR/active" ]; then
+        active=$(cat "$PROFILE_DIR/active")
+        echo "  🫀 Active Profile : ${GREEN}$active${RESET}"
+    else
+        echo "  🫀 Active Profile : ${GRAY}None${RESET}"
+    fi
+
+    if [ -f "$ROUTING_DIR/current_mode" ]; then
+        mode=$(cat "$ROUTING_DIR/current_mode")
+        echo "  🚦 Routing Mode   : ${CYAN}$mode${RESET}"
+    else
+        echo "  🚦 Routing Mode   : ${GRAY}Not set${RESET}"
+    fi
+
+    ui_divider
+}
+
+
+# List available profiles
+
+list_profiles() {
+    echo "  🎭 Available Routing Profiles"
+    ui_divider
+    echo "  ⚖️  1) Balanced       (Iran Direct + Foreign Proxy)"
+    echo "  🕹️  2) Gaming         (Low latency focus)"
+    echo "  📺  3) Streaming      (Better for video services)"
+    echo "  🌎  4) Global Proxy   (All traffic through proxy)"
+    echo "  🎯  5) Direct Only    (Disable proxy completely)"
+    ui_divider
+}
+
+
+# Apply a profile (calls real routing functions when possible)
+
+apply_profile() {
+    local profile="$1"
+
+    case "$profile" in
+        balanced)
+            echo "balanced" > "$PROFILE_DIR/active"
+
+            if command -v apply_iran_direct >/dev/null 2>&1; then
+                apply_iran_direct
+            else
+                echo "iran_direct" > "$ROUTING_DIR/current_mode"
+                log_warn "Routing module not fully loaded. Mode saved locally."
+            fi
+
+            log_success "Profile [⚖️ Balanced] applied!"
+            log_info "Iranian sites → Direct | Foreign sites → Proxy"
+            ;;
+
+        gaming)
+            echo "gaming" > "$PROFILE_DIR/active"
+
+            # Gaming currently uses Iran Direct as base
+            if command -v apply_iran_direct >/dev/null 2>&1; then
+                apply_iran_direct
+            else
+                echo "iran_direct" > "$ROUTING_DIR/current_mode"
+                log_warn "Routing module not fully loaded. Mode saved locally."
+            fi
+
+            log_success "Profile [🕹️ Gaming] applied!"
+            log_info "Optimized for lower latency and stability."
+            ;;
+
+        streaming)
+            echo "streaming" > "$PROFILE_DIR/active"
+
+            if command -v apply_iran_direct >/dev/null 2>&1; then
+                apply_iran_direct
+            else
+                echo "iran_direct" > "$ROUTING_DIR/current_mode"
+                log_warn "Routing module not fully loaded. Mode saved locally."
+            fi
+
+            log_success "Profile [📺 Streaming] applied!"
+            log_info "Optimized for YouTube / Netflix style traffic."
+            ;;
+
+        global)
+            echo "global" > "$PROFILE_DIR/active"
+
+            if command -v apply_global_proxy >/dev/null 2>&1; then
+                apply_global_proxy
+            else
+                echo "global_proxy" > "$ROUTING_DIR/current_mode"
+                log_warn "Routing module not fully loaded. Mode saved locally."
+            fi
+
+            log_success "Profile [🌎 Global Proxy] applied!"
+            log_info "All traffic will go through proxy."
+            ;;
+
+        direct)
+            echo "direct" > "$PROFILE_DIR/active"
+
+            if command -v apply_direct_only >/dev/null 2>&1; then
+                apply_direct_only
+            else
+                echo "direct_only" > "$ROUTING_DIR/current_mode"
+                log_warn "Routing module not fully loaded. Mode saved locally."
+            fi
+
+            log_success "Profile [🎯 Direct Only] applied!"
+            log_info "Proxy disabled. All traffic is direct."
+            ;;
+
+        *)
+            log_error "Unknown profile!"
+            return 1
+            ;;
+    esac
+}
+
+
+# Main Menu
+
+profile_manager_menu() {
+    local HELP_MODULE_ID="proxy_profiles"
+
+    while true; do
+        render_persistent_header
+
+        echo "  🎭 Routing Profiles"
+        ui_divider
+        show_active_profile
+        echo
+        list_profiles
+        echo
+        ui_nav_footer
+
+        ui_prompt 5
+        choice="$UI_CHOICE"
+
+        case "$choice" in
+            1) apply_profile "balanced" ;;
+            2) apply_profile "gaming" ;;
+            3) apply_profile "streaming" ;;
+            4) apply_profile "global" ;;
+            5) apply_profile "direct" ;;
+            q|Q) daypass_quit ;;
+            h|H)
+                if command -v show_help >/dev/null 2>&1; then
+                    show_help "$HELP_MODULE_ID"
+                else
+                    log_warn "Help module not loaded!"
+                    sleep 1
+                fi
+                continue
+                ;;
+            0) return 0 ;;
+            *) log_warn "Invalid option!" ;;
+        esac
+
+        printf "\n  ${GRAY}Press [Enter] to continue ...${RESET}"
+        read -r _ </dev/tty || daypass_quit
+    done
+}

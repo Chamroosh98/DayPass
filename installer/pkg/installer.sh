@@ -136,9 +136,28 @@ deploy_targeted_packages()
     if [ -z "$PACKAGES_TO_PROCESS" ]; then
         PACKAGES_TO_PROCESS="$FINAL_PACKAGES"
     fi
+    PACKAGES_PLANNED="$PACKAGES_TO_PROCESS"
 
     echo "  🔍 Executing Pre-Flight System Resource Validation ..."
     resource_snapshot
+
+    APPLY_LIST="${TMP_DIR:-/tmp}/daypass_applied.list"
+    : > "$APPLY_LIST"
+    PACKAGES_NEEDED=""
+
+    echo
+    log_info "Checking packages already on this router ..."
+    for pkg in $PACKAGES_PLANNED; do
+        if command -v pkg_payload_required >/dev/null 2>&1 && ! pkg_payload_required "$pkg"; then
+            printf "  ${GRAY}[SKIP]${RESET} Package %s is already installed and up-to-date.\n" "$pkg"
+            printf '%s\t%s\n' "$pkg" "(Already Installed)" >> "$APPLY_LIST"
+        else
+            PACKAGES_NEEDED="$PACKAGES_NEEDED $pkg"
+            printf '%s\t%s\n' "$pkg" "pending" >> "$APPLY_LIST"
+        fi
+    done
+    echo
+
     if ! estimate_install_size; then
         log_error "Installation aborted due to system resource limits!"
         return 1
@@ -146,90 +165,144 @@ deploy_targeted_packages()
 
     INSTALL_FILES=""
     total_pkgs=0
-    for p in $PACKAGES_TO_PROCESS; do
+    for p in $PACKAGES_NEEDED; do
         total_pkgs=$((total_pkgs + 1))
     done
 
-    current_idx=0
-    log_info "Downloading required packages ..."
+    if [ "$total_pkgs" -gt 0 ]; then
+        current_idx=0
+        log_info "Downloading required packages ..."
 
-    for pkg in $PACKAGES_TO_PROCESS; do
-        current_idx=$((current_idx + 1))
-        
-        curr_ram_bytes=$(get_free_ram_bytes 2>/dev/null)
-        curr_ram_fmt=$(human_readable_bytes "$curr_ram_bytes" 2>/dev/null)
-        
-        if command -v show_ascii_progress >/dev/null 2>&1; then
-            show_ascii_progress "Downloading ($pkg) [Free RAM: ${curr_ram_fmt:-N/A}]" "$current_idx" "$total_pkgs"
-        else
-            echo "  📦 [$current_idx/$total_pkgs] Downloading $pkg ... (Free RAM: ${curr_ram_fmt:-N/A})"
-        fi
+        for pkg in $PACKAGES_NEEDED; do
+            current_idx=$((current_idx + 1))
 
-        if ! download_package "$pkg"; then
-            echo
-            log_error "Failed downloading dependency : [$pkg]"
-            rollback_failed_install
-            return 1
-        fi
+            curr_ram_bytes=$(get_free_ram_bytes 2>/dev/null)
+            curr_ram_fmt=$(human_readable_bytes "$curr_ram_bytes" 2>/dev/null)
 
-        file=$(manifest_lookup "file" "$pkg")
-        file_basename=$(basename "$file")
-        INSTALL_FILES="$INSTALL_FILES $TMP_DIR/$file_basename"
-    done
-    echo
+            if command -v show_ascii_progress >/dev/null 2>&1; then
+                show_ascii_progress "Downloading ($pkg) [Free RAM: ${curr_ram_fmt:-N/A}]" "$current_idx" "$total_pkgs"
+            else
+                echo "  📦 [$current_idx/$total_pkgs] Downloading $pkg ... (Free RAM: ${curr_ram_fmt:-N/A})"
+            fi
 
-    for pkg in $PACKAGES_TO_PROCESS; do
-        echo "$pkg" >> "$TRANSACTION_LOG"
-    done
+            if ! download_package "$pkg"; then
+                echo
+                log_error "Failed downloading dependency : [$pkg]"
+                rollback_failed_install
+                return 1
+            fi
 
-    INSTALL_SUCCESS=0
+            file=$(manifest_lookup "file" "$pkg")
+            file_basename=$(basename "$file")
+            INSTALL_FILES="$INSTALL_FILES $TMP_DIR/$file_basename"
+            echo "$pkg" >> "$TRANSACTION_LOG"
+        done
+        echo
+    else
+        log_info "Nothing to download — every selected package is already current."
+        echo
+    fi
+
+    INSTALL_SUCCESS=1
     CURRENT_PKG_MGR="${PKG_MANAGER:-opkg}"
+    DAYPASS_OPKG_LOG="${DAYPASS_OPKG_LOG:-/tmp/daypass_opkg.log}"
+    DAYPASS_APK_LOG="${DAYPASS_APK_LOG:-/tmp/daypass_apk.log}"
 
-    case "$CURRENT_PKG_MGR" in
-        apk)
-            (apk add --allow-untrusted --no-progress $INSTALL_FILES >/tmp/apk_inst.log 2>&1) &
-            BG_PID=$!
-            if command -v show_timer_progress >/dev/null 2>&1; then
-                show_timer_progress "$BG_PID" "applying APK package bundle"
-            fi
-            wait "$BG_PID"
-            [ $? -eq 0 ] && INSTALL_SUCCESS=1
-            ;;
-        opkg|*)
-            (opkg install --force-reinstall --force-checksum $INSTALL_FILES >/tmp/opkg_inst.log 2>&1) &
-            BG_PID=$!
-            if command -v show_timer_progress >/dev/null 2>&1; then
-                show_timer_progress "$BG_PID" "applying OPKG package bundle"
-            fi
-            wait "$BG_PID"
-            [ $? -eq 0 ] && INSTALL_SUCCESS=1
-            ;;
-    esac
+    if [ -n "$INSTALL_FILES" ]; then
+        INSTALL_SUCCESS=0
+        case "$CURRENT_PKG_MGR" in
+            apk)
+                : > "$DAYPASS_APK_LOG"
+                (apk add --allow-untrusted --no-progress $INSTALL_FILES >"$DAYPASS_APK_LOG" 2>&1) &
+                BG_PID=$!
+                if command -v ui_spinner >/dev/null 2>&1; then
+                    ui_spinner "$BG_PID" "Installing packages ..."
+                elif command -v show_timer_progress >/dev/null 2>&1; then
+                    show_timer_progress "$BG_PID" "applying APK package bundle"
+                    wait "$BG_PID"
+                else
+                    wait "$BG_PID"
+                fi
+                [ $? -eq 0 ] && INSTALL_SUCCESS=1
+                ;;
+            opkg|*)
+                : > "$DAYPASS_OPKG_LOG"
+                (opkg install --force-checksum $INSTALL_FILES >"$DAYPASS_OPKG_LOG" 2>&1) &
+                BG_PID=$!
+                if command -v ui_spinner >/dev/null 2>&1; then
+                    ui_spinner "$BG_PID" "Installing packages ..."
+                elif command -v show_timer_progress >/dev/null 2>&1; then
+                    show_timer_progress "$BG_PID" "applying OPKG package bundle"
+                    wait "$BG_PID"
+                else
+                    wait "$BG_PID"
+                fi
+                [ $? -eq 0 ] && INSTALL_SUCCESS=1
+                ;;
+        esac
+    fi
 
     if [ "$INSTALL_SUCCESS" -eq 1 ]; then
-        for pkg in $PACKAGES_TO_PROCESS; do
-            echo "$pkg" >> "$INSTALL_LOG"
-        done
+        _apply_tmp="${APPLY_LIST}.tmp"
+        : > "$_apply_tmp"
+        while IFS='	' read -r _ap_name _ap_note; do
+            [ -n "$_ap_name" ] || continue
+            if [ "$_ap_note" = "pending" ]; then
+                _ap_ver=$(pkg_get_installed_version "$_ap_name" 2>/dev/null | awk 'NR==1 { print $1 }')
+                [ -z "$_ap_ver" ] && _ap_ver=$(manifest_lookup "version" "$_ap_name" 2>/dev/null)
+                case "$_ap_ver" in
+                    ""|null|Latest|N/A) _ap_note="(Installed)" ;;
+                    *) _ap_note="(Installed v${_ap_ver})" ;;
+                esac
+            fi
+            printf '%s\t%s\n' "$_ap_name" "$_ap_note" >> "$_apply_tmp"
+            echo "$_ap_name" >> "$INSTALL_LOG"
+        done < "$APPLY_LIST"
+        mv "$_apply_tmp" "$APPLY_LIST"
 
         if [ -f "$INSTALL_LOG" ]; then
             sort -u "$INSTALL_LOG" -o "$INSTALL_LOG"
         fi
-        
+
+        render_applied_components "$APPLY_LIST"
         resource_compare
-        
+
         rm -f $INSTALL_FILES 2>/dev/null
         rm -f "$TRANSACTION_LOG"
-        
+
         log_success "All targeted packages deployed successfully!"
+
+        if command -v mf_record_install >/dev/null 2>&1; then
+            mf_record_install "${INSPECT_MODULE_ID:-${SELECTED_PROFILE:-proxy}}" "$PACKAGES_PLANNED"
+        fi
+
         return 0
     fi
 
     echo
     log_error "Package manager batch execution failed!"
-    if [ -f /tmp/opkg_inst.log ]; then cat /tmp/opkg_inst.log; fi
-    if [ -f /tmp/apk_inst.log ]; then cat /tmp/apk_inst.log; fi
+    case "$CURRENT_PKG_MGR" in
+        apk)  log_info "Details : ${DAYPASS_APK_LOG}" ;;
+        *)    log_info "Details : ${DAYPASS_OPKG_LOG}" ;;
+    esac
     rollback_failed_install
     return 1
+}
+
+# $1 tab-separated file: package<TAB>note
+render_applied_components()
+{
+    [ -s "$1" ] || return 0
+
+    echo
+    echo "  📦 Applied Package Components"
+    ui_divider
+    while IFS='	' read -r _rc_name _rc_note; do
+        [ -n "$_rc_name" ] || continue
+        printf "  ${GREEN}✔${RESET} %s  %s\n" "$_rc_name" "$_rc_note"
+    done < "$1"
+    ui_divider
+    echo
 }
 
 rollback_failed_install()

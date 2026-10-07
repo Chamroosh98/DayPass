@@ -1,0 +1,229 @@
+{
+  "schema_version": "1.0.0",
+  "description": "User-facing titles, one-line descriptions and UI roles for DayPass profile packages. Used by the Profile Installation screen.",
+  "roles": {
+    "core": "Core",
+    "web": "Web Interface",
+    "enhancement": "Enhancement"
+  },
+  "profiles": {
+    "proxy": {
+      "icon": "⚡",
+      "highlights": ["xray-core", "luci-app-passwall2", "geoview"]
+    },
+    "vpn": {
+      "icon": "🔐",
+      "highlights": ["wireguard-tools", "openvpn-openssl", "softethervpn5-client"]
+    },
+    "usb": {
+      "icon": "🔌",
+      "highlights": ["kmod-usb-net-rndis", "usbutils", "usb-modeswitch"]
+    },
+    "network_tools": {
+      "icon": "📈",
+      "highlights": ["mwan3", "sqm-scripts", "iperf3"]
+    }
+  },
+  "packages": {
+    "tcping": {
+      "title": "TCP Ping Probe",
+      "description": "Checks whether a remote host and port actually accept connections.",
+      "role": "enhancement"
+    },
+    "geoview": {
+      "title": "Geo Database Viewer",
+      "description": "Looks up country and site categories used by routing rules.",
+      "role": "enhancement"
+    },
+    "v2ray-geoip": {
+      "title": "IP Country Database",
+      "description": "Maps IP addresses to countries so Iranian and foreign traffic can be split.",
+      "role": "core"
+    },
+    "v2ray-geosite": {
+      "title": "Site Category Database",
+      "description": "Domain lists (video, ads, Iran, and so on) used by the proxy engine.",
+      "role": "core"
+    },
+    "xray-core": {
+      "title": "Xray Proxy Engine",
+      "description": "The Xray core that carries VLESS, VMess, Trojan and Reality traffic.",
+      "role": "core"
+    },
+    "sing-box": {
+      "title": "sing-box Proxy Engine",
+      "description": "A modern all-in-one proxy core (VLESS, Hysteria2, TUIC, and more).",
+      "role": "core"
+    },
+    "v2ray-core": {
+      "title": "V2Ray Proxy Engine",
+      "description": "The classic V2Ray core for VMess and VLESS links.",
+      "role": "core"
+    },
+    "luci-app-passwall": {
+      "title": "Passwall 1 Control Panel",
+      "description": "LuCI web app that configures Passwall 1 on this router.",
+      "role": "web"
+    },
+    "luci-app-passwall2": {
+      "title": "Passwall 2 Control Panel",
+      "description": "LuCI web app that configures Passwall 2 on this router.",
+      "role": "web"
+    },
+    "kmod-wireguard": {
+      "title": "WireGuard Kernel Module",
+      "description": "In-kernel WireGuard so the tunnel runs with little CPU cost.",
+      "role": "core"
+    },
+    "wireguard-tools": {
+      "title": "WireGuard Tools",
+      "description": "Creates and manages WireGuard interfaces from the command line.",
+      "role": "core"
+    },
+    "luci-proto-wireguard": {
+      "title": "Web Interface for WireGuard",
+      "description": "Lets you add WireGuard tunnels from LuCI Network → Interfaces.",
+      "role": "web"
+    },
+    "kmod-amneziawg": {
+      "title": "AmneziaWG Kernel Module",
+      "description": "Censorship-resistant WireGuard variant (needs a third-party feed).",
+      "role": "enhancement"
+    },
+    "amneziawg-tools": {
+      "title": "AmneziaWG Tools",
+      "description": "User-space tools to bring AmneziaWG interfaces up.",
+      "role": "enhancement"
+    },
+    "luci-proto-amneziawg": {
+      "title": "Web Interface for AmneziaWG",
+      "description": "LuCI protocol helper for AmneziaWG tunnels.",
+      "role": "web"
+    },
+    "openvpn-openssl": {
+      "title": "OpenVPN",
+      "description": "OpenVPN client/server using OpenSSL for TLS.",
+      "role": "core"
+    },
+    "openvpn-mbedtls": {
+      "title": "OpenVPN (mbedTLS)",
+      "description": "OpenVPN built against mbedTLS — used if the OpenSSL build is missing.",
+      "role": "core"
+    },
+    "openvpn-wolfssl": {
+      "title": "OpenVPN (WolfSSL)",
+      "description": "OpenVPN built against WolfSSL — another fallback build.",
+      "role": "core"
+    },
+    "luci-app-openvpn": {
+      "title": "Web Interface for OpenVPN",
+      "description": "Manage OpenVPN instances from the LuCI web UI.",
+      "role": "web"
+    },
+    "softethervpn5-client": {
+      "title": "SoftEther VPN Client",
+      "description": "Connects this router to a SoftEther VPN server.",
+      "role": "core"
+    },
+    "softethervpn5-server": {
+      "title": "SoftEther VPN Server",
+      "description": "Turns the router into a SoftEther VPN server (optional).",
+      "role": "enhancement"
+    },
+    "kmod-usb-net-rndis": {
+      "title": "Android USB Tethering Driver",
+      "description": "Lets most Android phones share their mobile data over USB.",
+      "role": "core"
+    },
+    "kmod-usb-net-cdc-ether": {
+      "title": "USB Ethernet Interface Drivers",
+      "description": "CDC Ethernet support for phones and USB tethering gadgets.",
+      "role": "core"
+    },
+    "kmod-usb-net-cdc-ncm": {
+      "title": "USB Ethernet Interface Drivers",
+      "description": "CDC-NCM support used by newer phones instead of classic CDC Ethernet.",
+      "role": "enhancement"
+    },
+    "usbutils": {
+      "title": "USB Device Diagnostics Tool (lsusb)",
+      "description": "Lists connected USB devices so tethering and modems can be diagnosed.",
+      "role": "enhancement"
+    },
+    "usb-modeswitch": {
+      "title": "Modem Mode Switching Tool (3G/4G/5G)",
+      "description": "Switches USB modems from storage mode into a real network/modem mode.",
+      "role": "core"
+    },
+    "kmod-usb-net-ipheth": {
+      "title": "iPhone USB Tethering Support",
+      "description": "Kernel driver for iPhone Personal Hotspot over USB.",
+      "role": "enhancement"
+    },
+    "usbmuxd": {
+      "title": "iPhone USB Tethering Support",
+      "description": "Pairs the iPhone over USB so Personal Hotspot can actually pass data.",
+      "role": "enhancement"
+    },
+    "mwan3": {
+      "title": "Multi-WAN Load Balancing & Failover",
+      "description": "Keeps several internet links online and fails over when one drops.",
+      "role": "core"
+    },
+    "luci-app-mwan3": {
+      "title": "Web Interface for Multi-WAN",
+      "description": "Configure WAN members, policies and rules from LuCI.",
+      "role": "web"
+    },
+    "kmod-sched-cake": {
+      "title": "Smart Queue Management (Bufferbloat Reduction)",
+      "description": "Cake kernel scheduler that keeps latency low when the line is busy.",
+      "role": "core"
+    },
+    "sqm-scripts": {
+      "title": "Smart Queue Management (Bufferbloat Reduction)",
+      "description": "Applies Cake/SQM so browsing stays snappy during heavy downloads.",
+      "role": "core"
+    },
+    "luci-app-sqm": {
+      "title": "Web Interface for SQM",
+      "description": "Set SQM speeds and the Cake/fq_codel queue from LuCI.",
+      "role": "web"
+    },
+    "nftables-json": {
+      "title": "nftables Firewall Engine",
+      "description": "Modern packet filter used by DayPass TPROXY rules and OpenWrt 24+.",
+      "role": "core"
+    },
+    "nftables-nojson": {
+      "title": "nftables (compact build)",
+      "description": "Fallback nftables package when the JSON build is not in the feeds.",
+      "role": "core"
+    },
+    "iperf3": {
+      "title": "Network Bandwidth Performance Tester",
+      "description": "Measures how fast a link really is between two points.",
+      "role": "enhancement"
+    },
+    "iperf3-ssl": {
+      "title": "iperf3 with TLS",
+      "description": "Same bandwidth tester, built with TLS support.",
+      "role": "enhancement"
+    },
+    "tcpdump": {
+      "title": "Network Packet Analyzer",
+      "description": "Captures live packets so you can see what the router is sending.",
+      "role": "enhancement"
+    },
+    "tcpdump-mini": {
+      "title": "Packet Analyzer (mini)",
+      "description": "Smaller tcpdump build for routers with little flash.",
+      "role": "enhancement"
+    },
+    "kmod-nft-tproxy": {
+      "title": "Transparent Proxy Support (TPROXY)",
+      "description": "Lets DayPass send LAN traffic into sing-box or Xray without a local proxy setting.",
+      "role": "enhancement"
+    }
+  }
+}

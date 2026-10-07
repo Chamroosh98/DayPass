@@ -8,7 +8,11 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sync"
 )
+
+// Concurrent package downloads per architecture. Tune if the upstream rate-limits.
+const downloadWorkers = 12
 
 type ArchConfig struct {
 	Release       string `json:"release"`
@@ -142,8 +146,8 @@ func main() {
 
 		for _, feed := range arch.Feeds {
 			feedCacheDir := filepath.Join(persistentCacheDir, feed)
-			cdnOutputDir := baseDownloadDir                   
-			zipFeedOutputDir := filepath.Join(zipWorkspaceDir, feed) 
+			cdnOutputDir := baseDownloadDir
+			zipFeedOutputDir := filepath.Join(zipWorkspaceDir, feed)
 
 			os.MkdirAll(feedCacheDir, 0755)
 			os.MkdirAll(cdnOutputDir, 0755)
@@ -171,51 +175,67 @@ func main() {
 
 			cachedCount := 0
 			downloadedCount := 0
+			var statMu sync.Mutex
+			var pkgWg sync.WaitGroup
+			sem := make(chan struct{}, downloadWorkers)
 
 			// Handling diffrence names of files!
 			for pkgName, pkgVersion := range feedIdx.Packages {
-				var pkgFileName string
+				pkgWg.Add(1)
+				go func(pkgName, pkgVersion string) {
+					defer pkgWg.Done()
+					sem <- struct{}{}
+					defer func() { <-sem }()
 
-				if owVersion == "24" {
-					pkgFileName = fmt.Sprintf("%s_%s_%s.ipk", pkgName, pkgVersion, feedIdx.Architecture)
-				} else {
-					pkgFileName = fmt.Sprintf("%s-%s.apk", pkgName, pkgVersion)
-				}
+					var pkgFileName string
 
-				cachePkgPath := filepath.Join(feedCacheDir, pkgFileName)
-				pkgURL := fmt.Sprintf("%s/%s", feedURL, pkgFileName)
-
-				if !fileExists(cachePkgPath) {
-					fmt.Printf("📥 Saved in Cache : [%-55s] ", pkgFileName)
-					err := downloadWithCurl(pkgURL, cachePkgPath)
-
-					if err != nil && owVersion == "24" {
-						pkgFileName = fmt.Sprintf("%s_%s_all.ipk", pkgName, pkgVersion)
-						cachePkgPath = filepath.Join(feedCacheDir, pkgFileName)
-						altPkgURL := fmt.Sprintf("%s/%s", feedURL, pkgFileName)
-
-						err = downloadWithCurl(altPkgURL, cachePkgPath)
-					}
-
-					if err != nil {
-						fmt.Println("❌ FAILED")
-						os.Remove(cachePkgPath)
-						continue
+					if owVersion == "24" {
+						pkgFileName = fmt.Sprintf("%s_%s_%s.ipk", pkgName, pkgVersion, feedIdx.Architecture)
 					} else {
-						fmt.Printf("✅ OK (%s)\n", pkgFileName)
-						downloadedCount++
+						pkgFileName = fmt.Sprintf("%s-%s.apk", pkgName, pkgVersion)
 					}
-				} else {
-					fmt.Printf("🔄 Cached : [%-55s]\n", pkgFileName)
-					cachedCount++
-				}
 
-				cdnPkgPath := filepath.Join(cdnOutputDir, pkgFileName)
-				zipPkgPath := filepath.Join(zipFeedOutputDir, pkgFileName)
+					cachePkgPath := filepath.Join(feedCacheDir, pkgFileName)
+					pkgURL := fmt.Sprintf("%s/%s", feedURL, pkgFileName)
 
-				copyFile(cachePkgPath, cdnPkgPath)
-				copyFile(cachePkgPath, zipPkgPath)
+					if !fileExists(cachePkgPath) {
+						origName := pkgFileName
+						err := downloadWithCurl(pkgURL, cachePkgPath)
+
+						if err != nil && owVersion == "24" {
+							pkgFileName = fmt.Sprintf("%s_%s_all.ipk", pkgName, pkgVersion)
+							cachePkgPath = filepath.Join(feedCacheDir, pkgFileName)
+							altPkgURL := fmt.Sprintf("%s/%s", feedURL, pkgFileName)
+
+							err = downloadWithCurl(altPkgURL, cachePkgPath)
+						}
+
+						if err != nil {
+							statMu.Lock()
+							fmt.Printf("📥 Saved in Cache : [%-55s] ❌ FAILED\n", origName)
+							statMu.Unlock()
+							os.Remove(cachePkgPath)
+							return
+						}
+						statMu.Lock()
+						fmt.Printf("📥 Saved in Cache : [%-55s] ✅ OK (%s)\n", origName, pkgFileName)
+						downloadedCount++
+						statMu.Unlock()
+					} else {
+						statMu.Lock()
+						fmt.Printf("🔄 Cached : [%-55s]\n", pkgFileName)
+						cachedCount++
+						statMu.Unlock()
+					}
+
+					cdnPkgPath := filepath.Join(cdnOutputDir, pkgFileName)
+					zipPkgPath := filepath.Join(zipFeedOutputDir, pkgFileName)
+
+					copyFile(cachePkgPath, cdnPkgPath)
+					copyFile(cachePkgPath, zipPkgPath)
+				}(pkgName, pkgVersion)
 			}
+			pkgWg.Wait()
 
 			fmt.Printf("✅ Feed synchronized! (🔄 [%d] cached, 📥 [%d] downloaded)\n", cachedCount, downloadedCount)
 		}

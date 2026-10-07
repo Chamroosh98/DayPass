@@ -1,4 +1,3 @@
-
 <div align="center">
 
   <img src="../ui/ico/dp.svg" alt="DayPass Logo" width="77" height="77" style="vertical-align: middle; margin-right: 8px;">
@@ -40,7 +39,9 @@
 - [🔀 Multi-WAN and Load Balancing](#-multi-wan-and-load-balancing)
   - [🔌 Routers with USB Ports (USB WAN Compatible)](#-routers-with-usb-ports-usb-wan-compatible)
 - [🌐 Wi-Fi Management and Isolation](#-wi-fi-management-and-isolation)
+
 - [🧼 Clean IP Management for Cloudflare](#-clean-ip-management-for-cloudflare)
+beta
 - [🧭 DNS Manager](#-dns-manager)
   - [❓ What does it do?](#-what-does-it-do)
 - [🧼 Clean IP Management for Cloudflare](#-clean-ip-management-for-cloudflare)
@@ -53,7 +54,7 @@
 
 **DayPass** is a lightweight, automated, and modular toolkit built for **OpenWrt** routers. It brings network management, proxy tools, and smart routing together in one place.
 
-With built-in support for **Passwall**, **Multi-WAN**, **Guest Network**, and **Clean IP**, it helps you stay online more reliably — even under heavy internet censorship. From selecting the best nodes and splitting traffic, to swapping Cloudflare IPs and applying ready-made routing profiles, DayPass covers the whole workflow.
+With built-in support for **Passwall**, **Multi-WAN**, **Guest Network**, **DNS Manager**, and **Clean IP**, it helps you stay online more reliably — even under heavy internet censorship. From selecting the best nodes and splitting traffic, to swapping Cloudflare IPs and applying ready-made routing profiles, DayPass covers the whole workflow.
 
 It works seamlessly with both package managers used in recent OpenWrt releases:
 
@@ -78,6 +79,9 @@ Packages are automatically downloaded and installed according to your OpenWrt ve
 - 🔄 **Automatic Internal Network Synchronization**  
   Automatically updates the internal network IP, adjusts the DHCP range, and cleans up old leases from `dhcp.leases`.
 
+- 🧭 **DNS Manager**  
+  Lets you choose how the router resolves names: system default, secure DoT/DoH when available, DNS through the Passwall tunnel, or a hybrid fallback.
+
 - 🌐 **Wide OpenWrt Version Compatibility**  
   Supports both OpenWrt 24.x (`opkg`) and OpenWrt 25.x (`apk`) across more than 9 hardware architectures.
 
@@ -85,13 +89,13 @@ Packages are automatically downloaded and installed according to your OpenWrt ve
 
 ## 🖥️ Hardware Compatibility
 
-| CPU Architecture | Compatible Hardware & Routers |
-| :--- | :--- |
-| **`aarch64_cortex-a53` / `aarch64_generic`** | **Raspberry Pi:** 3B, 3B+, 4B<br>**FriendlyELEC:** NanoPi R2S, R4S, R5S<br>**GL.iNet:** Flint (GL-AX1800), Slate AX (GL-AXT1800)<br>**Xiaomi:** AX3000T, AX6000 |
-| **`aarch64_cortex-a72` / `aarch64_cortex-a76`** | **Raspberry Pi:** 4B, 5<br>**SBCs:** Rockchip RK3399, RK3588 (NanoPi R6S, Orange Pi 5) |
-| **`arm_cortex-a7_neon-vfpv4` / `arm_cortex-a9`** | **Linksys:** EA8300, MR8300<br>**Netgear:** R7000, R7800, R8000<br>**ASUS:** RT-AC68U, RT-AC87U<br>**GL.iNet:** B1300 (ConnextDrive) |
-| **`mipsel_24kc`** | **Xiaomi:** Mi Router 3G, 4A Gigabit<br>**TP-Link:** Archer C50, C6, C7, TL-WR841N<br>**Ubiquiti:** EdgeRouter X (ER-X)<br>**GL.iNet:** Mango (GL-MT300N-V2), Shadow (GL-AR300M) |
-| **`x86_64` / `i386_pentium4`** | **Mini PCs & Mini Servers:** Intel N100, N5105, J4125<br>**Industrial Hardware:** Protectli Vault, Qotom, Topton (with Intel i225/i226 ports)<br>**Virtual Machines:** VMware, Proxmox VE, KVM, VirtualBox |
+| CPU Architecture                                 | Compatible Hardware & Routers                                                                                                                                                                              |
+| :----------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`aarch64_cortex-a53` / `aarch64_generic`**     | **Raspberry Pi:** 3B, 3B+, 4B<br>**FriendlyELEC:** NanoPi R2S, R4S, R5S<br>**GL.iNet:** Flint (GL-AX1800), Slate AX (GL-AXT1800)<br>**Xiaomi:** AX3000T, AX6000                                            |
+| **`aarch64_cortex-a72` / `aarch64_cortex-a76`**  | **Raspberry Pi:** 4B, 5<br>**SBCs:** Rockchip RK3399, RK3588 (NanoPi R6S, Orange Pi 5)                                                                                                                     |
+| **`arm_cortex-a7_neon-vfpv4` / `arm_cortex-a9`** | **Linksys:** EA8300, MR8300<br>**Netgear:** R7000, R7800, R8000<br>**ASUS:** RT-AC68U, RT-AC87U<br>**GL.iNet:** B1300 (ConnextDrive)                                                                       |
+| **`mipsel_24kc`**                                | **Xiaomi:** Mi Router 3G, 4A Gigabit<br>**TP-Link:** Archer C50, C6, C7, TL-WR841N<br>**Ubiquiti:** EdgeRouter X (ER-X)<br>**GL.iNet:** Mango (GL-MT300N-V2), Shadow (GL-AR300M)                           |
+| **`x86_64` / `i386_pentium4`**                   | **Mini PCs & Mini Servers:** Intel N100, N5105, J4125<br>**Industrial Hardware:** Protectli Vault, Qotom, Topton (with Intel i225/i226 ports)<br>**Virtual Machines:** VMware, Proxmox VE, KVM, VirtualBox |
 
 ---
 
@@ -144,42 +148,43 @@ curl -sSL https://chamroosh98.github.io/DayPass/beta/install.sh | sh
 
 DayPass allows you to set up and manage multiple internet connections on your router at the same time.
 
-* **🌐 Wired Internet (`Ethernet WAN`)**  
+- **🌐 Wired Internet (`Ethernet WAN`)**  
   Router receives internet from an ADSL/VDSL modem or fiber optic connection via the WAN port (using a LAN cable).
 
-> 💡 **WAN vs LAN Ports**  
-> * **`WAN` port (Internet input):** The router receives internet from the main modem, fiber, or external antenna.  
-> * **`LAN` port (Internet output):** The router distributes the received internet to internal devices (computers, TVs, secondary routers, or switches).
+> 💡 **WAN vs LAN Ports**
+>
+> - **`WAN` port (Internet input):** The router receives internet from the main modem, fiber, or external antenna.
+> - **`LAN` port (Internet output):** The router distributes the received internet to internal devices (computers, TVs, secondary routers, or switches).
 
-* **📱 Phone & USB Modem Internet (`USB WAN`)**  
+- **📱 Phone & USB Modem Internet (`USB WAN`)**  
   Connect Android phones, iPhones, or 4G/5G USB modems to the router’s USB port. DayPass supports both CDC-Ethernet and RNDIS modes.
 
 ### 🔌 Routers with USB Ports (USB WAN Compatible)
 
-| CPU Architecture | Models with USB Ports | Number & Type of USB Ports |
-| :--- | :--- | :--- |
-| **`aarch64_cortex-a53`** | **Raspberry Pi:** 3B, 3B+, 4B<br>**FriendlyELEC:** NanoPi R2S, R4S, R5S<br>**GL.iNet:** Flint (GL-AX1800), Slate AX (GL-AXT1800)<br>**Xiaomi:** AX6000 | **Raspberry Pi:** 4× USB<br>**NanoPi:** 1× to 2× USB<br>**GL.iNet:** 1× USB 3.0<br>**Xiaomi:** 1× USB 3.0 |
-| **`aarch64_cortex-a72/a76`** | **Raspberry Pi:** 4B, 5<br>**SBCs:** Rockchip RK3399, RK3588 (NanoPi R6S, Orange Pi 5) | **Raspberry Pi:** 2× USB 3.0 + 2× USB 2.0<br>**Orange Pi / NanoPi:** 2× to 3× USB |
-| **`arm_cortex-a7_neon-vfpv4` / `arm_cortex-a9`** | **Linksys:** EA8300, MR8300<br>**Netgear:** R7000, R7800, R8000<br>**ASUS:** RT-AC68U, RT-AC87U<br>**GL.iNet:** B1300 | **Linksys:** 1× USB 3.0 / 2.0<br>**Netgear / ASUS:** 1× USB 3.0 + 1× USB 2.0<br>**GL.iNet B1300:** 1× USB 3.0 |
-| **`mipsel_24kc`** | **Xiaomi:** Mi Router 3G<br>**TP-Link:** Archer C7<br>**GL.iNet:** Mango (GL-MT300N-V2), Shadow (GL-AR300M) | **Xiaomi 3G:** 1× USB 3.0<br>**Archer C7:** 2× USB 2.0<br>**GL.iNet Mango/Shadow:** 1× USB 2.0 |
-| **`x86_64` / `i386`** | **Mini PCs & Mini Servers:** Intel N100, N5105, Protectli, Topton<br>**Virtual Environments:** VMware, Proxmox (via USB Passthrough) | **Most have 2 to 4 USB 3.0/2.0 ports** |
+| CPU Architecture                                 | Models with USB Ports                                                                                                                                  | Number & Type of USB Ports                                                                                    |
+| :----------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------ |
+| **`aarch64_cortex-a53`**                         | **Raspberry Pi:** 3B, 3B+, 4B<br>**FriendlyELEC:** NanoPi R2S, R4S, R5S<br>**GL.iNet:** Flint (GL-AX1800), Slate AX (GL-AXT1800)<br>**Xiaomi:** AX6000 | **Raspberry Pi:** 4× USB<br>**NanoPi:** 1× to 2× USB<br>**GL.iNet:** 1× USB 3.0<br>**Xiaomi:** 1× USB 3.0     |
+| **`aarch64_cortex-a72/a76`**                     | **Raspberry Pi:** 4B, 5<br>**SBCs:** Rockchip RK3399, RK3588 (NanoPi R6S, Orange Pi 5)                                                                 | **Raspberry Pi:** 2× USB 3.0 + 2× USB 2.0<br>**Orange Pi / NanoPi:** 2× to 3× USB                             |
+| **`arm_cortex-a7_neon-vfpv4` / `arm_cortex-a9`** | **Linksys:** EA8300, MR8300<br>**Netgear:** R7000, R7800, R8000<br>**ASUS:** RT-AC68U, RT-AC87U<br>**GL.iNet:** B1300                                  | **Linksys:** 1× USB 3.0 / 2.0<br>**Netgear / ASUS:** 1× USB 3.0 + 1× USB 2.0<br>**GL.iNet B1300:** 1× USB 3.0 |
+| **`mipsel_24kc`**                                | **Xiaomi:** Mi Router 3G<br>**TP-Link:** Archer C7<br>**GL.iNet:** Mango (GL-MT300N-V2), Shadow (GL-AR300M)                                            | **Xiaomi 3G:** 1× USB 3.0<br>**Archer C7:** 2× USB 2.0<br>**GL.iNet Mango/Shadow:** 1× USB 2.0                |
+| **`x86_64` / `i386`**                            | **Mini PCs & Mini Servers:** Intel N100, N5105, Protectli, Topton<br>**Virtual Environments:** VMware, Proxmox (via USB Passthrough)                   | **Most have 2 to 4 USB 3.0/2.0 ports**                                                                        |
 
-> * **`USB WAN (Tethering)`**  
->   Sharing internet from a phone or 4G/5G modem with the router via USB cable.  
-> * **`RNDIS`**  
->   Microsoft standard for emulating a network adapter over USB. Commonly used on older Android phones and some USB dongles.  
-> * **`CDC-Ethernet`**  
+> - **`USB WAN (Tethering)`**  
+>   Sharing internet from a phone or 4G/5G modem with the router via USB cable.
+> - **`RNDIS`**  
+>   Microsoft standard for emulating a network adapter over USB. Commonly used on older Android phones and some USB dongles.
+> - **`CDC-Ethernet`**  
 >   Open standard used by Linux/POSIX systems. Offers higher speed, lower latency, and better stability on iPhones, modern Android devices, and newer modems.
 
-* **📡 Wireless Internet (`WWAN`)**  
+- **📡 Wireless Internet (`WWAN`)**  
   Connect to another router, modem, or hotspot and share that internet with the local network.
 
 These connections are automatically registered in `mwan3` and provide two main capabilities:
 
-* **Failover**  
+- **Failover**  
   If one connection goes down, traffic is automatically redirected through another path.
 
-* **Load Balancing**  
+- **Load Balancing**  
   Traffic is distributed across multiple connections so several internet paths can be used at the same time.
 
 > **Note:** Load Balancing does **not** mean that a single download will reach the combined speed of all connections. Traffic is distributed across the available paths, and the actual performance depends on the type of connections and the `mwan3` configuration.
@@ -192,8 +197,21 @@ A common issue in OpenWrt occurs when a router operates simultaneously as both a
 
 DayPass prevents this problem by keeping the two configurations completely separate:
 
-* Managing the router’s Access Point for the home network on both 2.4 GHz and 5 GHz bands  
-* Managing internet reception via Wi-Fi (`WWAN` / Client mode) without touching the Access Point settings
+- Managing the router’s Access Point for the home network on both 2.4 GHz and 5 GHz bands
+- Managing internet reception via Wi-Fi (`WWAN` / Client mode) without touching the Access Point settings
+
+---
+
+## 🧭 DNS Manager
+
+This section lives under **Network Settings** and controls how the router itself resolves DNS for the local network.
+
+### ❓ What does it do?
+
+- **System Default** — Uses the WAN / ISP resolvers (the usual OpenWrt path).
+- **Secure DNS** — Prefers encrypted resolvers (DoT/DoH) when a stub or Passwall is available.
+- **DNS through Tunnel** — Sends DNS through Passwall so queries follow the proxy path (Passwall must be installed).
+- **Hybrid (Recommended)** — Tries the tunnel / encrypted path first, then falls back to trusted public resolvers.
 
 ---
 

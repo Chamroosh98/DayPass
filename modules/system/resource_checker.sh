@@ -58,28 +58,26 @@ resource_snapshot()
 # Smart estimation: Calculates REAL net storage expansion
 estimate_install_size()
 {
-    [ -z "${FINAL_PACKAGES:-}" ] && return 0
+    _est_list="${PACKAGES_TO_PROCESS:-${FINAL_PACKAGES:-}}"
+    [ -z "$_est_list" ] && return 0
     [ -z "${MANIFEST_FILE:-}" ] || [ ! -f "$MANIFEST_FILE" ] && return 0
 
     TOTAL_REQUIRED_BYTES=0
     TOTAL_SAVED_BYTES=0
     RECLAIMABLE_BYTES=0
 
-    for pkg in $FINAL_PACKAGES; do
+    for pkg in $_est_list; do
         pkg_bytes=$(manifest_lookup "size" "$pkg")
         [ -z "$pkg_bytes" ] || [ "$pkg_bytes" = "null" ] && pkg_bytes=0
 
-        inst_ver=$(pkg_get_installed_version "$pkg")
-        manif_ver=$(manifest_lookup "version" "$pkg")
-
-        # Skip logic if version is identical and not generic "Latest"
-        if [ -n "$inst_ver" ] && [ "$inst_ver" = "$manif_ver" ] && [ "$manif_ver" != "Latest" ]; then
+        # Payload size counts only packages that are missing or outdated.
+        if command -v pkg_payload_required >/dev/null 2>&1 && ! pkg_payload_required "$pkg"; then
             TOTAL_SAVED_BYTES=$((TOTAL_SAVED_BYTES + pkg_bytes))
         else
             TOTAL_REQUIRED_BYTES=$((TOTAL_REQUIRED_BYTES + pkg_bytes))
 
-            # If replacing an existing package, account for reclaimed space
-            if [ -n "$inst_ver" ] && [ "$inst_ver" != "None" ]; then
+            inst_ver=$(pkg_get_installed_version "$pkg" 2>/dev/null | awk 'NR==1 { print $1 }')
+            if [ -n "$inst_ver" ]; then
                 RECLAIMABLE_BYTES=$((RECLAIMABLE_BYTES + pkg_bytes))
             fi
         fi
@@ -132,12 +130,12 @@ resource_compare()
 
     echo
     echo "  🤌🏻 DayPass Deployment Efficiency Summary"
-    echo "  ────────────────────────────────────────────────────────── "
+    ui_divider
     echo "    ├─ Total Downloaded Payload     : $(human_readable_bytes "$TOTAL_REQUIRED_BYTES")"
     echo "    ├─ Total Network Traffic Saved  : $(human_readable_bytes "$TOTAL_SAVED_BYTES") "
     echo "    ├─ Net Storage Consumed         : $(human_readable_bytes "$USED_FLASH")"
     echo "    └─ Free Storage Remaining       : $(human_readable_bytes "$AFTER_FREE_FLASH")"
-    echo "  ────────────────────────────────────────────────────────── "
+    ui_divider
     echo
 }
 
@@ -191,20 +189,35 @@ show_system_resources_menu()
     used_flash_b=$((tot_flash_b - free_flash_b))
 
     echo "  🖥️ System Hardware & Resource Status"
-    echo "  ──────────────────────────────────────────────────────────"
+    ui_divider
     printf "  🩻 Architecture      : ${CYAN}%s${RESET}\n" "${ARCH:-N/A}"
     printf "  💡 OpenWrt System    : ${CYAN}%s [%s]${RESET}\n" "$OW_VER" "${PKG_MANAGER:-opkg}"
-    echo "  ──────────────────────────────────────────────────────────"
+    ui_divider
     printf "  🧠 Total RAM         : %s\n" "$(human_readable_bytes "$tot_ram_b")"
-    printf "     🟠 Used RAM          : ${YELLOW}%s${RESET}\n" "$(human_readable_bytes "$used_ram_b")"
-    printf "     🟢 Free RAM          : ${GREEN}%s${RESET}\n" "$(human_readable_bytes "$free_ram_b")"
-    echo "  ──────────────────────────────────────────────────────────"
+    printf "     🟠 Used RAM       : ${YELLOW}%s${RESET}\n" "$(human_readable_bytes "$used_ram_b")"
+    printf "     🟢 Free RAM       : ${GREEN}%s${RESET}\n" "$(human_readable_bytes "$free_ram_b")"
+    ui_divider
     printf "  💾 Total Storage     : %s\n" "$(human_readable_bytes "$tot_flash_b")"
-    printf "     🟠 Used Storage      : ${YELLOW}%s${RESET}\n" "$(human_readable_bytes "$used_flash_b")"
-    printf "     🟢 Free Storage      : ${GREEN}%s${RESET}\n" "$(human_readable_bytes "$free_flash_b")"
-    echo "  ──────────────────────────────────────────────────────────"
+    printf "     🟠 Used Storage   : ${YELLOW}%s${RESET}\n" "$(human_readable_bytes "$used_flash_b")"
+    printf "     🟢 Free Storage   : ${GREEN}%s${RESET}\n" "$(human_readable_bytes "$free_flash_b")"
+    ui_divider
     echo
 
-    printf "  ${GRAY}Press [ENTER] to return to main menu ...${RESET}"
-    read -r _ </dev/tty
+    if command -v ui_nav_footer >/dev/null 2>&1; then
+        ui_nav_footer
+    fi
+    printf "  ⁉️ Select option : "
+    read -r res_choice </dev/tty || daypass_quit
+    case "$res_choice" in
+        q|Q) daypass_quit ;;
+        h|H)
+            if command -v show_help >/dev/null 2>&1; then
+                show_help "system"
+                show_system_resources_menu
+            else
+                log_warn "Help module not loaded!"
+                sleep 1
+            fi
+            ;;
+    esac
 }

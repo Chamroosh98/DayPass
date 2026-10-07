@@ -8,7 +8,46 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
+
+func stageHelpManuals(dest string) {
+	helpDir := "help"
+	if _, err := os.Stat(helpDir); err != nil {
+		// Engine is sometimes started from .github/actions/engine without GITHUB_WORKSPACE.
+		alt := filepath.Join("..", "..", "..", "help")
+		if _, err2 := os.Stat(alt); err2 == nil {
+			helpDir = alt
+		}
+	}
+
+	entries, err := os.ReadDir(helpDir)
+	if err != nil {
+		fmt.Printf("⚠️ Help manuals directory not found, skipping : [%v]\n", err)
+		return
+	}
+
+	if err := os.MkdirAll(dest, 0755); err != nil {
+		fmt.Printf("❌ Failed to create help staging dir : [%v]\n", err)
+		return
+	}
+
+	staged := 0
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".json") {
+			continue
+		}
+		src := filepath.Join(helpDir, entry.Name())
+		dst := filepath.Join(dest, entry.Name())
+		if err := copyFile(src, dst); err != nil {
+			fmt.Printf("❌ Failed to stage help manual [%s] : [%v]\n", entry.Name(), err)
+			continue
+		}
+		staged++
+	}
+
+	fmt.Printf("✅ Staged [%d] help manuals into [%s]\n", staged, dest)
+}
 
 func copyFile(src, dst string) error {
 	srcStat, err1 := os.Stat(src)
@@ -163,6 +202,15 @@ func main() {
 	// Compile Core Install Script
 	if err := generateInstallScript("build-artifacts/install.sh"); err != nil {
 		fmt.Printf("❌ Failed to compile install.sh : [%v]\n", err)
+	}
+
+	// Stage in-app manuals next to install.sh so Pages serves REPO_URL/help/<id>.json
+	stageHelpManuals("build-artifacts/help")
+
+	// Package profiles served as REPO_URL/config/package_profiles.json
+	os.MkdirAll("build-artifacts/config", 0755)
+	if err := copyFile("config/package_profiles.json", "build-artifacts/config/package_profiles.json"); err != nil {
+		fmt.Printf("⚠️ Package profiles not staged : [%v]\n", err)
 	}
 
 	fmt.Println("\n📊 Checking Final Release Assets Structure :")

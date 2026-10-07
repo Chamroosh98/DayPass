@@ -37,7 +37,7 @@ draw_bar()
     printf "${COLOR}%s${RESET}" "$BAR"
 }
 
-log_warn()    { printf "  ${YELLOW}⚠️  %s${RESET}\n" "$1" >&2; }
-log_info()    { printf "  ${CYAN}ℹ️  %s${RESET}\n" "$1"; }
-log_success() { printf "  ${GREEN}✅  %s${RESET}\n" "$1"; }
-log_error()   { printf "  ${RED}❌  %s${RESET}\n" "$1" >&2; }
+log_warn()    { printf "  ${YELLOW}⚠️ %s${RESET}\n" "$1" >&2; }
+log_info()    { printf "  ${CYAN}ℹ️ %s${RESET}\n" "$1"; }
+log_success() { printf "  ${GREEN}✅ %s${RESET}\n" "$1"; }
+log_error()   { printf "  ${RED}❌ %s${RESET}\n" "$1" >&2; }

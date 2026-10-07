@@ -7,17 +7,41 @@ import (
 	"strings"
 )
 
+// First lines of install.sh. Resolves the script file even when $0 is a
+// bare PATH name (daypass typed from /root) or a symlink.
+const daypassHomeBootstrap = `# Dynamically detect absolute path to DayPass home directory.
+# $0 is often just "daypass" when the shell found it on PATH.
+_dp_invoked="$0"
+case "$_dp_invoked" in
+    */*) ;;
+    *)
+        _dp_via=$(command -v "$_dp_invoked" 2>/dev/null || true)
+        [ -n "$_dp_via" ] && _dp_invoked="$_dp_via"
+        ;;
+esac
+REAL_SCRIPT=$(readlink -f "$_dp_invoked" 2>/dev/null || echo "$_dp_invoked")
+case "$REAL_SCRIPT" in
+    /*) ;;
+    *) REAL_SCRIPT="$(pwd)/$REAL_SCRIPT" ;;
+esac
+DAYPASS_HOME=$(CDPATH= cd -- "$(dirname "$REAL_SCRIPT")" >/dev/null 2>&1 && pwd) || DAYPASS_HOME=$(pwd)
+export REAL_SCRIPT DAYPASS_HOME
+unset _dp_invoked _dp_via
+`
+
 func generateInstallScript(outputFile string) error {
 	fmt.Println("⌛ Processing Core Components with Go Engine for DayPass ...")
-	
+
 	branch := os.Getenv("GITHUB_REF_NAME")
 	releaseType := os.Getenv("INPUT_RELEASE_TYPE")
 	if branch == "" {
-		branch = "beta" 
+		branch = "beta"
 	}
 
 	var scriptBuilder strings.Builder
 	scriptBuilder.WriteString("#!/bin/sh\n\n")
+	scriptBuilder.WriteString(daypassHomeBootstrap)
+	scriptBuilder.WriteString("\n")
 
 	scriptBuilder.WriteString("###############################################################################\n")
 	scriptBuilder.WriteString("# DayPass Installer (Auto-generated via Go Action)\n")
@@ -41,12 +65,17 @@ func generateInstallScript(outputFile string) error {
 		"installer/init/globals.sh",
 		"ui/lib/styles.sh",
 		"ui/lib/box_utils.sh",
+		"ui/banner.sh",
 		"ui/lib/header.sh",
 		"ui/lib/progress.sh",
-		"ui/banner.sh",
+		"ui/lib/help.sh",
+		"ui/lib/nav.sh",
 
-		// 2. Network — Host Bootstrap (proxy, DNS, ...)
-		"modules/network/host/bootstrap/proxy_bootstrap.sh",   
+		// 2. Network — Host Bootstrap (proxy, Worker mirror, wizard)
+		"modules/mirror/http_request.sh",
+		"modules/network/relays/ssh/reverse_tunnel.sh",
+		"modules/network/relays/cloudflare/worker.sh",
+		"modules/network/relays/wizard.sh",
 
 		// 3. Low-Level System Detection & Package Management
 		"installer/init/arch_detector.sh",
@@ -55,43 +84,70 @@ func generateInstallScript(outputFile string) error {
 		// 4. Core System Modules
 		"installer/init/zero_deps.sh",
 		"modules/system/arch_check.sh",
-		"modules/resource_monitor.sh",
 
 		// 5. Network - Host
-		"modules/network/host/network_info.sh",
-		"modules/network/host/dns_fix.sh",
-		"modules/network/host/lan_ip.sh",
-		"modules/network/host/usb_wan.sh",
-		"modules/network/host/wifi_wan.sh",
-		"modules/network/host/wifi_ap.sh",
-		"modules/network/host/load_balancer.sh",
-		"modules/network/host/network_checker.sh",
+		"modules/network/info/discover.sh",
+		"modules/network/info/fetch.sh",
+		"ui/menu/network_ip.sh",
+		"modules/network/info/panel.sh",
+		"modules/network/info/speed.sh",
+		"modules/network/info/network_info.sh",
+		"modules/network/dns/recovery.sh",
+		"modules/network/interfaces/lan/lan_ip.sh",
+		"modules/network/interfaces/usb/deps.sh",
+		"modules/network/interfaces/usb/detect.sh",
+		"modules/network/interfaces/usb/usb_wan.sh",
+		"modules/network/interfaces/usb/restore.sh",
+		"modules/network/interfaces/usb/dashboard.sh",
+		"modules/network/interfaces/wan/wan_state.sh",
+		"modules/network/interfaces/wifi/wifi_wan.sh",
+		"modules/network/interfaces/wifi/wifi_ap.sh",
+		"modules/network/routing/load_balancing/load_balancer.sh",
+		"modules/network/connectivity/diagnostics/network_checker.sh",
+
+		// 5b. Network - DNS Manager
+		"modules/network/dns/core.sh",
+		"modules/network/dns/modes/system.sh",
+		"modules/network/dns/modes/secure.sh",
+		"modules/network/dns/modes/tunnel.sh",
+		"modules/network/dns/modes/hybrid.sh",
+		"modules/network/dns/apply.sh",
+		"modules/network/dns/ui/menu.sh",
 
 		// 6. Network - Guest
-		"modules/network/guest/network.sh",
-		"modules/network/guest/qos.sh",
+		"modules/network/interfaces/guest/network.sh",
+		"modules/network/qos/guest/qos.sh",
 
 		// 7. Proxy - Config Management
-		"modules/proxy/config/config_storage.sh",
-		"modules/proxy/config/subscription.sh",
-		"modules/proxy/config/passwall_bridge.sh",
-		"modules/proxy/config/config_manager.sh",
+		"modules/network/profiles/storage.sh",
+		"modules/network/profiles/subscription.sh",
+		"modules/network/transports/transport_bridge.sh",
+		"modules/network/transports/drivers/core_common.sh",
+		"modules/network/transports/drivers/passwall.sh",
+		"modules/network/transports/drivers/singbox.sh",
+		"modules/network/transports/drivers/xray.sh",
+		"modules/network/transports/drivers/wireguard.sh",
+		"modules/network/transports/drivers/openvpn.sh",
+		"modules/network/profiles/manager.sh",
 
 		// 8. Proxy - Other Modules
-		"modules/proxy/routing.sh",
-		"modules/proxy/node_balancer.sh",
-		"modules/proxy/health_checker.sh",
-		"modules/proxy/profile_manager.sh",
-		
+		"modules/network/routing/core.sh",
+		"modules/network/balancing/node_balancer.sh",
+		"modules/network/connectivity/checker/health_checker.sh",
+		"modules/network/profiles/profile_manager.sh",
+
 		// 9. Proxy - Cloudflare Clean IP
-		"modules/proxy/cloudflare/core.sh",
-		"modules/proxy/cloudflare/link_utils.sh",
-		"modules/proxy/cloudflare/scanner.sh",
-		"modules/proxy/cloudflare/applier.sh",
-		"modules/proxy/cloudflare/menu.sh",
+		"modules/network/relays/cloudflare/core.sh",
+		"modules/network/relays/cloudflare/link_utils.sh",
+		"modules/network/relays/cloudflare/scanner.sh",
+		"modules/network/relays/cloudflare/applier.sh",
+		"ui/menu/cf.sh",
 
 		// 10. Other Modules
 		"modules/system/backup_restore.sh",
+		"ui/lib/banner.sh",
+		"modules/system/banner.sh",
+		"modules/system/daypass_cli.sh",
 		"modules/system/maintenance.sh",
 		"modules/service/service_manager.sh",
 
@@ -99,22 +155,31 @@ func generateInstallScript(outputFile string) error {
 		"installer/init/install_core.sh",
 		"modules/system/resource_checker.sh",
 		"installer/pkg/resolver.sh",
+		"installer/pkg/package_catalog.sh",
+		"installer/pkg/profile_overview.sh",
+		"installer/pkg/manifest_manager.sh",
 		"installer/pkg/installer.sh",
 		"installer/pkg/updater.sh",
+		"installer/pkg/purge.sh",
 
 		// 12. UI Components & Interactive Menus
-		"ui/state.sh",
+		"ui/lib/state.sh",
 		"ui/menu/custom.sh",
 		"ui/menu/mode.sh",
 		"ui/menu/engine.sh",
 		"ui/menu/language.sh",
 		"ui/menu/geo.sh",
-		"ui/review.sh",
-		"ui/menu/passwall.sh",
-		"ui/menu/network.sh",
-		"ui/menu/proxy.sh",       
+		"ui/lib/review.sh",
+		"ui/menu/packages.sh",
+		"ui/menu/hardware.sh",
+		"ui/menu/guest_network.sh",
+		"ui/menu/proxy_engine.sh",
+		"ui/menu/proxy.sh",
+		"ui/menu/diagnostics.sh",
+		"ui/menu/system.sh",
+		"ui/menu/help.sh",
 		"ui/menu/main.sh",
-		"ui/installer_ui.sh",
+		"ui/lib/installer_ui.sh",
 	}
 
 	for _, file := range installerFiles {
@@ -123,7 +188,7 @@ func generateInstallScript(outputFile string) error {
 			fmt.Printf("⚠️ Warning : File [%s] not found, skipping ...\n", file)
 			continue
 		}
-		
+
 		scriptBuilder.WriteString(fmt.Sprintf("\n# 📄 Source : %s\n", filepath.Base(file)))
 		lines := strings.Split(string(data), "\n")
 		for _, line := range lines {
@@ -136,6 +201,56 @@ func generateInstallScript(outputFile string) error {
 		fmt.Printf("✅ [%s] appended dynamically!\n", filepath.Base(file))
 	}
 
+	// Embedded package profiles read by load_package_profiles in installer/pkg/resolver.sh
+	profilesFile := "config/package_profiles.json"
+	if data, err := os.ReadFile(profilesFile); err == nil {
+		scriptBuilder.WriteString(fmt.Sprintf("\n# 📄 Source : %s (embedded)\n", filepath.Base(profilesFile)))
+		scriptBuilder.WriteString("daypass_embedded_profiles()\n{\n    cat <<'DAYPASS_PROFILES_JSON'\n")
+		scriptBuilder.Write(data)
+		if len(data) > 0 && data[len(data)-1] != '\n' {
+			scriptBuilder.WriteByte('\n')
+		}
+		scriptBuilder.WriteString("DAYPASS_PROFILES_JSON\n}\n")
+		fmt.Printf("✅ [%s] embedded!\n", filepath.Base(profilesFile))
+	} else {
+		fmt.Printf("⚠️ Warning : File [%s] not found, skipping ...\n", profilesFile)
+	}
+
+	catalogFile := "config/package_catalog.json"
+	if data, err := os.ReadFile(catalogFile); err == nil {
+		scriptBuilder.WriteString(fmt.Sprintf("\n# 📄 Source : %s (embedded)\n", filepath.Base(catalogFile)))
+		scriptBuilder.WriteString("daypass_embedded_catalog()\n{\n    cat <<'DAYPASS_CATALOG_JSON'\n")
+		scriptBuilder.Write(data)
+		if len(data) > 0 && data[len(data)-1] != '\n' {
+			scriptBuilder.WriteByte('\n')
+		}
+		scriptBuilder.WriteString("DAYPASS_CATALOG_JSON\n}\n")
+		fmt.Printf("✅ [%s] embedded!\n", filepath.Base(catalogFile))
+	} else {
+		fmt.Printf("⚠️ Warning : File [%s] not found, skipping ...\n", catalogFile)
+	}
+
+	// Embedded Cloudflare Worker mirror (config/worker.js). The menu tells
+	// the user to paste this script in the Cloudflare dashboard editor.
+	// cf-worker/worker.js is the same script, published for the browser
+	// deploy button. Refuse the build if the two copies drift.
+	// Embedded Cloudflare Worker mirror (config/worker.js)
+	mirrorFile := "config/worker.js"
+	canon, err := os.ReadFile(mirrorFile)
+	if err != nil {
+		return fmt.Errorf("read %s: %w", mirrorFile, err)
+	}
+
+	scriptBuilder.WriteString(fmt.Sprintf("\n# 📄 Source : %s (embedded)\n", filepath.Base(mirrorFile)))
+	scriptBuilder.WriteString("daypass_embedded_worker_js()\n{\n    cat <<'DAYPASS_WORKER_JS'\n")
+	scriptBuilder.Write(canon)
+	if len(canon) > 0 && canon[len(canon)-1] != '\n' {
+		scriptBuilder.WriteByte('\n')
+	}
+	scriptBuilder.WriteString("DAYPASS_WORKER_JS\n}\n")
+	fmt.Printf("✅ [%s] embedded!\n", filepath.Base(mirrorFile))
+
+
 	// Cleaned Runtime Execution Pipeline
 	scriptBuilder.WriteString(`
 
@@ -144,8 +259,13 @@ func generateInstallScript(outputFile string) error {
 ###############################################################################
 DEPLOYMENT_FAILED=0
 
-# 1. Pre-flight proxy bootstrap (offers SSH tunnel to bypass filtering)
-proxy_bootstrap_offer
+# 0. Persistent CLI: install /usr/bin/daypass, or handle update / version / uninstall
+if command -v daypass_cli_dispatch >/dev/null 2>&1; then
+    daypass_cli_dispatch "$@"
+fi
+
+# 1. Pre-flight network bootstrap (skipped when a mirror or proxy is already set)
+network_bootstrap_startup
 
 # 2. Pre-flight connectivity check
 network_check || exit 1
@@ -156,7 +276,6 @@ detect_system_architecture
 
 # 4. Core dependency initialization => with delay (2 secs) to ensure system stability after installing the dnsmasq-full tool!
 deploy_system_dependencies
-sleep 2
 initialize_installer
 
 # 5. Optional Automatic UCI Config Backup
@@ -164,12 +283,17 @@ if command -v backup_configs >/dev/null 2>&1; then
     backup_configs
 fi
 
-# 6. Interactive UI Launch
+# 6. Replace the OpenWrt SSH/console banner (/etc/banner)
+if command -v system_banner_post_install >/dev/null 2>&1; then
+    system_banner_post_install
+fi
+
+# 7. Interactive UI Launch
 clear
 reset_state
 main_menu
 
-# 7. Clean Exit
+# 8. Clean Exit
 echo
 log_success "👋 DayPass session finished!"
 exit 0

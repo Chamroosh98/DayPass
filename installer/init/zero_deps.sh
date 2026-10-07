@@ -58,7 +58,7 @@ scan_required_tools()
     MISSING_COUNT=0
 
     echo "  🔎 Required Tool Validation"
-    echo "  ──────────────────────────────────────────────────────────"
+    ui_divider
 
     for pkg in $TARGET_PACKAGES; do
         if tool_is_available "$pkg"; then
@@ -71,8 +71,8 @@ scan_required_tools()
         fi
     done
 
-    echo "  ───────────────────────────────────────────────────────────"
-    printf "   Summary : %d tool(s) ready, %d missing\n" "$PRESENT_COUNT" "$MISSING_COUNT"
+    ui_divider
+    printf "  Summary : %d tool(s) ready, %d missing\n" "$PRESENT_COUNT" "$MISSING_COUNT"
     echo
 }
 
@@ -88,7 +88,7 @@ deploy_system_dependencies()
         fi
     fi
 
-    COMMON_DEPS="ca-bundle ca-certificates curl jq libnetfilter-conntrack"
+    COMMON_DEPS="ca-bundle ca-certificates curl jq "
     OW24_EXTRA_DEPS="coreutils coreutils-base64 coreutils-nohup coreutils-timeout ip-full unzip resolveip lua libuci-lua luci-compat luci-lib-jsonc luci-lua-runtime lyaml"
 
     TARGET_PACKAGES="$COMMON_DEPS"
@@ -136,22 +136,31 @@ deploy_system_dependencies()
 
     (pkg_update >/dev/null 2>&1) &
     BG_PID=$!
-    if command -v show_timer_progress >/dev/null 2>&1; then
+    if command -v ui_spinner >/dev/null 2>&1; then
+        ui_spinner "$BG_PID" "Updating package database ..."
+    elif command -v show_timer_progress >/dev/null 2>&1; then
         show_timer_progress "$BG_PID" "refreshing package index"
+        wait "$BG_PID"
+    else
+        wait "$BG_PID"
     fi
-    wait "$BG_PID"
 
     if [ -n "$MISSING_PACKAGES" ]; then
         for pkg in $MISSING_PACKAGES; do
             (pkg_install "$pkg" >> "$DEP_LOG" 2>&1) &
             BG_PID=$!
 
-            if command -v show_timer_progress >/dev/null 2>&1; then
+            if command -v ui_spinner >/dev/null 2>&1; then
+                ui_spinner "$BG_PID" "Installing [$pkg] ..."
+                INSTALL_STATUS=$?
+            elif command -v show_timer_progress >/dev/null 2>&1; then
                 show_timer_progress "$BG_PID" "installing core tool [$pkg]"
+                wait "$BG_PID"
+                INSTALL_STATUS=$?
+            else
+                wait "$BG_PID"
+                INSTALL_STATUS=$?
             fi
-
-            wait "$BG_PID"
-            INSTALL_STATUS=$?
 
             if [ "$INSTALL_STATUS" -eq 0 ]; then
                 log_success "Package [$pkg] installed successfully."
@@ -186,11 +195,11 @@ deploy_system_dependencies()
             case "$PKG_MANAGER" in
                 opkg)
                     opkg remove dnsmasq --force-depends >/dev/null 2>&1 || true
-                    opkg install dnsmasq-full libnetfilter-conntrack --force-overwrite >/dev/null 2>&1 || true
+                    opkg install dnsmasq-full  --force-overwrite >/dev/null 2>&1 || true
                     ;;
                 apk)
                     apk del dnsmasq >/dev/null 2>&1 || true
-                    apk add --allow-untrusted dnsmasq-full libnetfilter-conntrack >/dev/null 2>&1 || true
+                    apk add --allow-untrusted dnsmasq-full  >/dev/null 2>&1 || true
                     ;;
             esac
         ) &
