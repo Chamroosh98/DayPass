@@ -39,9 +39,7 @@
 - [🔀 Multi-WAN and Load Balancing](#-multi-wan-and-load-balancing)
   - [🔌 Routers with USB Ports (USB WAN Compatible)](#-routers-with-usb-ports-usb-wan-compatible)
 - [🌐 Wi-Fi Management and Isolation](#-wi-fi-management-and-isolation)
-
 - [🧼 Clean IP Management for Cloudflare](#-clean-ip-management-for-cloudflare)
-beta
 - [🧭 DNS Manager](#-dns-manager)
   - [❓ What does it do?](#-what-does-it-do)
 - [🧼 Clean IP Management for Cloudflare](#-clean-ip-management-for-cloudflare)
