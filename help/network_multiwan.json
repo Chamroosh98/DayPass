@@ -1,0 +1,49 @@
+{
+  "module_id": "network_multiwan",
+  "title": "Multi-WAN Load Balancer",
+  "summary": "Finds every WAN (wired, USB, Wi-Fi, extra Ethernet) and writes an mwan3 policy that shares traffic across all of them. A metric menu sets failover priority.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Install Dependencies",
+      "description": "Installs mwan3 with opkg on OpenWrt 24 or apk on OpenWrt 25 when it is not already present.",
+      "usage_tip": "Skip this when mwan3 status already runs."
+    },
+    {
+      "key": "2",
+      "title": "Setup USB Tethering WAN",
+      "description": "Registers the first USB tethering interface (detected by kernel driver: rndis_host, cdc_ether, cdc_ncm, ipheth; fallback usb0) as wan_usb with metric 20.",
+      "usage_tip": "Hardware & USB Tethering (Main menu -> 2) offers device choice, metrics and toggling."
+    },
+    {
+      "key": "3",
+      "title": "Setup Wi-Fi Hotspot WAN",
+      "description": "Connects the router as a client to a phone hotspot or another Wi-Fi network and adds it as wwan with metric 30.",
+      "usage_tip": "Station mode never touches your Access Point interfaces."
+    },
+    {
+      "key": "4",
+      "title": "Apply Dynamic Load Balancing",
+      "description": "Finds every enabled WAN, tracks 1.1.1.1 and 8.8.8.8 on each, and builds a balanced policy with weight 1 on every link.",
+      "usage_tip": "A link that stops answering those pings is dropped until it recovers."
+    },
+    {
+      "key": "5",
+      "title": "Show mwan3 Status",
+      "description": "Prints the current mwan3 interface and policy status.",
+      "usage_tip": "Use it to confirm which links are online right now."
+    },
+    {
+      "key": "6",
+      "title": "WAN Metrics",
+      "description": "Lists every discovered WAN and writes network.<iface>.metric.",
+      "usage_tip": "A lower metric is preferred. The failover policy follows that order."
+    },
+    {
+      "key": "0",
+      "title": "Back",
+      "description": "Returns to Network Settings.",
+      "usage_tip": "Existing WAN interfaces keep working."
+    }
+  ]
+}

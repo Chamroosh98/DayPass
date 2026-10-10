@@ -1,0 +1,2227 @@
+{
+  "release": "25.12",
+  "generated_at": "2026-10-10T13:42:40Z",
+  "download_base": "https://cdn.jsdelivr.net/gh/Chamroosh98/DayPass@packages/beta/v25",
+  "architectures": [
+    {
+      "name": "x86_64",
+      "feeds": {
+        "passwall2": [
+          {
+            "package": "luci-app-passwall2",
+            "version": "26.10.1-r2",
+            "file": "x86_64/luci-app-passwall2-26.10.1-r2.apk",
+            "sha256": "fdec516b9c9c2ae5e2eedb60b7c3d65f63c517fa322a1e5195b85b263423131e",
+            "size": 346838
+          },
+          {
+            "package": "luci-i18n-passwall2-fa",
+            "version": "26.10.1",
+            "file": "x86_64/luci-i18n-passwall2-fa-26.10.1.apk",
+            "sha256": "8cda91406577df5aa075a11c71c23e7c995b53c0f6211e0298a948ffa921e7d0",
+            "size": 22733
+          },
+          {
+            "package": "luci-i18n-passwall2-ru",
+            "version": "26.10.1",
+            "file": "x86_64/luci-i18n-passwall2-ru-26.10.1.apk",
+            "sha256": "72c09e15a6a8473f1d96133bc49299fcbf628c1797ad1b66428cbf4cd0e46aa6",
+            "size": 23773
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-cn",
+            "version": "26.10.1",
+            "file": "x86_64/luci-i18n-passwall2-zh-cn-26.10.1.apk",
+            "sha256": "b66579b87373791e3bf54b7968b05335120c44c5234786a12c4fb9e7638f88a9",
+            "size": 20200
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-tw",
+            "version": "26.10.1",
+            "file": "x86_64/luci-i18n-passwall2-zh-tw-26.10.1.apk",
+            "sha256": "68d6a56819fae4165a496239a6fef12517d8e797422925f429e99b0aca0b6c13",
+            "size": 20371
+          }
+        ],
+        "passwall_luci": [
+          {
+            "package": "luci-app-passwall",
+            "version": "26.10.4-r1",
+            "file": "x86_64/luci-app-passwall-26.10.4-r1.apk",
+            "sha256": "45557de54a96736a305902a3882e68742f69109cd5ba5125cf51cb3c18e55cc0",
+            "size": 850179
+          },
+          {
+            "package": "luci-i18n-passwall-zh-cn",
+            "version": "26.10.4",
+            "file": "x86_64/luci-i18n-passwall-zh-cn-26.10.4.apk",
+            "sha256": "e9ff62218e5b0cfa83599816ba3625312e5e433071a6cec5edc3b81c525d3ea1",
+            "size": 18040
+          }
+        ],
+        "passwall_packages": [
+          {
+            "package": "chinadns-ng",
+            "version": "2025.08.09-r1",
+            "file": "x86_64/chinadns-ng-2025.08.09-r1.apk",
+            "sha256": "5a45a0b3e009c9fda72e0236d5d0e602a6b6302d3aaf5259d4563ad9b39fd763",
+            "size": 286852
+          },
+          {
+            "package": "dns2socks",
+            "version": "2.1-r2",
+            "file": "x86_64/dns2socks-2.1-r2.apk",
+            "sha256": "ae82d0fe040e681b230414ce8c96ba8b20aba3032ebd19ecfbddf7165e425017",
+            "size": 10745
+          },
+          {
+            "package": "geoview",
+            "version": "0.2.6-r1",
+            "file": "x86_64/geoview-0.2.6-r1.apk",
+            "sha256": "a213d16ec0d9a21b39876205ee10634eb799f7bfd7e713a8ed3d46ee288931e4",
+            "size": 3305650
+          },
+          {
+            "package": "hysteria",
+            "version": "2.13.0-r1",
+            "file": "x86_64/hysteria-2.13.0-r1.apk",
+            "sha256": "91f66104ae0e012d43eb081cd9c09728c47aba8d513f3259f506405a81a4aaa5",
+            "size": 9111325
+          },
+          {
+            "package": "ipt2socks",
+            "version": "1.1.4-r3",
+            "file": "x86_64/ipt2socks-1.1.4-r3.apk",
+            "sha256": "4b4f13fb80b3eed7eac469b6b81da5317479c8fcaf8644677440fade42613eee",
+            "size": 26603
+          },
+          {
+            "package": "microsocks",
+            "version": "1.0.5-r2",
+            "file": "x86_64/microsocks-1.0.5-r2.apk",
+            "sha256": "4f812ad26332bddc1ee9b3796536edd0d96ce2e6b9c041d39a03a609683f2d68",
+            "size": 8115
+          },
+          {
+            "package": "naiveproxy",
+            "version": "154.0.8037.49-r4",
+            "file": "x86_64/naiveproxy-154.0.8037.49-r4.apk",
+            "sha256": "582258fcc9d6584868bf4596709dad8886261422e91244f14ba7e3a3dc84cf47",
+            "size": 4189003
+          },
+          {
+            "package": "shadow-tls",
+            "version": "0.2.25-r1",
+            "file": "x86_64/shadow-tls-0.2.25-r1.apk",
+            "sha256": "1437a6e3b96bfbed80d371a6cde630f417f82d3c17e8b02164212ca8749a4db5",
+            "size": 1607767
+          },
+          {
+            "package": "shadowsocks-rust-sslocal",
+            "version": "1.25.0-r1",
+            "file": "x86_64/shadowsocks-rust-sslocal-1.25.0-r1.apk",
+            "sha256": "a33e63f079be70ca3cfc7a52e75763d49c640c0673c8b16205072aaab469ba8f",
+            "size": 4090204
+          },
+          {
+            "package": "shadowsocks-rust-ssmanager",
+            "version": "1.25.0-r1",
+            "file": "x86_64/shadowsocks-rust-ssmanager-1.25.0-r1.apk",
+            "sha256": "2191ae6a9b742a31d07146d0bc48b12a667c89f772eb332b9c5edf8e6b4d37de",
+            "size": 3320265
+          },
+          {
+            "package": "shadowsocks-rust-ssserver",
+            "version": "1.25.0-r1",
+            "file": "x86_64/shadowsocks-rust-ssserver-1.25.0-r1.apk",
+            "sha256": "f110e42702ed96d6ed81f87cddd303d57af4c5177500bae2d3da1f8aedb9bcb4",
+            "size": 3264796
+          },
+          {
+            "package": "shadowsocks-rust-ssservice",
+            "version": "1.25.0-r1",
+            "file": "x86_64/shadowsocks-rust-ssservice-1.25.0-r1.apk",
+            "sha256": "4a27ef0e9804de8e3ade1b41a3e58336189b7f9dbf3a23b47e19f7b4cd7c2fe9",
+            "size": 4271479
+          },
+          {
+            "package": "shadowsocks-rust-ssurl",
+            "version": "1.25.0-r1",
+            "file": "x86_64/shadowsocks-rust-ssurl-1.25.0-r1.apk",
+            "sha256": "6c331f9abde3ea8e110af7bcdc7b07e88df41da67236040ead989590e1bcfd7b",
+            "size": 952055
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-check",
+            "version": "2.5.6-r13",
+            "file": "x86_64/shadowsocksr-libev-ssr-check-2.5.6-r13.apk",
+            "sha256": "9cfe15ee798794082b031ba35bb4afa65d3aefd6a37174f8a8b278e2ec7c8c66",
+            "size": 2873
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-local",
+            "version": "2.5.6-r13",
+            "file": "x86_64/shadowsocksr-libev-ssr-local-2.5.6-r13.apk",
+            "sha256": "8220f51d183d4d0952e7419f70d0a9ceb0952e52a0bb096b49f13469add0054f",
+            "size": 63972
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-nat",
+            "version": "2.5.6-r13",
+            "file": "x86_64/shadowsocksr-libev-ssr-nat-2.5.6-r13.apk",
+            "sha256": "a4c06ea91c8a90b25eef2548c769994e850bf5ea79804a8e6b897649b2d773d4",
+            "size": 2869
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-redir",
+            "version": "2.5.6-r13",
+            "file": "x86_64/shadowsocksr-libev-ssr-redir-2.5.6-r13.apk",
+            "sha256": "1344702d14117fe7ab144a9f8672e39e2a496d51876a19ba9f8378caff62e6be",
+            "size": 56183
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-server",
+            "version": "2.5.6-r13",
+            "file": "x86_64/shadowsocksr-libev-ssr-server-2.5.6-r13.apk",
+            "sha256": "23e9427a321985d5f5d021076373445fea4798c4b460105bc11d9bab6496d488",
+            "size": 66433
+          },
+          {
+            "package": "simple-obfs-client",
+            "version": "0.0.5-r3",
+            "file": "x86_64/simple-obfs-client-0.0.5-r3.apk",
+            "sha256": "23d30e80e7c9a0f9567aad72661cee0aa5c4b9363d784f210d4e9bf249f1ffde",
+            "size": 30840
+          },
+          {
+            "package": "simple-obfs-server",
+            "version": "0.0.5-r3",
+            "file": "x86_64/simple-obfs-server-0.0.5-r3.apk",
+            "sha256": "ff946d2776781de18145f6a544b9a3941cb80566478ea13b9e2c03da93165389",
+            "size": 33187
+          },
+          {
+            "package": "sing-box",
+            "version": "1.14.3-r1",
+            "file": "x86_64/sing-box-1.14.3-r1.apk",
+            "sha256": "97cfd08d32f9d1374dec4560fe25e04fb3e4137a4f4bb105fd072ef6d2b30924",
+            "size": 21380188
+          },
+          {
+            "package": "tcping",
+            "version": "0.3-r1",
+            "file": "x86_64/tcping-0.3-r1.apk",
+            "sha256": "cca85da646f2d9100d29c137b3593ac84faaa54301244cd9b39b059cfa27fb16",
+            "size": 4181
+          },
+          {
+            "package": "v2ray-geoip",
+            "version": "202609240030.1",
+            "file": "x86_64/v2ray-geoip-202609240030.1.apk",
+            "sha256": "7c04711f44867d9e0c5eb41f7905e1c94a79bc09fc9411791efb36aeb72b6008",
+            "size": 3567754
+          },
+          {
+            "package": "v2ray-geosite",
+            "version": "202609292207.1",
+            "file": "x86_64/v2ray-geosite-202609292207.1.apk",
+            "sha256": "7df158595aa622972b3b1c2ce5b0d72c1e11f98c9744a473a45c33d5208c2717",
+            "size": 3587442
+          },
+          {
+            "package": "v2ray-plugin",
+            "version": "5.49.0-r1",
+            "file": "x86_64/v2ray-plugin-5.49.0-r1.apk",
+            "sha256": "08ddbcb8360757664b90ae4f4974a90f74b3b7aa4cdac07acf2f4265e3d22c1f",
+            "size": 6838973
+          },
+          {
+            "package": "xray-core",
+            "version": "26.9.30-r1",
+            "file": "x86_64/xray-core-26.9.30-r1.apk",
+            "sha256": "99e9ccd65af94d10a5dea02af8f02b316d9f7b852c59611cc1e435b5b9a1c371",
+            "size": 12736495
+          },
+          {
+            "package": "xray-plugin",
+            "version": "1.8.24-r1",
+            "file": "x86_64/xray-plugin-1.8.24-r1.apk",
+            "sha256": "52819cec4491dbdcf439dabbe37b4be055c406ec7ccf60b6fc0b70c53c48e5c1",
+            "size": 7776249
+          }
+        ]
+      }
+    },
+    {
+      "name": "mipsel_24kc",
+      "feeds": {
+        "passwall2": [
+          {
+            "package": "luci-app-passwall2",
+            "version": "26.10.1-r2",
+            "file": "mipsel_24kc/luci-app-passwall2-26.10.1-r2.apk",
+            "sha256": "4ea052ea816c4b08454cefe2785533ccdee0cd06872ed4445f93d767fda959c7",
+            "size": 346840
+          },
+          {
+            "package": "luci-i18n-passwall2-fa",
+            "version": "26.10.1",
+            "file": "mipsel_24kc/luci-i18n-passwall2-fa-26.10.1.apk",
+            "sha256": "509212aaed8379fc1df1017763b86c149a305fbe623881943372106f88c9fde2",
+            "size": 22734
+          },
+          {
+            "package": "luci-i18n-passwall2-ru",
+            "version": "26.10.1",
+            "file": "mipsel_24kc/luci-i18n-passwall2-ru-26.10.1.apk",
+            "sha256": "63c6babfe4af2f7f4c02dc363ba46bc7a3bc49fdf2f7504ccc4830f93abbe7d8",
+            "size": 23774
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-cn",
+            "version": "26.10.1",
+            "file": "mipsel_24kc/luci-i18n-passwall2-zh-cn-26.10.1.apk",
+            "sha256": "f7a75b3ed1f57b8adf7a1af431e63725276ed9ca2bb0532c01d5d44aa935626f",
+            "size": 20200
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-tw",
+            "version": "26.10.1",
+            "file": "mipsel_24kc/luci-i18n-passwall2-zh-tw-26.10.1.apk",
+            "sha256": "ce05a9751e321bd49a9e8de3266223da959422994dbcb8fecf73c7ee8076b836",
+            "size": 20370
+          }
+        ],
+        "passwall_luci": [
+          {
+            "package": "luci-app-passwall",
+            "version": "26.10.4-r1",
+            "file": "mipsel_24kc/luci-app-passwall-26.10.4-r1.apk",
+            "sha256": "d296483410e6efc889ed594969e625d249ed4840da712d2953b0358eccab679f",
+            "size": 850181
+          },
+          {
+            "package": "luci-i18n-passwall-zh-cn",
+            "version": "26.10.4",
+            "file": "mipsel_24kc/luci-i18n-passwall-zh-cn-26.10.4.apk",
+            "sha256": "131859edaa6756d71e6771d7589438ed998713f171a902ca1d8a46b38f7bc337",
+            "size": 18038
+          }
+        ],
+        "passwall_packages": [
+          {
+            "package": "chinadns-ng",
+            "version": "2025.08.09-r1",
+            "file": "mipsel_24kc/chinadns-ng-2025.08.09-r1.apk",
+            "sha256": "1a88eec66a161d10c2bfe78821ccc556270ee11a1c45c6819a766f40fab254ee",
+            "size": 300709
+          },
+          {
+            "package": "dns2socks",
+            "version": "2.1-r2",
+            "file": "mipsel_24kc/dns2socks-2.1-r2.apk",
+            "sha256": "70513eba74c81ab21b3f8d3614c386f0375ed952fbdcd6b3577f05055c97e1e2",
+            "size": 11066
+          },
+          {
+            "package": "geoview",
+            "version": "0.2.6-r1",
+            "file": "mipsel_24kc/geoview-0.2.6-r1.apk",
+            "sha256": "a34942913bad879e4fdc55ec25f20504a29391b0189c8809b8e80c4925af778c",
+            "size": 3091395
+          },
+          {
+            "package": "hysteria",
+            "version": "2.13.0-r1",
+            "file": "mipsel_24kc/hysteria-2.13.0-r1.apk",
+            "sha256": "dca19fed73bff80c333e5863f8b261de94bae52542aacc1121959a72950bc035",
+            "size": 8164376
+          },
+          {
+            "package": "ipt2socks",
+            "version": "1.1.4-r3",
+            "file": "mipsel_24kc/ipt2socks-1.1.4-r3.apk",
+            "sha256": "84551f73323787b013a9139fdde78067c024619d8b52b9e01e0aad6a5e58a3c2",
+            "size": 25134
+          },
+          {
+            "package": "microsocks",
+            "version": "1.0.5-r2",
+            "file": "mipsel_24kc/microsocks-1.0.5-r2.apk",
+            "sha256": "ac09cc38426ddcb6379fd5be9c85b9526bb72ef5aa84f5c0f9c6d92fa8c6a992",
+            "size": 6869
+          },
+          {
+            "package": "naiveproxy",
+            "version": "154.0.8037.49-r4",
+            "file": "mipsel_24kc/naiveproxy-154.0.8037.49-r4.apk",
+            "sha256": "c8f32153069b2ac77326a32d8d03189054eaeee6caaea54d9bcbeecd3c60da72",
+            "size": 4586473
+          },
+          {
+            "package": "shadowsocks-rust-sslocal",
+            "version": "1.25.0-r1",
+            "file": "mipsel_24kc/shadowsocks-rust-sslocal-1.25.0-r1.apk",
+            "sha256": "96af6e930fb3f3fffa69a28cb8eea80e69dce5baffa32cc205d81ebad9822d5d",
+            "size": 4157420
+          },
+          {
+            "package": "shadowsocks-rust-ssmanager",
+            "version": "1.25.0-r1",
+            "file": "mipsel_24kc/shadowsocks-rust-ssmanager-1.25.0-r1.apk",
+            "sha256": "c2854a22c14e42b5dd34aeaa5b09862e1258e3f29aff20515eac5f57b9bb5b68",
+            "size": 3329629
+          },
+          {
+            "package": "shadowsocks-rust-ssserver",
+            "version": "1.25.0-r1",
+            "file": "mipsel_24kc/shadowsocks-rust-ssserver-1.25.0-r1.apk",
+            "sha256": "b962dda10c885c321aa1ebf5111f6e738fc23df5bf0eb5cd5ff23b27d07a2f71",
+            "size": 3267414
+          },
+          {
+            "package": "shadowsocks-rust-ssservice",
+            "version": "1.25.0-r1",
+            "file": "mipsel_24kc/shadowsocks-rust-ssservice-1.25.0-r1.apk",
+            "sha256": "67234ac59ed082aa9a9e6ff4bc1e867027c9672fdf3ba06b164d308fa59706e3",
+            "size": 4356505
+          },
+          {
+            "package": "shadowsocks-rust-ssurl",
+            "version": "1.25.0-r1",
+            "file": "mipsel_24kc/shadowsocks-rust-ssurl-1.25.0-r1.apk",
+            "sha256": "6ef7d2b4e6c503e4ff0b18068dcfd0c9fe92db089e85c63208381728ebbac687",
+            "size": 1048183
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-check",
+            "version": "2.5.6-r13",
+            "file": "mipsel_24kc/shadowsocksr-libev-ssr-check-2.5.6-r13.apk",
+            "sha256": "8f2dfdf358fbc3335c6da6544562e82408141ba75da0997e2d7e21367ea5680f",
+            "size": 2809
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-local",
+            "version": "2.5.6-r13",
+            "file": "mipsel_24kc/shadowsocksr-libev-ssr-local-2.5.6-r13.apk",
+            "sha256": "ce3281d0c4716d6653066ba930edc2f23398301b7a5a06e9bde819cc982104e0",
+            "size": 63716
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-nat",
+            "version": "2.5.6-r13",
+            "file": "mipsel_24kc/shadowsocksr-libev-ssr-nat-2.5.6-r13.apk",
+            "sha256": "b680b5485da8c73db58698f1c63f0726ab81b5923077300390ade1c060c78681",
+            "size": 2875
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-redir",
+            "version": "2.5.6-r13",
+            "file": "mipsel_24kc/shadowsocksr-libev-ssr-redir-2.5.6-r13.apk",
+            "sha256": "003d202d54e5fb21c316c72ae87cda4d9093d77b80f513a0e1cc99cd66143d5c",
+            "size": 57414
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-server",
+            "version": "2.5.6-r13",
+            "file": "mipsel_24kc/shadowsocksr-libev-ssr-server-2.5.6-r13.apk",
+            "sha256": "d4c2bc64a360680a92cd9069bb5cf8df0a76803ae9ff489ad402d6b8d6964a6e",
+            "size": 65720
+          },
+          {
+            "package": "simple-obfs-client",
+            "version": "0.0.5-r3",
+            "file": "mipsel_24kc/simple-obfs-client-0.0.5-r3.apk",
+            "sha256": "0144d9c9119087082269d3b0f3b4c087ce5b205992fc81a3fce5ad98c597958a",
+            "size": 24520
+          },
+          {
+            "package": "simple-obfs-server",
+            "version": "0.0.5-r3",
+            "file": "mipsel_24kc/simple-obfs-server-0.0.5-r3.apk",
+            "sha256": "d1ca9f96e5b3abc1a5eb8c8681850419337fbdfd4e208c80ae746b0a400fcc3a",
+            "size": 26403
+          },
+          {
+            "package": "sing-box",
+            "version": "1.14.3-r1",
+            "file": "mipsel_24kc/sing-box-1.14.3-r1.apk",
+            "sha256": "23d5857afa09c5ca71ee583dd94409d95f9c3f70950e1d2facee180e35cd47ab",
+            "size": 18936668
+          },
+          {
+            "package": "tcping",
+            "version": "0.3-r1",
+            "file": "mipsel_24kc/tcping-0.3-r1.apk",
+            "sha256": "1e582dcec69c8ba1809630d305dd2c36c8874e635937be580f29f2f74e6d39cf",
+            "size": 4168
+          },
+          {
+            "package": "v2ray-geoip",
+            "version": "202609240030.1",
+            "file": "mipsel_24kc/v2ray-geoip-202609240030.1.apk",
+            "sha256": "7c04711f44867d9e0c5eb41f7905e1c94a79bc09fc9411791efb36aeb72b6008",
+            "size": 3567754
+          },
+          {
+            "package": "v2ray-geosite",
+            "version": "202609292207.1",
+            "file": "mipsel_24kc/v2ray-geosite-202609292207.1.apk",
+            "sha256": "7df158595aa622972b3b1c2ce5b0d72c1e11f98c9744a473a45c33d5208c2717",
+            "size": 3587442
+          },
+          {
+            "package": "v2ray-plugin",
+            "version": "5.49.0-r1",
+            "file": "mipsel_24kc/v2ray-plugin-5.49.0-r1.apk",
+            "sha256": "cb19a8183e636ca158189f6b787c5ec310d81951a347a45fb191d2e6d8c758c1",
+            "size": 6178502
+          },
+          {
+            "package": "xray-core",
+            "version": "26.9.30-r1",
+            "file": "mipsel_24kc/xray-core-26.9.30-r1.apk",
+            "sha256": "646d89cfaf682f0b2d79c3a6b2ad3315f2a77fc13e3c49370cfd42730f66c9c8",
+            "size": 11286770
+          },
+          {
+            "package": "xray-plugin",
+            "version": "1.8.24-r1",
+            "file": "mipsel_24kc/xray-plugin-1.8.24-r1.apk",
+            "sha256": "4cf2d994bc8db8ae7782ed860149aaa65cf4bd9d13b361f5fd2b227cc33afdf0",
+            "size": 6990061
+          }
+        ]
+      }
+    },
+    {
+      "name": "i386_pentium4",
+      "feeds": {
+        "passwall2": [
+          {
+            "package": "luci-app-passwall2",
+            "version": "26.10.1-r2",
+            "file": "i386_pentium4/luci-app-passwall2-26.10.1-r2.apk",
+            "sha256": "d4415c510f1cf0d35303ccad03ae1530184e7d03ea9799d17ff88ace7990dbe8",
+            "size": 346838
+          },
+          {
+            "package": "luci-i18n-passwall2-fa",
+            "version": "26.10.1",
+            "file": "i386_pentium4/luci-i18n-passwall2-fa-26.10.1.apk",
+            "sha256": "f8ebca123fd92b01fde6da6d5bde08c1ebe0177d96f36adfb4eaced9e065a599",
+            "size": 22733
+          },
+          {
+            "package": "luci-i18n-passwall2-ru",
+            "version": "26.10.1",
+            "file": "i386_pentium4/luci-i18n-passwall2-ru-26.10.1.apk",
+            "sha256": "d1d2f05d9441db83e6353c5c25239c9d80bb718a88ea3a68d699e8ee2c8dc4c6",
+            "size": 23773
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-cn",
+            "version": "26.10.1",
+            "file": "i386_pentium4/luci-i18n-passwall2-zh-cn-26.10.1.apk",
+            "sha256": "1cc6141fa95ac22db3a516cb40d9dcc082e3f36f45cdcd7fc15d7cb4955c4306",
+            "size": 20200
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-tw",
+            "version": "26.10.1",
+            "file": "i386_pentium4/luci-i18n-passwall2-zh-tw-26.10.1.apk",
+            "sha256": "5d63b83da512e8295b7f6ca82fae53d9439195dc35f3974a47896eb3fa738988",
+            "size": 20369
+          }
+        ],
+        "passwall_luci": [
+          {
+            "package": "luci-app-passwall",
+            "version": "26.10.4-r1",
+            "file": "i386_pentium4/luci-app-passwall-26.10.4-r1.apk",
+            "sha256": "b76419188c0dc3cc9b08303e1c0f533ce0341f097a068002d069041094d8fb32",
+            "size": 850181
+          },
+          {
+            "package": "luci-i18n-passwall-zh-cn",
+            "version": "26.10.4",
+            "file": "i386_pentium4/luci-i18n-passwall-zh-cn-26.10.4.apk",
+            "sha256": "064251044d0d725812c4c468c367fc2bf463a27871c1a046a62097a0f8acf456",
+            "size": 18042
+          }
+        ],
+        "passwall_packages": [
+          {
+            "package": "chinadns-ng",
+            "version": "2025.08.09-r1",
+            "file": "i386_pentium4/chinadns-ng-2025.08.09-r1.apk",
+            "sha256": "0de1ccae135b1ca1a176764bf33a2d6859419837f34193c1605039c4522400d7",
+            "size": 278791
+          },
+          {
+            "package": "dns2socks",
+            "version": "2.1-r2",
+            "file": "i386_pentium4/dns2socks-2.1-r2.apk",
+            "sha256": "8ce568adc6c82259ee0d9bbad599e29634348b2a821860edab7de4a425a104cf",
+            "size": 9885
+          },
+          {
+            "package": "geoview",
+            "version": "0.2.6-r1",
+            "file": "i386_pentium4/geoview-0.2.6-r1.apk",
+            "sha256": "c489da3eb54991afc577eb016b58c9ec9487bfd94566bd83ac97a7185321c283",
+            "size": 3269663
+          },
+          {
+            "package": "hysteria",
+            "version": "2.13.0-r1",
+            "file": "i386_pentium4/hysteria-2.13.0-r1.apk",
+            "sha256": "9989337138c6eeb0f5b502ec5eb27589bc437d53f45b9af482bcf1255c1702ee",
+            "size": 8711741
+          },
+          {
+            "package": "ipt2socks",
+            "version": "1.1.4-r3",
+            "file": "i386_pentium4/ipt2socks-1.1.4-r3.apk",
+            "sha256": "9410c5fe03557130ab98a61ae3dd056c2440e77a164d614c9950950793c7749a",
+            "size": 23268
+          },
+          {
+            "package": "microsocks",
+            "version": "1.0.5-r2",
+            "file": "i386_pentium4/microsocks-1.0.5-r2.apk",
+            "sha256": "024a64ddf2d4d8682828005b83e12f55e7229899f167c5171a82109242632f02",
+            "size": 7656
+          },
+          {
+            "package": "naiveproxy",
+            "version": "154.0.8037.49-r4",
+            "file": "i386_pentium4/naiveproxy-154.0.8037.49-r4.apk",
+            "sha256": "80e61fc52ce685a7c9239775deb10d64d63f13b5b06ea6ae195152f88ca9b845",
+            "size": 4333086
+          },
+          {
+            "package": "shadowsocks-rust-sslocal",
+            "version": "1.25.0-r1",
+            "file": "i386_pentium4/shadowsocks-rust-sslocal-1.25.0-r1.apk",
+            "sha256": "930955d0ef5b4456516d90c54d38f8b466a440e2f16d9489bf42f8de28c337e9",
+            "size": 3778673
+          },
+          {
+            "package": "shadowsocks-rust-ssmanager",
+            "version": "1.25.0-r1",
+            "file": "i386_pentium4/shadowsocks-rust-ssmanager-1.25.0-r1.apk",
+            "sha256": "e27d067b7e485ec71253c260938921795cf549168e1824fd619d5f75ebbf5fb1",
+            "size": 3021041
+          },
+          {
+            "package": "shadowsocks-rust-ssserver",
+            "version": "1.25.0-r1",
+            "file": "i386_pentium4/shadowsocks-rust-ssserver-1.25.0-r1.apk",
+            "sha256": "21dae9c34b2be2e9222ca2463c2e2c78cea05620d879b9586195152726d888ac",
+            "size": 2968675
+          },
+          {
+            "package": "shadowsocks-rust-ssservice",
+            "version": "1.25.0-r1",
+            "file": "i386_pentium4/shadowsocks-rust-ssservice-1.25.0-r1.apk",
+            "sha256": "0140bbeaaff39b8027becab13c5be8f4572d08312093176f67e2b4ec74e3e2c8",
+            "size": 3962033
+          },
+          {
+            "package": "shadowsocks-rust-ssurl",
+            "version": "1.25.0-r1",
+            "file": "i386_pentium4/shadowsocks-rust-ssurl-1.25.0-r1.apk",
+            "sha256": "a01fe067f97d11372c9d04310b36c7a519ee4dcc5c6c93427281c4f375713ea1",
+            "size": 927988
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-check",
+            "version": "2.5.6-r13",
+            "file": "i386_pentium4/shadowsocksr-libev-ssr-check-2.5.6-r13.apk",
+            "sha256": "4c01030214b7d895c359ca51f19ab0172c44846bc1295884b49307a751f0f278",
+            "size": 2842
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-local",
+            "version": "2.5.6-r13",
+            "file": "i386_pentium4/shadowsocksr-libev-ssr-local-2.5.6-r13.apk",
+            "sha256": "cf3bac6b34fbfb525c9a25b9c57af58ac5043bd5e7bc55b4916199b638840160",
+            "size": 56623
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-nat",
+            "version": "2.5.6-r13",
+            "file": "i386_pentium4/shadowsocksr-libev-ssr-nat-2.5.6-r13.apk",
+            "sha256": "7ddfdeb21664b079a3d31d0f8c788ceabf18ea21462b5b13dc60e587fb7482b3",
+            "size": 2873
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-redir",
+            "version": "2.5.6-r13",
+            "file": "i386_pentium4/shadowsocksr-libev-ssr-redir-2.5.6-r13.apk",
+            "sha256": "747ed3282cd6e8e8fb4bbc34c3d0becd5d9a4428326fbb972daa5277151eda02",
+            "size": 50788
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-server",
+            "version": "2.5.6-r13",
+            "file": "i386_pentium4/shadowsocksr-libev-ssr-server-2.5.6-r13.apk",
+            "sha256": "9c8c85c68758ac418ce22502c45350302195c652098391b77aaf7ee07b2e6947",
+            "size": 57774
+          },
+          {
+            "package": "simple-obfs-client",
+            "version": "0.0.5-r3",
+            "file": "i386_pentium4/simple-obfs-client-0.0.5-r3.apk",
+            "sha256": "940b01711e65cfefe0e3f9ef417a0218f06bae3e609acabe900274f7dbce803f",
+            "size": 27981
+          },
+          {
+            "package": "simple-obfs-server",
+            "version": "0.0.5-r3",
+            "file": "i386_pentium4/simple-obfs-server-0.0.5-r3.apk",
+            "sha256": "f12161f10f497d3f9b6530f2125aa81b4d98dd70494e2d31dc76774431f945e9",
+            "size": 29534
+          },
+          {
+            "package": "sing-box",
+            "version": "1.14.3-r1",
+            "file": "i386_pentium4/sing-box-1.14.3-r1.apk",
+            "sha256": "3427dafbbdee2280e64fe783152e0a39e968d1d7e207fd2d235d27e150bc06d2",
+            "size": 20163953
+          },
+          {
+            "package": "tcping",
+            "version": "0.3-r1",
+            "file": "i386_pentium4/tcping-0.3-r1.apk",
+            "sha256": "2d10a7054cb8cfdfcb8e727bbdbfcece2feb04aa915d943830eda7f5a5a403c8",
+            "size": 4087
+          },
+          {
+            "package": "v2ray-geoip",
+            "version": "202609240030.1",
+            "file": "i386_pentium4/v2ray-geoip-202609240030.1.apk",
+            "sha256": "7c04711f44867d9e0c5eb41f7905e1c94a79bc09fc9411791efb36aeb72b6008",
+            "size": 3567754
+          },
+          {
+            "package": "v2ray-geosite",
+            "version": "202609292207.1",
+            "file": "i386_pentium4/v2ray-geosite-202609292207.1.apk",
+            "sha256": "7df158595aa622972b3b1c2ce5b0d72c1e11f98c9744a473a45c33d5208c2717",
+            "size": 3587442
+          },
+          {
+            "package": "v2ray-plugin",
+            "version": "5.49.0-r1",
+            "file": "i386_pentium4/v2ray-plugin-5.49.0-r1.apk",
+            "sha256": "41047908a6459040130cead8d72e948801632290d34a4737070e1c9b50dcd856",
+            "size": 6539997
+          },
+          {
+            "package": "xray-core",
+            "version": "26.9.30-r1",
+            "file": "i386_pentium4/xray-core-26.9.30-r1.apk",
+            "sha256": "46d2f97ff3e7d7222280aed9e6dac0a525b93cf3037c2988e8237803a98d841d",
+            "size": 12012216
+          },
+          {
+            "package": "xray-plugin",
+            "version": "1.8.24-r1",
+            "file": "i386_pentium4/xray-plugin-1.8.24-r1.apk",
+            "sha256": "75fa940d6f493e18d26d8c7a2424a86c765a9e55570a3fd499cfacb154f10bdc",
+            "size": 7414308
+          }
+        ]
+      }
+    },
+    {
+      "name": "aarch64_cortex-a53",
+      "feeds": {
+        "passwall2": [
+          {
+            "package": "luci-app-passwall2",
+            "version": "26.10.1-r2",
+            "file": "aarch64_cortex-a53/luci-app-passwall2-26.10.1-r2.apk",
+            "sha256": "e7a64374ff39c095bad704914f350d853bc2c958b6a6465c3c852c33cdc1ec63",
+            "size": 346840
+          },
+          {
+            "package": "luci-i18n-passwall2-fa",
+            "version": "26.10.1",
+            "file": "aarch64_cortex-a53/luci-i18n-passwall2-fa-26.10.1.apk",
+            "sha256": "ab8e00f8a2f95c3c1a2a10e1eca7deae985a7117e1189c3b24d3febb7c19c069",
+            "size": 22732
+          },
+          {
+            "package": "luci-i18n-passwall2-ru",
+            "version": "26.10.1",
+            "file": "aarch64_cortex-a53/luci-i18n-passwall2-ru-26.10.1.apk",
+            "sha256": "0bf1f3becc8fc005728fe50737d81506fd753d0965ca2678d897cce06cfd9107",
+            "size": 23774
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-cn",
+            "version": "26.10.1",
+            "file": "aarch64_cortex-a53/luci-i18n-passwall2-zh-cn-26.10.1.apk",
+            "sha256": "1d58dbb5357e90e63f0c89420f7cffff7829797ffc571df9c29dc64f7fb9fb28",
+            "size": 20199
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-tw",
+            "version": "26.10.1",
+            "file": "aarch64_cortex-a53/luci-i18n-passwall2-zh-tw-26.10.1.apk",
+            "sha256": "4dbbf30f9eea98c2b72c819b8409ef2617366adaac5fa844ec3080e5af060cb8",
+            "size": 20369
+          }
+        ],
+        "passwall_luci": [
+          {
+            "package": "luci-app-passwall",
+            "version": "26.10.4-r1",
+            "file": "aarch64_cortex-a53/luci-app-passwall-26.10.4-r1.apk",
+            "sha256": "902754e1f6d0bb681fd0e4ecfbfc12fe985735b2c548060685266a5131717a4d",
+            "size": 850180
+          },
+          {
+            "package": "luci-i18n-passwall-zh-cn",
+            "version": "26.10.4",
+            "file": "aarch64_cortex-a53/luci-i18n-passwall-zh-cn-26.10.4.apk",
+            "sha256": "fb9fd617c7cbc6124555fc7050a8630301390248dc1ac0684bdc0cabbad05133",
+            "size": 18040
+          }
+        ],
+        "passwall_packages": [
+          {
+            "package": "chinadns-ng",
+            "version": "2025.08.09-r1",
+            "file": "aarch64_cortex-a53/chinadns-ng-2025.08.09-r1.apk",
+            "sha256": "bf2e1dee237787f3c7819610e555d687e839c797646662653e16c9f980850234",
+            "size": 270128
+          },
+          {
+            "package": "dns2socks",
+            "version": "2.1-r2",
+            "file": "aarch64_cortex-a53/dns2socks-2.1-r2.apk",
+            "sha256": "37ae784f29bf08d4edb6e08deb2b5bddbfde74a374c633370c7a12a8f5ab741e",
+            "size": 11476
+          },
+          {
+            "package": "geoview",
+            "version": "0.2.6-r1",
+            "file": "aarch64_cortex-a53/geoview-0.2.6-r1.apk",
+            "sha256": "53feef0e40ef4770bbd4f2407e684a28472d9e31083bbfa73cea4a85fd6a7d89",
+            "size": 2974682
+          },
+          {
+            "package": "hysteria",
+            "version": "2.13.0-r1",
+            "file": "aarch64_cortex-a53/hysteria-2.13.0-r1.apk",
+            "sha256": "c1503988cd2b5694c7cc354eee2cebeb7458def96337900106c8bcac623accce",
+            "size": 8163358
+          },
+          {
+            "package": "ipt2socks",
+            "version": "1.1.4-r3",
+            "file": "aarch64_cortex-a53/ipt2socks-1.1.4-r3.apk",
+            "sha256": "8050ba6c368b6d6c8f4677429d8280c5f019e4165abd7b7e51e2ae3663e96442",
+            "size": 26250
+          },
+          {
+            "package": "microsocks",
+            "version": "1.0.5-r2",
+            "file": "aarch64_cortex-a53/microsocks-1.0.5-r2.apk",
+            "sha256": "013c5e8910a90512a8198b780278d4050a92ba56eeed3f28e44b4bf909b7140d",
+            "size": 8412
+          },
+          {
+            "package": "naiveproxy",
+            "version": "154.0.8037.49-r4",
+            "file": "aarch64_cortex-a53/naiveproxy-154.0.8037.49-r4.apk",
+            "sha256": "25e2606be454c469fad06476baded8035ee3bbf720181a1a5edd1e1c742422e1",
+            "size": 3989320
+          },
+          {
+            "package": "shadow-tls",
+            "version": "0.2.25-r1",
+            "file": "aarch64_cortex-a53/shadow-tls-0.2.25-r1.apk",
+            "sha256": "e42821c06e93566f2acd2de94766520135f3b6f4c6a59836d9d3bfebec200236",
+            "size": 1547542
+          },
+          {
+            "package": "shadowsocks-rust-sslocal",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a53/shadowsocks-rust-sslocal-1.25.0-r1.apk",
+            "sha256": "9c966b33f60fb4144ba27d4d45388013a531c1227312cc467d817cb2e27b7cf8",
+            "size": 3890096
+          },
+          {
+            "package": "shadowsocks-rust-ssmanager",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a53/shadowsocks-rust-ssmanager-1.25.0-r1.apk",
+            "sha256": "c2b42e9308c5924908506b2ca9dc9891ccbe1f44dc43c3a7cf4baab755fa6b30",
+            "size": 3129576
+          },
+          {
+            "package": "shadowsocks-rust-ssserver",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a53/shadowsocks-rust-ssserver-1.25.0-r1.apk",
+            "sha256": "1f83a81479db33d3bb493fdfcd31c517320a50a714a9d40926890c6a38d49ca7",
+            "size": 3074863
+          },
+          {
+            "package": "shadowsocks-rust-ssservice",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a53/shadowsocks-rust-ssservice-1.25.0-r1.apk",
+            "sha256": "55fe4e37c745c43934e23303402e99e56a50e8cbbcf1d6597fad45f68f8c91ef",
+            "size": 4075708
+          },
+          {
+            "package": "shadowsocks-rust-ssurl",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a53/shadowsocks-rust-ssurl-1.25.0-r1.apk",
+            "sha256": "1e5ccd86e3feb301ff39ae7f4315603bc55ff55cf41bee560ac858c4800c19b6",
+            "size": 908304
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-check",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a53/shadowsocksr-libev-ssr-check-2.5.6-r13.apk",
+            "sha256": "42a342383117096a249acce12a3058d213b70cbceb997dbd1fc3221ad4c69d1a",
+            "size": 3146
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-local",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a53/shadowsocksr-libev-ssr-local-2.5.6-r13.apk",
+            "sha256": "3155ed18bef3b499bd3ebbbeae09b9b71dfbdcb0003699e965a8bd4889d68121",
+            "size": 63497
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-nat",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a53/shadowsocksr-libev-ssr-nat-2.5.6-r13.apk",
+            "sha256": "c009cc9498f5728e7d4a88250e156217a53607d7e925bd2e90d95edbd1dfaead",
+            "size": 2877
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-redir",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a53/shadowsocksr-libev-ssr-redir-2.5.6-r13.apk",
+            "sha256": "91f9c9f397e3e772d49673b952448b0be6682804b8b0cc44fbbc2770637db2a4",
+            "size": 56201
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-server",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a53/shadowsocksr-libev-ssr-server-2.5.6-r13.apk",
+            "sha256": "21f2b7d9754624b49f4b4c06b4920baf1c7651ccf5ab0fea66d3c761dec37220",
+            "size": 66622
+          },
+          {
+            "package": "simple-obfs-client",
+            "version": "0.0.5-r3",
+            "file": "aarch64_cortex-a53/simple-obfs-client-0.0.5-r3.apk",
+            "sha256": "1b8f0b147554b2a35c3c7bf380a1ddd14ad2241f5c40e02662553ea996d8f554",
+            "size": 31675
+          },
+          {
+            "package": "simple-obfs-server",
+            "version": "0.0.5-r3",
+            "file": "aarch64_cortex-a53/simple-obfs-server-0.0.5-r3.apk",
+            "sha256": "9ff652f6d961682d32ff623571baa93a8bc79a9dd44a21f7c43c2badd275d4b0",
+            "size": 34217
+          },
+          {
+            "package": "sing-box",
+            "version": "1.14.3-r1",
+            "file": "aarch64_cortex-a53/sing-box-1.14.3-r1.apk",
+            "sha256": "0dac6bb0bbc6ccaf989cdac1cfa670578e538ded3dcfe975aa17a8ec469cceb6",
+            "size": 19326323
+          },
+          {
+            "package": "tcping",
+            "version": "0.3-r1",
+            "file": "aarch64_cortex-a53/tcping-0.3-r1.apk",
+            "sha256": "821d3be38dc6fe983307ab11b3085f4c26e4ab32b4ea2e8b27b81bbd9326c7b3",
+            "size": 4265
+          },
+          {
+            "package": "v2ray-geoip",
+            "version": "202609240030.1",
+            "file": "aarch64_cortex-a53/v2ray-geoip-202609240030.1.apk",
+            "sha256": "7c04711f44867d9e0c5eb41f7905e1c94a79bc09fc9411791efb36aeb72b6008",
+            "size": 3567754
+          },
+          {
+            "package": "v2ray-geosite",
+            "version": "202609292207.1",
+            "file": "aarch64_cortex-a53/v2ray-geosite-202609292207.1.apk",
+            "sha256": "7df158595aa622972b3b1c2ce5b0d72c1e11f98c9744a473a45c33d5208c2717",
+            "size": 3587442
+          },
+          {
+            "package": "v2ray-plugin",
+            "version": "5.49.0-r1",
+            "file": "aarch64_cortex-a53/v2ray-plugin-5.49.0-r1.apk",
+            "sha256": "f9c8eb0ec5f609da22de169d8bc7db6e3eeb1a84448a760af925d843c7a7be3d",
+            "size": 6165810
+          },
+          {
+            "package": "xray-core",
+            "version": "26.9.30-r1",
+            "file": "aarch64_cortex-a53/xray-core-26.9.30-r1.apk",
+            "sha256": "789b53fbe01c2ea4678a7ee667a11ffa11588bad835bfea9eb28b56e49b6bb26",
+            "size": 11478666
+          },
+          {
+            "package": "xray-plugin",
+            "version": "1.8.24-r1",
+            "file": "aarch64_cortex-a53/xray-plugin-1.8.24-r1.apk",
+            "sha256": "302d8be8817607c22c7ea655d73ef5450019a9b5a85afc2577bc72951d8abf60",
+            "size": 6964600
+          }
+        ]
+      }
+    },
+    {
+      "name": "aarch64_cortex-a72",
+      "feeds": {
+        "passwall2": [
+          {
+            "package": "luci-app-passwall2",
+            "version": "26.10.1-r2",
+            "file": "aarch64_cortex-a72/luci-app-passwall2-26.10.1-r2.apk",
+            "sha256": "628574c2fc72423062ef62aace4c628fcea49c86a5e27f801c20a0794d7544cf",
+            "size": 346839
+          },
+          {
+            "package": "luci-i18n-passwall2-fa",
+            "version": "26.10.1",
+            "file": "aarch64_cortex-a72/luci-i18n-passwall2-fa-26.10.1.apk",
+            "sha256": "bca558ef4ac837b9953dd929a06d2ed7442553d3c90b8e281bae5c92a3c023f9",
+            "size": 22732
+          },
+          {
+            "package": "luci-i18n-passwall2-ru",
+            "version": "26.10.1",
+            "file": "aarch64_cortex-a72/luci-i18n-passwall2-ru-26.10.1.apk",
+            "sha256": "d8331f83c917d8268c31d6aa0a1dba0f185ba9e03dad878fc0256a40d7056d44",
+            "size": 23773
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-cn",
+            "version": "26.10.1",
+            "file": "aarch64_cortex-a72/luci-i18n-passwall2-zh-cn-26.10.1.apk",
+            "sha256": "14ff3a4db236281e02fc811bf31dec214a4d14bfc9765a7139b5bfec5e7c5e69",
+            "size": 20202
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-tw",
+            "version": "26.10.1",
+            "file": "aarch64_cortex-a72/luci-i18n-passwall2-zh-tw-26.10.1.apk",
+            "sha256": "630ac95056902355efa0e4bdb6b82bbecac4d3cb19492619fbdb8f7b11769920",
+            "size": 20368
+          }
+        ],
+        "passwall_luci": [
+          {
+            "package": "luci-app-passwall",
+            "version": "26.10.4-r1",
+            "file": "aarch64_cortex-a72/luci-app-passwall-26.10.4-r1.apk",
+            "sha256": "d800a22596bf8f426002a386bbef1da43592591dac8b60cdda8089ed5eb3b2ee",
+            "size": 850180
+          },
+          {
+            "package": "luci-i18n-passwall-zh-cn",
+            "version": "26.10.4",
+            "file": "aarch64_cortex-a72/luci-i18n-passwall-zh-cn-26.10.4.apk",
+            "sha256": "caa4e8925f4e3b3566e1d337abdcc1011b22423cc596cbb80e144cdd6ef316b3",
+            "size": 18041
+          }
+        ],
+        "passwall_packages": [
+          {
+            "package": "chinadns-ng",
+            "version": "2025.08.09-r1",
+            "file": "aarch64_cortex-a72/chinadns-ng-2025.08.09-r1.apk",
+            "sha256": "d0ad7dc72dbad16e627e7f0f345ee9f512fe3d2bb5f0884a6fcfc39cf71225fe",
+            "size": 270127
+          },
+          {
+            "package": "dns2socks",
+            "version": "2.1-r2",
+            "file": "aarch64_cortex-a72/dns2socks-2.1-r2.apk",
+            "sha256": "dd6bd5e6949c4ee05fc757c26e8b4ea9a910089179c15e73824917a23b40c5a2",
+            "size": 11534
+          },
+          {
+            "package": "geoview",
+            "version": "0.2.6-r1",
+            "file": "aarch64_cortex-a72/geoview-0.2.6-r1.apk",
+            "sha256": "840595d857be25a708ee1234b6d81c9f17825a30e61aff91e41c852a75aa73a1",
+            "size": 2974686
+          },
+          {
+            "package": "hysteria",
+            "version": "2.13.0-r1",
+            "file": "aarch64_cortex-a72/hysteria-2.13.0-r1.apk",
+            "sha256": "807f66e7f500b6898038fd17fe7a421cc15b52211615ace91aea47944527cfe7",
+            "size": 8163363
+          },
+          {
+            "package": "ipt2socks",
+            "version": "1.1.4-r3",
+            "file": "aarch64_cortex-a72/ipt2socks-1.1.4-r3.apk",
+            "sha256": "874048d51a08f88695c53fbf73e8b60995011906b71f070aa03bb509ef326a22",
+            "size": 26269
+          },
+          {
+            "package": "microsocks",
+            "version": "1.0.5-r2",
+            "file": "aarch64_cortex-a72/microsocks-1.0.5-r2.apk",
+            "sha256": "26b44665658021c41acbffad46cc261002eb71abc5002cc7a58ee9cecce89d7a",
+            "size": 8410
+          },
+          {
+            "package": "naiveproxy",
+            "version": "154.0.8037.49-r4",
+            "file": "aarch64_cortex-a72/naiveproxy-154.0.8037.49-r4.apk",
+            "sha256": "bcb89511c6163f3bd6f70af75f0dce491a977b7ebf08bfdb107e32da1deeb3fb",
+            "size": 3869612
+          },
+          {
+            "package": "shadow-tls",
+            "version": "0.2.25-r1",
+            "file": "aarch64_cortex-a72/shadow-tls-0.2.25-r1.apk",
+            "sha256": "2936b1a96e8110918f5c77c612c237486e32eb3791b60b74aaa1397d0bdc9e18",
+            "size": 1547554
+          },
+          {
+            "package": "shadowsocks-rust-sslocal",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a72/shadowsocks-rust-sslocal-1.25.0-r1.apk",
+            "sha256": "a33d54b09b2ef61ea2b10f7a0d5829515e7c65d0e437c8d5642ec465bda8c07a",
+            "size": 3891580
+          },
+          {
+            "package": "shadowsocks-rust-ssmanager",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a72/shadowsocks-rust-ssmanager-1.25.0-r1.apk",
+            "sha256": "d390802aa50c7fe036a53f24fe09522fbfcaf50cd3c539913e59068e20fc78d8",
+            "size": 3131304
+          },
+          {
+            "package": "shadowsocks-rust-ssserver",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a72/shadowsocks-rust-ssserver-1.25.0-r1.apk",
+            "sha256": "0308e257710664a5990eae47ea9dcc9ef149619448d54196efd4a32fa00c949f",
+            "size": 3077408
+          },
+          {
+            "package": "shadowsocks-rust-ssservice",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a72/shadowsocks-rust-ssservice-1.25.0-r1.apk",
+            "sha256": "0f74b9b08c9b441b01298d3e7cf1132b295c5cdb96831f00429ddcce91641d94",
+            "size": 4077234
+          },
+          {
+            "package": "shadowsocks-rust-ssurl",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a72/shadowsocks-rust-ssurl-1.25.0-r1.apk",
+            "sha256": "d482247431360ec026ea507d9f983f7342f56f48abce634580952c9c1bd27814",
+            "size": 908306
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-check",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a72/shadowsocksr-libev-ssr-check-2.5.6-r13.apk",
+            "sha256": "d7640c813e511e468b102ae97a4ca5b3cd6e755e7857a8606312a35bd31326fb",
+            "size": 3144
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-local",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a72/shadowsocksr-libev-ssr-local-2.5.6-r13.apk",
+            "sha256": "290a0e55875803cf892274d8793a5d82556fb6d77b238f3f9b728c1d5bcc0b8d",
+            "size": 63578
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-nat",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a72/shadowsocksr-libev-ssr-nat-2.5.6-r13.apk",
+            "sha256": "4e0e7967282d4a35b14c1f3efc88e771b15c8dfcdb0e3dc3ec0ba87053bac4d9",
+            "size": 2875
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-redir",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a72/shadowsocksr-libev-ssr-redir-2.5.6-r13.apk",
+            "sha256": "61d105ee26f3baa6fc8d045e2211464712c7cf53b8e48c81c2096624bed15a06",
+            "size": 56306
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-server",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a72/shadowsocksr-libev-ssr-server-2.5.6-r13.apk",
+            "sha256": "b89f795a52546dd036233c946f6fea30bf83f91ac5ade3071467c0db9ad3b06a",
+            "size": 66718
+          },
+          {
+            "package": "simple-obfs-client",
+            "version": "0.0.5-r3",
+            "file": "aarch64_cortex-a72/simple-obfs-client-0.0.5-r3.apk",
+            "sha256": "2d82b8455ba1e5bb68e08195a4244e775d045638988bceb0b12cc4db760a95cd",
+            "size": 31760
+          },
+          {
+            "package": "simple-obfs-server",
+            "version": "0.0.5-r3",
+            "file": "aarch64_cortex-a72/simple-obfs-server-0.0.5-r3.apk",
+            "sha256": "0fa6ed89335e03ce462952bd0919bae8a27f517125127bce2d4aab0be6923c9f",
+            "size": 34279
+          },
+          {
+            "package": "sing-box",
+            "version": "1.14.3-r1",
+            "file": "aarch64_cortex-a72/sing-box-1.14.3-r1.apk",
+            "sha256": "bb9e16effff58d1205a0a64078b340ff134ff2c8871f7d460c7dd5a1e5b586b7",
+            "size": 19326324
+          },
+          {
+            "package": "tcping",
+            "version": "0.3-r1",
+            "file": "aarch64_cortex-a72/tcping-0.3-r1.apk",
+            "sha256": "98dc00a46529accce8bef7d359a81ec3131a7c342238d0b0854241d7e658c381",
+            "size": 4268
+          },
+          {
+            "package": "v2ray-geoip",
+            "version": "202609240030.1",
+            "file": "aarch64_cortex-a72/v2ray-geoip-202609240030.1.apk",
+            "sha256": "7c04711f44867d9e0c5eb41f7905e1c94a79bc09fc9411791efb36aeb72b6008",
+            "size": 3567754
+          },
+          {
+            "package": "v2ray-geosite",
+            "version": "202609292207.1",
+            "file": "aarch64_cortex-a72/v2ray-geosite-202609292207.1.apk",
+            "sha256": "7df158595aa622972b3b1c2ce5b0d72c1e11f98c9744a473a45c33d5208c2717",
+            "size": 3587442
+          },
+          {
+            "package": "v2ray-plugin",
+            "version": "5.49.0-r1",
+            "file": "aarch64_cortex-a72/v2ray-plugin-5.49.0-r1.apk",
+            "sha256": "7b0dc83462b5ed1dd6649741554f6469618ac3ddd0fe2f5eebfff2c03b1bad2c",
+            "size": 6165818
+          },
+          {
+            "package": "xray-core",
+            "version": "26.9.30-r1",
+            "file": "aarch64_cortex-a72/xray-core-26.9.30-r1.apk",
+            "sha256": "765dd6912e4a9dfd27b310f43f46a9d7ba599c044d6d83b11efdd994d520ec83",
+            "size": 11478677
+          },
+          {
+            "package": "xray-plugin",
+            "version": "1.8.24-r1",
+            "file": "aarch64_cortex-a72/xray-plugin-1.8.24-r1.apk",
+            "sha256": "4eeac4121b61fc6c3271da5df8f38217539498b11a4e696491837e51cc477b9e",
+            "size": 6964607
+          }
+        ]
+      }
+    },
+    {
+      "name": "aarch64_cortex-a76",
+      "feeds": {
+        "passwall2": [
+          {
+            "package": "luci-app-passwall2",
+            "version": "26.10.1-r2",
+            "file": "aarch64_cortex-a76/luci-app-passwall2-26.10.1-r2.apk",
+            "sha256": "493836452d819b2d67140dc8166ef44d6a93f9108f259f27813b05fc933b4f6f",
+            "size": 346839
+          },
+          {
+            "package": "luci-i18n-passwall2-fa",
+            "version": "26.10.1",
+            "file": "aarch64_cortex-a76/luci-i18n-passwall2-fa-26.10.1.apk",
+            "sha256": "6bb84010e9d2cc930c2aeab4e9e9e8377c0d6b2f3a557a9f9f19259855dce0bb",
+            "size": 22734
+          },
+          {
+            "package": "luci-i18n-passwall2-ru",
+            "version": "26.10.1",
+            "file": "aarch64_cortex-a76/luci-i18n-passwall2-ru-26.10.1.apk",
+            "sha256": "de414a3b0094042c8441bc147d591e7efb03fb15499cee57752d5c8433cd85db",
+            "size": 23774
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-cn",
+            "version": "26.10.1",
+            "file": "aarch64_cortex-a76/luci-i18n-passwall2-zh-cn-26.10.1.apk",
+            "sha256": "4a6b16b5a7eb04200c7febe3d8452ae672928c78fd1a643a6224e7104b7a3a1b",
+            "size": 20201
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-tw",
+            "version": "26.10.1",
+            "file": "aarch64_cortex-a76/luci-i18n-passwall2-zh-tw-26.10.1.apk",
+            "sha256": "fb6dc876eec58b385119169d0d569efd116e29405e78773748c6fc8133be016c",
+            "size": 20367
+          }
+        ],
+        "passwall_luci": [
+          {
+            "package": "luci-app-passwall",
+            "version": "26.10.4-r1",
+            "file": "aarch64_cortex-a76/luci-app-passwall-26.10.4-r1.apk",
+            "sha256": "5860b9e12e487a32d0c47e013a0bb1740719a705fae41d549326eb3f9458bbb8",
+            "size": 850179
+          },
+          {
+            "package": "luci-i18n-passwall-zh-cn",
+            "version": "26.10.4",
+            "file": "aarch64_cortex-a76/luci-i18n-passwall-zh-cn-26.10.4.apk",
+            "sha256": "0e8357925e77d8b5f1db30d4aeb37516487f4faf25eb93e138c168d03a2b424e",
+            "size": 18040
+          }
+        ],
+        "passwall_packages": [
+          {
+            "package": "chinadns-ng",
+            "version": "2025.08.09-r1",
+            "file": "aarch64_cortex-a76/chinadns-ng-2025.08.09-r1.apk",
+            "sha256": "8b55b2b0f6c917dfd1867cf8f26edebcc81afc4992b1754601e70c5592956c63",
+            "size": 270128
+          },
+          {
+            "package": "dns2socks",
+            "version": "2.1-r2",
+            "file": "aarch64_cortex-a76/dns2socks-2.1-r2.apk",
+            "sha256": "2a061669a103f4d28733d34a296c00642b1e993d33f1a8b6e3f33b5fe4f8eb4e",
+            "size": 11537
+          },
+          {
+            "package": "geoview",
+            "version": "0.2.6-r1",
+            "file": "aarch64_cortex-a76/geoview-0.2.6-r1.apk",
+            "sha256": "6ef9f95fe965705559acc5deea2d8dc0d314db8865fc1178ce8e1bc9b75c8261",
+            "size": 2965749
+          },
+          {
+            "package": "hysteria",
+            "version": "2.13.0-r1",
+            "file": "aarch64_cortex-a76/hysteria-2.13.0-r1.apk",
+            "sha256": "c81bd28097a4f8948e64d6b2a371e90743f6c6deddaa65ec1fd58557e8a9021b",
+            "size": 8135349
+          },
+          {
+            "package": "ipt2socks",
+            "version": "1.1.4-r3",
+            "file": "aarch64_cortex-a76/ipt2socks-1.1.4-r3.apk",
+            "sha256": "9e440ac9e2fd8e2e366052b531ac3a28a966ae2a604945e13ec2f05ee0e5f3f6",
+            "size": 26271
+          },
+          {
+            "package": "microsocks",
+            "version": "1.0.5-r2",
+            "file": "aarch64_cortex-a76/microsocks-1.0.5-r2.apk",
+            "sha256": "cc022cd7122eba9f3b510f1aff12d2d3695bb43ee0b3c7e31c55a73e018cc2eb",
+            "size": 8413
+          },
+          {
+            "package": "naiveproxy",
+            "version": "154.0.8037.49-r4",
+            "file": "aarch64_cortex-a76/naiveproxy-154.0.8037.49-r4.apk",
+            "sha256": "bf7b27af8ec7c59c7d42b484dc5c21f1df3937790e0e429c5cd78ef3973f96c0",
+            "size": 3971859
+          },
+          {
+            "package": "shadow-tls",
+            "version": "0.2.25-r1",
+            "file": "aarch64_cortex-a76/shadow-tls-0.2.25-r1.apk",
+            "sha256": "c1c20051b6e8f66d10f0878e4638cdeab929eca438a0decfe2266e44403d6bd6",
+            "size": 1547554
+          },
+          {
+            "package": "shadowsocks-rust-sslocal",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a76/shadowsocks-rust-sslocal-1.25.0-r1.apk",
+            "sha256": "03bdebc4801d040c19c457ffbc133a5f147906d2738f54d9b2ae02fcedc877a6",
+            "size": 3891578
+          },
+          {
+            "package": "shadowsocks-rust-ssmanager",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a76/shadowsocks-rust-ssmanager-1.25.0-r1.apk",
+            "sha256": "e843a348f6c968aeaa87dee0d0f4e563f1180881e15ada0a23c8308c95535d12",
+            "size": 3131295
+          },
+          {
+            "package": "shadowsocks-rust-ssserver",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a76/shadowsocks-rust-ssserver-1.25.0-r1.apk",
+            "sha256": "d8a8bf20b2398c1a266bc9c758a6bdc4c47130975f2b0d1c80ee460cfd2fd8e2",
+            "size": 3077414
+          },
+          {
+            "package": "shadowsocks-rust-ssservice",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a76/shadowsocks-rust-ssservice-1.25.0-r1.apk",
+            "sha256": "ab35cd28f966f68128f396177d07603306f1f293832ac689f693ad0031c6e69a",
+            "size": 4077231
+          },
+          {
+            "package": "shadowsocks-rust-ssurl",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a76/shadowsocks-rust-ssurl-1.25.0-r1.apk",
+            "sha256": "2017235995161b2323d49d1aba75e8cbba29a9700f45b72cf0a853f0052554c4",
+            "size": 908303
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-check",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a76/shadowsocksr-libev-ssr-check-2.5.6-r13.apk",
+            "sha256": "278fe992bbf6d683f722e9f3c56805b2dad27e955c996a12d96874c4e08dfa30",
+            "size": 3142
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-local",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a76/shadowsocksr-libev-ssr-local-2.5.6-r13.apk",
+            "sha256": "5f56afae9fc9c4e6eb322863f5ab9e9581d7be0ec47ccd66301584ca717f0bbb",
+            "size": 63578
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-nat",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a76/shadowsocksr-libev-ssr-nat-2.5.6-r13.apk",
+            "sha256": "94f88c51f93f6da328327e84b5aaf0b968026e3a3453e60928ab5190bf26b285",
+            "size": 2880
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-redir",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a76/shadowsocksr-libev-ssr-redir-2.5.6-r13.apk",
+            "sha256": "8fa95a2d9e7d71770509ad759afff08530b54c9b8d602da705cc379f4f6f5076",
+            "size": 56305
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-server",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a76/shadowsocksr-libev-ssr-server-2.5.6-r13.apk",
+            "sha256": "ba5e84b0a0efcc177b3c0c3a4df7a63fd71eb72f465b4a04aaa90ec605c2024c",
+            "size": 66717
+          },
+          {
+            "package": "simple-obfs-client",
+            "version": "0.0.5-r3",
+            "file": "aarch64_cortex-a76/simple-obfs-client-0.0.5-r3.apk",
+            "sha256": "019941317eed2c898594885dfa3354315e6a09c75c70f54e26584304d1985674",
+            "size": 31759
+          },
+          {
+            "package": "simple-obfs-server",
+            "version": "0.0.5-r3",
+            "file": "aarch64_cortex-a76/simple-obfs-server-0.0.5-r3.apk",
+            "sha256": "e716ff4f40637d689bc4011df2e4dd6cf32a3002268ee43ce6a587e1cfdc7af7",
+            "size": 34281
+          },
+          {
+            "package": "sing-box",
+            "version": "1.14.3-r1",
+            "file": "aarch64_cortex-a76/sing-box-1.14.3-r1.apk",
+            "sha256": "713c4972ebcd56649853ceba0fbaec164384690ea28b5e3739f90bfe546a8605",
+            "size": 19221348
+          },
+          {
+            "package": "tcping",
+            "version": "0.3-r1",
+            "file": "aarch64_cortex-a76/tcping-0.3-r1.apk",
+            "sha256": "9494b1910149a01b3290ffe7bd7c01bf5e797ab98961b76d715566c71dc8dd99",
+            "size": 4269
+          },
+          {
+            "package": "v2ray-geoip",
+            "version": "202609240030.1",
+            "file": "aarch64_cortex-a76/v2ray-geoip-202609240030.1.apk",
+            "sha256": "7c04711f44867d9e0c5eb41f7905e1c94a79bc09fc9411791efb36aeb72b6008",
+            "size": 3567754
+          },
+          {
+            "package": "v2ray-geosite",
+            "version": "202609292207.1",
+            "file": "aarch64_cortex-a76/v2ray-geosite-202609292207.1.apk",
+            "sha256": "7df158595aa622972b3b1c2ce5b0d72c1e11f98c9744a473a45c33d5208c2717",
+            "size": 3587442
+          },
+          {
+            "package": "v2ray-plugin",
+            "version": "5.49.0-r1",
+            "file": "aarch64_cortex-a76/v2ray-plugin-5.49.0-r1.apk",
+            "sha256": "12b8004cc8d7365d0af4861c5f44ad75e30c3788e1d864c4ac964eb4e8495b6a",
+            "size": 6141202
+          },
+          {
+            "package": "xray-core",
+            "version": "26.9.30-r1",
+            "file": "aarch64_cortex-a76/xray-core-26.9.30-r1.apk",
+            "sha256": "1ed81daf0e94ba7bd50728289d426ffaf7676c1a613e0a277623b23b6a6bbae4",
+            "size": 11419319
+          },
+          {
+            "package": "xray-plugin",
+            "version": "1.8.24-r1",
+            "file": "aarch64_cortex-a76/xray-plugin-1.8.24-r1.apk",
+            "sha256": "5bbb82043e442977f6eb37e668e301830528656e9509d8e9486285f56c05d829",
+            "size": 6934062
+          }
+        ]
+      }
+    },
+    {
+      "name": "aarch64_generic",
+      "feeds": {
+        "passwall2": [
+          {
+            "package": "luci-app-passwall2",
+            "version": "26.10.1-r2",
+            "file": "aarch64_generic/luci-app-passwall2-26.10.1-r2.apk",
+            "sha256": "62e7f12397153b464d5599a5ff697b3dce80cc82ebefc827f56d87eebf6fbf35",
+            "size": 346839
+          },
+          {
+            "package": "luci-i18n-passwall2-fa",
+            "version": "26.10.1",
+            "file": "aarch64_generic/luci-i18n-passwall2-fa-26.10.1.apk",
+            "sha256": "e1b1106b0d4bc1ac0d38b410ea4c192c31d9008627f06ff605a4dd19b2dc5b30",
+            "size": 22734
+          },
+          {
+            "package": "luci-i18n-passwall2-ru",
+            "version": "26.10.1",
+            "file": "aarch64_generic/luci-i18n-passwall2-ru-26.10.1.apk",
+            "sha256": "73a9a1e58adce6b3dc1848750d6a73804c615ce42aafb00998a9cb7f2e65ae6e",
+            "size": 23773
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-cn",
+            "version": "26.10.1",
+            "file": "aarch64_generic/luci-i18n-passwall2-zh-cn-26.10.1.apk",
+            "sha256": "efbc7f3e5d686cb1f81b9b1cc96e06e4abab4c2e43de551d280e3eb04de05515",
+            "size": 20200
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-tw",
+            "version": "26.10.1",
+            "file": "aarch64_generic/luci-i18n-passwall2-zh-tw-26.10.1.apk",
+            "sha256": "286145083e0edf8eb525f4d1bf83441b07b7b20568fbd0305969ca4045053296",
+            "size": 20372
+          }
+        ],
+        "passwall_luci": [
+          {
+            "package": "luci-app-passwall",
+            "version": "26.10.4-r1",
+            "file": "aarch64_generic/luci-app-passwall-26.10.4-r1.apk",
+            "sha256": "8d37c1ede454b4e5eba1f21e0ca97d0091144d90246fda3ec79e4b17d62708e0",
+            "size": 850179
+          },
+          {
+            "package": "luci-i18n-passwall-zh-cn",
+            "version": "26.10.4",
+            "file": "aarch64_generic/luci-i18n-passwall-zh-cn-26.10.4.apk",
+            "sha256": "5969181e1637edb23cafeacf9d2bddd20716a9bd46bfee7ef22c8077e2b1ac42",
+            "size": 18039
+          }
+        ],
+        "passwall_packages": [
+          {
+            "package": "chinadns-ng",
+            "version": "2025.08.09-r1",
+            "file": "aarch64_generic/chinadns-ng-2025.08.09-r1.apk",
+            "sha256": "545b37934a81df09627be845fa0cdd00d1ffaac41363ad2d12aa798446ce5f0e",
+            "size": 270121
+          },
+          {
+            "package": "dns2socks",
+            "version": "2.1-r2",
+            "file": "aarch64_generic/dns2socks-2.1-r2.apk",
+            "sha256": "c5cdf2b88dd4bc776b06e0279408900561ad0b2acfca50fb20799e6a91becfde",
+            "size": 11482
+          },
+          {
+            "package": "geoview",
+            "version": "0.2.6-r1",
+            "file": "aarch64_generic/geoview-0.2.6-r1.apk",
+            "sha256": "cf0efaed4a6952134a4e2fc9f23e1090b8420217b208d78c824e64c36cc234a0",
+            "size": 2974695
+          },
+          {
+            "package": "hysteria",
+            "version": "2.13.0-r1",
+            "file": "aarch64_generic/hysteria-2.13.0-r1.apk",
+            "sha256": "4b64c3af23c5c0b8c5848f9007fe430d5b4a6c9a10d26f4d6fd674ea46414868",
+            "size": 8163373
+          },
+          {
+            "package": "ipt2socks",
+            "version": "1.1.4-r3",
+            "file": "aarch64_generic/ipt2socks-1.1.4-r3.apk",
+            "sha256": "8eecfdc68e9a5d56be126988d5607b18f03903e89f9a3c237341f86edd9074a2",
+            "size": 26270
+          },
+          {
+            "package": "microsocks",
+            "version": "1.0.5-r2",
+            "file": "aarch64_generic/microsocks-1.0.5-r2.apk",
+            "sha256": "4e09f999b0a0c0af85d9cc59dd683bdc359da6df139e9910c228aa67f7d4d8f4",
+            "size": 8420
+          },
+          {
+            "package": "naiveproxy",
+            "version": "154.0.8037.49-r4",
+            "file": "aarch64_generic/naiveproxy-154.0.8037.49-r4.apk",
+            "sha256": "0cd914fccb77c61d3c5c61f396178357c88cc9562dbff76a1dd24fd9c9c76a4c",
+            "size": 3971858
+          },
+          {
+            "package": "shadow-tls",
+            "version": "0.2.25-r1",
+            "file": "aarch64_generic/shadow-tls-0.2.25-r1.apk",
+            "sha256": "666a6d2001681c1ec67ddd9bc1744447374c6d17b749b283081daf8dd7344595",
+            "size": 1547451
+          },
+          {
+            "package": "shadowsocks-rust-sslocal",
+            "version": "1.25.0-r1",
+            "file": "aarch64_generic/shadowsocks-rust-sslocal-1.25.0-r1.apk",
+            "sha256": "8779039d53c6154fd1d2c86994508e4005560dbaaf8aab27d1b0bc87c0c41019",
+            "size": 3890439
+          },
+          {
+            "package": "shadowsocks-rust-ssmanager",
+            "version": "1.25.0-r1",
+            "file": "aarch64_generic/shadowsocks-rust-ssmanager-1.25.0-r1.apk",
+            "sha256": "8fc0847146a88e3243d1fb3ae2e3271a53ad9a9da6a4c17ad0474125f2b3c690",
+            "size": 3130078
+          },
+          {
+            "package": "shadowsocks-rust-ssserver",
+            "version": "1.25.0-r1",
+            "file": "aarch64_generic/shadowsocks-rust-ssserver-1.25.0-r1.apk",
+            "sha256": "2886c51fdd464b11b6cafeff081a050ff2ceb14365ebeff183d56c0f93610672",
+            "size": 3075454
+          },
+          {
+            "package": "shadowsocks-rust-ssservice",
+            "version": "1.25.0-r1",
+            "file": "aarch64_generic/shadowsocks-rust-ssservice-1.25.0-r1.apk",
+            "sha256": "254d21f2345b028443e5d426a5241dcdfe545c65c5ea5d8ebe0db7bbff7a5754",
+            "size": 4076129
+          },
+          {
+            "package": "shadowsocks-rust-ssurl",
+            "version": "1.25.0-r1",
+            "file": "aarch64_generic/shadowsocks-rust-ssurl-1.25.0-r1.apk",
+            "sha256": "9838ce2bfe14c395f057ae7ae23c5aff09deac722fcbd303ddc380ff0161e56e",
+            "size": 908275
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-check",
+            "version": "2.5.6-r13",
+            "file": "aarch64_generic/shadowsocksr-libev-ssr-check-2.5.6-r13.apk",
+            "sha256": "7a45afa3867e62569201024b9e66a51afd2b816d5387ebbadb0672b0b6a56c4b",
+            "size": 3133
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-local",
+            "version": "2.5.6-r13",
+            "file": "aarch64_generic/shadowsocksr-libev-ssr-local-2.5.6-r13.apk",
+            "sha256": "439ff5c7884e9f417bfcdf14901f49206bb220aaaec329e33bde49fb39c080e3",
+            "size": 63544
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-nat",
+            "version": "2.5.6-r13",
+            "file": "aarch64_generic/shadowsocksr-libev-ssr-nat-2.5.6-r13.apk",
+            "sha256": "0b163e49ebb7e893cca8743e8db22fe6b1f83b674c74e0582110365fbba7b50f",
+            "size": 2871
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-redir",
+            "version": "2.5.6-r13",
+            "file": "aarch64_generic/shadowsocksr-libev-ssr-redir-2.5.6-r13.apk",
+            "sha256": "c0e1f0395d03b93cff6332eccc7dc4240f6fff1576b8f0ff3936d4525bd0ec36",
+            "size": 56292
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-server",
+            "version": "2.5.6-r13",
+            "file": "aarch64_generic/shadowsocksr-libev-ssr-server-2.5.6-r13.apk",
+            "sha256": "c784053f6fce24fd41c6c070308ffe222a46cf957f74936dcc1849197edda7c0",
+            "size": 66706
+          },
+          {
+            "package": "simple-obfs-client",
+            "version": "0.0.5-r3",
+            "file": "aarch64_generic/simple-obfs-client-0.0.5-r3.apk",
+            "sha256": "b4a3c7ad34053f20ef673c22cfb2ea6b98c8ffa879eef7157e85a19b3e03c481",
+            "size": 31764
+          },
+          {
+            "package": "simple-obfs-server",
+            "version": "0.0.5-r3",
+            "file": "aarch64_generic/simple-obfs-server-0.0.5-r3.apk",
+            "sha256": "49bc714a1c0b31e53bf5b62c8eaf07adf765b8004c73e7314466bda827f21b3a",
+            "size": 34252
+          },
+          {
+            "package": "sing-box",
+            "version": "1.14.3-r1",
+            "file": "aarch64_generic/sing-box-1.14.3-r1.apk",
+            "sha256": "b5f1268830535e8e5bd08095e8c5383312d4c8f98b04e26e468d2b2961c8d245",
+            "size": 19326317
+          },
+          {
+            "package": "tcping",
+            "version": "0.3-r1",
+            "file": "aarch64_generic/tcping-0.3-r1.apk",
+            "sha256": "0e81c20209170eab04b4bd54a0cb1a8a7aa8f836f99d20c14bee6b66a2916932",
+            "size": 4267
+          },
+          {
+            "package": "v2ray-geoip",
+            "version": "202609240030.1",
+            "file": "aarch64_generic/v2ray-geoip-202609240030.1.apk",
+            "sha256": "7c04711f44867d9e0c5eb41f7905e1c94a79bc09fc9411791efb36aeb72b6008",
+            "size": 3567754
+          },
+          {
+            "package": "v2ray-geosite",
+            "version": "202609292207.1",
+            "file": "aarch64_generic/v2ray-geosite-202609292207.1.apk",
+            "sha256": "7df158595aa622972b3b1c2ce5b0d72c1e11f98c9744a473a45c33d5208c2717",
+            "size": 3587442
+          },
+          {
+            "package": "v2ray-plugin",
+            "version": "5.49.0-r1",
+            "file": "aarch64_generic/v2ray-plugin-5.49.0-r1.apk",
+            "sha256": "59d50d32b5e9092e65dd346aa78d872426e1872e7357e5de3a5de907c6b92e55",
+            "size": 6165808
+          },
+          {
+            "package": "xray-core",
+            "version": "26.9.30-r1",
+            "file": "aarch64_generic/xray-core-26.9.30-r1.apk",
+            "sha256": "58abb69366391e5dbabc0a35500cd584f2a84283f5ac0da9acbdb64a6a0c840f",
+            "size": 11478682
+          },
+          {
+            "package": "xray-plugin",
+            "version": "1.8.24-r1",
+            "file": "aarch64_generic/xray-plugin-1.8.24-r1.apk",
+            "sha256": "0f7c721626893e15ac5f44eb199ab0791abfdc4c63db93a3f989d9b061ea7919",
+            "size": 6964603
+          }
+        ]
+      }
+    },
+    {
+      "name": "arm_cortex-a7_neon-vfpv4",
+      "feeds": {
+        "passwall2": [
+          {
+            "package": "luci-app-passwall2",
+            "version": "26.10.1-r2",
+            "file": "arm_cortex-a7_neon-vfpv4/luci-app-passwall2-26.10.1-r2.apk",
+            "sha256": "9dd01ee4aa6a863a28676c1b27d5dcda57de959a2b439051904db8b6da86b937",
+            "size": 346841
+          },
+          {
+            "package": "luci-i18n-passwall2-fa",
+            "version": "26.10.1",
+            "file": "arm_cortex-a7_neon-vfpv4/luci-i18n-passwall2-fa-26.10.1.apk",
+            "sha256": "8e514d0aa9f0fd54cd62567adba56871c2e7b38427c9a330576eb72cc9bf47c5",
+            "size": 22732
+          },
+          {
+            "package": "luci-i18n-passwall2-ru",
+            "version": "26.10.1",
+            "file": "arm_cortex-a7_neon-vfpv4/luci-i18n-passwall2-ru-26.10.1.apk",
+            "sha256": "76e2db5aa915ad9da22f0928cfbafff7d84e86a63a5171b9980e5e24da38d95f",
+            "size": 23774
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-cn",
+            "version": "26.10.1",
+            "file": "arm_cortex-a7_neon-vfpv4/luci-i18n-passwall2-zh-cn-26.10.1.apk",
+            "sha256": "a792ced80ee9c8b274ba85bd137677b7e9c5d9e183e23289ce5c5056287feb37",
+            "size": 20202
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-tw",
+            "version": "26.10.1",
+            "file": "arm_cortex-a7_neon-vfpv4/luci-i18n-passwall2-zh-tw-26.10.1.apk",
+            "sha256": "e082c7a5037a5868314aab8196a892aa33db54eaaf9216c4f3b017833f623fed",
+            "size": 20370
+          }
+        ],
+        "passwall_luci": [
+          {
+            "package": "luci-app-passwall",
+            "version": "26.10.4-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/luci-app-passwall-26.10.4-r1.apk",
+            "sha256": "2461d71e39267b1745e965e382b5ab35d70a7e865533a0a7b3a0b6d8fcb25be8",
+            "size": 850180
+          },
+          {
+            "package": "luci-i18n-passwall-zh-cn",
+            "version": "26.10.4",
+            "file": "arm_cortex-a7_neon-vfpv4/luci-i18n-passwall-zh-cn-26.10.4.apk",
+            "sha256": "332b9e08afb19aacabd3ff204cf1ea189f44b3deacd715f4dbe3be5ff3d74d14",
+            "size": 18040
+          }
+        ],
+        "passwall_packages": [
+          {
+            "package": "chinadns-ng",
+            "version": "2025.08.09-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/chinadns-ng-2025.08.09-r1.apk",
+            "sha256": "1355f792739e92d15de1706e7a879353310acfd21f5a20426db2096b4a7ec086",
+            "size": 270310
+          },
+          {
+            "package": "dns2socks",
+            "version": "2.1-r2",
+            "file": "arm_cortex-a7_neon-vfpv4/dns2socks-2.1-r2.apk",
+            "sha256": "31f2e8e40eb9b8fcfa1982b3a545930f0d9b790856b97a72e21e6c9b57d6b0a1",
+            "size": 11195
+          },
+          {
+            "package": "geoview",
+            "version": "0.2.6-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/geoview-0.2.6-r1.apk",
+            "sha256": "aeb70d557564fd28af63a4c45537228be66a3619627488ed96163f8f9fcbd8e1",
+            "size": 3198178
+          },
+          {
+            "package": "hysteria",
+            "version": "2.13.0-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/hysteria-2.13.0-r1.apk",
+            "sha256": "348824b30d283b89fb1b7d504f67edb26c9d38ed9aa76638fd1acdaa113658f0",
+            "size": 8578486
+          },
+          {
+            "package": "ipt2socks",
+            "version": "1.1.4-r3",
+            "file": "arm_cortex-a7_neon-vfpv4/ipt2socks-1.1.4-r3.apk",
+            "sha256": "6aa55c5a3e7109c0d7a3ceb5dac9237e287554fc14428b4f06b5133ed0d8e0a7",
+            "size": 26014
+          },
+          {
+            "package": "microsocks",
+            "version": "1.0.5-r2",
+            "file": "arm_cortex-a7_neon-vfpv4/microsocks-1.0.5-r2.apk",
+            "sha256": "bed9c32b56c0eff1a403f19e1096d91f0a2880a5e92486c3d814ed9b63fecdb3",
+            "size": 7762
+          },
+          {
+            "package": "shadow-tls",
+            "version": "0.2.25-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/shadow-tls-0.2.25-r1.apk",
+            "sha256": "7cc930825049be01ef895585335eccc2a8c07dec46c391dcb10568e76d88ec72",
+            "size": 1188997
+          },
+          {
+            "package": "shadowsocks-rust-sslocal",
+            "version": "1.25.0-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/shadowsocks-rust-sslocal-1.25.0-r1.apk",
+            "sha256": "99e7787eccdc294bd250698761f9d3e8197df67d0ef589ccbd5076ad12e05e86",
+            "size": 3509278
+          },
+          {
+            "package": "shadowsocks-rust-ssmanager",
+            "version": "1.25.0-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/shadowsocks-rust-ssmanager-1.25.0-r1.apk",
+            "sha256": "e94e31b63e3c5ae922f2dd9bba73446cda33836cf729a52637480aeb3a931d47",
+            "size": 2781761
+          },
+          {
+            "package": "shadowsocks-rust-ssserver",
+            "version": "1.25.0-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/shadowsocks-rust-ssserver-1.25.0-r1.apk",
+            "sha256": "ed20d0802fc110176c6436e6aeeeaab16d755e3b6d81a921c44bf7660ff2aeae",
+            "size": 2730794
+          },
+          {
+            "package": "shadowsocks-rust-ssservice",
+            "version": "1.25.0-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/shadowsocks-rust-ssservice-1.25.0-r1.apk",
+            "sha256": "0f1134c139a335fbf4ebd51613782f40200a69be8d76478c95a48408c1c808c9",
+            "size": 3685768
+          },
+          {
+            "package": "shadowsocks-rust-ssurl",
+            "version": "1.25.0-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/shadowsocks-rust-ssurl-1.25.0-r1.apk",
+            "sha256": "c147fdcea01f78ae7281fae0728f1489064897f5a5549e5fae27e2e8142c5542",
+            "size": 846920
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-check",
+            "version": "2.5.6-r13",
+            "file": "arm_cortex-a7_neon-vfpv4/shadowsocksr-libev-ssr-check-2.5.6-r13.apk",
+            "sha256": "da290622665c4a871f30db6dd0dd2c9c6d8f5b72cdc3ba61202b5e534d8f48ad",
+            "size": 2812
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-local",
+            "version": "2.5.6-r13",
+            "file": "arm_cortex-a7_neon-vfpv4/shadowsocksr-libev-ssr-local-2.5.6-r13.apk",
+            "sha256": "97be6a37d033c4779fd41ca42ab2429c6932fb563017ae66b1c79253fa67f433",
+            "size": 61380
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-nat",
+            "version": "2.5.6-r13",
+            "file": "arm_cortex-a7_neon-vfpv4/shadowsocksr-libev-ssr-nat-2.5.6-r13.apk",
+            "sha256": "926c81da204e0055f38e8d5358ac64801ff506100f7a8526b0cd7ab7cf936713",
+            "size": 2883
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-redir",
+            "version": "2.5.6-r13",
+            "file": "arm_cortex-a7_neon-vfpv4/shadowsocksr-libev-ssr-redir-2.5.6-r13.apk",
+            "sha256": "ea9fcfdaa02ca075bacfef543dc43d350c3392c7f92885ac8904ec721b876ffd",
+            "size": 55264
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-server",
+            "version": "2.5.6-r13",
+            "file": "arm_cortex-a7_neon-vfpv4/shadowsocksr-libev-ssr-server-2.5.6-r13.apk",
+            "sha256": "57ddd7e27f098ef72096d799878ca071b1d91d83ddb054af5cd99464efcabfd8",
+            "size": 65137
+          },
+          {
+            "package": "simple-obfs-client",
+            "version": "0.0.5-r3",
+            "file": "arm_cortex-a7_neon-vfpv4/simple-obfs-client-0.0.5-r3.apk",
+            "sha256": "1ed63b49bafd018d1f3849ffa4aa8dcc7ad74208eb55db705b052a621909481e",
+            "size": 27903
+          },
+          {
+            "package": "simple-obfs-server",
+            "version": "0.0.5-r3",
+            "file": "arm_cortex-a7_neon-vfpv4/simple-obfs-server-0.0.5-r3.apk",
+            "sha256": "e86aa33cc4c730dee67c880ced9702c7febdaccc3074c3a75a5cf0034568d852",
+            "size": 30287
+          },
+          {
+            "package": "sing-box",
+            "version": "1.14.3-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/sing-box-1.14.3-r1.apk",
+            "sha256": "f88716640e3a4bb71143dad034fb811dba71f466f39c1e3142aefb8d10f1955b",
+            "size": 19873143
+          },
+          {
+            "package": "tcping",
+            "version": "0.3-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/tcping-0.3-r1.apk",
+            "sha256": "8c36d210cc4db6e53c891fd5046f50ba90ef9a0fa616915f799b5f666de40bbf",
+            "size": 3927
+          },
+          {
+            "package": "v2ray-geoip",
+            "version": "202609240030.1",
+            "file": "arm_cortex-a7_neon-vfpv4/v2ray-geoip-202609240030.1.apk",
+            "sha256": "7c04711f44867d9e0c5eb41f7905e1c94a79bc09fc9411791efb36aeb72b6008",
+            "size": 3567754
+          },
+          {
+            "package": "v2ray-geosite",
+            "version": "202609292207.1",
+            "file": "arm_cortex-a7_neon-vfpv4/v2ray-geosite-202609292207.1.apk",
+            "sha256": "7df158595aa622972b3b1c2ce5b0d72c1e11f98c9744a473a45c33d5208c2717",
+            "size": 3587442
+          },
+          {
+            "package": "v2ray-plugin",
+            "version": "5.49.0-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/v2ray-plugin-5.49.0-r1.apk",
+            "sha256": "d60021513f37c3fb37351b272b30427a88b75f4641a2b373ffe124b937df1a0e",
+            "size": 6465488
+          },
+          {
+            "package": "xray-core",
+            "version": "26.9.30-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/xray-core-26.9.30-r1.apk",
+            "sha256": "d991d38fa31dc03af257054b5dcf278e856a4c3352e4a560fd229419f01cef76",
+            "size": 11921011
+          },
+          {
+            "package": "xray-plugin",
+            "version": "1.8.24-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/xray-plugin-1.8.24-r1.apk",
+            "sha256": "05b72da977ff1d8487c107dc5cc6b4b5b7192d400fb3a07cda7a3bc01943e7cb",
+            "size": 7299776
+          }
+        ]
+      }
+    },
+    {
+      "name": "arm_cortex-a9_vfpv3-d16",
+      "feeds": {
+        "passwall2": [
+          {
+            "package": "luci-app-passwall2",
+            "version": "26.10.1-r2",
+            "file": "arm_cortex-a9_vfpv3-d16/luci-app-passwall2-26.10.1-r2.apk",
+            "sha256": "6cf930de5f4adca492cb79404a42a2851097cf5b4948434410947c096bb9a356",
+            "size": 346840
+          },
+          {
+            "package": "luci-i18n-passwall2-fa",
+            "version": "26.10.1",
+            "file": "arm_cortex-a9_vfpv3-d16/luci-i18n-passwall2-fa-26.10.1.apk",
+            "sha256": "37ca9a53688c0dfb40dc2a6548b39e236bbc6039e8d86284955e680ebb8e7cbc",
+            "size": 22732
+          },
+          {
+            "package": "luci-i18n-passwall2-ru",
+            "version": "26.10.1",
+            "file": "arm_cortex-a9_vfpv3-d16/luci-i18n-passwall2-ru-26.10.1.apk",
+            "sha256": "8bd4773e99d382a4a9ce641b5cf0d16720bc00964c02dde5286493293138cf13",
+            "size": 23774
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-cn",
+            "version": "26.10.1",
+            "file": "arm_cortex-a9_vfpv3-d16/luci-i18n-passwall2-zh-cn-26.10.1.apk",
+            "sha256": "4fa081788f0824568ea82f4a6a3af8dd304c93ac6a73425e762cb678fc0b4bdc",
+            "size": 20202
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-tw",
+            "version": "26.10.1",
+            "file": "arm_cortex-a9_vfpv3-d16/luci-i18n-passwall2-zh-tw-26.10.1.apk",
+            "sha256": "b33ef5d02238c375b2be3d6428e41c5fc3af395b1c4544d561c8976a2f5067da",
+            "size": 20368
+          }
+        ],
+        "passwall_luci": [
+          {
+            "package": "luci-app-passwall",
+            "version": "26.10.4-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/luci-app-passwall-26.10.4-r1.apk",
+            "sha256": "6d82f37140742e618240591294c3a8b9668b98befab49eab68c74e5ae46c7c56",
+            "size": 850178
+          },
+          {
+            "package": "luci-i18n-passwall-zh-cn",
+            "version": "26.10.4",
+            "file": "arm_cortex-a9_vfpv3-d16/luci-i18n-passwall-zh-cn-26.10.4.apk",
+            "sha256": "1f8d3b803e25e293cc5715eccfae8565a6f9583a3e6f2f925df326b9bfe4d4d3",
+            "size": 18038
+          }
+        ],
+        "passwall_packages": [
+          {
+            "package": "chinadns-ng",
+            "version": "2025.08.09-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/chinadns-ng-2025.08.09-r1.apk",
+            "sha256": "33ad78561e6427c1f3de67f643a37ccc2dd7ddfdb3df556984b98dad8eddefd1",
+            "size": 270308
+          },
+          {
+            "package": "dns2socks",
+            "version": "2.1-r2",
+            "file": "arm_cortex-a9_vfpv3-d16/dns2socks-2.1-r2.apk",
+            "sha256": "17226bd7e43a21a29298b902b2aaada5e4ba96e4988fddb1a586ca7df6a21d0c",
+            "size": 11221
+          },
+          {
+            "package": "geoview",
+            "version": "0.2.6-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/geoview-0.2.6-r1.apk",
+            "sha256": "646f5156080904e88a024e7820c263ea20ce887a8c1a1a054df90c536e65a9c0",
+            "size": 3198187
+          },
+          {
+            "package": "hysteria",
+            "version": "2.13.0-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/hysteria-2.13.0-r1.apk",
+            "sha256": "0730ef61e4916d63bcc2d5c218f5a3553a61b9320e4bdfe3250b974060e69929",
+            "size": 8578691
+          },
+          {
+            "package": "ipt2socks",
+            "version": "1.1.4-r3",
+            "file": "arm_cortex-a9_vfpv3-d16/ipt2socks-1.1.4-r3.apk",
+            "sha256": "869156c6f139947d7c557df6a00d4ceae7f73f8a7c7e461e69391d50c11332b2",
+            "size": 26321
+          },
+          {
+            "package": "microsocks",
+            "version": "1.0.5-r2",
+            "file": "arm_cortex-a9_vfpv3-d16/microsocks-1.0.5-r2.apk",
+            "sha256": "17a451cec49e75a21e364e59184b4699e82ba6b8ca89f16ce4c437985c2f657b",
+            "size": 7806
+          },
+          {
+            "package": "naiveproxy",
+            "version": "154.0.8037.49-r4",
+            "file": "arm_cortex-a9_vfpv3-d16/naiveproxy-154.0.8037.49-r4.apk",
+            "sha256": "ece059f94c028b4dd1a02fd70c511b84b4fee51fd21ef65113d9d2f1bede4708",
+            "size": 3828885
+          },
+          {
+            "package": "shadow-tls",
+            "version": "0.2.25-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/shadow-tls-0.2.25-r1.apk",
+            "sha256": "1e72e9ef153888714e6d78bc464a8107c441b669d6815f5a15485cd4ee0ca734",
+            "size": 1189034
+          },
+          {
+            "package": "shadowsocks-rust-sslocal",
+            "version": "1.25.0-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/shadowsocks-rust-sslocal-1.25.0-r1.apk",
+            "sha256": "4f04116d5a02e34cee05a15ebbef01daff55cf941e0e7db30397c5747cec3306",
+            "size": 3509220
+          },
+          {
+            "package": "shadowsocks-rust-ssmanager",
+            "version": "1.25.0-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/shadowsocks-rust-ssmanager-1.25.0-r1.apk",
+            "sha256": "4b91ee9a4024244624ef095b19fee09ade4595fb67918f21108ba7e2a946e908",
+            "size": 2781643
+          },
+          {
+            "package": "shadowsocks-rust-ssserver",
+            "version": "1.25.0-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/shadowsocks-rust-ssserver-1.25.0-r1.apk",
+            "sha256": "1f4a352717def4a70149f231dde547deede78651a9dda67bfc70d2f3d3a890e2",
+            "size": 2730842
+          },
+          {
+            "package": "shadowsocks-rust-ssservice",
+            "version": "1.25.0-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/shadowsocks-rust-ssservice-1.25.0-r1.apk",
+            "sha256": "cfcf5742962cc15ad00dde66a801ee89df41562024602cb0c198724002f71049",
+            "size": 3685675
+          },
+          {
+            "package": "shadowsocks-rust-ssurl",
+            "version": "1.25.0-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/shadowsocks-rust-ssurl-1.25.0-r1.apk",
+            "sha256": "dcc5a2c0437924d6743e74318b8b0851024450548af812fe6e34b45fea09f0f2",
+            "size": 846869
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-check",
+            "version": "2.5.6-r13",
+            "file": "arm_cortex-a9_vfpv3-d16/shadowsocksr-libev-ssr-check-2.5.6-r13.apk",
+            "sha256": "baac34a7654b1928f4b06b686b3c36efc4ba549098aef48d8c029e2e6ae6176f",
+            "size": 2813
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-local",
+            "version": "2.5.6-r13",
+            "file": "arm_cortex-a9_vfpv3-d16/shadowsocksr-libev-ssr-local-2.5.6-r13.apk",
+            "sha256": "73518b2275801ad41be8486ad90fe09e73b2957c38d64b9cee51bcb44d1bf96f",
+            "size": 61343
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-nat",
+            "version": "2.5.6-r13",
+            "file": "arm_cortex-a9_vfpv3-d16/shadowsocksr-libev-ssr-nat-2.5.6-r13.apk",
+            "sha256": "c93b534664318c5dcf35db9e95598c259a3cb7886db994efce34ec260ffeedda",
+            "size": 2881
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-redir",
+            "version": "2.5.6-r13",
+            "file": "arm_cortex-a9_vfpv3-d16/shadowsocksr-libev-ssr-redir-2.5.6-r13.apk",
+            "sha256": "4a2559d24eefd0dab030bd14d247f0fe0ca441b3c8020e2de060204dc0ff49ad",
+            "size": 55055
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-server",
+            "version": "2.5.6-r13",
+            "file": "arm_cortex-a9_vfpv3-d16/shadowsocksr-libev-ssr-server-2.5.6-r13.apk",
+            "sha256": "b23f54e9469ecfb63a361d234c4940069b44b703b22517f394e36042e62a8192",
+            "size": 64934
+          },
+          {
+            "package": "simple-obfs-client",
+            "version": "0.0.5-r3",
+            "file": "arm_cortex-a9_vfpv3-d16/simple-obfs-client-0.0.5-r3.apk",
+            "sha256": "a0bba6cd83cf745ac4b3c570496868acbd003fa68b21f83871cc40482fafb7f7",
+            "size": 27978
+          },
+          {
+            "package": "simple-obfs-server",
+            "version": "0.0.5-r3",
+            "file": "arm_cortex-a9_vfpv3-d16/simple-obfs-server-0.0.5-r3.apk",
+            "sha256": "d4c41348f016ea7db4edfa65b817d63faac30ee8fe2c3c553401b408e8892947",
+            "size": 30366
+          },
+          {
+            "package": "sing-box",
+            "version": "1.14.3-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/sing-box-1.14.3-r1.apk",
+            "sha256": "95b9e41ba9bfb60c87ed2b2ba4971bf8541a5da571cdcb1b2e0017e63288ec8e",
+            "size": 19873136
+          },
+          {
+            "package": "tcping",
+            "version": "0.3-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/tcping-0.3-r1.apk",
+            "sha256": "0b6424a8d38b7d737c6310940d31717f59a4282571338f87a93b90115b6f6693",
+            "size": 3931
+          },
+          {
+            "package": "v2ray-geoip",
+            "version": "202609240030.1",
+            "file": "arm_cortex-a9_vfpv3-d16/v2ray-geoip-202609240030.1.apk",
+            "sha256": "7c04711f44867d9e0c5eb41f7905e1c94a79bc09fc9411791efb36aeb72b6008",
+            "size": 3567754
+          },
+          {
+            "package": "v2ray-geosite",
+            "version": "202609292207.1",
+            "file": "arm_cortex-a9_vfpv3-d16/v2ray-geosite-202609292207.1.apk",
+            "sha256": "7df158595aa622972b3b1c2ce5b0d72c1e11f98c9744a473a45c33d5208c2717",
+            "size": 3587442
+          },
+          {
+            "package": "v2ray-plugin",
+            "version": "5.49.0-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/v2ray-plugin-5.49.0-r1.apk",
+            "sha256": "85107a0955fc40aa554c27055a232fbaaa9ae6d7be27cca802c9bb4329a93de0",
+            "size": 6465678
+          },
+          {
+            "package": "xray-core",
+            "version": "26.9.30-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/xray-core-26.9.30-r1.apk",
+            "sha256": "c1fa8d8a79c0b2857af98b2f4de7e5ae0b31f87a160305c63a49aefbab6f002b",
+            "size": 11921011
+          },
+          {
+            "package": "xray-plugin",
+            "version": "1.8.24-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/xray-plugin-1.8.24-r1.apk",
+            "sha256": "b683f2b17ce23e7e2034363038cedbd0691c6c800a15b4b661d79ea1ba61d90a",
+            "size": 7299776
+          }
+        ]
+      }
+    }
+  ]
+}

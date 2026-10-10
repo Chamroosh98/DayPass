@@ -1,0 +1,61 @@
+{
+  "module_id": "packages",
+  "title": "Package Profiles & Dependencies",
+  "summary": "Installs the package profiles from config/package_profiles.json. Each profile shows its resolved package plan before anything is installed; failed required packages roll the profile back.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Proxy & Evasion Cores",
+      "description": "Passwall wizard: Passwall-1 or Passwall-2, then Recommended or Custom package selection, review and deploy.",
+      "usage_tip": "0 on any wizard step goes back without installing."
+    },
+    {
+      "key": "2",
+      "title": "VPN & Tunnels",
+      "description": "Shows a friendly summary of the VPN profile (WireGuard, OpenVPN, SoftEther) with Core / Web Interface / Enhancement tags, then installs after you confirm with Enter or Y.",
+      "usage_tip": "Resolution details are written to /tmp/daypass_resolve.log instead of the screen."
+    },
+    {
+      "key": "3",
+      "title": "USB & Hardware Drivers",
+      "description": "USB tethering drivers (Android, CDC, iPhone) listed with plain-English titles, then installed after confirmation.",
+      "usage_tip": "Install this before using the Hardware & USB Tethering menu."
+    },
+    {
+      "key": "4",
+      "title": "Network Tools & Traffic",
+      "description": "Multi-WAN, Smart Queue Management, bandwidth tests and TPROXY support, each with a short description — not raw package names.",
+      "usage_tip": "Needed for Multi-WAN and for tproxy engines. Enter confirms the default Yes."
+    },
+    {
+      "key": "5",
+      "title": "Check & Update Installed Packages",
+      "description": "Compares the packages DayPass installed with the available versions and upgrades them after confirmation.",
+      "usage_tip": "Use it after a new DayPass release."
+    },
+    {
+      "key": "6",
+      "title": "Profile Status Dashboard",
+      "description": "Clears the screen and shows every package profile with its install status (Installed / Partial / Not Installed), key tools, and package count.",
+      "usage_tip": "Status is taken from packages on the router and /etc/daypass/installed_manifest.json. Enter returns to this menu."
+    },
+    {
+      "key": "0",
+      "title": "Back to Main Menu",
+      "description": "Returns to the main menu.",
+      "usage_tip": "Nothing is changed by leaving this menu."
+    },
+    {
+      "key": "q",
+      "title": "Quit DayPass",
+      "description": "Ends the DayPass session from any menu.",
+      "usage_tip": "Ctrl+C does the same and restores the terminal."
+    },
+    {
+      "key": "h",
+      "title": "Help",
+      "description": "Opens the manual of the current screen.",
+      "usage_tip": "Enter or 0 inside a manual returns to the screen you came from; q quits DayPass."
+    }
+  ]
+}
