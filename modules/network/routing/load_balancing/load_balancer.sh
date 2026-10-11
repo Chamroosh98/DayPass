@@ -76,54 +76,54 @@ mwan_active_ifaces() {
     done
 }
 
-# Install mwan3 with opkg (OpenWrt 24) or apk (OpenWrt 25).
+# Install mwan3 core & LuCI web interface with opkg (OpenWrt 24) or apk (OpenWrt 25).
 install_mwan3_deps() {
-    if command -v pkg_installed >/dev/null 2>&1 && pkg_installed mwan3; then
-        log_success "mwan3 is already installed."
-        return 0
-    fi
-    if command -v mwan3 >/dev/null 2>&1 || [ -x /etc/init.d/mwan3 ]; then
-        log_success "mwan3 is already installed."
+    local PKGS="mwan3 luci-app-mwan3"
+
+    log_info "Verifying Multi-WAN & LuCI Web Interface packages ..."
+
+    # 1. Pre-flight check: Skip if both mwan3 binary and LuCI app exist
+    if command -v mwan3 >/dev/null 2>&1 && [ -f /usr/lib/lua/luci/controller/mwan3.lua -o -d /www/luci-static/resources/view/mwan3 ]; then
+        log_success "mwan3 and LuCI web panel are already installed."
         return 0
     fi
 
-    log_info "Installing mwan3 ..."
-    if command -v pkg_installed >/dev/null 2>&1 && pkg_installed mwan3; then
-        printf '  [✓] %s is already installed. Skipping.\n' "mwan3"
-        return 0
-    fi
+    log_info "Updating package database ..."
     if command -v pkg_update >/dev/null 2>&1; then
         pkg_update >/dev/null 2>&1 || true
     elif command -v opkg >/dev/null 2>&1; then
-        (opkg update >/dev/null 2>&1) &
-        if command -v ui_spinner >/dev/null 2>&1; then
-            ui_spinner $! "Updating package database ..." || true
-        else
-            wait $! || true
-        fi
+        opkg update >/dev/null 2>&1 || true
     elif command -v apk >/dev/null 2>&1; then
-        (apk update >/dev/null 2>&1) &
-        if command -v ui_spinner >/dev/null 2>&1; then
-            ui_spinner $! "Updating package database ..." || true
-        else
-            wait $! || true
+        apk update >/dev/null 2>&1 || true
+    fi
+
+    log_info "Installing mwan3 and LuCI Web Interface ($PKGS) ..."
+
+    # 2. Try using DayPass core wrapper if available
+    if command -v pkg_install >/dev/null 2>&1; then
+        if pkg_install mwan3 && pkg_install luci-app-mwan3; then
+            log_success "mwan3 and LuCI Web Interface successfully installed."
+            return 0
         fi
     fi
 
-    if command -v pkg_install >/dev/null 2>&1 && pkg_install mwan3; then
-        log_success "mwan3 installed."
-        return 0
-    fi
-    if command -v opkg >/dev/null 2>&1 && opkg install mwan3 >/dev/null 2>&1; then
-        log_success "mwan3 installed."
-        return 0
-    fi
-    if command -v apk >/dev/null 2>&1 && apk add --allow-untrusted mwan3 >/dev/null 2>&1; then
-        log_success "mwan3 installed."
-        return 0
+    # 3. Fallback for OpenWrt 24 (opkg)
+    if command -v opkg >/dev/null 2>&1; then
+        if opkg install $PKGS >/dev/null 2>&1; then
+            log_success "mwan3 & LuCI Web Panel installed via OPKG."
+            return 0
+        fi
     fi
 
-    log_error "Could not install mwan3."
+    # 4. Fallback for OpenWrt 25 (apk)
+    if command -v apk >/dev/null 2>&1; then
+        if apk add $PKGS >/dev/null 2>&1; then
+            log_success "mwan3 & LuCI Web Panel installed via APK."
+            return 0
+        fi
+    fi
+
+    log_error "Could not install mwan3 or luci-app-mwan3."
     return 1
 }
 
