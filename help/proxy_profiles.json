@@ -1,0 +1,43 @@
+{
+  "module_id": "proxy_profiles",
+  "title": "Routing Profiles",
+  "summary": "Ready-made traffic profiles that apply a routing mode to the active transport engine and remember the active profile. The header shows the active profile and the current routing mode.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Balanced (Iran Direct + Foreign Proxy)",
+      "description": "Applies the Iran Direct routing mode: Iranian destinations go direct and everything else through the active engine.",
+      "usage_tip": "Recommended profile for everyday browsing. On Passwall engines a proxy node must be selected, otherwise the routing mode is refused and only the profile name is saved."
+    },
+    {
+      "key": "2",
+      "title": "Gaming (Low latency focus)",
+      "description": "Applies the same Iran direct mode as Balanced and saves the profile name as gaming.",
+      "usage_tip": "No latency tuning is applied yet; keep a nearby node selected in the active engine."
+    },
+    {
+      "key": "3",
+      "title": "Streaming (Better for video services)",
+      "description": "Applies the same Iran direct mode as Balanced and saves the profile name as streaming.",
+      "usage_tip": "No streaming-specific rules are applied yet; pick a fast node in the active engine."
+    },
+    {
+      "key": "4",
+      "title": "Global Proxy (All traffic through proxy)",
+      "description": "Applies the global mode so every destination uses the proxy.",
+      "usage_tip": "Expect slower local access while this profile is active."
+    },
+    {
+      "key": "5",
+      "title": "Direct Only (Disable proxy completely)",
+      "description": "Applies direct only mode and turns proxying off on the active engine.",
+      "usage_tip": "Use it to rule out the proxy when debugging connectivity."
+    },
+    {
+      "key": "0",
+      "title": "Back",
+      "description": "Returns to the Proxy & Routing Manager.",
+      "usage_tip": "The last applied profile stays active."
+    }
+  ]
+}
