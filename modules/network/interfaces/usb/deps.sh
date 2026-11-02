@@ -117,7 +117,7 @@ _usb_dep_update() {
 
     case "$_ub_pm" in
         apk)
-            _usb_run_bounded 40 apk update --no-interactive --network-timeout 15
+            _usb_run_bounded 40 apk update --no-interactive
             _ub_st=$?
             if [ "$_ub_st" -ne 0 ] && [ "$_ub_st" -ne 124 ]; then
                 _ua_flag=""
@@ -174,7 +174,7 @@ _usb_dep_install_one() {
 
     case "$_ub_pm" in
         apk)
-            _usb_run_bounded 90 apk add --no-interactive --no-cache --allow-untrusted --network-timeout 20 "$_ud_pkg"
+            _usb_run_bounded 90 apk add --no-interactive --no-cache --allow-untrusted "$_ud_pkg"
             _ub_st=$?
             if [ "$_ub_st" -ne 0 ] && [ "$_ub_st" -ne 124 ]; then
                 _ua_flag=""
