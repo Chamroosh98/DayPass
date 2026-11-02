@@ -393,8 +393,6 @@ load_balancer_menu() {
         render_persistent_header
         echo "  ⚖️ Multi-WAN Load Balancer"
         ui_divider
-        echo "  🌐 Detected WAN interfaces"
-        list=$(mwan_discover_ifaces)
         if [ -z "$list" ]; then
             echo "     none"
         else
