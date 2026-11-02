@@ -166,7 +166,7 @@ _usb_dep_install_one() {
 
     [ -n "$_ud_pkg" ] || return 1
     if command -v pkg_installed >/dev/null 2>&1 && pkg_installed "$_ud_pkg"; then
-        printf '  [✓] %s is already installed. Skipping.\n' "$_ud_pkg"
+        printf '  ✅ %s is already installed. Skipping.\n' "$_ud_pkg"
         return 0
     fi
     _ub_pm=$(_usb_pm) || return 1
@@ -458,7 +458,9 @@ usb_driver_menu() {
             "$(usb_driver_set_state android)"
         _usb_driver_menu_row "🍏" "2) iPhone/iOS Drivers (ipheth & usbmuxd)" \
             "$(usb_driver_set_state ios)"
-        _usb_driver_menu_row "📦" "3) Full Hardware Suite (Android + iOS + Modems)" \
+        _usb_driver_menu_row "📡" "3) USB Dongle/Modem Drivers (QMI / MBIM / NCM)" \
+            "$(usb_driver_set_state modem)"
+        _usb_driver_menu_row "📦" "4) Full Hardware Suite (Android + iOS + Modems)" \
             "$(usb_driver_set_state full)"
         if command -v ui_nav_footer >/dev/null 2>&1; then
             ui_nav_footer
@@ -483,6 +485,12 @@ usb_driver_menu() {
                     "Some iPhone USB drivers could not be installed."
                 ;;
             3)
+                _usb_offer_driver_set modem \
+                    "USB dongle/modem drivers are already installed on this router! Skipping download." \
+                    "USB dongle/modem drivers are installed." \
+                    "Some USB dongle/modem drivers could not be installed."
+                ;;
+            4)
                 _usb_offer_driver_set full \
                     "Full USB hardware suite is already installed on this router! Skipping download." \
                     "Full USB hardware suite is installed." \
