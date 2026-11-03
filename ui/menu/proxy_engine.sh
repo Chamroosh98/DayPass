@@ -126,8 +126,8 @@ proxy_engine_actions_menu() {
         fi
         ui_divider
         echo "  🎯 1) Set as Active Engine"
-        echo "  ▶️  2) Start"
-        echo "  ⏹️  3) Stop"
+        echo "  ▶️ 2) Start"
+        echo "  ⏹️ 3) Stop"
         echo "  🔁 4) Restart"
         echo "  🔄 5) Reload Rules"
         echo "  🧶 6) Show Nodes / Endpoints"

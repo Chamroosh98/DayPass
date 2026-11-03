@@ -1,19 +1,15 @@
 #!/bin/sh
-
-handle_recommended_profile()
-{
-    SELECTED_PACKAGES=""
-    export SELECTED_PACKAGES
-}
+# ============================================================
+# DayPass - Passwall Installation Mode Selector
+# ============================================================
 
 menu_mode()
 {
     render_persistent_header
 
-    echo "  🕵️‍♀️ Select Installation Mode                                "
-    ui_divider
-    echo "  1) ⚡ Recommended (Quick & Pre-configured for users)       "
-    echo "  2) 🛠️ Custom      (Advanced package selection)             "
+    ui_title "🕵️‍♀️ Select Installation Mode"
+    echo "  1) ⚡ Recommended (Quick & Pre-configured for IRANIAN users)"
+    echo "  2) 🛠️ Custom      (Advanced package selection)"
     ui_nav_footer
 
     ui_prompt 2
@@ -29,21 +25,21 @@ menu_mode()
         h|H)
             ui_show_help "packages"
             menu_mode
-            return
+            return $?
             ;;
         1|"")
-            SELECTED_MODE="recommended"  
+            SELECTED_MODE="recommended"
             export SELECTED_MODE
             handle_recommended_profile
             ;;
         2)
-            SELECTED_MODE="custom"       
+            SELECTED_MODE="custom"
             export SELECTED_MODE
             handle_custom_profile || return 1
             ;;
         *)
             log_warn "Invalid choice! Defaulting to Recommended mode!"
-            SELECTED_MODE="recommended"   
+            SELECTED_MODE="recommended"
             export SELECTED_MODE
             handle_recommended_profile
             ;;

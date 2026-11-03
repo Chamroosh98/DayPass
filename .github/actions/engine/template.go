@@ -162,13 +162,18 @@ func generateInstallScript(outputFile string) error {
 		"installer/pkg/updater.sh",
 		"installer/pkg/purge.sh",
 
-		// 12. UI Components & Interactive Menus
+		// 12. Passwall
+		"modules/passwall/recommended.sh",
+		"modules/passwall/custom.sh",
+		"modules/passwall/mode.sh",
+		"modules/passwall/language.sh",
+		"modules/passwall/geo.sh",
+		"modules/passwall/engine.sh",
+		"modules/passwall/wizard.sh",
+
+		// 13. UI Components & Interactive Menus
 		"ui/lib/state.sh",
-		"ui/menu/custom.sh",
-		"ui/menu/mode.sh",
 		"ui/menu/engine.sh",
-		"ui/menu/language.sh",
-		"ui/menu/geo.sh",
 		"ui/lib/review.sh",
 		"ui/menu/packages.sh",
 		"ui/menu/hardware.sh",

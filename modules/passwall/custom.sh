@@ -192,7 +192,14 @@ handle_custom_profile()
                     log_warn "No packages selected! Please select at least one package!"
                     sleep 1
                 else
-                    log_info "Custom package selection saved!"
+                    # Trigger modular sub-menus for Custom mode
+                    engine_menu || true
+                    language_menu || true
+                    geo_menu || true
+
+                    SELECTED_MODE="custom"
+                    export SELECTED_MODE SELECTED_ENGINE SELECTED_LANGUAGE SELECTED_GEO
+                    log_info "Custom package selection and preferences saved!"
                     break
                 fi
                 ;;
