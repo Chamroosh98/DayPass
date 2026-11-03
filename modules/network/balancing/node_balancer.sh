@@ -55,7 +55,7 @@ _nb_random() {
 show_balancer_status() {
     local mode engine count names id current legacy
 
-    echo "  ⚖️  Current Node Balancer Status"
+    echo "  👀 Current Node Balancer Status"
     ui_divider
 
     if [ -f "$BALANCER_DIR/mode" ]; then
@@ -104,7 +104,7 @@ select_nodes() {
     nodes=$(transport_call "$engine" list_nodes 2>/dev/null)
     rc=$?
     if [ "$rc" -eq 3 ]; then
-        log_error "Engine [$engine] does not expose switchable nodes."
+        log_error "Engine [$engine] does not expose switchable nodes!"
         return 1
     fi
 
@@ -171,7 +171,7 @@ set_balancer_mode() {
 
     while true; do
         echo
-        echo "  ⚖️  Select Load Balancing Mode :"
+        echo "  ⚖️ Select Load Balancing Mode :"
         ui_divider
         echo "  ⏳ 1) Round-Robin      (distribute equally)"
         echo "  🏓 2) Least Ping       (prefer lowest latency)"
@@ -393,7 +393,7 @@ node_balancer_menu() {
         show_balancer_status
         echo
         echo "  💆‍♀️ 1) Select Nodes for Balancing"
-        echo "  ⚖️  2) Set Balancing Mode"
+        echo "  ⚖️ 2) Set Balancing Mode"
         echo "  🔥 3) Apply Balancer (probe & switch node)"
         echo "  🚫 4) Disable Balancer"
         echo "  🏓 5) Probe Selected Nodes"

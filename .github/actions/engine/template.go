@@ -102,7 +102,10 @@ func generateInstallScript(outputFile string) error {
 		"modules/network/interfaces/wan/wan_state.sh",
 		"modules/network/interfaces/wifi/wifi_wan.sh",
 		"modules/network/interfaces/wifi/wifi_ap.sh",
-		"modules/network/routing/load_balancing/load_balancer.sh",
+		"modules/network/routing/mwan3/discovery.sh",
+		"modules/network/routing/mwan3/engine.sh",
+		"modules/network/routing/mwan3/metrics.sh",
+		"modules/network/routing/mwan3/menu.sh",
 		"modules/network/connectivity/diagnostics/network_checker.sh",
 
 		// 5b. Network - DNS Manager

@@ -13,7 +13,6 @@ diagnostics_menu() {
         if command -v show_balancer_status >/dev/null 2>&1; then
             show_balancer_status
         fi
-        echo
         echo "  🧶 1) Node Balancer (select nodes, Active/Standby mode)"
         echo "  🏓 2) Probe Selected Nodes"
         echo "  🔥 3) Probe & Auto-Switch Now"
