@@ -130,16 +130,27 @@ func generateInstallScript(outputFile string) error {
 		"modules/network/interfaces/guest/network.sh",
 		"modules/network/qos/guest/qos.sh",
 
-		// 7. Proxy - Config Management
+		// 7. Proxy - Config Management & Transports
 		"modules/network/profiles/storage.sh",
 		"modules/network/profiles/subscription.sh",
-		"modules/network/transports/transport_bridge.sh",
-		"modules/network/transports/drivers/core_common.sh",
-		"modules/network/transports/drivers/passwall.sh",
-		"modules/network/transports/drivers/singbox.sh",
-		"modules/network/transports/drivers/xray.sh",
-		"modules/network/transports/drivers/wireguard.sh",
-		"modules/network/transports/drivers/openvpn.sh",
+		
+		// Bridge & Common
+		"modules/network/transports/bridge/transport_bridge.sh",
+		"modules/network/transports/common/core_common.sh",
+		
+		// Passwall Driver
+		"modules/network/transports/passwall/driver/core.sh",
+		"modules/network/transports/passwall/driver/routing.sh",
+		"modules/network/transports/passwall/driver/nodes.sh",
+		
+		// Other Proxy Engines
+		"modules/network/transports/singbox/singbox.sh",
+		"modules/network/transports/xray/xray.sh",
+		
+		// Tunnels
+		"modules/network/transports/tunnels/wireguard/wireguard.sh",
+		"modules/network/transports/tunnels/openvpn/openvpn.sh",
+		
 		"modules/network/profiles/manager.sh",
 
 		// 8. Proxy - Other Modules
@@ -174,14 +185,14 @@ func generateInstallScript(outputFile string) error {
 		"installer/pkg/updater.sh",
 		"installer/pkg/purge.sh",
 
-		// 12. Passwall
-		"modules/passwall/recommended.sh",
-		"modules/passwall/custom.sh",
-		"modules/passwall/mode.sh",
-		"modules/passwall/language.sh",
-		"modules/passwall/geo.sh",
-		"modules/passwall/engine.sh",
-		"modules/passwall/wizard.sh",
+		// 12. Passwall Setup & Wizard
+		"modules/network/transports/passwall/setup/recommended.sh",
+		"modules/network/transports/passwall/setup/custom.sh",
+		"modules/network/transports/passwall/setup/mode.sh",
+		"modules/network/transports/passwall/setup/language.sh",
+		"modules/network/transports/passwall/setup/geo.sh",
+		"modules/network/transports/passwall/setup/engine.sh",
+		"modules/network/transports/passwall/setup/wizard.sh",
 
 		// 13. UI Components & Interactive Menus
 		"ui/lib/state.sh",
