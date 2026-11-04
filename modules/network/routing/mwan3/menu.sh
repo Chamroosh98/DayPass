@@ -28,7 +28,7 @@ load_balancer_menu() {
             done
         fi
         
-        echo "------------------------------------------------------------"
+        echo "  ------------------------------------------------------------"
 
         echo "  📌 1) Install Dependencies"
         echo "  📲 2) Setup USB Tethering WAN"

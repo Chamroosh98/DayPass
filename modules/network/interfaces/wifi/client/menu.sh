@@ -130,9 +130,11 @@ wifi_client_menu() {
         
         local current_ssid=$(uci -q get wireless.wwan_sta.ssid)
         if [ -n "$current_ssid" ]; then
-            printf "  ${GREEN}✓ Currently configured to connect to: [${YELLOW}%s${GREEN}]${RESET}\n\n" "$current_ssid"
+            printf "  ${BOLD}${CYAN}📊 Active Wi-Fi Client Status:${RESET}\n"
+            printf "    📶 SSID    ${GRAY}»${RESET} ${YELLOW}%s${RESET}\n" "$current_ssid"
+            printf "    🟢 Status  ${GRAY}»${RESET} ${GREEN}Connected (Station Mode)${RESET}\n\n"
         else
-            printf "  ${GRAY}No Wi-Fi Client configured.${RESET}\n\n"
+            printf "  ${GRAY}❌ No Wi-Fi Client configured!${RESET}\n\n"
         fi
         
         echo "  🔍 1) Scan and Connect to a Wi-Fi Network"
