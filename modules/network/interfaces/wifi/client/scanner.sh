@@ -7,18 +7,36 @@ wifi_scan_networks() {
     local radio="$1"
     local scan_file="/tmp/daypass_wifi_scan.txt"
     local target_iface=""
-
+    
     : > "$scan_file"
 
-    # Find a valid interface on the radio for the iwinfo scan command
-    target_iface=$(iwinfo 2>/dev/null | grep -B 2 "$radio" | head -n 1 | cut -d' ' -f1)
-    [ -n "$target_iface" ] || target_iface=$(iwinfo 2>/dev/null | grep "^phy" | head -n 1 | cut -d' ' -f1)
-    [ -n "$target_iface" ] || target_iface="phy1-sta0"
+    # 1. Extract radio index (e.g., "radio1" -> "1")
+    local rad_idx
+    rad_idx=$(echo "$radio" | tr -dc '0-9')
 
-    # Execute scan
-    iwinfo "$target_iface" scan 2>/dev/null > "/tmp/wifi_raw_scan.txt" || \
-    iwinfo "$radio" scan 2>/dev/null > "/tmp/wifi_raw_scan.txt" || true
+    # 2. Get ALL active wireless interfaces on the system
+    local all_ifaces
+    all_ifaces=$(iwinfo 2>/dev/null | awk '/^[a-zA-Z0-9_-]+/ {print $1}')
 
+    # 3. Match the interface that belongs to our PHY (e.g., phy1*, wlan1*)
+    for iface in $all_ifaces; do
+        if echo "$iface" | grep -qE "^(phy|wlan|ath|ra)${rad_idx}"; then
+            target_iface="$iface"
+            break
+        fi
+    done
+
+    # 4. Fallback: If no direct match, use the first available wireless interface
+    if [ -z "$target_iface" ]; then
+        target_iface=$(echo "$all_ifaces" | head -n 1)
+    fi
+
+    # 5. Execute scan on the correctly identified interface
+    if [ -n "$target_iface" ]; then
+        iwinfo "$target_iface" scan 2>/dev/null > "/tmp/wifi_raw_scan.txt"
+    fi
+
+    # 6. Parse Results
     if [ -s "/tmp/wifi_raw_scan.txt" ]; then
         awk '
             BEGIN { ssid=""; signal="" }

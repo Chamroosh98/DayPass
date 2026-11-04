@@ -45,7 +45,7 @@ load_balancer_menu() {
         case "$c" in
             1) install_mwan3_deps || true ;;
             2) setup_usb_wan 2>/dev/null || log_warn "USB module not loaded." ;;
-            3) wifi_client_menu 2>/dev/null || log_warn "Wi-Fi WAN module not loaded." ;;
+            3) wifi_client_menu || log_warn "Wi-Fi WAN module not loaded." ;;
             4) apply_mwan3_mode "balanced" || true ;;
             5) apply_mwan3_mode "failover" || true ;;
             6) command -v mwan3 >/dev/null 2>&1 && mwan3 status || log_error "mwan3 not installed!" ;;

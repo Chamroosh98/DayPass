@@ -25,7 +25,7 @@ wifi_client_wizard() {
             return 1
         fi
 
-        echo "  📻 Available Radios :"
+        echo "  📻 Available Radios:"
         idx=1
         radio_list=""
         for r in $radios; do
@@ -55,12 +55,14 @@ wifi_client_wizard() {
 
     # Scanning Phase
     echo
-    ui_spinner $$ "Scanning Wi-Fi networks on $chosen ..." &
-    wifi_scan_networks "$chosen"
-    kill $! 2>/dev/null
+    wifi_scan_networks "$chosen" &
+    _scan_pid=$!
+    
+    ui_spinner "$_scan_pid" "Scanning Wi-Fi networks on $chosen ..." || true
+    wait "$_scan_pid" 2>/dev/null || true
     
     if [ ! -s "$scan_file" ]; then
-        log_warn "No Wi-Fi networks found nearby."
+        log_warn "No Wi-Fi networks found nearby or radio is busy."
         ui_pause
         return 0
     fi
@@ -90,7 +92,6 @@ wifi_client_wizard() {
         esac
         
         if [ "$net_choice" -ge 1 ] && [ "$net_choice" -le "$net_count" ]; then
-            # Extract selected network details
             local selected_line=$(sed -n "${net_choice}p" "$scan_file")
             target_ssid=$(echo "$selected_line" | cut -d'|' -f1)
             target_sig=$(echo "$selected_line" | cut -d'|' -f2)
@@ -124,21 +125,40 @@ wifi_client_wizard() {
 }
 
 wifi_client_menu() {
+    local found=0 mode ssid disabled
+
     while true; do
         render_persistent_header
         ui_title "🌐 Wi-Fi WAN (Station Mode) Manager"
         
-        local current_ssid=$(uci -q get wireless.wwan_sta.ssid)
-        if [ -n "$current_ssid" ]; then
-            printf "  ${BOLD}${CYAN}📊 Active Wi-Fi Client Status:${RESET}\n"
-            printf "    📶 SSID    ${GRAY}»${RESET} ${YELLOW}%s${RESET}\n" "$current_ssid"
-            printf "    🟢 Status  ${GRAY}»${RESET} ${GREEN}Connected (Station Mode)${RESET}\n\n"
-        else
-            printf "  ${GRAY}❌ No Wi-Fi Client configured!${RESET}\n\n"
+        # پیدا کردن تمام اینترفیس‌های وای‌فای که در حالت sta (Station/Client) هستند
+        found=0
+        for sec in $(uci show wireless 2>/dev/null | grep "=wifi-iface" | cut -d'.' -f2 | cut -d'=' -f1); do
+            mode=$(uci -q get wireless.$sec.mode)
+            [ "$mode" != "sta" ] && continue
+            
+            ssid=$(uci -q get wireless.$sec.ssid)
+            disabled=$(uci -q get wireless.$sec.disabled || echo "0")
+            
+            if [ "$found" -eq 0 ]; then
+                printf "  ${BOLD}${CYAN}📊 Active Wi-Fi Client Status:${RESET}\n"
+            fi
+            
+            if [ "$disabled" = "1" ]; then
+                printf "    📶 SSID    ${GRAY}»${RESET} ${YELLOW}%-20s${RESET} ${GRAY}[Disabled]${RESET}\n" "$ssid"
+            else
+                printf "    📶 SSID    ${GRAY}»${RESET} ${YELLOW}%-20s${RESET} ${GREEN}[Connected]${RESET}\n" "$ssid"
+            fi
+            found=$((found + 1))
+        done
+
+        if [ "$found" -eq 0 ]; then
+            printf "  ${GRAY}  No Wi-Fi Client configured.${RESET}\n"
         fi
+        echo
         
         echo "  🔍 1) Scan and Connect to a Wi-Fi Network"
-        echo "  ❌ 2) Disconnect and Remove Wi-Fi Client"
+        echo "  ❌ 2) Disconnect and Remove ALL Wi-Fi Clients"
         
         ui_nav_footer
         ui_prompt 2
@@ -146,10 +166,16 @@ wifi_client_menu() {
         case "$UI_CHOICE" in
             1) wifi_client_wizard ;;
             2) 
-                uci -q delete wireless.wwan_sta
+                # حذف تمام اینترفیس‌های کلاینت (sta) از UCI
+                for sec in $(uci show wireless 2>/dev/null | grep "=wifi-iface" | cut -d'.' -f2 | cut -d'=' -f1); do
+                    mode=$(uci -q get wireless.$sec.mode)
+                    if [ "$mode" = "sta" ]; then
+                        uci -q delete wireless.$sec
+                    fi
+                done
                 uci commit wireless
                 wifi reload >/dev/null 2>&1
-                log_success "Wi-Fi Client configuration removed."
+                log_success "All Wi-Fi Client configurations removed."
                 ui_pause
                 ;;
             0) return 0 ;;
