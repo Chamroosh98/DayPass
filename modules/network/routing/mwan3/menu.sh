@@ -15,7 +15,7 @@ load_balancer_menu() {
         if [ -z "$list" ]; then
             printf "  ${GRAY}  No active WAN interfaces detected.${RESET}\n"
         else
-            printf "  ${BOLD}${CYAN}📊 Active WAN Overview:${RESET}\n"
+            printf "  ${BOLD}${CYAN}📊 Active WAN Overview :${RESET}\n"
             for iface in $list; do
                 metric=$(uci -q get "network.$iface.metric")
                 [ -n "$metric" ] || metric="default"
@@ -28,7 +28,8 @@ load_balancer_menu() {
             done
         fi
         
-        echo
+        echo "------------------------------------------------------------"
+
         echo "  📌 1) Install Dependencies"
         echo "  📲 2) Setup USB Tethering WAN"
         echo "  📶 3) Setup Wi-Fi Hotspot WAN"
@@ -44,7 +45,7 @@ load_balancer_menu() {
         case "$c" in
             1) install_mwan3_deps || true ;;
             2) setup_usb_wan 2>/dev/null || log_warn "USB module not loaded." ;;
-            3) setup_wifi_wan 2>/dev/null || log_warn "Wi-Fi WAN module not loaded." ;;
+            3) wifi_client_menu 2>/dev/null || log_warn "Wi-Fi WAN module not loaded." ;;
             4) apply_mwan3_mode "balanced" || true ;;
             5) apply_mwan3_mode "failover" || true ;;
             6) command -v mwan3 >/dev/null 2>&1 && mwan3 status || log_error "mwan3 not installed!" ;;
