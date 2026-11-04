@@ -5,7 +5,7 @@
 
 load_balancer_menu() {
     local HELP_MODULE_ID="network_multiwan"
-    local iface metric list
+    local iface metric list icon padded_iface
 
     while true; do
         render_persistent_header
@@ -13,12 +13,18 @@ load_balancer_menu() {
         
         list=$(mwan_active_ifaces 2>/dev/null)
         if [ -z "$list" ]; then
-            echo "     none"
+            printf "  ${GRAY}  No active WAN interfaces detected.${RESET}\n"
         else
+            printf "  ${BOLD}${CYAN}📊 Active WAN Overview:${RESET}\n"
             for iface in $list; do
                 metric=$(uci -q get "network.$iface.metric")
                 [ -n "$metric" ] || metric="default"
-                echo "     $iface  metric $metric"
+                icon=$(_mwan_metric_icon "$iface" 2>/dev/null || echo "🌐")
+                
+                padded_iface="$iface"
+                while [ "${#padded_iface}" -lt 14 ]; do padded_iface="$padded_iface "; done
+                
+                printf "    %s %s ${GRAY}»${RESET} Metric: ${YELLOW}%-4s${RESET}\n" "$icon" "$padded_iface" "$metric"
             done
         fi
         

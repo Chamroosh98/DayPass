@@ -56,7 +56,8 @@ show_balancer_status() {
     local mode engine count names id current legacy
 
     echo "  👀 Current Node Balancer Status"
-    ui_divider
+    echo "------------------------------------------------------------"
+
 
     if [ -f "$BALANCER_DIR/mode" ]; then
         mode=$(cat "$BALANCER_DIR/mode")

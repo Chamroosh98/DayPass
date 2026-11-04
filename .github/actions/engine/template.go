@@ -100,12 +100,21 @@ func generateInstallScript(outputFile string) error {
 		"modules/network/interfaces/usb/restore.sh",
 		"modules/network/interfaces/usb/dashboard.sh",
 		"modules/network/interfaces/wan/wan_state.sh",
-		"modules/network/interfaces/wifi/wifi_wan.sh",
-		"modules/network/interfaces/wifi/wifi_ap.sh",
+		// Wi-Fi Client (WWAN / Station)
+		"modules/network/interfaces/wifi/client/scanner.sh",
+		"modules/network/interfaces/wifi/client/setup.sh",
+		"modules/network/interfaces/wifi/client/menu.sh",
+
+		// Wi-Fi Access Point (AP)
+		"modules/network/interfaces/wifi/ap/status.sh",
+		"modules/network/interfaces/wifi/ap/setup.sh",
+		"modules/network/interfaces/wifi/ap/menu.sh",
+		// mwan3
 		"modules/network/routing/mwan3/discovery.sh",
 		"modules/network/routing/mwan3/engine.sh",
 		"modules/network/routing/mwan3/metrics.sh",
 		"modules/network/routing/mwan3/menu.sh",
+		// Network diagnostics
 		"modules/network/connectivity/diagnostics/network_checker.sh",
 
 		// 5b. Network - DNS Manager

@@ -88,30 +88,36 @@ render_pager_footer() {
     [ "$_pg_page" -ge 1 ] || _pg_page=1
 
     if [ "$_pg_page" -ge "$_pg_pages" ]; then
-        _pg_next="${_pg_muted}n) Next${RESET}"
-        _pg_back="${BOLD}0) Finish / Back${RESET}"
+        _pg_next="n) Next"
+        _pg_back="0) Finish / Back"
     else
         _pg_next="n) Next"
         _pg_back="0) Back / Skip"
     fi
     if [ "$_pg_page" -le 1 ]; then
-        _pg_prev="${_pg_muted}p) Previous${RESET}"
+        _pg_prev="p) Previous"
     else
         _pg_prev="p) Previous"
     fi
 
-    _pg_line="${_pg_next}   ${_pg_prev}   ${_pg_back}   q) Quit DayPass"
+    # Compile the nav line with muted color formatting wrapping each item
+    _pg_line="${_pg_muted}${_pg_next}   ${_pg_prev}   ${_pg_back}   q) Quit DayPass${RESET}"
+    
     for _pg_extra in "$@"; do
         [ -n "$_pg_extra" ] || continue
+        # Strip bold/color tags from the passed arguments to enforce muted style, or keep them if you prefer. 
+        # Here we just append the raw argument.
         _pg_line="${_pg_line}   ${_pg_extra}"
     done
 
     echo
     ui_divider
-    printf '  📄 Page %s%s%s/%s%s%s\n' \
-        "${BOLD}${CYAN}" "$_pg_page" "${RESET}" \
-        "${YELLOW}" "$_pg_pages" "${RESET}"
-    printf '  %s\n' "$_pg_line"
+    # One clean line: Page indicator + Nav buttons
+    printf '  %s📄 Page %s%s%s/%s%s%s   %s\n' \
+        "$_pg_muted" \
+        "${BOLD}${CYAN}" "$_pg_page" "${RESET}${_pg_muted}" \
+        "${YELLOW}" "$_pg_pages" "${RESET}" \
+        "$_pg_line"
 }
 
 ui_title() {
