@@ -125,13 +125,12 @@ wifi_client_wizard() {
 }
 
 wifi_client_menu() {
-    local found=0 mode ssid disabled
+    local found=0 mode ssid disabled net
 
     while true; do
         render_persistent_header
         ui_title "🌐 Wi-Fi WAN (Station Mode) Manager"
         
-        # پیدا کردن تمام اینترفیس‌های وای‌فای که در حالت sta (Station/Client) هستند
         found=0
         for sec in $(uci show wireless 2>/dev/null | grep "=wifi-iface" | cut -d'.' -f2 | cut -d'=' -f1); do
             mode=$(uci -q get wireless.$sec.mode)
@@ -139,6 +138,7 @@ wifi_client_menu() {
             
             ssid=$(uci -q get wireless.$sec.ssid)
             disabled=$(uci -q get wireless.$sec.disabled || echo "0")
+            net=$(uci -q get wireless.$sec.network)
             
             if [ "$found" -eq 0 ]; then
                 printf "  ${BOLD}${CYAN}📊 Active Wi-Fi Client Status:${RESET}\n"
@@ -147,7 +147,12 @@ wifi_client_menu() {
             if [ "$disabled" = "1" ]; then
                 printf "    📶 SSID    ${GRAY}»${RESET} ${YELLOW}%-20s${RESET} ${GRAY}[Disabled]${RESET}\n" "$ssid"
             else
-                printf "    📶 SSID    ${GRAY}»${RESET} ${YELLOW}%-20s${RESET} ${GREEN}[Connected]${RESET}\n" "$ssid"
+                # استعلام وضعیت واقعی اینترفیس شبکه از طریق ubus
+                if [ -n "$net" ] && ubus call network.interface."$net" status 2>/dev/null | grep -q '"up": true'; then
+                    printf "    📶 SSID    ${GRAY}»${RESET} ${YELLOW}%-20s${RESET} ${GREEN}[Connected]${RESET}\n" "$ssid"
+                else
+                    printf "    📶 SSID    ${GRAY}»${RESET} ${YELLOW}%-20s${RESET} ${RED}[Offline / Searching]${RESET}\n" "$ssid"
+                fi
             fi
             found=$((found + 1))
         done
@@ -166,7 +171,6 @@ wifi_client_menu() {
         case "$UI_CHOICE" in
             1) wifi_client_wizard ;;
             2) 
-                # حذف تمام اینترفیس‌های کلاینت (sta) از UCI
                 for sec in $(uci show wireless 2>/dev/null | grep "=wifi-iface" | cut -d'.' -f2 | cut -d'=' -f1); do
                     mode=$(uci -q get wireless.$sec.mode)
                     if [ "$mode" = "sta" ]; then
