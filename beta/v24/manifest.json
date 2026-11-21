@@ -1,0 +1,2234 @@
+{
+  "release": "24.10",
+  "generated_at": "2026-11-05T07:51:44Z",
+  "download_base": "https://cdn.jsdelivr.net/gh/Chamroosh98/DayPass@packages/beta/v24",
+  "architectures": [
+    {
+      "name": "x86_64",
+      "feeds": {
+        "passwall2": [
+          {
+            "package": "luci-app-passwall2",
+            "version": "26.11.3-r1",
+            "file": "x86_64/luci-app-passwall2_26.11.3-r1_all.ipk",
+            "sha256": "e5a49332e7da6c123d192a55b2cd6b57da4505f7b1f976074a18a5223ff5c822",
+            "size": 366717
+          },
+          {
+            "package": "luci-i18n-passwall2-fa",
+            "version": "26.11.3",
+            "file": "x86_64/luci-i18n-passwall2-fa_26.11.3_all.ipk",
+            "sha256": "f634e9935d1905080cc48b86ce38525c32c8f3b042b444aa74f42bdd40053bde",
+            "size": 24319
+          },
+          {
+            "package": "luci-i18n-passwall2-ru",
+            "version": "26.11.3",
+            "file": "x86_64/luci-i18n-passwall2-ru_26.11.3_all.ipk",
+            "sha256": "70aeff58a256af77aa0b41f39192876864060540cbc865d1c5a67943622bbaa2",
+            "size": 25451
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-cn",
+            "version": "26.11.3",
+            "file": "x86_64/luci-i18n-passwall2-zh-cn_26.11.3_all.ipk",
+            "sha256": "57dda1843ede6fb025a39288a1923f6405267ebd2d51739d90ebde90b309e16e",
+            "size": 21219
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-tw",
+            "version": "26.11.3",
+            "file": "x86_64/luci-i18n-passwall2-zh-tw_26.11.3_all.ipk",
+            "sha256": "1ba893342478c4d03f4e3898c01541f1e6a42e2668b741eef41ad0a3a55f8db4",
+            "size": 21490
+          }
+        ],
+        "passwall_luci": [
+          {
+            "package": "luci-app-passwall",
+            "version": "26.11.3-r1",
+            "file": "x86_64/luci-app-passwall_26.11.3-r1_all.ipk",
+            "sha256": "af7a0602c8881ccd04a00f7b99de1d7d2d1e472ae53f0d2eec11810363ba417f",
+            "size": 862873
+          },
+          {
+            "package": "luci-i18n-passwall-zh-cn",
+            "version": "26.11.3",
+            "file": "x86_64/luci-i18n-passwall-zh-cn_26.11.3_all.ipk",
+            "sha256": "e5d4cd9a0f35ca59e27de313aa3aec735802f600e6d924325cb8892117c1333c",
+            "size": 17491
+          }
+        ],
+        "passwall_packages": [
+          {
+            "package": "chinadns-ng",
+            "version": "2025.08.09-r1",
+            "file": "x86_64/chinadns-ng_2025.08.09-r1_x86_64.ipk",
+            "sha256": "9880f88916de4382697854b55117d30c39c2e70e9c1722337e3e739be5d84cfd",
+            "size": 286323
+          },
+          {
+            "package": "dns2socks",
+            "version": "2.1-r3",
+            "file": "x86_64/dns2socks_2.1-r3_x86_64.ipk",
+            "sha256": "8d638a4823a90d5487961d2c898688b3f698ea5c078606bac233fdadd1572c83",
+            "size": 11134
+          },
+          {
+            "package": "geoview",
+            "version": "0.2.9-r1",
+            "file": "x86_64/geoview_0.2.9-r1_x86_64.ipk",
+            "sha256": "b6c672e604934f5ffe033114a88ca77a69c8fb1447f7c96f2dea1ed8cef81682",
+            "size": 3336123
+          },
+          {
+            "package": "hysteria",
+            "version": "2.13.0-r1",
+            "file": "x86_64/hysteria_2.13.0-r1_x86_64.ipk",
+            "sha256": "81268a67d5203be9514def88f1171eb666bb1c4b7d401381a06066cbe0fd4e68",
+            "size": 9183015
+          },
+          {
+            "package": "ipt2socks",
+            "version": "1.1.4-r3",
+            "file": "x86_64/ipt2socks_1.1.4-r3_x86_64.ipk",
+            "sha256": "2641cba3229d068c8cc4fd3ec97021b0c728903fc62540326a10f885ce6b4fb0",
+            "size": 27258
+          },
+          {
+            "package": "microsocks",
+            "version": "1.0.5-r2",
+            "file": "x86_64/microsocks_1.0.5-r2_x86_64.ipk",
+            "sha256": "d3a8e47837cf3e597a7b71f6dd8421d096a8066bdb3aa781cc89debc0e6615c8",
+            "size": 6751
+          },
+          {
+            "package": "naiveproxy",
+            "version": "154.0.8037.49-r5",
+            "file": "x86_64/naiveproxy_154.0.8037.49-r5_x86_64.ipk",
+            "sha256": "61d148f7fb23a7824ac0988589b38b0af915ec2c089524889b72144ca8a8ea4f",
+            "size": 4195546
+          },
+          {
+            "package": "shadow-tls",
+            "version": "0.2.25-r1",
+            "file": "x86_64/shadow-tls_0.2.25-r1_x86_64.ipk",
+            "sha256": "9c6f347ebd67f3d6843a76a5b6e66a5303f3e8502eb32a5eb124a9b949b123d9",
+            "size": 1587282
+          },
+          {
+            "package": "shadowsocks-rust-sslocal",
+            "version": "1.25.0-r1",
+            "file": "x86_64/shadowsocks-rust-sslocal_1.25.0-r1_x86_64.ipk",
+            "sha256": "344fbe431c964200604ea6d57c59df0db44024ac1c0a5938423b57a694045584",
+            "size": 4098564
+          },
+          {
+            "package": "shadowsocks-rust-ssmanager",
+            "version": "1.25.0-r1",
+            "file": "x86_64/shadowsocks-rust-ssmanager_1.25.0-r1_x86_64.ipk",
+            "sha256": "3ac4e721400dd4810df7de636b4daddf9ba59c1eb51188c57e7ab2b3bc563ceb",
+            "size": 3329977
+          },
+          {
+            "package": "shadowsocks-rust-ssserver",
+            "version": "1.25.0-r1",
+            "file": "x86_64/shadowsocks-rust-ssserver_1.25.0-r1_x86_64.ipk",
+            "sha256": "c8b81c4c7400e93bf898aa599b0c3cc114b1461969ac886bbace6653c992e33d",
+            "size": 3272524
+          },
+          {
+            "package": "shadowsocks-rust-ssservice",
+            "version": "1.25.0-r1",
+            "file": "x86_64/shadowsocks-rust-ssservice_1.25.0-r1_x86_64.ipk",
+            "sha256": "3edbf76aefec9db5b0c797c781ddd8c4908512bfb2dcde8a9d08e7d7aedf95e8",
+            "size": 4279621
+          },
+          {
+            "package": "shadowsocks-rust-ssurl",
+            "version": "1.25.0-r1",
+            "file": "x86_64/shadowsocks-rust-ssurl_1.25.0-r1_x86_64.ipk",
+            "sha256": "da2be0553f8417875ccd7913149d19aba31dd3416068f022cd1b133be494a3da",
+            "size": 955767
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-check",
+            "version": "2.5.6-r13",
+            "file": "x86_64/shadowsocksr-libev-ssr-check_2.5.6-r13_x86_64.ipk",
+            "sha256": "80b33c72b9580af4a16611cb4902cd1c8b765d314d6440dc2b36e759a60d82aa",
+            "size": 3078
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-local",
+            "version": "2.5.6-r13",
+            "file": "x86_64/shadowsocksr-libev-ssr-local_2.5.6-r13_x86_64.ipk",
+            "sha256": "a2ab12eebfaf1aa284a5f1f28002088b80d138ba68f708a20faf511b22ddc3ad",
+            "size": 63562
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-nat",
+            "version": "2.5.6-r13",
+            "file": "x86_64/shadowsocksr-libev-ssr-nat_2.5.6-r13_x86_64.ipk",
+            "sha256": "6f4fbe22d70b64e1ae331df1e20a51cc20af58cd83bd5e94b707e75f3e20228c",
+            "size": 3014
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-redir",
+            "version": "2.5.6-r13",
+            "file": "x86_64/shadowsocksr-libev-ssr-redir_2.5.6-r13_x86_64.ipk",
+            "sha256": "050394ac4e5abff9b32528eb76e6678bd9985fdd94f543425dcc440ae88ea00c",
+            "size": 56760
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-server",
+            "version": "2.5.6-r13",
+            "file": "x86_64/shadowsocksr-libev-ssr-server_2.5.6-r13_x86_64.ipk",
+            "sha256": "e559b5ddab59bcd4a0bcba0944b6dd838465f4d861f1a6322c1e053461e1fd93",
+            "size": 66751
+          },
+          {
+            "package": "simple-obfs-client",
+            "version": "0.0.5-r3",
+            "file": "x86_64/simple-obfs-client_0.0.5-r3_x86_64.ipk",
+            "sha256": "68eb49f70b0cdf3ba8c4cc65f1255e874b4943ec30de875b5ac451d564dac2b4",
+            "size": 31226
+          },
+          {
+            "package": "simple-obfs-server",
+            "version": "0.0.5-r3",
+            "file": "x86_64/simple-obfs-server_0.0.5-r3_x86_64.ipk",
+            "sha256": "3cc8e7e929228a3d4e961f03b325218fa2a562304b66eedb7a1f9da6f588a899",
+            "size": 33631
+          },
+          {
+            "package": "sing-box",
+            "version": "1.14.4-r1",
+            "file": "x86_64/sing-box_1.14.4-r1_x86_64.ipk",
+            "sha256": "4289e2de0d029457b1a013b99d9e82d25e66ccfef0a6ae9e69f8442f399ef9ac",
+            "size": 21568575
+          },
+          {
+            "package": "tcping",
+            "version": "0.3-r1",
+            "file": "x86_64/tcping_0.3-r1_x86_64.ipk",
+            "sha256": "b11dff677c7435b7257235ef185c8032d1544348fd1f60f0b333af626e453d97",
+            "size": 4436
+          },
+          {
+            "package": "v2ray-geoip",
+            "version": "202610290022.1",
+            "file": "x86_64/v2ray-geoip_202610290022.1_all.ipk",
+            "sha256": "1491a2ee2b24490d8e0996a2e97d942e0febaad21ed256fac459134007b925bd",
+            "size": 3442046
+          },
+          {
+            "package": "v2ray-geosite",
+            "version": "202610302203.1",
+            "file": "x86_64/v2ray-geosite_202610302203.1_all.ipk",
+            "sha256": "05b97db0bdcb7734e7e473923193d86281416cef21b9919b3b52a00dfe8d6092",
+            "size": 3696544
+          },
+          {
+            "package": "v2ray-plugin",
+            "version": "5.49.0-r1",
+            "file": "x86_64/v2ray-plugin_5.49.0-r1_x86_64.ipk",
+            "sha256": "90ca66aa960e6e5821b8429a5dfb557856e1379f6c3f735fdeb2d3df8f40737e",
+            "size": 6894340
+          },
+          {
+            "package": "xray-core",
+            "version": "26.10.31-r1",
+            "file": "x86_64/xray-core_26.10.31-r1_x86_64.ipk",
+            "sha256": "702a1303b6905173c76dc6afb248756dcc534d0db470cf9db858aa5ef48633ce",
+            "size": 12211098
+          },
+          {
+            "package": "xray-plugin",
+            "version": "1.8.24-r1",
+            "file": "x86_64/xray-plugin_1.8.24-r1_x86_64.ipk",
+            "sha256": "01cf682379b08915c665bef5f7a00031cc0bc0cf835fa85f3bbd5622fff92da5",
+            "size": 7835442
+          }
+        ]
+      }
+    },
+    {
+      "name": "mipsel_24kc",
+      "feeds": {
+        "passwall2": [
+          {
+            "package": "luci-app-passwall2",
+            "version": "26.11.3-r1",
+            "file": "mipsel_24kc/luci-app-passwall2_26.11.3-r1_all.ipk",
+            "sha256": "e5a49332e7da6c123d192a55b2cd6b57da4505f7b1f976074a18a5223ff5c822",
+            "size": 366717
+          },
+          {
+            "package": "luci-i18n-passwall2-fa",
+            "version": "26.11.3",
+            "file": "mipsel_24kc/luci-i18n-passwall2-fa_26.11.3_all.ipk",
+            "sha256": "f634e9935d1905080cc48b86ce38525c32c8f3b042b444aa74f42bdd40053bde",
+            "size": 24319
+          },
+          {
+            "package": "luci-i18n-passwall2-ru",
+            "version": "26.11.3",
+            "file": "mipsel_24kc/luci-i18n-passwall2-ru_26.11.3_all.ipk",
+            "sha256": "70aeff58a256af77aa0b41f39192876864060540cbc865d1c5a67943622bbaa2",
+            "size": 25451
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-cn",
+            "version": "26.11.3",
+            "file": "mipsel_24kc/luci-i18n-passwall2-zh-cn_26.11.3_all.ipk",
+            "sha256": "57dda1843ede6fb025a39288a1923f6405267ebd2d51739d90ebde90b309e16e",
+            "size": 21219
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-tw",
+            "version": "26.11.3",
+            "file": "mipsel_24kc/luci-i18n-passwall2-zh-tw_26.11.3_all.ipk",
+            "sha256": "1ba893342478c4d03f4e3898c01541f1e6a42e2668b741eef41ad0a3a55f8db4",
+            "size": 21490
+          }
+        ],
+        "passwall_luci": [
+          {
+            "package": "luci-app-passwall",
+            "version": "26.11.3-r1",
+            "file": "mipsel_24kc/luci-app-passwall_26.11.3-r1_all.ipk",
+            "sha256": "af7a0602c8881ccd04a00f7b99de1d7d2d1e472ae53f0d2eec11810363ba417f",
+            "size": 862873
+          },
+          {
+            "package": "luci-i18n-passwall-zh-cn",
+            "version": "26.11.3",
+            "file": "mipsel_24kc/luci-i18n-passwall-zh-cn_26.11.3_all.ipk",
+            "sha256": "e5d4cd9a0f35ca59e27de313aa3aec735802f600e6d924325cb8892117c1333c",
+            "size": 17491
+          }
+        ],
+        "passwall_packages": [
+          {
+            "package": "chinadns-ng",
+            "version": "2025.08.09-r1",
+            "file": "mipsel_24kc/chinadns-ng_2025.08.09-r1_mipsel_24kc.ipk",
+            "sha256": "ee9aa96738349fb380753eb888dae0dbdf601a2b946385f9c574443295fdf6dd",
+            "size": 299465
+          },
+          {
+            "package": "dns2socks",
+            "version": "2.1-r3",
+            "file": "mipsel_24kc/dns2socks_2.1-r3_mipsel_24kc.ipk",
+            "sha256": "03e1ea7b9e3253f477617104bac4797aa0c2050154a8225297e8db965235af6e",
+            "size": 11430
+          },
+          {
+            "package": "geoview",
+            "version": "0.2.9-r1",
+            "file": "mipsel_24kc/geoview_0.2.9-r1_mipsel_24kc.ipk",
+            "sha256": "e5ff8e097dc053c209013c99776eff92c734d78f481666391aecef5972127378",
+            "size": 3129402
+          },
+          {
+            "package": "hysteria",
+            "version": "2.13.0-r1",
+            "file": "mipsel_24kc/hysteria_2.13.0-r1_mipsel_24kc.ipk",
+            "sha256": "14ad5bbc63eee8fd324951ad0869231051e3f08ba058432732967caab99b17a3",
+            "size": 8252327
+          },
+          {
+            "package": "ipt2socks",
+            "version": "1.1.4-r3",
+            "file": "mipsel_24kc/ipt2socks_1.1.4-r3_mipsel_24kc.ipk",
+            "sha256": "fd54ef20bfce3ac8c0f663dccab9119f6a2b1f80368cf4d264a2b4aa948f2b3b",
+            "size": 24886
+          },
+          {
+            "package": "microsocks",
+            "version": "1.0.5-r2",
+            "file": "mipsel_24kc/microsocks_1.0.5-r2_mipsel_24kc.ipk",
+            "sha256": "ca823654b6b5a53deb66f01304cb7eee7090529adb8a88b37d84b1b3b0f8d20f",
+            "size": 5862
+          },
+          {
+            "package": "naiveproxy",
+            "version": "154.0.8037.49-r5",
+            "file": "mipsel_24kc/naiveproxy_154.0.8037.49-r5_mipsel_24kc.ipk",
+            "sha256": "2f5f85b17eaa10676bd0a8f61a190eb9cf9f0343daf18b63ce23b5caa328a865",
+            "size": 4600795
+          },
+          {
+            "package": "shadowsocks-rust-sslocal",
+            "version": "1.25.0-r1",
+            "file": "mipsel_24kc/shadowsocks-rust-sslocal_1.25.0-r1_mipsel_24kc.ipk",
+            "sha256": "25ba7fc60dfbae2384517a2b9fab4127bc25c0ffa9862d825058b9be0dfd0965",
+            "size": 4176621
+          },
+          {
+            "package": "shadowsocks-rust-ssmanager",
+            "version": "1.25.0-r1",
+            "file": "mipsel_24kc/shadowsocks-rust-ssmanager_1.25.0-r1_mipsel_24kc.ipk",
+            "sha256": "3f0642d5343afb57880c561271d045253b5a055c370bff26fd67b9c4318b0398",
+            "size": 3342279
+          },
+          {
+            "package": "shadowsocks-rust-ssserver",
+            "version": "1.25.0-r1",
+            "file": "mipsel_24kc/shadowsocks-rust-ssserver_1.25.0-r1_mipsel_24kc.ipk",
+            "sha256": "e112dd60c480aa7aca9bc460bf451bcfd06b045f3507466c5ec37bca9e906711",
+            "size": 3281448
+          },
+          {
+            "package": "shadowsocks-rust-ssservice",
+            "version": "1.25.0-r1",
+            "file": "mipsel_24kc/shadowsocks-rust-ssservice_1.25.0-r1_mipsel_24kc.ipk",
+            "sha256": "4ae9eea2299facaad256af8eba3220821abbe4342061269a0bc09f35a6e358a1",
+            "size": 4373771
+          },
+          {
+            "package": "shadowsocks-rust-ssurl",
+            "version": "1.25.0-r1",
+            "file": "mipsel_24kc/shadowsocks-rust-ssurl_1.25.0-r1_mipsel_24kc.ipk",
+            "sha256": "bda4ff41cd6094b04a141cb3838a42cbeb464de08343430a3cc756d61dcb46fb",
+            "size": 1053401
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-check",
+            "version": "2.5.6-r13",
+            "file": "mipsel_24kc/shadowsocksr-libev-ssr-check_2.5.6-r13_mipsel_24kc.ipk",
+            "sha256": "65251c77e02439e22362f898987c2ac3c68bb18cd95ff5c167ed0c3601fe4a99",
+            "size": 3074
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-local",
+            "version": "2.5.6-r13",
+            "file": "mipsel_24kc/shadowsocksr-libev-ssr-local_2.5.6-r13_mipsel_24kc.ipk",
+            "sha256": "9f1cbcea64677444c89e492ccb945ee2b9f6c80f9197ff230bdbd270093879e3",
+            "size": 58424
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-nat",
+            "version": "2.5.6-r13",
+            "file": "mipsel_24kc/shadowsocksr-libev-ssr-nat_2.5.6-r13_mipsel_24kc.ipk",
+            "sha256": "0a189cbdefb4ee6ae2ab0aeaf2c8b75fd0500484fd6522dde3ec6f5fa7de8965",
+            "size": 3020
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-redir",
+            "version": "2.5.6-r13",
+            "file": "mipsel_24kc/shadowsocksr-libev-ssr-redir_2.5.6-r13_mipsel_24kc.ipk",
+            "sha256": "c08d7dc36a59e76076650c549d7348f045fd592e4741cd1dce9bdac1f288f4c1",
+            "size": 52868
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-server",
+            "version": "2.5.6-r13",
+            "file": "mipsel_24kc/shadowsocksr-libev-ssr-server_2.5.6-r13_mipsel_24kc.ipk",
+            "sha256": "9366eb287b2fceceeb69ba9db68ca911b642ac084b0fe6474b917f6c1313e24a",
+            "size": 61496
+          },
+          {
+            "package": "simple-obfs-client",
+            "version": "0.0.5-r3",
+            "file": "mipsel_24kc/simple-obfs-client_0.0.5-r3_mipsel_24kc.ipk",
+            "sha256": "1a1440139a71e1bf6bb65e7db0148a448eeb603b8bf7bd1d142302e77b11079f",
+            "size": 24783
+          },
+          {
+            "package": "simple-obfs-server",
+            "version": "0.0.5-r3",
+            "file": "mipsel_24kc/simple-obfs-server_0.0.5-r3_mipsel_24kc.ipk",
+            "sha256": "355f422f713681a4539f92655d8298f4d52b6dcb70b2f6a4c9d5c71e386ef0b0",
+            "size": 26542
+          },
+          {
+            "package": "sing-box",
+            "version": "1.14.4-r1",
+            "file": "mipsel_24kc/sing-box_1.14.4-r1_mipsel_24kc.ipk",
+            "sha256": "49335d5135054d1f0e8525786f36d1ebf423a76d8753231dbc1982b2a89d9d6d",
+            "size": 19165313
+          },
+          {
+            "package": "tcping",
+            "version": "0.3-r1",
+            "file": "mipsel_24kc/tcping_0.3-r1_mipsel_24kc.ipk",
+            "sha256": "c30d9cb5928a11df4d656b4a095a0bcbb7f3ab57b00338ef13e3f3f1cb237823",
+            "size": 4431
+          },
+          {
+            "package": "v2ray-geoip",
+            "version": "202610290022.1",
+            "file": "mipsel_24kc/v2ray-geoip_202610290022.1_all.ipk",
+            "sha256": "1491a2ee2b24490d8e0996a2e97d942e0febaad21ed256fac459134007b925bd",
+            "size": 3442046
+          },
+          {
+            "package": "v2ray-geosite",
+            "version": "202610302203.1",
+            "file": "mipsel_24kc/v2ray-geosite_202610302203.1_all.ipk",
+            "sha256": "05b97db0bdcb7734e7e473923193d86281416cef21b9919b3b52a00dfe8d6092",
+            "size": 3696544
+          },
+          {
+            "package": "v2ray-plugin",
+            "version": "5.49.0-r1",
+            "file": "mipsel_24kc/v2ray-plugin_5.49.0-r1_mipsel_24kc.ipk",
+            "sha256": "9bcc10ce7d9ffe6c057637116cfcda95302cdffb8aa7d71137df346ff6e2582a",
+            "size": 6253235
+          },
+          {
+            "package": "xray-core",
+            "version": "26.10.31-r1",
+            "file": "mipsel_24kc/xray-core_26.10.31-r1_mipsel_24kc.ipk",
+            "sha256": "860e7273207a6bfa42a9245e15963a6f40d74f7d1a7aa108e7351a94f05de5a4",
+            "size": 10862385
+          },
+          {
+            "package": "xray-plugin",
+            "version": "1.8.24-r1",
+            "file": "mipsel_24kc/xray-plugin_1.8.24-r1_mipsel_24kc.ipk",
+            "sha256": "ca07d5e9a717ba9c34faf037266b73ab76c7f2f5cfd71c7833ddfc99f814c3cc",
+            "size": 7066819
+          }
+        ]
+      }
+    },
+    {
+      "name": "i386_pentium4",
+      "feeds": {
+        "passwall2": [
+          {
+            "package": "luci-app-passwall2",
+            "version": "26.11.3-r1",
+            "file": "i386_pentium4/luci-app-passwall2_26.11.3-r1_all.ipk",
+            "sha256": "e5a49332e7da6c123d192a55b2cd6b57da4505f7b1f976074a18a5223ff5c822",
+            "size": 366717
+          },
+          {
+            "package": "luci-i18n-passwall2-fa",
+            "version": "26.11.3",
+            "file": "i386_pentium4/luci-i18n-passwall2-fa_26.11.3_all.ipk",
+            "sha256": "f634e9935d1905080cc48b86ce38525c32c8f3b042b444aa74f42bdd40053bde",
+            "size": 24319
+          },
+          {
+            "package": "luci-i18n-passwall2-ru",
+            "version": "26.11.3",
+            "file": "i386_pentium4/luci-i18n-passwall2-ru_26.11.3_all.ipk",
+            "sha256": "70aeff58a256af77aa0b41f39192876864060540cbc865d1c5a67943622bbaa2",
+            "size": 25451
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-cn",
+            "version": "26.11.3",
+            "file": "i386_pentium4/luci-i18n-passwall2-zh-cn_26.11.3_all.ipk",
+            "sha256": "57dda1843ede6fb025a39288a1923f6405267ebd2d51739d90ebde90b309e16e",
+            "size": 21219
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-tw",
+            "version": "26.11.3",
+            "file": "i386_pentium4/luci-i18n-passwall2-zh-tw_26.11.3_all.ipk",
+            "sha256": "1ba893342478c4d03f4e3898c01541f1e6a42e2668b741eef41ad0a3a55f8db4",
+            "size": 21490
+          }
+        ],
+        "passwall_luci": [
+          {
+            "package": "luci-app-passwall",
+            "version": "26.11.3-r1",
+            "file": "i386_pentium4/luci-app-passwall_26.11.3-r1_all.ipk",
+            "sha256": "af7a0602c8881ccd04a00f7b99de1d7d2d1e472ae53f0d2eec11810363ba417f",
+            "size": 862873
+          },
+          {
+            "package": "luci-i18n-passwall-zh-cn",
+            "version": "26.11.3",
+            "file": "i386_pentium4/luci-i18n-passwall-zh-cn_26.11.3_all.ipk",
+            "sha256": "e5d4cd9a0f35ca59e27de313aa3aec735802f600e6d924325cb8892117c1333c",
+            "size": 17491
+          }
+        ],
+        "passwall_packages": [
+          {
+            "package": "chinadns-ng",
+            "version": "2025.08.09-r1",
+            "file": "i386_pentium4/chinadns-ng_2025.08.09-r1_i386_pentium4.ipk",
+            "sha256": "dfecf2abf881099ec27c7d2eee432c6a669988c6ae60707e29c7f76bf75057a3",
+            "size": 278659
+          },
+          {
+            "package": "dns2socks",
+            "version": "2.1-r3",
+            "file": "i386_pentium4/dns2socks_2.1-r3_i386_pentium4.ipk",
+            "sha256": "0d099aafa676d5790d82e3e1273d6f417e884ba079251a42c3251c349bbf0b84",
+            "size": 10253
+          },
+          {
+            "package": "geoview",
+            "version": "0.2.9-r1",
+            "file": "i386_pentium4/geoview_0.2.9-r1_i386_pentium4.ipk",
+            "sha256": "68dfec7cd56fb9fbe809ddb8cfa8cd3b8e17401519e2bdced6611acd6a36a33a",
+            "size": 3309349
+          },
+          {
+            "package": "hysteria",
+            "version": "2.13.0-r1",
+            "file": "i386_pentium4/hysteria_2.13.0-r1_i386_pentium4.ipk",
+            "sha256": "197ee09f65e3a0c02b77b30d3c5762bfe74459f32f9100524fe239b5d04da3f2",
+            "size": 8797170
+          },
+          {
+            "package": "ipt2socks",
+            "version": "1.1.4-r3",
+            "file": "i386_pentium4/ipt2socks_1.1.4-r3_i386_pentium4.ipk",
+            "sha256": "874c1e304cc68aa03fda86372b265dc0ea20c4f12ac5994ae47f4b27706a4a3a",
+            "size": 23449
+          },
+          {
+            "package": "microsocks",
+            "version": "1.0.5-r2",
+            "file": "i386_pentium4/microsocks_1.0.5-r2_i386_pentium4.ipk",
+            "sha256": "6064fd8a98b8f8328b7a0f1f39d4d4cf0be7736e86c9f42e5b41562176c1d660",
+            "size": 6455
+          },
+          {
+            "package": "naiveproxy",
+            "version": "154.0.8037.49-r5",
+            "file": "i386_pentium4/naiveproxy_154.0.8037.49-r5_i386_pentium4.ipk",
+            "sha256": "05a289b027e766d37a5698d1d4f1984d53a7952938f2815ad94c54ffff15f3ef",
+            "size": 4330789
+          },
+          {
+            "package": "shadowsocks-rust-sslocal",
+            "version": "1.25.0-r1",
+            "file": "i386_pentium4/shadowsocks-rust-sslocal_1.25.0-r1_i386_pentium4.ipk",
+            "sha256": "3ecd12a8729a1a22a37169cf3cac562047e12c7c4f049b1fa83f1770c027fb99",
+            "size": 3783807
+          },
+          {
+            "package": "shadowsocks-rust-ssmanager",
+            "version": "1.25.0-r1",
+            "file": "i386_pentium4/shadowsocks-rust-ssmanager_1.25.0-r1_i386_pentium4.ipk",
+            "sha256": "e5bd36e6c29e8238b6fc096570b2e1855e1ea9af8c79a6ab4eb3b6a747a1af40",
+            "size": 3023847
+          },
+          {
+            "package": "shadowsocks-rust-ssserver",
+            "version": "1.25.0-r1",
+            "file": "i386_pentium4/shadowsocks-rust-ssserver_1.25.0-r1_i386_pentium4.ipk",
+            "sha256": "c4f56471caa8084f7fe4d1ef6e69a6cf1b36caaf6b5a43b2dda736b6004982ef",
+            "size": 2970668
+          },
+          {
+            "package": "shadowsocks-rust-ssservice",
+            "version": "1.25.0-r1",
+            "file": "i386_pentium4/shadowsocks-rust-ssservice_1.25.0-r1_i386_pentium4.ipk",
+            "sha256": "2bd94c6150d66f96aac9aa1fd654731e878a25c16bbebe9f7a1b3bbc53e4afb8",
+            "size": 3965303
+          },
+          {
+            "package": "shadowsocks-rust-ssurl",
+            "version": "1.25.0-r1",
+            "file": "i386_pentium4/shadowsocks-rust-ssurl_1.25.0-r1_i386_pentium4.ipk",
+            "sha256": "acf573ad814ca8e8ccc960f83de4590f4fa10950cfdb8de8416bbc7fa4d3289c",
+            "size": 929061
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-check",
+            "version": "2.5.6-r13",
+            "file": "i386_pentium4/shadowsocksr-libev-ssr-check_2.5.6-r13_i386_pentium4.ipk",
+            "sha256": "da30643fa6e403d29db2462b02b7945573ce9d7af39f8e38c129eb4f3a4ac2bb",
+            "size": 3047
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-local",
+            "version": "2.5.6-r13",
+            "file": "i386_pentium4/shadowsocksr-libev-ssr-local_2.5.6-r13_i386_pentium4.ipk",
+            "sha256": "98ce97351b8089de8264f5a9ae9886f66064fd2760bcb875eacf67d1b532a079",
+            "size": 56553
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-nat",
+            "version": "2.5.6-r13",
+            "file": "i386_pentium4/shadowsocksr-libev-ssr-nat_2.5.6-r13_i386_pentium4.ipk",
+            "sha256": "5d88072042df8c77c2f25fb1d32b231a01022569c00d56fada2ce268da27cc8a",
+            "size": 3022
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-redir",
+            "version": "2.5.6-r13",
+            "file": "i386_pentium4/shadowsocksr-libev-ssr-redir_2.5.6-r13_i386_pentium4.ipk",
+            "sha256": "2fb907165cd13a980e0018e2f91135bf67c04dbc38eca54502dd558e133784e2",
+            "size": 50520
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-server",
+            "version": "2.5.6-r13",
+            "file": "i386_pentium4/shadowsocksr-libev-ssr-server_2.5.6-r13_i386_pentium4.ipk",
+            "sha256": "1a6d6b4f40c2d1aacdd4af07e3df18224fadca671b7c34d81578056ed155d1a9",
+            "size": 58264
+          },
+          {
+            "package": "simple-obfs-client",
+            "version": "0.0.5-r3",
+            "file": "i386_pentium4/simple-obfs-client_0.0.5-r3_i386_pentium4.ipk",
+            "sha256": "3f4bdf6c284626c409a615c03e487d94df38e5780506172f998bc5420dda9a48",
+            "size": 28368
+          },
+          {
+            "package": "simple-obfs-server",
+            "version": "0.0.5-r3",
+            "file": "i386_pentium4/simple-obfs-server_0.0.5-r3_i386_pentium4.ipk",
+            "sha256": "6f106107890e883c5a2cd1401ec79c58776e350431942d42b28f8ab9a3c1da17",
+            "size": 30100
+          },
+          {
+            "package": "sing-box",
+            "version": "1.14.4-r1",
+            "file": "i386_pentium4/sing-box_1.14.4-r1_i386_pentium4.ipk",
+            "sha256": "447a5d08961ead4e7c4731a766e6c9d014b6e1f7f51dc6973de3100cb20b0847",
+            "size": 20390594
+          },
+          {
+            "package": "tcping",
+            "version": "0.3-r1",
+            "file": "i386_pentium4/tcping_0.3-r1_i386_pentium4.ipk",
+            "sha256": "7d9cfb83fdb7970d577251ca5e0b34aa87a4f019b547a0bb26d8fd90883c6257",
+            "size": 4337
+          },
+          {
+            "package": "v2ray-geoip",
+            "version": "202610290022.1",
+            "file": "i386_pentium4/v2ray-geoip_202610290022.1_all.ipk",
+            "sha256": "1491a2ee2b24490d8e0996a2e97d942e0febaad21ed256fac459134007b925bd",
+            "size": 3442046
+          },
+          {
+            "package": "v2ray-geosite",
+            "version": "202610302203.1",
+            "file": "i386_pentium4/v2ray-geosite_202610302203.1_all.ipk",
+            "sha256": "05b97db0bdcb7734e7e473923193d86281416cef21b9919b3b52a00dfe8d6092",
+            "size": 3696544
+          },
+          {
+            "package": "v2ray-plugin",
+            "version": "5.49.0-r1",
+            "file": "i386_pentium4/v2ray-plugin_5.49.0-r1_i386_pentium4.ipk",
+            "sha256": "5e75864f7a82dd300a5c0c59a8c3c1ac8a45b35add11648c5a4c74b87213f10e",
+            "size": 6610152
+          },
+          {
+            "package": "xray-core",
+            "version": "26.10.31-r1",
+            "file": "i386_pentium4/xray-core_26.10.31-r1_i386_pentium4.ipk",
+            "sha256": "07dc387e9fdb02ecdf1303c19b3ecd2fe5556f983fd8adef76d03de30b829c8a",
+            "size": 11539881
+          },
+          {
+            "package": "xray-plugin",
+            "version": "1.8.24-r1",
+            "file": "i386_pentium4/xray-plugin_1.8.24-r1_i386_pentium4.ipk",
+            "sha256": "b466a9da6e1ad1a3150a00ff15b9dd84f3b70ba62d87c3acc3d43b2fd4e0afbb",
+            "size": 7491035
+          }
+        ]
+      }
+    },
+    {
+      "name": "aarch64_cortex-a53",
+      "feeds": {
+        "passwall2": [
+          {
+            "package": "luci-app-passwall2",
+            "version": "26.11.3-r1",
+            "file": "aarch64_cortex-a53/luci-app-passwall2_26.11.3-r1_all.ipk",
+            "sha256": "e5a49332e7da6c123d192a55b2cd6b57da4505f7b1f976074a18a5223ff5c822",
+            "size": 366717
+          },
+          {
+            "package": "luci-i18n-passwall2-fa",
+            "version": "26.11.3",
+            "file": "aarch64_cortex-a53/luci-i18n-passwall2-fa_26.11.3_all.ipk",
+            "sha256": "f634e9935d1905080cc48b86ce38525c32c8f3b042b444aa74f42bdd40053bde",
+            "size": 24319
+          },
+          {
+            "package": "luci-i18n-passwall2-ru",
+            "version": "26.11.3",
+            "file": "aarch64_cortex-a53/luci-i18n-passwall2-ru_26.11.3_all.ipk",
+            "sha256": "70aeff58a256af77aa0b41f39192876864060540cbc865d1c5a67943622bbaa2",
+            "size": 25451
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-cn",
+            "version": "26.11.3",
+            "file": "aarch64_cortex-a53/luci-i18n-passwall2-zh-cn_26.11.3_all.ipk",
+            "sha256": "57dda1843ede6fb025a39288a1923f6405267ebd2d51739d90ebde90b309e16e",
+            "size": 21219
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-tw",
+            "version": "26.11.3",
+            "file": "aarch64_cortex-a53/luci-i18n-passwall2-zh-tw_26.11.3_all.ipk",
+            "sha256": "1ba893342478c4d03f4e3898c01541f1e6a42e2668b741eef41ad0a3a55f8db4",
+            "size": 21490
+          }
+        ],
+        "passwall_luci": [
+          {
+            "package": "luci-app-passwall",
+            "version": "26.11.3-r1",
+            "file": "aarch64_cortex-a53/luci-app-passwall_26.11.3-r1_all.ipk",
+            "sha256": "af7a0602c8881ccd04a00f7b99de1d7d2d1e472ae53f0d2eec11810363ba417f",
+            "size": 862873
+          },
+          {
+            "package": "luci-i18n-passwall-zh-cn",
+            "version": "26.11.3",
+            "file": "aarch64_cortex-a53/luci-i18n-passwall-zh-cn_26.11.3_all.ipk",
+            "sha256": "e5d4cd9a0f35ca59e27de313aa3aec735802f600e6d924325cb8892117c1333c",
+            "size": 17491
+          }
+        ],
+        "passwall_packages": [
+          {
+            "package": "chinadns-ng",
+            "version": "2025.08.09-r1",
+            "file": "aarch64_cortex-a53/chinadns-ng_2025.08.09-r1_aarch64_cortex-a53.ipk",
+            "sha256": "d76447ecc9fc51c638c79aae619ef07cc5450164ab6d08adf3f49c9f20f27c16",
+            "size": 269730
+          },
+          {
+            "package": "dns2socks",
+            "version": "2.1-r3",
+            "file": "aarch64_cortex-a53/dns2socks_2.1-r3_aarch64_cortex-a53.ipk",
+            "sha256": "68ddb7a177b425b8c3a8416d74e648f794b40f887bfddb71c2c72ae4bec1c72d",
+            "size": 11822
+          },
+          {
+            "package": "geoview",
+            "version": "0.2.9-r1",
+            "file": "aarch64_cortex-a53/geoview_0.2.9-r1_aarch64_cortex-a53.ipk",
+            "sha256": "bc82c83f5b24d7db8003439d94cab271f959eeee56fda7a32b64c26a78ef20ba",
+            "size": 2996649
+          },
+          {
+            "package": "hysteria",
+            "version": "2.13.0-r1",
+            "file": "aarch64_cortex-a53/hysteria_2.13.0-r1_aarch64_cortex-a53.ipk",
+            "sha256": "401bcea34c2b542f22a2a5c4c78bde7d8e9c8624d38f045f35123a450f8a0d8a",
+            "size": 8203234
+          },
+          {
+            "package": "ipt2socks",
+            "version": "1.1.4-r3",
+            "file": "aarch64_cortex-a53/ipt2socks_1.1.4-r3_aarch64_cortex-a53.ipk",
+            "sha256": "6bf04b2200c9b4937335066d048cdef9fac1d8564a57392e1781470d624b7dac",
+            "size": 26138
+          },
+          {
+            "package": "microsocks",
+            "version": "1.0.5-r2",
+            "file": "aarch64_cortex-a53/microsocks_1.0.5-r2_aarch64_cortex-a53.ipk",
+            "sha256": "4ce66bad258b30cd54da8e77f5defae33272ea5e85efbb17e87456790a654e6b",
+            "size": 7203
+          },
+          {
+            "package": "naiveproxy",
+            "version": "154.0.8037.49-r5",
+            "file": "aarch64_cortex-a53/naiveproxy_154.0.8037.49-r5_aarch64_cortex-a53.ipk",
+            "sha256": "13923f745bc6325f7ea2cc1ccc4a95caebe60c4be3bab30937e5f4f651525cc9",
+            "size": 3986704
+          },
+          {
+            "package": "shadow-tls",
+            "version": "0.2.25-r1",
+            "file": "aarch64_cortex-a53/shadow-tls_0.2.25-r1_aarch64_cortex-a53.ipk",
+            "sha256": "59a286810bf1afad718d55f583367e55c3124765d3ee4cec3f0d32c506053b5d",
+            "size": 1521018
+          },
+          {
+            "package": "shadowsocks-rust-sslocal",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a53/shadowsocks-rust-sslocal_1.25.0-r1_aarch64_cortex-a53.ipk",
+            "sha256": "2fd8e66e0219cce81c35804d3b816691c0acc4614d1045d2b989f026add41b2a",
+            "size": 3877063
+          },
+          {
+            "package": "shadowsocks-rust-ssmanager",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a53/shadowsocks-rust-ssmanager_1.25.0-r1_aarch64_cortex-a53.ipk",
+            "sha256": "9a06fae21c2b0b267403c96246661df1bcbc3d4612d5aca03d165c3495dc4c04",
+            "size": 3117766
+          },
+          {
+            "package": "shadowsocks-rust-ssserver",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a53/shadowsocks-rust-ssserver_1.25.0-r1_aarch64_cortex-a53.ipk",
+            "sha256": "80d4c8c610749872c7e37141677215b089136f71ed07add87b01189e949b22f0",
+            "size": 3063010
+          },
+          {
+            "package": "shadowsocks-rust-ssservice",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a53/shadowsocks-rust-ssservice_1.25.0-r1_aarch64_cortex-a53.ipk",
+            "sha256": "9f913a324ec4d6648b17a600f6d45e6a61468afa373f39cd239de39bcde4b152",
+            "size": 4059915
+          },
+          {
+            "package": "shadowsocks-rust-ssurl",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a53/shadowsocks-rust-ssurl_1.25.0-r1_aarch64_cortex-a53.ipk",
+            "sha256": "5a7ed9e5b15971d9e9427454cbf7ca603dde663d2ab73352dc2a6077b4194633",
+            "size": 908314
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-check",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a53/shadowsocksr-libev-ssr-check_2.5.6-r13_aarch64_cortex-a53.ipk",
+            "sha256": "2703b7e9f271514b5c7a4ebdf111c3811b86ff8676e6d0e9a32f538d0f798cfd",
+            "size": 3381
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-local",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a53/shadowsocksr-libev-ssr-local_2.5.6-r13_aarch64_cortex-a53.ipk",
+            "sha256": "618c6b7356a13f66ad83309928758f44d224ac04997a34c024196706303ce312",
+            "size": 63444
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-nat",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a53/shadowsocksr-libev-ssr-nat_2.5.6-r13_aarch64_cortex-a53.ipk",
+            "sha256": "a4daab50485e77f83f1609766998d9ca5fed169c8d3e6dfc57a7fcd4f2bd71bf",
+            "size": 3026
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-redir",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a53/shadowsocksr-libev-ssr-redir_2.5.6-r13_aarch64_cortex-a53.ipk",
+            "sha256": "f71ccfa41e42b97757f65192b7718c9c886a13712a41aaae9d7476f9a7928607",
+            "size": 56998
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-server",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a53/shadowsocksr-libev-ssr-server_2.5.6-r13_aarch64_cortex-a53.ipk",
+            "sha256": "1f935e132f966d5edcf4d6cc9d70e17cebafd49b87162c501d6dbf4ecf8ca641",
+            "size": 66891
+          },
+          {
+            "package": "simple-obfs-client",
+            "version": "0.0.5-r3",
+            "file": "aarch64_cortex-a53/simple-obfs-client_0.0.5-r3_aarch64_cortex-a53.ipk",
+            "sha256": "90715e0e49ed1e53956da270b587a73e0aff9c4a75cc19ae0d478c71c971fc25",
+            "size": 32043
+          },
+          {
+            "package": "simple-obfs-server",
+            "version": "0.0.5-r3",
+            "file": "aarch64_cortex-a53/simple-obfs-server_0.0.5-r3_aarch64_cortex-a53.ipk",
+            "sha256": "ac71ad6bd5a6586836e6878d125d91b7f88caf5c0a86787e2ae7aadac7587c2a",
+            "size": 34621
+          },
+          {
+            "package": "sing-box",
+            "version": "1.14.4-r1",
+            "file": "aarch64_cortex-a53/sing-box_1.14.4-r1_aarch64_cortex-a53.ipk",
+            "sha256": "c469fc36e67bcd5bc600b3e3e6c134bfc1e6abec10838d306042317ab73656ae",
+            "size": 19445394
+          },
+          {
+            "package": "tcping",
+            "version": "0.3-r1",
+            "file": "aarch64_cortex-a53/tcping_0.3-r1_aarch64_cortex-a53.ipk",
+            "sha256": "b14ba8b9127ef21e577a8e59d4a71317aa95f4639edc8f1cbdacfc2331383f2f",
+            "size": 4317
+          },
+          {
+            "package": "v2ray-geoip",
+            "version": "202610290022.1",
+            "file": "aarch64_cortex-a53/v2ray-geoip_202610290022.1_all.ipk",
+            "sha256": "1491a2ee2b24490d8e0996a2e97d942e0febaad21ed256fac459134007b925bd",
+            "size": 3442046
+          },
+          {
+            "package": "v2ray-geosite",
+            "version": "202610302203.1",
+            "file": "aarch64_cortex-a53/v2ray-geosite_202610302203.1_all.ipk",
+            "sha256": "05b97db0bdcb7734e7e473923193d86281416cef21b9919b3b52a00dfe8d6092",
+            "size": 3696544
+          },
+          {
+            "package": "v2ray-plugin",
+            "version": "5.49.0-r1",
+            "file": "aarch64_cortex-a53/v2ray-plugin_5.49.0-r1_aarch64_cortex-a53.ipk",
+            "sha256": "eb6878020b579907da84ff238e97f8864b5dd5056de0b86a8ab359548cfd7ad9",
+            "size": 6200564
+          },
+          {
+            "package": "xray-core",
+            "version": "26.10.31-r1",
+            "file": "aarch64_cortex-a53/xray-core_26.10.31-r1_aarch64_cortex-a53.ipk",
+            "sha256": "f511dbd3dbb182e0e725b8ef8f0a1c49fe62f054fec92d0f05d756e36ba8b2ca",
+            "size": 10922710
+          },
+          {
+            "package": "xray-plugin",
+            "version": "1.8.24-r1",
+            "file": "aarch64_cortex-a53/xray-plugin_1.8.24-r1_aarch64_cortex-a53.ipk",
+            "sha256": "6a391980a0a952f4bfbc5f323953a82503bab8a8083e2faf15a2c76daa6fd7a2",
+            "size": 7004718
+          }
+        ]
+      }
+    },
+    {
+      "name": "aarch64_cortex-a72",
+      "feeds": {
+        "passwall2": [
+          {
+            "package": "luci-app-passwall2",
+            "version": "26.11.3-r1",
+            "file": "aarch64_cortex-a72/luci-app-passwall2_26.11.3-r1_all.ipk",
+            "sha256": "e5a49332e7da6c123d192a55b2cd6b57da4505f7b1f976074a18a5223ff5c822",
+            "size": 366717
+          },
+          {
+            "package": "luci-i18n-passwall2-fa",
+            "version": "26.11.3",
+            "file": "aarch64_cortex-a72/luci-i18n-passwall2-fa_26.11.3_all.ipk",
+            "sha256": "f634e9935d1905080cc48b86ce38525c32c8f3b042b444aa74f42bdd40053bde",
+            "size": 24319
+          },
+          {
+            "package": "luci-i18n-passwall2-ru",
+            "version": "26.11.3",
+            "file": "aarch64_cortex-a72/luci-i18n-passwall2-ru_26.11.3_all.ipk",
+            "sha256": "70aeff58a256af77aa0b41f39192876864060540cbc865d1c5a67943622bbaa2",
+            "size": 25451
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-cn",
+            "version": "26.11.3",
+            "file": "aarch64_cortex-a72/luci-i18n-passwall2-zh-cn_26.11.3_all.ipk",
+            "sha256": "57dda1843ede6fb025a39288a1923f6405267ebd2d51739d90ebde90b309e16e",
+            "size": 21219
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-tw",
+            "version": "26.11.3",
+            "file": "aarch64_cortex-a72/luci-i18n-passwall2-zh-tw_26.11.3_all.ipk",
+            "sha256": "1ba893342478c4d03f4e3898c01541f1e6a42e2668b741eef41ad0a3a55f8db4",
+            "size": 21490
+          }
+        ],
+        "passwall_luci": [
+          {
+            "package": "luci-app-passwall",
+            "version": "26.11.3-r1",
+            "file": "aarch64_cortex-a72/luci-app-passwall_26.11.3-r1_all.ipk",
+            "sha256": "af7a0602c8881ccd04a00f7b99de1d7d2d1e472ae53f0d2eec11810363ba417f",
+            "size": 862873
+          },
+          {
+            "package": "luci-i18n-passwall-zh-cn",
+            "version": "26.11.3",
+            "file": "aarch64_cortex-a72/luci-i18n-passwall-zh-cn_26.11.3_all.ipk",
+            "sha256": "e5d4cd9a0f35ca59e27de313aa3aec735802f600e6d924325cb8892117c1333c",
+            "size": 17491
+          }
+        ],
+        "passwall_packages": [
+          {
+            "package": "chinadns-ng",
+            "version": "2025.08.09-r1",
+            "file": "aarch64_cortex-a72/chinadns-ng_2025.08.09-r1_aarch64_cortex-a72.ipk",
+            "sha256": "7a40a28b2482c212cd7db98866106127828ebf32e89b964b7a9bfe213ca788c8",
+            "size": 269727
+          },
+          {
+            "package": "dns2socks",
+            "version": "2.1-r3",
+            "file": "aarch64_cortex-a72/dns2socks_2.1-r3_aarch64_cortex-a72.ipk",
+            "sha256": "0815727215f5a3a4c491506836366ec96ea1f39c43821a28c68e1495a4a28166",
+            "size": 11837
+          },
+          {
+            "package": "geoview",
+            "version": "0.2.9-r1",
+            "file": "aarch64_cortex-a72/geoview_0.2.9-r1_aarch64_cortex-a72.ipk",
+            "sha256": "bafe95c933faeeab8fd9918c47d43e69c92019019967da556337ade7e72d9024",
+            "size": 2996969
+          },
+          {
+            "package": "hysteria",
+            "version": "2.13.0-r1",
+            "file": "aarch64_cortex-a72/hysteria_2.13.0-r1_aarch64_cortex-a72.ipk",
+            "sha256": "27a19cdc8b46c138b09f176a39eaa9cd4a53ce18382d894cdca1e3344e0ddb33",
+            "size": 8203423
+          },
+          {
+            "package": "ipt2socks",
+            "version": "1.1.4-r3",
+            "file": "aarch64_cortex-a72/ipt2socks_1.1.4-r3_aarch64_cortex-a72.ipk",
+            "sha256": "d9c817b52a2e44b61b7a89e9ff5b4ce9deae97ea66e4c06f9cc70cc89b06d6f2",
+            "size": 26144
+          },
+          {
+            "package": "microsocks",
+            "version": "1.0.5-r2",
+            "file": "aarch64_cortex-a72/microsocks_1.0.5-r2_aarch64_cortex-a72.ipk",
+            "sha256": "61900e35cf8dd039703691d184742dbb3c8d9ac229a7b9cfa523befb0d75353e",
+            "size": 7204
+          },
+          {
+            "package": "naiveproxy",
+            "version": "154.0.8037.49-r5",
+            "file": "aarch64_cortex-a72/naiveproxy_154.0.8037.49-r5_aarch64_cortex-a72.ipk",
+            "sha256": "c3b2d0d86c94e00f361432aaefd6f087d82790005e27419ec3688b01f9276185",
+            "size": 3867421
+          },
+          {
+            "package": "shadow-tls",
+            "version": "0.2.25-r1",
+            "file": "aarch64_cortex-a72/shadow-tls_0.2.25-r1_aarch64_cortex-a72.ipk",
+            "sha256": "5bcc56f064803dabfddc971b8f71556cca6f034b3a18ba4df922d2c04741f0bd",
+            "size": 1521262
+          },
+          {
+            "package": "shadowsocks-rust-sslocal",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a72/shadowsocks-rust-sslocal_1.25.0-r1_aarch64_cortex-a72.ipk",
+            "sha256": "dbc5d8e327bfe81cc1ed254c9299f390da9238b210899981a406df8dda9a5c00",
+            "size": 3881112
+          },
+          {
+            "package": "shadowsocks-rust-ssmanager",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a72/shadowsocks-rust-ssmanager_1.25.0-r1_aarch64_cortex-a72.ipk",
+            "sha256": "e05bb9f3b1b2ddb8573e3a1609caef2823ac124170c119541a83b93ddfa2b4a9",
+            "size": 3120524
+          },
+          {
+            "package": "shadowsocks-rust-ssserver",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a72/shadowsocks-rust-ssserver_1.25.0-r1_aarch64_cortex-a72.ipk",
+            "sha256": "048a10dfd4d3f7e4598f384bd0b86a4aae4cadd2c20e408b8e342fac693412b9",
+            "size": 3065932
+          },
+          {
+            "package": "shadowsocks-rust-ssservice",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a72/shadowsocks-rust-ssservice_1.25.0-r1_aarch64_cortex-a72.ipk",
+            "sha256": "9c594ba12d0bb240819a8e5115275eb1cad54bbd0a4ebcf7511f777203cea84f",
+            "size": 4061480
+          },
+          {
+            "package": "shadowsocks-rust-ssurl",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a72/shadowsocks-rust-ssurl_1.25.0-r1_aarch64_cortex-a72.ipk",
+            "sha256": "35cb52dded65865e06e7f03fd45579b9c0d9b9a9707bab744bf0eb7c21719880",
+            "size": 908325
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-check",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a72/shadowsocksr-libev-ssr-check_2.5.6-r13_aarch64_cortex-a72.ipk",
+            "sha256": "9550cb6caee60c7c4b68c82000ba1938af4bfa4360c40ccc56d5c517856ad2cb",
+            "size": 3373
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-local",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a72/shadowsocksr-libev-ssr-local_2.5.6-r13_aarch64_cortex-a72.ipk",
+            "sha256": "1ce48475f4e1366889a530bd6e0a275a5c20320600ddc5aea1b48dfd6e8f5c9f",
+            "size": 63560
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-nat",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a72/shadowsocksr-libev-ssr-nat_2.5.6-r13_aarch64_cortex-a72.ipk",
+            "sha256": "31ae29c982de28dba60c7e260b16a8646f4661db9e9addfc32a962520cfa1026",
+            "size": 3026
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-redir",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a72/shadowsocksr-libev-ssr-redir_2.5.6-r13_aarch64_cortex-a72.ipk",
+            "sha256": "442c004a7b26e77015cc7b0649af7ddfba92b530a665deacaca236999ec2293c",
+            "size": 57018
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-server",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a72/shadowsocksr-libev-ssr-server_2.5.6-r13_aarch64_cortex-a72.ipk",
+            "sha256": "a4b99445c195fd99b9c3daea37bf6d16dc1e321812aa65137b206d0485614619",
+            "size": 66939
+          },
+          {
+            "package": "simple-obfs-client",
+            "version": "0.0.5-r3",
+            "file": "aarch64_cortex-a72/simple-obfs-client_0.0.5-r3_aarch64_cortex-a72.ipk",
+            "sha256": "9880596bf6e5f4f190b3b35e26a5a783ec58d6091d0a21764cda949539a4572e",
+            "size": 32108
+          },
+          {
+            "package": "simple-obfs-server",
+            "version": "0.0.5-r3",
+            "file": "aarch64_cortex-a72/simple-obfs-server_0.0.5-r3_aarch64_cortex-a72.ipk",
+            "sha256": "2b842a934d7b0e8c1e465083d5124b764340f56c505c5a54129e56b8ce99035d",
+            "size": 34703
+          },
+          {
+            "package": "sing-box",
+            "version": "1.14.4-r1",
+            "file": "aarch64_cortex-a72/sing-box_1.14.4-r1_aarch64_cortex-a72.ipk",
+            "sha256": "49e1891662992a5330217abe029ff0a022c82f6ea04da45826536798213eccc0",
+            "size": 19445598
+          },
+          {
+            "package": "tcping",
+            "version": "0.3-r1",
+            "file": "aarch64_cortex-a72/tcping_0.3-r1_aarch64_cortex-a72.ipk",
+            "sha256": "8373b8f88de54ec426d142dd0bef155fc27e2ce2d02b4dc8db5e842eda4db56c",
+            "size": 4321
+          },
+          {
+            "package": "v2ray-geoip",
+            "version": "202610290022.1",
+            "file": "aarch64_cortex-a72/v2ray-geoip_202610290022.1_all.ipk",
+            "sha256": "1491a2ee2b24490d8e0996a2e97d942e0febaad21ed256fac459134007b925bd",
+            "size": 3442046
+          },
+          {
+            "package": "v2ray-geosite",
+            "version": "202610302203.1",
+            "file": "aarch64_cortex-a72/v2ray-geosite_202610302203.1_all.ipk",
+            "sha256": "05b97db0bdcb7734e7e473923193d86281416cef21b9919b3b52a00dfe8d6092",
+            "size": 3696544
+          },
+          {
+            "package": "v2ray-plugin",
+            "version": "5.49.0-r1",
+            "file": "aarch64_cortex-a72/v2ray-plugin_5.49.0-r1_aarch64_cortex-a72.ipk",
+            "sha256": "7e07b7a0ce1b9dd81cff58f2467cb67d85f12598e5a8d7e5023dfaecc8bd332b",
+            "size": 6200177
+          },
+          {
+            "package": "xray-core",
+            "version": "26.10.31-r1",
+            "file": "aarch64_cortex-a72/xray-core_26.10.31-r1_aarch64_cortex-a72.ipk",
+            "sha256": "72d8abce868a08909207ad2b329d7f9e88b1b730de25875c60c5f91e21969294",
+            "size": 10922755
+          },
+          {
+            "package": "xray-plugin",
+            "version": "1.8.24-r1",
+            "file": "aarch64_cortex-a72/xray-plugin_1.8.24-r1_aarch64_cortex-a72.ipk",
+            "sha256": "461a349a56cccd1870b78b2c51a71ee6cd9458de117af265d3825f78ab102c25",
+            "size": 7004868
+          }
+        ]
+      }
+    },
+    {
+      "name": "aarch64_cortex-a76",
+      "feeds": {
+        "passwall2": [
+          {
+            "package": "luci-app-passwall2",
+            "version": "26.11.3-r1",
+            "file": "aarch64_cortex-a76/luci-app-passwall2_26.11.3-r1_all.ipk",
+            "sha256": "e5a49332e7da6c123d192a55b2cd6b57da4505f7b1f976074a18a5223ff5c822",
+            "size": 366717
+          },
+          {
+            "package": "luci-i18n-passwall2-fa",
+            "version": "26.11.3",
+            "file": "aarch64_cortex-a76/luci-i18n-passwall2-fa_26.11.3_all.ipk",
+            "sha256": "f634e9935d1905080cc48b86ce38525c32c8f3b042b444aa74f42bdd40053bde",
+            "size": 24319
+          },
+          {
+            "package": "luci-i18n-passwall2-ru",
+            "version": "26.11.3",
+            "file": "aarch64_cortex-a76/luci-i18n-passwall2-ru_26.11.3_all.ipk",
+            "sha256": "70aeff58a256af77aa0b41f39192876864060540cbc865d1c5a67943622bbaa2",
+            "size": 25451
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-cn",
+            "version": "26.11.3",
+            "file": "aarch64_cortex-a76/luci-i18n-passwall2-zh-cn_26.11.3_all.ipk",
+            "sha256": "57dda1843ede6fb025a39288a1923f6405267ebd2d51739d90ebde90b309e16e",
+            "size": 21219
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-tw",
+            "version": "26.11.3",
+            "file": "aarch64_cortex-a76/luci-i18n-passwall2-zh-tw_26.11.3_all.ipk",
+            "sha256": "1ba893342478c4d03f4e3898c01541f1e6a42e2668b741eef41ad0a3a55f8db4",
+            "size": 21490
+          }
+        ],
+        "passwall_luci": [
+          {
+            "package": "luci-app-passwall",
+            "version": "26.11.3-r1",
+            "file": "aarch64_cortex-a76/luci-app-passwall_26.11.3-r1_all.ipk",
+            "sha256": "af7a0602c8881ccd04a00f7b99de1d7d2d1e472ae53f0d2eec11810363ba417f",
+            "size": 862873
+          },
+          {
+            "package": "luci-i18n-passwall-zh-cn",
+            "version": "26.11.3",
+            "file": "aarch64_cortex-a76/luci-i18n-passwall-zh-cn_26.11.3_all.ipk",
+            "sha256": "e5d4cd9a0f35ca59e27de313aa3aec735802f600e6d924325cb8892117c1333c",
+            "size": 17491
+          }
+        ],
+        "passwall_packages": [
+          {
+            "package": "chinadns-ng",
+            "version": "2025.08.09-r1",
+            "file": "aarch64_cortex-a76/chinadns-ng_2025.08.09-r1_aarch64_cortex-a76.ipk",
+            "sha256": "e39e9133079bdc38b6e7180dca20eaa37fde732c8f2c04c75fb9968a283dedcd",
+            "size": 269730
+          },
+          {
+            "package": "dns2socks",
+            "version": "2.1-r3",
+            "file": "aarch64_cortex-a76/dns2socks_2.1-r3_aarch64_cortex-a76.ipk",
+            "sha256": "51b67b85ca2aab4202528fad06a4be591d1013bb14d4ad5c731c6a3ee9afe6a8",
+            "size": 11839
+          },
+          {
+            "package": "geoview",
+            "version": "0.2.9-r1",
+            "file": "aarch64_cortex-a76/geoview_0.2.9-r1_aarch64_cortex-a76.ipk",
+            "sha256": "5e7518d784131c493f041b814714e84785f8ea0a9254fb777b11e9437c5b7529",
+            "size": 2987722
+          },
+          {
+            "package": "hysteria",
+            "version": "2.13.0-r1",
+            "file": "aarch64_cortex-a76/hysteria_2.13.0-r1_aarch64_cortex-a76.ipk",
+            "sha256": "d116aad2abd4e5a88ec01b81b72b2332cfa4e7a97153925bd72613ed6b2662bc",
+            "size": 8174923
+          },
+          {
+            "package": "ipt2socks",
+            "version": "1.1.4-r3",
+            "file": "aarch64_cortex-a76/ipt2socks_1.1.4-r3_aarch64_cortex-a76.ipk",
+            "sha256": "23725f90a73d6dfa32ef04ea61de0a58c18a5ad8c729adf0641f6c60aca581c3",
+            "size": 26145
+          },
+          {
+            "package": "microsocks",
+            "version": "1.0.5-r2",
+            "file": "aarch64_cortex-a76/microsocks_1.0.5-r2_aarch64_cortex-a76.ipk",
+            "sha256": "923851a2d9eeadd01361b30d5a60913c6edd2e49bf0c70e9c13600f4cb0437f3",
+            "size": 7205
+          },
+          {
+            "package": "naiveproxy",
+            "version": "154.0.8037.49-r5",
+            "file": "aarch64_cortex-a76/naiveproxy_154.0.8037.49-r5_aarch64_cortex-a76.ipk",
+            "sha256": "9d53658cf0585af3f4e64d262f5c0bb931da4712b13351cab27b9b4996798139",
+            "size": 3968361
+          },
+          {
+            "package": "shadow-tls",
+            "version": "0.2.25-r1",
+            "file": "aarch64_cortex-a76/shadow-tls_0.2.25-r1_aarch64_cortex-a76.ipk",
+            "sha256": "9b3795d408940ead29c1e7a39de2e1c40b54ae83bf48b3c418f86ddea4a9f688",
+            "size": 1521274
+          },
+          {
+            "package": "shadowsocks-rust-sslocal",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a76/shadowsocks-rust-sslocal_1.25.0-r1_aarch64_cortex-a76.ipk",
+            "sha256": "f838330e49c2e99e07bb216ff92ae60fbb998940a2bb01f2244bc46bd40a5ddb",
+            "size": 3880957
+          },
+          {
+            "package": "shadowsocks-rust-ssmanager",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a76/shadowsocks-rust-ssmanager_1.25.0-r1_aarch64_cortex-a76.ipk",
+            "sha256": "9c3e78bf6e3c3e2fabae79ca40506f6fea2b971b62a139cd813347f107f1f7f1",
+            "size": 3120495
+          },
+          {
+            "package": "shadowsocks-rust-ssserver",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a76/shadowsocks-rust-ssserver_1.25.0-r1_aarch64_cortex-a76.ipk",
+            "sha256": "0f317c776abe2bcf1367377d0671cfdc27c12b66409cde4a92c5c4e61d8c2961",
+            "size": 3066036
+          },
+          {
+            "package": "shadowsocks-rust-ssservice",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a76/shadowsocks-rust-ssservice_1.25.0-r1_aarch64_cortex-a76.ipk",
+            "sha256": "7e20fd0d92b7ead535359cf499721729b4d259bc2e1ecf3b5dfb63b0e348159d",
+            "size": 4062074
+          },
+          {
+            "package": "shadowsocks-rust-ssurl",
+            "version": "1.25.0-r1",
+            "file": "aarch64_cortex-a76/shadowsocks-rust-ssurl_1.25.0-r1_aarch64_cortex-a76.ipk",
+            "sha256": "552feccb1a4fe3f02ef962707d0cd6adc400b17749851da6977bf4294c8088bb",
+            "size": 908353
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-check",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a76/shadowsocksr-libev-ssr-check_2.5.6-r13_aarch64_cortex-a76.ipk",
+            "sha256": "39b683d6ea9768fffa9eec04d34d2cff3b292f08499b68769841287e9a32add2",
+            "size": 3378
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-local",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a76/shadowsocksr-libev-ssr-local_2.5.6-r13_aarch64_cortex-a76.ipk",
+            "sha256": "6392716241d28c49390f4ac9ef36cd47c18b6848446b0d692d25acc69a8ac79f",
+            "size": 63560
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-nat",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a76/shadowsocksr-libev-ssr-nat_2.5.6-r13_aarch64_cortex-a76.ipk",
+            "sha256": "23a1621d43e679367eedf918bd74e1fd96e6fcaced33f24befd403555af3ece4",
+            "size": 3020
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-redir",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a76/shadowsocksr-libev-ssr-redir_2.5.6-r13_aarch64_cortex-a76.ipk",
+            "sha256": "c33e5ce8445ac898139c614dae1534896e1fc429b25a2c238be23511ffb82bad",
+            "size": 57020
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-server",
+            "version": "2.5.6-r13",
+            "file": "aarch64_cortex-a76/shadowsocksr-libev-ssr-server_2.5.6-r13_aarch64_cortex-a76.ipk",
+            "sha256": "e6f39b5399bd49ba0f8ba02c55992c47d14531fc016775f453f5a15db1e35186",
+            "size": 66938
+          },
+          {
+            "package": "simple-obfs-client",
+            "version": "0.0.5-r3",
+            "file": "aarch64_cortex-a76/simple-obfs-client_0.0.5-r3_aarch64_cortex-a76.ipk",
+            "sha256": "f36a4a3414514ba4541beb5fc78b8f3980d7918d1035f36d4d6bd537db1a9892",
+            "size": 32111
+          },
+          {
+            "package": "simple-obfs-server",
+            "version": "0.0.5-r3",
+            "file": "aarch64_cortex-a76/simple-obfs-server_0.0.5-r3_aarch64_cortex-a76.ipk",
+            "sha256": "5645e33875293188e11a27cd368cd03e0871ff18e7f66c94aab7ddc1d0404297",
+            "size": 34702
+          },
+          {
+            "package": "sing-box",
+            "version": "1.14.4-r1",
+            "file": "aarch64_cortex-a76/sing-box_1.14.4-r1_aarch64_cortex-a76.ipk",
+            "sha256": "45d9745ca51136b20cf037e2ceda8e2837e87ad2e737ce2b431be3e168421c76",
+            "size": 19335253
+          },
+          {
+            "package": "tcping",
+            "version": "0.3-r1",
+            "file": "aarch64_cortex-a76/tcping_0.3-r1_aarch64_cortex-a76.ipk",
+            "sha256": "1c0fc46549ebe40abcba79cbc8b47a88f06dfa8b72b611a6a85638aec4591ceb",
+            "size": 4321
+          },
+          {
+            "package": "v2ray-geoip",
+            "version": "202610290022.1",
+            "file": "aarch64_cortex-a76/v2ray-geoip_202610290022.1_all.ipk",
+            "sha256": "1491a2ee2b24490d8e0996a2e97d942e0febaad21ed256fac459134007b925bd",
+            "size": 3442046
+          },
+          {
+            "package": "v2ray-geosite",
+            "version": "202610302203.1",
+            "file": "aarch64_cortex-a76/v2ray-geosite_202610302203.1_all.ipk",
+            "sha256": "05b97db0bdcb7734e7e473923193d86281416cef21b9919b3b52a00dfe8d6092",
+            "size": 3696544
+          },
+          {
+            "package": "v2ray-plugin",
+            "version": "5.49.0-r1",
+            "file": "aarch64_cortex-a76/v2ray-plugin_5.49.0-r1_aarch64_cortex-a76.ipk",
+            "sha256": "1ebc468c117ca08cf882725ce3590672e5bd483f8b794943b73e32957b613624",
+            "size": 6175806
+          },
+          {
+            "package": "xray-core",
+            "version": "26.10.31-r1",
+            "file": "aarch64_cortex-a76/xray-core_26.10.31-r1_aarch64_cortex-a76.ipk",
+            "sha256": "74a17d7bb7d719cf0f606b22e3cd56cc7118ab25831c749a9b274ba69c010af4",
+            "size": 10879313
+          },
+          {
+            "package": "xray-plugin",
+            "version": "1.8.24-r1",
+            "file": "aarch64_cortex-a76/xray-plugin_1.8.24-r1_aarch64_cortex-a76.ipk",
+            "sha256": "40afd246e3a1f0914c6943ea45fc96b8ff79625fdc82b7fe5f7f40c9a122912f",
+            "size": 6973707
+          }
+        ]
+      }
+    },
+    {
+      "name": "aarch64_generic",
+      "feeds": {
+        "passwall2": [
+          {
+            "package": "luci-app-passwall2",
+            "version": "26.11.3-r1",
+            "file": "aarch64_generic/luci-app-passwall2_26.11.3-r1_all.ipk",
+            "sha256": "e5a49332e7da6c123d192a55b2cd6b57da4505f7b1f976074a18a5223ff5c822",
+            "size": 366717
+          },
+          {
+            "package": "luci-i18n-passwall2-fa",
+            "version": "26.11.3",
+            "file": "aarch64_generic/luci-i18n-passwall2-fa_26.11.3_all.ipk",
+            "sha256": "f634e9935d1905080cc48b86ce38525c32c8f3b042b444aa74f42bdd40053bde",
+            "size": 24319
+          },
+          {
+            "package": "luci-i18n-passwall2-ru",
+            "version": "26.11.3",
+            "file": "aarch64_generic/luci-i18n-passwall2-ru_26.11.3_all.ipk",
+            "sha256": "70aeff58a256af77aa0b41f39192876864060540cbc865d1c5a67943622bbaa2",
+            "size": 25451
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-cn",
+            "version": "26.11.3",
+            "file": "aarch64_generic/luci-i18n-passwall2-zh-cn_26.11.3_all.ipk",
+            "sha256": "57dda1843ede6fb025a39288a1923f6405267ebd2d51739d90ebde90b309e16e",
+            "size": 21219
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-tw",
+            "version": "26.11.3",
+            "file": "aarch64_generic/luci-i18n-passwall2-zh-tw_26.11.3_all.ipk",
+            "sha256": "1ba893342478c4d03f4e3898c01541f1e6a42e2668b741eef41ad0a3a55f8db4",
+            "size": 21490
+          }
+        ],
+        "passwall_luci": [
+          {
+            "package": "luci-app-passwall",
+            "version": "26.11.3-r1",
+            "file": "aarch64_generic/luci-app-passwall_26.11.3-r1_all.ipk",
+            "sha256": "af7a0602c8881ccd04a00f7b99de1d7d2d1e472ae53f0d2eec11810363ba417f",
+            "size": 862873
+          },
+          {
+            "package": "luci-i18n-passwall-zh-cn",
+            "version": "26.11.3",
+            "file": "aarch64_generic/luci-i18n-passwall-zh-cn_26.11.3_all.ipk",
+            "sha256": "e5d4cd9a0f35ca59e27de313aa3aec735802f600e6d924325cb8892117c1333c",
+            "size": 17491
+          }
+        ],
+        "passwall_packages": [
+          {
+            "package": "chinadns-ng",
+            "version": "2025.08.09-r1",
+            "file": "aarch64_generic/chinadns-ng_2025.08.09-r1_aarch64_generic.ipk",
+            "sha256": "a79711bd14b081de805e3ef54191e5d6911998a724df27f426a3fc91389dcde5",
+            "size": 269724
+          },
+          {
+            "package": "dns2socks",
+            "version": "2.1-r3",
+            "file": "aarch64_generic/dns2socks_2.1-r3_aarch64_generic.ipk",
+            "sha256": "df82bdb7e605ff7f211bf40e1d8c9110ef88faf17b7908e1e5db2e9fe90a3dbd",
+            "size": 11836
+          },
+          {
+            "package": "geoview",
+            "version": "0.2.9-r1",
+            "file": "aarch64_generic/geoview_0.2.9-r1_aarch64_generic.ipk",
+            "sha256": "1d512da3c4cb8e1770fe8b5c564d62be1c9fdc29f741637223321174a5b91aaf",
+            "size": 2996801
+          },
+          {
+            "package": "hysteria",
+            "version": "2.13.0-r1",
+            "file": "aarch64_generic/hysteria_2.13.0-r1_aarch64_generic.ipk",
+            "sha256": "145685924ca41319f576f3ca82a798333eea0e6f6033249d9d09e19b6afa4a5c",
+            "size": 8203179
+          },
+          {
+            "package": "ipt2socks",
+            "version": "1.1.4-r3",
+            "file": "aarch64_generic/ipt2socks_1.1.4-r3_aarch64_generic.ipk",
+            "sha256": "41bc40df16d3cfa43401d8492597a16207dd89cd535d3ed5691bd80c77aef9f9",
+            "size": 26140
+          },
+          {
+            "package": "microsocks",
+            "version": "1.0.5-r2",
+            "file": "aarch64_generic/microsocks_1.0.5-r2_aarch64_generic.ipk",
+            "sha256": "3fb1a4123f71baa7e63cdf49dba63f65e65cc711cecf16bcdc7ddc32e8f605e3",
+            "size": 7196
+          },
+          {
+            "package": "naiveproxy",
+            "version": "154.0.8037.49-r5",
+            "file": "aarch64_generic/naiveproxy_154.0.8037.49-r5_aarch64_generic.ipk",
+            "sha256": "d79dfab6ad4f9a0e7ad18cf1bbbdba855b26846e813e7c44cd933f97a9d2a10d",
+            "size": 3968355
+          },
+          {
+            "package": "shadow-tls",
+            "version": "0.2.25-r1",
+            "file": "aarch64_generic/shadow-tls_0.2.25-r1_aarch64_generic.ipk",
+            "sha256": "ef792a1ef6edc4eae8b7dd7b28a6e7039a27572b0ad81bab4219c885b635e4f3",
+            "size": 1522204
+          },
+          {
+            "package": "shadowsocks-rust-sslocal",
+            "version": "1.25.0-r1",
+            "file": "aarch64_generic/shadowsocks-rust-sslocal_1.25.0-r1_aarch64_generic.ipk",
+            "sha256": "88fbd3a740ed7298852bee117b3489f53b3a609cc2a68c8d68577264e1a489f2",
+            "size": 3876679
+          },
+          {
+            "package": "shadowsocks-rust-ssmanager",
+            "version": "1.25.0-r1",
+            "file": "aarch64_generic/shadowsocks-rust-ssmanager_1.25.0-r1_aarch64_generic.ipk",
+            "sha256": "94a1c57dd9eb071f24b8f4cff5882d98006e217375707613e5d923452ea3befd",
+            "size": 3120264
+          },
+          {
+            "package": "shadowsocks-rust-ssserver",
+            "version": "1.25.0-r1",
+            "file": "aarch64_generic/shadowsocks-rust-ssserver_1.25.0-r1_aarch64_generic.ipk",
+            "sha256": "60eb8ec7ec864d992916d2be1ceb0f4e4ed74838b1dd4e8f82bd6b6105b0d128",
+            "size": 3064909
+          },
+          {
+            "package": "shadowsocks-rust-ssservice",
+            "version": "1.25.0-r1",
+            "file": "aarch64_generic/shadowsocks-rust-ssservice_1.25.0-r1_aarch64_generic.ipk",
+            "sha256": "56d2484297717bb19b9b2df7fbf4d45fc90f99a5ffeb5b80e0b403a4a4dfadcb",
+            "size": 4060354
+          },
+          {
+            "package": "shadowsocks-rust-ssurl",
+            "version": "1.25.0-r1",
+            "file": "aarch64_generic/shadowsocks-rust-ssurl_1.25.0-r1_aarch64_generic.ipk",
+            "sha256": "0ab72ccdd9893664b9974d8cd8657858af08678bb09c4bfd42e4ce55a4e0aa2e",
+            "size": 908727
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-check",
+            "version": "2.5.6-r13",
+            "file": "aarch64_generic/shadowsocksr-libev-ssr-check_2.5.6-r13_aarch64_generic.ipk",
+            "sha256": "be0c844eb21bb2d3a8f0310dd085fdf414908b712f6d62d243e7655ad9f851f4",
+            "size": 3378
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-local",
+            "version": "2.5.6-r13",
+            "file": "aarch64_generic/shadowsocksr-libev-ssr-local_2.5.6-r13_aarch64_generic.ipk",
+            "sha256": "5db5c897a4174d2feb83de86b9f7165a3290ae00cf00b75fec065ba8416b0002",
+            "size": 63559
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-nat",
+            "version": "2.5.6-r13",
+            "file": "aarch64_generic/shadowsocksr-libev-ssr-nat_2.5.6-r13_aarch64_generic.ipk",
+            "sha256": "7986baa170bb016c1dfe16ce430caa81c0d99274c70fa244a9cf509e601bfb76",
+            "size": 3020
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-redir",
+            "version": "2.5.6-r13",
+            "file": "aarch64_generic/shadowsocksr-libev-ssr-redir_2.5.6-r13_aarch64_generic.ipk",
+            "sha256": "5ee95b614422a78853d9f4665883f200a002d5aefb79f7b51f606b13388dc7cf",
+            "size": 57017
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-server",
+            "version": "2.5.6-r13",
+            "file": "aarch64_generic/shadowsocksr-libev-ssr-server_2.5.6-r13_aarch64_generic.ipk",
+            "sha256": "6a36158df35c0a891bb4d2d6268caba8f37547097be87dd3a3cbdba763aada65",
+            "size": 66932
+          },
+          {
+            "package": "simple-obfs-client",
+            "version": "0.0.5-r3",
+            "file": "aarch64_generic/simple-obfs-client_0.0.5-r3_aarch64_generic.ipk",
+            "sha256": "5363b692c6535dcd6604880c633a245cdad42667e794951a056cd99c96c23c0d",
+            "size": 32103
+          },
+          {
+            "package": "simple-obfs-server",
+            "version": "0.0.5-r3",
+            "file": "aarch64_generic/simple-obfs-server_0.0.5-r3_aarch64_generic.ipk",
+            "sha256": "4872fe60da7cb1ebab6089e1a0fac4f4cd91d7cbfbd289aa5d9c146e9a88a397",
+            "size": 34701
+          },
+          {
+            "package": "sing-box",
+            "version": "1.14.4-r1",
+            "file": "aarch64_generic/sing-box_1.14.4-r1_aarch64_generic.ipk",
+            "sha256": "6017d5786d0998675726d4fb9bb392dc08987467a99d93cd5596886b6bc8cb3e",
+            "size": 19445367
+          },
+          {
+            "package": "tcping",
+            "version": "0.3-r1",
+            "file": "aarch64_generic/tcping_0.3-r1_aarch64_generic.ipk",
+            "sha256": "3bb34a9dc95f1f96843ac4dbd50150ebdcc85071c9ec64466bdccc290e8c4bbc",
+            "size": 4322
+          },
+          {
+            "package": "v2ray-geoip",
+            "version": "202610290022.1",
+            "file": "aarch64_generic/v2ray-geoip_202610290022.1_all.ipk",
+            "sha256": "1491a2ee2b24490d8e0996a2e97d942e0febaad21ed256fac459134007b925bd",
+            "size": 3442046
+          },
+          {
+            "package": "v2ray-geosite",
+            "version": "202610302203.1",
+            "file": "aarch64_generic/v2ray-geosite_202610302203.1_all.ipk",
+            "sha256": "05b97db0bdcb7734e7e473923193d86281416cef21b9919b3b52a00dfe8d6092",
+            "size": 3696544
+          },
+          {
+            "package": "v2ray-plugin",
+            "version": "5.49.0-r1",
+            "file": "aarch64_generic/v2ray-plugin_5.49.0-r1_aarch64_generic.ipk",
+            "sha256": "c78a0b1c925fbfe8cd35b1c9122455387e082d08bc92b83c88e76d47aaa89600",
+            "size": 6200442
+          },
+          {
+            "package": "xray-core",
+            "version": "26.10.31-r1",
+            "file": "aarch64_generic/xray-core_26.10.31-r1_aarch64_generic.ipk",
+            "sha256": "e51645149f30eec203ceb590868aab0eeab2f1c3258e2ece1e6df33f2ccd36b5",
+            "size": 10922903
+          },
+          {
+            "package": "xray-plugin",
+            "version": "1.8.24-r1",
+            "file": "aarch64_generic/xray-plugin_1.8.24-r1_aarch64_generic.ipk",
+            "sha256": "fa7a079c5f3604ac86459c220937777632a760a65b816e2e4c93502472ba4c92",
+            "size": 7004653
+          }
+        ]
+      }
+    },
+    {
+      "name": "arm_cortex-a7_neon-vfpv4",
+      "feeds": {
+        "passwall2": [
+          {
+            "package": "luci-app-passwall2",
+            "version": "26.11.3-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/luci-app-passwall2_26.11.3-r1_all.ipk",
+            "sha256": "e5a49332e7da6c123d192a55b2cd6b57da4505f7b1f976074a18a5223ff5c822",
+            "size": 366717
+          },
+          {
+            "package": "luci-i18n-passwall2-fa",
+            "version": "26.11.3",
+            "file": "arm_cortex-a7_neon-vfpv4/luci-i18n-passwall2-fa_26.11.3_all.ipk",
+            "sha256": "f634e9935d1905080cc48b86ce38525c32c8f3b042b444aa74f42bdd40053bde",
+            "size": 24319
+          },
+          {
+            "package": "luci-i18n-passwall2-ru",
+            "version": "26.11.3",
+            "file": "arm_cortex-a7_neon-vfpv4/luci-i18n-passwall2-ru_26.11.3_all.ipk",
+            "sha256": "70aeff58a256af77aa0b41f39192876864060540cbc865d1c5a67943622bbaa2",
+            "size": 25451
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-cn",
+            "version": "26.11.3",
+            "file": "arm_cortex-a7_neon-vfpv4/luci-i18n-passwall2-zh-cn_26.11.3_all.ipk",
+            "sha256": "57dda1843ede6fb025a39288a1923f6405267ebd2d51739d90ebde90b309e16e",
+            "size": 21219
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-tw",
+            "version": "26.11.3",
+            "file": "arm_cortex-a7_neon-vfpv4/luci-i18n-passwall2-zh-tw_26.11.3_all.ipk",
+            "sha256": "1ba893342478c4d03f4e3898c01541f1e6a42e2668b741eef41ad0a3a55f8db4",
+            "size": 21490
+          }
+        ],
+        "passwall_luci": [
+          {
+            "package": "luci-app-passwall",
+            "version": "26.11.3-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/luci-app-passwall_26.11.3-r1_all.ipk",
+            "sha256": "af7a0602c8881ccd04a00f7b99de1d7d2d1e472ae53f0d2eec11810363ba417f",
+            "size": 862873
+          },
+          {
+            "package": "luci-i18n-passwall-zh-cn",
+            "version": "26.11.3",
+            "file": "arm_cortex-a7_neon-vfpv4/luci-i18n-passwall-zh-cn_26.11.3_all.ipk",
+            "sha256": "e5d4cd9a0f35ca59e27de313aa3aec735802f600e6d924325cb8892117c1333c",
+            "size": 17491
+          }
+        ],
+        "passwall_packages": [
+          {
+            "package": "chinadns-ng",
+            "version": "2025.08.09-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/chinadns-ng_2025.08.09-r1_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "ed59f252a0b8a7d68bee0c032936065c5374f4ae741af34aedd5e09a14601b92",
+            "size": 270051
+          },
+          {
+            "package": "dns2socks",
+            "version": "2.1-r3",
+            "file": "arm_cortex-a7_neon-vfpv4/dns2socks_2.1-r3_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "75ab5de061cfcb8ec9da904f93d3a23c8e7ceb598a7c60f7e0e26d7e34c6a1a7",
+            "size": 11551
+          },
+          {
+            "package": "geoview",
+            "version": "0.2.9-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/geoview_0.2.9-r1_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "e5b757d4053dbc71763efb4522daa25eb6aed3c832f987a2353fd2abb82121d2",
+            "size": 3234910
+          },
+          {
+            "package": "hysteria",
+            "version": "2.13.0-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/hysteria_2.13.0-r1_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "0cd282158e26e326c5cbb9c4e51de90a01812bf9f34faa0eba49ee070be93c98",
+            "size": 8656788
+          },
+          {
+            "package": "ipt2socks",
+            "version": "1.1.4-r3",
+            "file": "arm_cortex-a7_neon-vfpv4/ipt2socks_1.1.4-r3_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "993bddba41bdf7fafcae00d21d582a1d6156436d51ac86e07bccd27fbda3ba18",
+            "size": 26338
+          },
+          {
+            "package": "microsocks",
+            "version": "1.0.5-r2",
+            "file": "arm_cortex-a7_neon-vfpv4/microsocks_1.0.5-r2_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "35078671d9cb54a02f2c53a479b60504936b56d71ac1f7011b81d28b1759dea7",
+            "size": 6362
+          },
+          {
+            "package": "naiveproxy",
+            "version": "154.0.8037.49-r5",
+            "file": "arm_cortex-a7_neon-vfpv4/naiveproxy_154.0.8037.49-r5_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "f4ae51a881bfee622074b8ccb170fe5431b7e532094a72c5119a418d3953a257",
+            "size": 3803637
+          },
+          {
+            "package": "shadow-tls",
+            "version": "0.2.25-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/shadow-tls_0.2.25-r1_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "6ae03d9eeab07da75f9950e918a46e0efc84e78d31ccbdffa2b8481985212165",
+            "size": 1157587
+          },
+          {
+            "package": "shadowsocks-rust-sslocal",
+            "version": "1.25.0-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/shadowsocks-rust-sslocal_1.25.0-r1_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "77af265fe448e0c485b3c16439dde2e520baa2ea4fbf6a550ad7de60f4bf9135",
+            "size": 3491226
+          },
+          {
+            "package": "shadowsocks-rust-ssmanager",
+            "version": "1.25.0-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/shadowsocks-rust-ssmanager_1.25.0-r1_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "455c9bf5f072c4efb84f85fc4137032e96dfec28cade8a86889e6d9e4e704319",
+            "size": 2764714
+          },
+          {
+            "package": "shadowsocks-rust-ssserver",
+            "version": "1.25.0-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/shadowsocks-rust-ssserver_1.25.0-r1_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "d10c8252f4c78a77c4163914c9e7517ab7306f2ce9bdd2bae173aaa6496986fd",
+            "size": 2712062
+          },
+          {
+            "package": "shadowsocks-rust-ssservice",
+            "version": "1.25.0-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/shadowsocks-rust-ssservice_1.25.0-r1_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "8f0a3542d1ea1a861fe8060e0428ad04d4959fcc2a5b49709e71d53b0e3d79f1",
+            "size": 3670284
+          },
+          {
+            "package": "shadowsocks-rust-ssurl",
+            "version": "1.25.0-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/shadowsocks-rust-ssurl_1.25.0-r1_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "070cff9837450c1ad6cc3e75cb4e9a21fe6c4aa267c094dd80c50eb5726f5f8a",
+            "size": 840177
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-check",
+            "version": "2.5.6-r13",
+            "file": "arm_cortex-a7_neon-vfpv4/shadowsocksr-libev-ssr-check_2.5.6-r13_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "7f5a741f3d86c443a47b9fd71358790545eb45f6fcdac18762004860ebaca023",
+            "size": 3046
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-local",
+            "version": "2.5.6-r13",
+            "file": "arm_cortex-a7_neon-vfpv4/shadowsocksr-libev-ssr-local_2.5.6-r13_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "fd9c3532be6f77ba814c48bd0fc680d9e1c11c63d963761e417913e4fde4f003",
+            "size": 60124
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-nat",
+            "version": "2.5.6-r13",
+            "file": "arm_cortex-a7_neon-vfpv4/shadowsocksr-libev-ssr-nat_2.5.6-r13_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "a89e0404d7a695b3f8c74df0435ff05fe6d9392117854dba1490acea371c389a",
+            "size": 3029
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-redir",
+            "version": "2.5.6-r13",
+            "file": "arm_cortex-a7_neon-vfpv4/shadowsocksr-libev-ssr-redir_2.5.6-r13_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "f5666c52990db7ad93b81933fbd543b3d72fce4f31641f41c589bc43a4d7e9b8",
+            "size": 54314
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-server",
+            "version": "2.5.6-r13",
+            "file": "arm_cortex-a7_neon-vfpv4/shadowsocksr-libev-ssr-server_2.5.6-r13_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "cb74cd1db29ed6de5c99da43d927c94b159b0bdbac5b39a03c03870df0c82464",
+            "size": 63810
+          },
+          {
+            "package": "simple-obfs-client",
+            "version": "0.0.5-r3",
+            "file": "arm_cortex-a7_neon-vfpv4/simple-obfs-client_0.0.5-r3_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "c037848fdca39b6c1aec2085ec1c1adb6fd087ad8dc6dc3f03b07d867ce00892",
+            "size": 28087
+          },
+          {
+            "package": "simple-obfs-server",
+            "version": "0.0.5-r3",
+            "file": "arm_cortex-a7_neon-vfpv4/simple-obfs-server_0.0.5-r3_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "b3c27962d9120312783935dbf9868c23d910ce792d63ede55fd2e34178a75664",
+            "size": 30489
+          },
+          {
+            "package": "sing-box",
+            "version": "1.14.4-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/sing-box_1.14.4-r1_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "d49bdcc7ca42e39567d784bc4c2fa292addbc0a7c6975cfa2563914c5284811e",
+            "size": 20083320
+          },
+          {
+            "package": "tcping",
+            "version": "0.3-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/tcping_0.3-r1_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "01257e645804ea4fd195cd4ccd3f3a0ada992176abfc0bc51e008673c89323e3",
+            "size": 4186
+          },
+          {
+            "package": "v2ray-geoip",
+            "version": "202610290022.1",
+            "file": "arm_cortex-a7_neon-vfpv4/v2ray-geoip_202610290022.1_all.ipk",
+            "sha256": "1491a2ee2b24490d8e0996a2e97d942e0febaad21ed256fac459134007b925bd",
+            "size": 3442046
+          },
+          {
+            "package": "v2ray-geosite",
+            "version": "202610302203.1",
+            "file": "arm_cortex-a7_neon-vfpv4/v2ray-geosite_202610302203.1_all.ipk",
+            "sha256": "05b97db0bdcb7734e7e473923193d86281416cef21b9919b3b52a00dfe8d6092",
+            "size": 3696544
+          },
+          {
+            "package": "v2ray-plugin",
+            "version": "5.49.0-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/v2ray-plugin_5.49.0-r1_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "ef9bf59a3183988d38e383816a9e14d19c84eb77c9d6b79f6917f3b334ff417f",
+            "size": 6534494
+          },
+          {
+            "package": "xray-core",
+            "version": "26.10.31-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/xray-core_26.10.31-r1_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "2d97612ac5f424f6f41315ca4c5e3f13704087ab5f525bdf937a87edceb8a983",
+            "size": 11462850
+          },
+          {
+            "package": "xray-plugin",
+            "version": "1.8.24-r1",
+            "file": "arm_cortex-a7_neon-vfpv4/xray-plugin_1.8.24-r1_arm_cortex-a7_neon-vfpv4.ipk",
+            "sha256": "d6cd133e9a241f63d5b68720d4cc7d180176c0d118f3621f30030ba94cf2a6b0",
+            "size": 7371248
+          }
+        ]
+      }
+    },
+    {
+      "name": "arm_cortex-a9_vfpv3-d16",
+      "feeds": {
+        "passwall2": [
+          {
+            "package": "luci-app-passwall2",
+            "version": "26.11.3-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/luci-app-passwall2_26.11.3-r1_all.ipk",
+            "sha256": "e5a49332e7da6c123d192a55b2cd6b57da4505f7b1f976074a18a5223ff5c822",
+            "size": 366717
+          },
+          {
+            "package": "luci-i18n-passwall2-fa",
+            "version": "26.11.3",
+            "file": "arm_cortex-a9_vfpv3-d16/luci-i18n-passwall2-fa_26.11.3_all.ipk",
+            "sha256": "f634e9935d1905080cc48b86ce38525c32c8f3b042b444aa74f42bdd40053bde",
+            "size": 24319
+          },
+          {
+            "package": "luci-i18n-passwall2-ru",
+            "version": "26.11.3",
+            "file": "arm_cortex-a9_vfpv3-d16/luci-i18n-passwall2-ru_26.11.3_all.ipk",
+            "sha256": "70aeff58a256af77aa0b41f39192876864060540cbc865d1c5a67943622bbaa2",
+            "size": 25451
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-cn",
+            "version": "26.11.3",
+            "file": "arm_cortex-a9_vfpv3-d16/luci-i18n-passwall2-zh-cn_26.11.3_all.ipk",
+            "sha256": "57dda1843ede6fb025a39288a1923f6405267ebd2d51739d90ebde90b309e16e",
+            "size": 21219
+          },
+          {
+            "package": "luci-i18n-passwall2-zh-tw",
+            "version": "26.11.3",
+            "file": "arm_cortex-a9_vfpv3-d16/luci-i18n-passwall2-zh-tw_26.11.3_all.ipk",
+            "sha256": "1ba893342478c4d03f4e3898c01541f1e6a42e2668b741eef41ad0a3a55f8db4",
+            "size": 21490
+          }
+        ],
+        "passwall_luci": [
+          {
+            "package": "luci-app-passwall",
+            "version": "26.11.3-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/luci-app-passwall_26.11.3-r1_all.ipk",
+            "sha256": "af7a0602c8881ccd04a00f7b99de1d7d2d1e472ae53f0d2eec11810363ba417f",
+            "size": 862873
+          },
+          {
+            "package": "luci-i18n-passwall-zh-cn",
+            "version": "26.11.3",
+            "file": "arm_cortex-a9_vfpv3-d16/luci-i18n-passwall-zh-cn_26.11.3_all.ipk",
+            "sha256": "e5d4cd9a0f35ca59e27de313aa3aec735802f600e6d924325cb8892117c1333c",
+            "size": 17491
+          }
+        ],
+        "passwall_packages": [
+          {
+            "package": "chinadns-ng",
+            "version": "2025.08.09-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/chinadns-ng_2025.08.09-r1_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "2b34b331ee38d2fce6845b05d8699dcbe813dea96cd7ebbf5663a8ac006ef3c3",
+            "size": 270051
+          },
+          {
+            "package": "dns2socks",
+            "version": "2.1-r3",
+            "file": "arm_cortex-a9_vfpv3-d16/dns2socks_2.1-r3_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "6020829db54ccf40c1082bc5f2958c1c56e409820492e1f32837dc6a4ad70e23",
+            "size": 11562
+          },
+          {
+            "package": "geoview",
+            "version": "0.2.9-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/geoview_0.2.9-r1_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "d8563ca6b460bf2259ec82523717bb40e655edc48e5aa3b65c8cbe20c878c627",
+            "size": 3234673
+          },
+          {
+            "package": "hysteria",
+            "version": "2.13.0-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/hysteria_2.13.0-r1_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "1d8ebbd2735fbab3dc0319d3a1efbab1d948a794cad0319fc5db7f159a7e9ec9",
+            "size": 8656959
+          },
+          {
+            "package": "ipt2socks",
+            "version": "1.1.4-r3",
+            "file": "arm_cortex-a9_vfpv3-d16/ipt2socks_1.1.4-r3_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "ea4f10a4f5eba260ec2ba3a59828a9cc3fb1c29740fe025896f9d6aaa71542c3",
+            "size": 26676
+          },
+          {
+            "package": "microsocks",
+            "version": "1.0.5-r2",
+            "file": "arm_cortex-a9_vfpv3-d16/microsocks_1.0.5-r2_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "58b646f3d3b9f994698602c75cf964c41699562ad141888c8d3244c04f7cf1e8",
+            "size": 6467
+          },
+          {
+            "package": "naiveproxy",
+            "version": "154.0.8037.49-r5",
+            "file": "arm_cortex-a9_vfpv3-d16/naiveproxy_154.0.8037.49-r5_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "4e3d7be303216bd3b95e48c863c20c55248152fa2be699287c58f8f1c6005244",
+            "size": 3817804
+          },
+          {
+            "package": "shadow-tls",
+            "version": "0.2.25-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/shadow-tls_0.2.25-r1_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "a6d41a7a402fe703fe46a78bd69443f4c8d084779e5228b638be1c5f2a6c6aad",
+            "size": 1157797
+          },
+          {
+            "package": "shadowsocks-rust-sslocal",
+            "version": "1.25.0-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/shadowsocks-rust-sslocal_1.25.0-r1_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "721cb6ab81a076aaf7d6d88efd41b03f350df9d0cbf09f4efafbb42b1efceb41",
+            "size": 3491061
+          },
+          {
+            "package": "shadowsocks-rust-ssmanager",
+            "version": "1.25.0-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/shadowsocks-rust-ssmanager_1.25.0-r1_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "2fb76f49b75726f018ab7d4da03eb9696b7ce866c2ca2eabbb8b72cf634755e1",
+            "size": 2764870
+          },
+          {
+            "package": "shadowsocks-rust-ssserver",
+            "version": "1.25.0-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/shadowsocks-rust-ssserver_1.25.0-r1_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "4ebca7b94e119def2b2be6b15f2e54c368ff6c08bf52c351cfbc8f5c1eccf8af",
+            "size": 2711943
+          },
+          {
+            "package": "shadowsocks-rust-ssservice",
+            "version": "1.25.0-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/shadowsocks-rust-ssservice_1.25.0-r1_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "7425ab369df0a5db52f92d5feffb096577e7f5d5d0dc1108848aa5f815bbba6c",
+            "size": 3670718
+          },
+          {
+            "package": "shadowsocks-rust-ssurl",
+            "version": "1.25.0-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/shadowsocks-rust-ssurl_1.25.0-r1_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "09dc7db01d1ef66bd50e33ff0630864ad2d8ed813d02b4491fb9dc0d55d631bc",
+            "size": 840349
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-check",
+            "version": "2.5.6-r13",
+            "file": "arm_cortex-a9_vfpv3-d16/shadowsocksr-libev-ssr-check_2.5.6-r13_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "aeff986b2b32ef4e0364c5182b8b3d4002581b33a0b6eb791b33707be4c26cb8",
+            "size": 3045
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-local",
+            "version": "2.5.6-r13",
+            "file": "arm_cortex-a9_vfpv3-d16/shadowsocksr-libev-ssr-local_2.5.6-r13_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "30d9c17f51853218b4a2d254135b0abfbb2f9a3c33177dd882374f3aa1f23b9c",
+            "size": 60274
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-nat",
+            "version": "2.5.6-r13",
+            "file": "arm_cortex-a9_vfpv3-d16/shadowsocksr-libev-ssr-nat_2.5.6-r13_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "ce40b9153d5a1fb11bdf90e939d2196dce4382411b4134e7eaf2cac1effdc766",
+            "size": 3030
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-redir",
+            "version": "2.5.6-r13",
+            "file": "arm_cortex-a9_vfpv3-d16/shadowsocksr-libev-ssr-redir_2.5.6-r13_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "4f661e8a5e01b26ce4781755da511015b5dc3546f0b9326c8474d184945e9597",
+            "size": 54579
+          },
+          {
+            "package": "shadowsocksr-libev-ssr-server",
+            "version": "2.5.6-r13",
+            "file": "arm_cortex-a9_vfpv3-d16/shadowsocksr-libev-ssr-server_2.5.6-r13_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "cadabde726949a9169bb7f9261ba1633d9fea38b569ac7cedd60561c0b7a0bcd",
+            "size": 63893
+          },
+          {
+            "package": "simple-obfs-client",
+            "version": "0.0.5-r3",
+            "file": "arm_cortex-a9_vfpv3-d16/simple-obfs-client_0.0.5-r3_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "be0e207289f0d2c5ea1b69372d3b75a820f0e607892a3e40346041c9ee177175",
+            "size": 28261
+          },
+          {
+            "package": "simple-obfs-server",
+            "version": "0.0.5-r3",
+            "file": "arm_cortex-a9_vfpv3-d16/simple-obfs-server_0.0.5-r3_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "f64a74b24babffc25682542e355a0650aa7979c49542e8a145c5e812f2e19134",
+            "size": 30483
+          },
+          {
+            "package": "sing-box",
+            "version": "1.14.4-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/sing-box_1.14.4-r1_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "81a47695e423da378653807e9f78f16c91b98ecd6533a855277a0974facab171",
+            "size": 20083332
+          },
+          {
+            "package": "tcping",
+            "version": "0.3-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/tcping_0.3-r1_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "f7e4f06a7d0a6c0d4dafda5941f46fb5d60c549c84cc25164cd7ed139e88d724",
+            "size": 4192
+          },
+          {
+            "package": "v2ray-geoip",
+            "version": "202610290022.1",
+            "file": "arm_cortex-a9_vfpv3-d16/v2ray-geoip_202610290022.1_all.ipk",
+            "sha256": "1491a2ee2b24490d8e0996a2e97d942e0febaad21ed256fac459134007b925bd",
+            "size": 3442046
+          },
+          {
+            "package": "v2ray-geosite",
+            "version": "202610302203.1",
+            "file": "arm_cortex-a9_vfpv3-d16/v2ray-geosite_202610302203.1_all.ipk",
+            "sha256": "05b97db0bdcb7734e7e473923193d86281416cef21b9919b3b52a00dfe8d6092",
+            "size": 3696544
+          },
+          {
+            "package": "v2ray-plugin",
+            "version": "5.49.0-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/v2ray-plugin_5.49.0-r1_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "25b3cbbcc68e96d6043bed5d87df419154378539b610aeb5a9f76fad1e9e2a21",
+            "size": 6534525
+          },
+          {
+            "package": "xray-core",
+            "version": "26.10.31-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/xray-core_26.10.31-r1_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "b4c2607e48471c92e59d28a53fd4f020b46bad8aed144dbfed7f76d4fcbf895a",
+            "size": 11462605
+          },
+          {
+            "package": "xray-plugin",
+            "version": "1.8.24-r1",
+            "file": "arm_cortex-a9_vfpv3-d16/xray-plugin_1.8.24-r1_arm_cortex-a9_vfpv3-d16.ipk",
+            "sha256": "f33153f6bb264dfae249067c30e7cae8a1e75a72744a8e27ec28fc4c99d0b8e6",
+            "size": 7371191
+          }
+        ]
+      }
+    }
+  ]
+}
