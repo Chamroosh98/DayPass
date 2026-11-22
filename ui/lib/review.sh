@@ -33,6 +33,14 @@ review_install()
     i=0
     for pkg in $FINAL_PACKAGES; do
         i=$((i + 1))
+        display_item="$pkg"
+
+        if [ "${SELECTED_MODE:-}" = "recommended" ]; then
+            case "$pkg" in
+                v2ray-geoip)   display_item="geoip:ir" ;;
+                v2ray-geosite) display_item="geosite:ir" ;;
+            esac
+        fi
         if [ "$i" -eq "$PKG_COUNT" ]; then
             echo "     └─ 🔹 ${CYAN}$pkg${RESET}"
         else
