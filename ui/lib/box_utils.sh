@@ -2,6 +2,7 @@
 
 draw_bar()
 {
+    local PCT BW MODE FILLED COLOR BAR i
     PCT="$1"
     BW="${2:-20}"
     MODE="${3:-usage}"

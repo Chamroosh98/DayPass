@@ -33,7 +33,13 @@ help_branch() {
 # Local cache path of a manual
 # ------------------------------------------------------------
 help_manual_path() {
-    echo "$(help_cache_dir)/$1.json"
+    local cache
+    cache=$(help_cache_dir)
+    if [ -f "$cache/.managed/$1.json" ]; then
+        printf '%s\n' "$cache/.managed/$1.json"
+    else
+        printf '%s\n' "$cache/$1.json"
+    fi
 }
 
 # ------------------------------------------------------------
@@ -53,12 +59,8 @@ help_manual_sources() {
 # Download one URL using curl -> uclient-fetch -> wget
 # ------------------------------------------------------------
 help_download() {
-    HELP_URL="$1"
-    HELP_DEST="$2"
-    HELP_TMP="${HELP_DEST}.part"
-
-    rm -f "$HELP_TMP" 2>/dev/null
-    HELP_DL_OK=0
+    local HELP_URL="$1" HELP_DEST="$2" HELP_TMP HELP_DL_OK=0
+    HELP_TMP=$(mktemp "${HELP_DEST%/*}/.download.XXXXXX") || return 1
 
     # Try the next client when the previous one is missing or the transfer fails.
     if command -v curl >/dev/null 2>&1; then
@@ -66,12 +68,10 @@ help_download() {
     fi
 
     if [ "$HELP_DL_OK" -ne 1 ] && command -v uclient-fetch >/dev/null 2>&1; then
-        rm -f "$HELP_TMP" 2>/dev/null
         uclient-fetch -q -T 20 -O "$HELP_TMP" "$HELP_URL" 2>/dev/null && [ -s "$HELP_TMP" ] && HELP_DL_OK=1
     fi
 
     if [ "$HELP_DL_OK" -ne 1 ] && command -v wget >/dev/null 2>&1; then
-        rm -f "$HELP_TMP" 2>/dev/null
         wget -q -T 20 -O "$HELP_TMP" "$HELP_URL" 2>/dev/null && [ -s "$HELP_TMP" ] && HELP_DL_OK=1
     fi
 
@@ -86,12 +86,19 @@ help_download() {
         return 1
     fi
 
-    mv "$HELP_TMP" "$HELP_DEST" 2>/dev/null || {
+    # Never replace a pre-existing cache path. Keep a second link as a receipt.
+    if [ -e "$HELP_DEST" ] || [ -L "$HELP_DEST" ] ||
+        [ -e "$HELP_DEST.owned" ] || [ -L "$HELP_DEST.owned" ]; then
+        rm -f "$HELP_TMP"
+        return 1
+    fi
+    ln "$HELP_TMP" "$HELP_DEST.owned" && ln "$HELP_TMP" "$HELP_DEST" || {
+        if [ "$HELP_TMP" -ef "$HELP_DEST.owned" ]; then rm -f "$HELP_DEST.owned"; fi
         rm -f "$HELP_TMP" 2>/dev/null
         return 1
     }
 
-    return 0
+    rm -f "$HELP_TMP"
 }
 
 # ------------------------------------------------------------
@@ -99,34 +106,37 @@ help_download() {
 # Returns 1 when jq is missing or every source failed
 # ------------------------------------------------------------
 help_ensure_manual() {
-    HELP_ID="$1"
-    [ -z "$HELP_ID" ] && return 1
-
+    local HELP_ID="$1" cache dest url
+    case "$HELP_ID" in ''|*[!a-zA-Z0-9_-]*) return 1 ;; esac
     command -v jq >/dev/null 2>&1 || return 1
-
-    HELP_DEST="$(help_manual_path "$HELP_ID")"
-
-    if [ -s "$HELP_DEST" ] && jq empty "$HELP_DEST" >/dev/null 2>&1; then
-        return 0
+    cache=$(help_cache_dir)
+    dest="$cache/.managed/$HELP_ID.json"
+    [ ! -L "$cache" ] && [ ! -L "$cache/.managed" ] || return 1
+    if [ -s "$dest" ]; then
+        [ ! -L "$dest" ] && jq empty "$dest" >/dev/null 2>&1
+        return $?
     fi
-
-    mkdir -p "$(help_cache_dir)" 2>/dev/null || return 1
-
-    for HELP_URL in $(help_manual_sources "$HELP_ID"); do
-        if help_download "$HELP_URL" "$HELP_DEST"; then
-            return 0
-        fi
+    mkdir -p "$cache/.managed" || return 1
+    for url in $(help_manual_sources "$HELP_ID"); do
+        help_download "$url" "$dest" && return 0
     done
-
-    rm -f "$HELP_DEST" 2>/dev/null
-    return 1
+    # Older installers left no ownership record. Keep these as offline fallback.
+    [ ! -L "$cache/$HELP_ID.json" ] && [ -s "$cache/$HELP_ID.json" ] &&
+        jq empty "$cache/$HELP_ID.json" >/dev/null 2>&1
 }
 
-# ------------------------------------------------------------
-# Drop cached manuals so the next screen re-downloads them
-# ------------------------------------------------------------
 help_cache_reset() {
-    rm -f "$(help_cache_dir)"/*.json 2>/dev/null
-    rmdir "$(help_cache_dir)" 2>/dev/null
+    local cache dir receipt file
+    cache=$(help_cache_dir)
+    dir="$cache/.managed"
+    [ ! -L "$cache" ] && [ ! -L "$dir" ] || return 1
+    [ -e "$dir" ] || return 0
+    [ -d "$dir" ] && [ -r "$dir" ] && [ -x "$dir" ] || return 1
+    for receipt in "$dir"/*.json.owned; do
+        [ -f "$receipt" ] && [ ! -L "$receipt" ] || continue
+        file=${receipt%.owned}
+        [ -f "$file" ] && [ ! -L "$file" ] && [ "$file" -ef "$receipt" ] || continue
+        rm "$file" "$receipt" || return 1
+    done
     return 0
 }

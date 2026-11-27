@@ -9,7 +9,7 @@ usb_render_operations() {
     echo "  2) 📱 Setup USB Tethering"
     echo "  3) 📶 Failover & Metrics Configuration"
     echo "  4) 🔀 Toggle Interface Status"
-    echo "  5) ♻️ Restore / Reset USB Stack"
+    echo "  5) ♻️ USB Restore Status"
     echo "  6) 📟 Modem Mode Switch"
     echo "  7) 📡 Network Interfaces State"
     echo "  8) 📈 System Resources"

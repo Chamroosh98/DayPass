@@ -15,22 +15,22 @@ apply_dns_hybrid() {
         log_info "Primary resolver: $(dns_engine_label) (DoH / tunnel). Fallback: Cloudflare + Google."
     elif port=$(dns_stubby_port); then
         primary=""
-        dns_engine_release
+        dns_engine_release || return $?
         uci add_list dhcp.@dnsmasq[0].server="127.0.0.1#${port}"
         log_info "Primary resolver: Stubby DoT. Fallback: public DNS."
     elif port=$(dns_https_proxy_port); then
         primary=""
-        dns_engine_release
+        dns_engine_release || return $?
         uci add_list dhcp.@dnsmasq[0].server="127.0.0.1#${port}"
         log_info "Primary resolver: https-dns-proxy. Fallback: public DNS."
     else
         primary=""
-        dns_engine_release
+        dns_engine_release || return $?
         log_warn "No transport engine DNS found. Hybrid uses public resolvers only."
     fi
 
     [ "$primary" = "$DNS_CF" ] || uci add_list dhcp.@dnsmasq[0].server="$DNS_CF"
     uci add_list dhcp.@dnsmasq[0].server="$DNS_GOOGLE"
-    dns_dnsmasq_commit
+    dns_dnsmasq_commit || return $?
     return 0
 }

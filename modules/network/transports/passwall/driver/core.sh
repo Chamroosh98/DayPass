@@ -33,7 +33,7 @@ _pw_service() {
 }
 
 _pw_reload() {
-    _pw_service "$1" reload || _pw_service "$1" restart || true
+    _pw_service "$1" reload || _pw_service "$1" restart
 }
 
 _pw_set() {
@@ -56,8 +56,8 @@ _pw_get() {
 }
 
 _pw_start() {
-    uci set "$1.@global[0].enabled=1" 2>/dev/null
-    uci commit "$1"
+    uci set "$1.@global[0].enabled=1" 2>/dev/null || return $?
+    uci commit "$1" || return $?
     _pw_service "$1" restart || _pw_service "$1" start
 }
 

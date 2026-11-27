@@ -3,8 +3,10 @@ package main
 import (
 	"archive/zip"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -34,12 +36,10 @@ func zipDirectory(sourceDir, targetZip string) error {
 	if err != nil {
 		return err
 	}
-	defer zipFile.Close()
 
 	archive := zip.NewWriter(zipFile)
-	defer archive.Close()
 
-	return filepath.Walk(sourceDir, func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(sourceDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil || info.IsDir() {
 			return err
 		}
@@ -60,6 +60,7 @@ func zipDirectory(sourceDir, targetZip string) error {
 		_, err = io.Copy(writer, file)
 		return err
 	})
+	return errors.Join(err, archive.Close(), zipFile.Close())
 }
 
 func copyFile(src, dst string) error {
@@ -73,10 +74,9 @@ func copyFile(src, dst string) error {
 	if err != nil {
 		return err
 	}
-	defer out.Close()
 
 	_, err = io.Copy(out, in)
-	return err
+	return errors.Join(err, out.Close())
 }
 
 func downloadWithCurl(url, destPath string) error {
@@ -86,7 +86,7 @@ func downloadWithCurl(url, destPath string) error {
 
 func fileExists(path string) bool {
 	info, err := os.Stat(path)
-	if os.IsNotExist(err) {
+	if err != nil {
 		return false
 	}
 	return !info.IsDir() && info.Size() > 0
@@ -136,6 +136,8 @@ func main() {
 	os.MkdirAll(baseDownloadDir, 0755)
 	os.MkdirAll(zipWorkspaceDir, 0755)
 
+	var failures []error
+	staged := 0
 	found := false
 	for _, arch := range archConfig.Architectures {
 		if arch.Name != targetArch {
@@ -158,18 +160,19 @@ func main() {
 
 			fmt.Printf("💰 Feed : %s\n", feed)
 			if err := downloadWithCurl(feedURL+"/index.json", tempIndexPath); err != nil {
-				fmt.Printf("❌ Failed to download index for [%s]\n", feed)
+				failures = append(failures, fmt.Errorf("%s index: %w", feed, err))
 				continue
 			}
 
 			indexData, err := os.ReadFile(tempIndexPath)
 			if err != nil {
+				failures = append(failures, err)
 				continue
 			}
 
 			var feedIdx FeedIndex
 			if err := json.Unmarshal(indexData, &feedIdx); err != nil {
-				fmt.Printf("⚠️ Formatting error on index [%s] : %v\n", feed, err)
+				failures = append(failures, fmt.Errorf("%s index: %w", feed, err))
 				continue
 			}
 
@@ -203,6 +206,7 @@ func main() {
 						err := downloadWithCurl(pkgURL, cachePkgPath)
 
 						if err != nil && owVersion == "24" {
+							os.Remove(cachePkgPath)
 							pkgFileName = fmt.Sprintf("%s_%s_all.ipk", pkgName, pkgVersion)
 							cachePkgPath = filepath.Join(feedCacheDir, pkgFileName)
 							altPkgURL := fmt.Sprintf("%s/%s", feedURL, pkgFileName)
@@ -212,7 +216,7 @@ func main() {
 
 						if err != nil {
 							statMu.Lock()
-							fmt.Printf("📥 Saved in Cache : [%-55s] ❌ FAILED\n", origName)
+							failures = append(failures, fmt.Errorf("%s: %w", origName, err))
 							statMu.Unlock()
 							os.Remove(cachePkgPath)
 							return
@@ -231,8 +235,14 @@ func main() {
 					cdnPkgPath := filepath.Join(cdnOutputDir, pkgFileName)
 					zipPkgPath := filepath.Join(zipFeedOutputDir, pkgFileName)
 
-					copyFile(cachePkgPath, cdnPkgPath)
-					copyFile(cachePkgPath, zipPkgPath)
+					err := errors.Join(copyFile(cachePkgPath, cdnPkgPath), copyFile(cachePkgPath, zipPkgPath))
+					statMu.Lock()
+					defer statMu.Unlock()
+					if err != nil {
+						failures = append(failures, err)
+						return
+					}
+					staged++
 				}(pkgName, pkgVersion)
 			}
 			pkgWg.Wait()
@@ -246,6 +256,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err := errors.Join(failures...); err != nil {
+		log.Fatal(err)
+	}
+	if staged == 0 {
+		log.Fatal("no packages staged")
+	}
 	var zipName string
 	if releaseType == "release" || releaseType == "main" || releaseType == "stable" {
 		zipName = fmt.Sprintf("DayPass_OW%s_%s_%s.zip", owVersion, targetArch, releaseVersion)

@@ -143,9 +143,12 @@ usb_metric_column() {
 # Write wan=10, wan6=15, wan_usb=20 when the UCI metric is missing or 0.
 # Existing non-zero metrics are left alone.
 usb_apply_explicit_metrics() {
-    local iface plan current changed=0
+    local iface plan current changed=0 activate="" pending
 
     command -v uci >/dev/null 2>&1 || { log_error "uci is not available."; return 1; }
+
+    pending=$(uci changes network) || return 1
+    [ -z "$pending" ] || { log_error "Network already has pending edits."; return 1; }
 
     for iface in wan wan6 wan_usb; do
         [ "$(uci -q get "network.$iface")" = "interface" ] || continue
@@ -159,7 +162,7 @@ usb_apply_explicit_metrics() {
         changed=1
         log_info "network.$iface.metric=$plan"
         if [ "$(uci -q get "network.$iface.disabled")" != "1" ]; then
-            ifup "$iface" >/dev/null 2>&1 || true
+            activate="$activate $iface"
         fi
     done
 
@@ -168,6 +171,9 @@ usb_apply_explicit_metrics() {
         return 0
     fi
     uci commit network || return 1
+    for iface in $activate; do
+        ifup "$iface" || { log_error "Metrics saved; activation failed for $iface."; return 1; }
+    done
     log_success "Suggested metrics written (wan 10, wan6 15, wan_usb 20)."
     return 0
 }
@@ -194,22 +200,31 @@ usb_wan_state() {
     echo "DOWN"
 }
 
+usb_wan_binding_active() {
+    local json up device
+    json=$(_usb_ubus_iface_json "$USB_WAN_IFACE")
+    up=$(jsonfilter -s "$json" -e '@.up') || return 1
+    device=$(jsonfilter -s "$json" -e '@.device') || return 1
+    [ -n "$1" ] && [ "$up" = true ] && [ "$device" = "$1" ]
+}
+
 # Create or update USB tethering WAN interface.
 # Usage: setup_usb_wan [device] [metric]
-# Returns 0 when the UCI interface is written, 1 when hardware is missing or UCI fails.
+# Returns success only after netifd confirms the selected binding is up.
 setup_usb_wan() {
     local usb_dev="${1:-}"
     local metric="${2:-$USB_WAN_DEFAULT_METRIC}"
-    local zone stored_dev stored_proto stored_metric exists=0
+    local zone stored_dev section pending
 
     if command -v ensure_usb_tether_deps >/dev/null 2>&1; then
-        ensure_usb_tether_deps || log_warn "Some USB tethering packages could not be installed."
+        ensure_usb_tether_deps || return $?
     else
-        log_warn "USB dependency module is not loaded."
+        log_error "USB dependency module is not loaded."
+        return 1
     fi
 
     if [ -n "$usb_dev" ] && [ ! -e "/sys/class/net/$usb_dev" ]; then
-        usb_dev=""
+        log_error "Selected USB device is unavailable."; return 1
     fi
     if [ -z "$usb_dev" ]; then
         if command -v usb_active_net_dev >/dev/null 2>&1; then
@@ -227,47 +242,38 @@ setup_usb_wan() {
 
     command -v uci >/dev/null 2>&1 || { log_error "uci is not available."; return 1; }
 
-    if [ "$(uci -q get "network.$USB_WAN_IFACE")" = "interface" ]; then
-        exists=1
-        stored_proto=$(uci -q get "network.$USB_WAN_IFACE.proto")
-        stored_dev=$(uci -q get "network.$USB_WAN_IFACE.device")
-        stored_metric=$(uci -q get "network.$USB_WAN_IFACE.metric")
-        [ -n "$stored_proto" ] || uci set "network.$USB_WAN_IFACE.proto"="dhcp"
-        if [ -z "$stored_dev" ] || [ ! -e "/sys/class/net/$stored_dev" ]; then
-            uci set "network.$USB_WAN_IFACE.device"="$usb_dev"
-        fi
-        case "$stored_metric" in
-            ''|0) uci set "network.$USB_WAN_IFACE.metric"="$metric" ;;
-            *)
-                [ "$stored_metric" = "$metric" ] || uci set "network.$USB_WAN_IFACE.metric"="$metric"
-                ;;
-        esac
-    else
-        uci set "network.$USB_WAN_IFACE"="interface"
-        uci set "network.$USB_WAN_IFACE.proto"="dhcp"
-        uci set "network.$USB_WAN_IFACE.device"="$usb_dev"
-        uci set "network.$USB_WAN_IFACE.metric"="$metric"
-        uci -q delete "network.$USB_WAN_IFACE.disabled"
-    fi
-    uci commit network || return 1
-
+    for section in network firewall; do
+        pending=$(uci changes "$section") || return 1
+        [ -z "$pending" ] || { log_error "$section has pending edits."; return 1; }
+    done
     zone=$(_usb_wan_zone)
-    if [ -n "$zone" ]; then
-        case " $(uci -q get "firewall.$zone.network") " in
-            *" $USB_WAN_IFACE "*) ;;
-            *)
-                uci add_list "firewall.$zone.network"="$USB_WAN_IFACE"
-                uci commit firewall
-                /etc/init.d/firewall reload >/dev/null 2>&1 || true
-                ;;
-        esac
-    elif [ "$exists" -eq 0 ]; then
-        log_warn "Firewall zone [wan] not found; add [$USB_WAN_IFACE] to your WAN zone manually."
+    [ -n "$zone" ] && [ "$(uci -q get "firewall.$zone")" = zone ] ||
+        { log_error "WAN firewall zone unavailable."; return 1; }
+    section=$(uci -q get "network.$USB_WAN_IFACE")
+    if [ -n "$section" ]; then
+        stored_dev=$(uci -q get "network.$USB_WAN_IFACE.device" ||
+            uci -q get "network.$USB_WAN_IFACE.ifname")
+        [ "$section" = interface ] && [ "$stored_dev" = "$usb_dev" ] &&
+            [ "$(uci -q get "network.$USB_WAN_IFACE.proto")" = dhcp ] ||
+            { log_error "Existing USB WAN binding is incompatible."; return 1; }
+        [ "$(uci -q get "network.$USB_WAN_IFACE.disabled")" != 1 ] ||
+            { log_warn "USB WAN is disabled."; return 1; }
+    else
+        uci set "network.$USB_WAN_IFACE=interface" &&
+            uci set "network.$USB_WAN_IFACE.proto=dhcp" &&
+            uci set "network.$USB_WAN_IFACE.device=$usb_dev" || return 1
     fi
+    uci set "network.$USB_WAN_IFACE.metric=$metric" && uci commit network || return 1
 
-    if [ "$(uci -q get "network.$USB_WAN_IFACE.disabled")" != "1" ]; then
-        ifup "$USB_WAN_IFACE" >/dev/null 2>&1 || true
-    fi
+    case " $(uci -q get "firewall.$zone.network") " in
+        *" $USB_WAN_IFACE "*) ;;
+        *) uci add_list "firewall.$zone.network=$USB_WAN_IFACE" &&
+            uci commit firewall || return 1 ;;
+    esac
+    /etc/init.d/firewall reload || return 1
+    ifup "$USB_WAN_IFACE" || return 1
+    usb_wan_binding_active "$usb_dev" ||
+        { log_warn "USB WAN saved; active binding to $usb_dev is unconfirmed."; return 1; }
     log_success "USB Tethering WAN interface [$USB_WAN_IFACE] is active and configured."
     return 0
 }
@@ -503,30 +509,21 @@ usb_wan_set_metric() {
     esac
     [ "$(uci -q get network.$iface)" = "interface" ] || { log_error "Interface [$iface] not found!"; return 1; }
 
-    uci set network.$iface.metric="$metric"
+    uci set network.$iface.metric="$metric" || return 1
     uci commit network || return 1
     if [ "$(uci -q get network.$iface.disabled)" != "1" ]; then
-        ifup "$iface" >/dev/null 2>&1 || true
+        ifup "$iface" >/dev/null 2>&1 || { log_error "Metric saved; interface activation failed."; return 1; }
     fi
-    log_success "Metric of [$iface] set to $metric."
+    log_success "Configured metric of [$iface] set to $metric."
     return 0
 }
 
+# Compatibility entry for older callers; apply the same ownership guard.
 remove_usb_wan() {
-    local zone
-
-    usb_wan_exists || { log_warn "USB WAN [$USB_WAN_IFACE] is not configured."; return 0; }
-
-    ifdown $USB_WAN_IFACE >/dev/null 2>&1 || true
-    uci -q delete network.$USB_WAN_IFACE
-    uci commit network || return 1
-
-    zone=$(_usb_wan_zone)
-    if [ -n "$zone" ]; then
-        uci -q del_list firewall.$zone.network="$USB_WAN_IFACE"
-        uci commit firewall || true
-        /etc/init.d/firewall reload >/dev/null 2>&1 || true
+    if command -v usb_restore_settings >/dev/null 2>&1; then
+        usb_restore_settings
+    else
+        log_error "USB restore unavailable; ownership cannot be verified."
+        return 1
     fi
-    log_success "USB WAN [$USB_WAN_IFACE] removed."
-    return 0
 }

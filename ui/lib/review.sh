@@ -2,6 +2,7 @@
 
 review_install()
 {
+    local i pkg display_item PKG_COUNT _rv_title confirm
     if ! resolve_packages; then
         log_error "Failed to resolve final package list!"
         sleep 2
@@ -64,6 +65,7 @@ review_install()
             q|Q)
                 daypass_quit
                 ;;
+            h|H) ui_show_help "packages" ;;
             n|N|0)
                 log_warn "Installation cancelled by user!"
                 FINAL_PACKAGES=""

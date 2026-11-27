@@ -5,6 +5,7 @@
 # -----------------------------------------------------------------------------
 show_timer_progress()
 {
+    local pid message start_time bar_width current_step now elapsed percent arrow_pos bar i full_bar
     pid="$1"
     message="$2"
     
@@ -77,6 +78,7 @@ show_timer_progress()
 # -----------------------------------------------------------------------------
 show_ascii_progress()
 {
+    local title current total bar_width percent filled bar i COLOR
     title="$1"
     current="$2"
     total="$3"
@@ -109,11 +111,12 @@ show_ascii_progress()
     printf "\r  ⏳ %-20s [${COLOR}%s${RESET}] ${BOLD}%3d%%${RESET} (%s/%s)" \
             "$title" "$bar" "$percent" "$current" "$total"
 
-    [ "$current" -ge "$total" ] && echo
+    if [ "$current" -ge "$total" ]; then echo; fi
 }
 
 log_step()
 {
+    local status message
     status="$1"
     message="$2"
 

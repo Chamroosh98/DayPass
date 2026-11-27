@@ -138,17 +138,17 @@ mwan_metric_menu() {
             '') UI_CHOICE="$current" ;;
         esac
         if command -v usb_wan_set_metric >/dev/null 2>&1; then
-            usb_wan_set_metric "$iface" "$UI_CHOICE" || true
+            usb_wan_set_metric "$iface" "$UI_CHOICE" || return $?
         else
             case "$UI_CHOICE" in
                 ''|*[!0-9]*) log_error "Invalid metric [$UI_CHOICE]!"; continue ;;
             esac
-            uci set "network.$iface.metric"="$UI_CHOICE"
+            uci set "network.$iface.metric"="$UI_CHOICE" || return 1
             uci commit network || { log_error "Could not save the metric."; continue; }
             if [ "$(uci -q get "network.$iface.disabled")" != "1" ]; then
-                ifup "$iface" >/dev/null 2>&1 || true
+                ifup "$iface" >/dev/null 2>&1 || { log_error "Metric saved; interface activation failed."; return 1; }
             fi
-            log_success "Metric of [$iface] set to $UI_CHOICE."
+            log_success "Configured metric of [$iface] set to $UI_CHOICE."
         fi
         command -v ui_pause >/dev/null 2>&1 && ui_pause
     done

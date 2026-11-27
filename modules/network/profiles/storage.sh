@@ -79,6 +79,11 @@ detect_protocol_from_link() {
 # ------------------------------------------------------------
 # Add a manual config to local storage
 # ------------------------------------------------------------
+profile_valid_name() {
+    case "$1" in ''|.*|*/*|*[[:cntrl:]]*) return 1 ;; esac
+    return 0
+}
+
 add_manual_config() {
     echo
     printf "  🎯 Config Name (example: MyVLESS) : "
@@ -98,6 +103,8 @@ add_manual_config() {
             ;;
     esac
 
+    profile_valid_name "$conf_name" && [ ! -L "$CONFIG_DIR/$conf_name.json" ] || return 1
+    [ ! -e "$CONFIG_DIR/$conf_name.json" ] || [ -f "$CONFIG_DIR/$conf_name.json" ] || return 1
     # Check duplicate
     if [ -f "$CONFIG_DIR/${conf_name}.json" ]; then
         log_warn "Config [$conf_name] already exists!"
@@ -127,15 +134,13 @@ add_manual_config() {
     local protocol
     protocol=$(detect_protocol_from_link "$share_link")
 
-    cat > "$CONFIG_DIR/${conf_name}.json" << EOF
-{
-    "name": "$conf_name",
-    "protocol": "$protocol",
-    "share_link": "$share_link",
-    "enabled": true,
-    "added_at": "$(date -Iseconds)"
-}
-EOF
+    local tmp
+    tmp=$(mktemp "$CONFIG_DIR/.manual.XXXXXX") || return 1
+    if ! jq -n --arg name "$conf_name" --arg p "$protocol" --arg link "$share_link" --arg ts "$(date -Iseconds)" \
+        '{name:$name,protocol:$p,share_link:$link,enabled:true,added_at:$ts}' > "$tmp" ||
+        ! mv "$tmp" "$CONFIG_DIR/$conf_name.json"; then
+        rm -f "$tmp"; return 1
+    fi
 
     log_success "Config [$conf_name] saved successfully! ${GRAY}($protocol)${RESET}"
 }
@@ -160,12 +165,13 @@ remove_config() {
         return 1
     fi
 
+    profile_valid_name "$del_name" && [ ! -L "$CONFIG_DIR/$del_name.json" ] || return 1
     if [ -f "$CONFIG_DIR/${del_name}.json" ]; then
         printf "  ⁉️ Are you sure you want to delete [$del_name]? [y/N] : "
         read -r confirm </dev/tty
         case "$confirm" in
             y|Y)
-                rm -f "$CONFIG_DIR/${del_name}.json"
+                rm "$CONFIG_DIR/${del_name}.json" || return 1
                 log_success "Config [$del_name] removed!"
                 ;;
             *)
@@ -174,6 +180,7 @@ remove_config() {
         esac
     else
         log_error "Config not found!"
+        return 1
     fi
 }
 
@@ -186,7 +193,9 @@ toggle_config() {
     printf "  🔄 Enter config name to toggle enable/disable : "
     read -r conf_name </dev/tty
 
-    local file="$CONFIG_DIR/${conf_name}.json"
+    profile_valid_name "$conf_name" || return 1
+    local file="$CONFIG_DIR/${conf_name}.json" tmp
+    [ ! -L "$file" ] || return 1
     if [ ! -f "$file" ]; then
         log_error "Config not found!"
         return 1
@@ -202,8 +211,8 @@ toggle_config() {
         new_value="true"
     fi
 
-    tmp=$(mktemp)
-    jq --argjson val "$new_value" '.enabled = $val' "$file" > "$tmp" && mv "$tmp" "$file"
+    tmp=$(mktemp "$CONFIG_DIR/.toggle.XXXXXX") || return 1
+    jq --argjson val "$new_value" '.enabled = $val' "$file" > "$tmp" && mv "$tmp" "$file" || { rm -f "$tmp"; return 1; }
 
     if [ "$new_value" = "true" ]; then
         log_success "Config [$conf_name] enabled!"

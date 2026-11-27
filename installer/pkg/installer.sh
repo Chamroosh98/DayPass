@@ -13,11 +13,7 @@ manifest_lookup()
 .architectures[]?
 | select(.name == $arch)
 | .feeds[]?[]?
-| select(
-    (.package == $pkg)
-    or
-    (.package | startswith($pkg + "-"))
-)
+| select(.package == $pkg)
 | .[$field] // empty
 ' \
 "$MANIFEST_FILE" 2>/dev/null | head -n1)
@@ -41,11 +37,7 @@ manifest_lookup()
 .architectures[]?
 | select(.name == $arch)
 | .feeds[]?[]?
-| select(
-    (.package == $pkg)
-    or
-    (.package | startswith($pkg + "-"))
-)
+| select(.package == $pkg)
 | .[$field] // empty
 ' \
 "$MANIFEST_FILE" 2>/dev/null | head -n1)
@@ -69,7 +61,7 @@ format_size()
 
 download_package()
 {
-    package="$1"
+    local package="$1" file sha256 base_url target_url file_basename target
 
     file=$(manifest_lookup "file" "$package")
     sha256=$(manifest_lookup "sha256" "$package")
@@ -84,86 +76,72 @@ download_package()
     target_url="${base_url}/${file}"
 
     file_basename=$(basename "$file")
-    target="$TMP_DIR/$file_basename"
-    tmp="$target.part"
+    target="$2/$file_basename"
+    _pr_stage_payload "$target_url" "$target" "$sha256" || return 1
+    staged_payload="$target"
+    staged_hash=$(printf %s "$sha256" | tr A-F a-f)
 
-    if [ -f "$target" ]; then
-        if echo "$sha256  $target" | sha256sum -c - >/dev/null 2>&1; then
-            return 0
-        fi
-        rm -f "$target"
-    fi
-
-    DOWNLOAD_SUCCESS=0
-    trap 'rm -f "$tmp" 2>/dev/null' INT TERM
-
-    if command -v curl >/dev/null 2>&1; then
-        curl -fsSL --connect-timeout 15 --max-time 120 --retry 3 --retry-delay 2 "$target_url" -o "$tmp" 2>/dev/null && DOWNLOAD_SUCCESS=1
-    elif command -v wget >/dev/null 2>&1; then
-        wget -q --timeout=20 --tries=3 -O "$tmp" "$target_url" 2>/dev/null && DOWNLOAD_SUCCESS=1
-    elif command -v uclient-fetch >/dev/null 2>&1; then
-        uclient-fetch -q --timeout=20 -O "$tmp" "$target_url" 2>/dev/null && DOWNLOAD_SUCCESS=1
-    fi
-
-    if [ "$DOWNLOAD_SUCCESS" -ne 1 ] || [ ! -s "$tmp" ]; then
-        rm -f "$tmp"
-        trap - INT TERM
-        return 1
-    fi
-
-    if [ -n "$sha256" ] && [ "$sha256" != "null" ]; then
-        if ! echo "$sha256  $tmp" | sha256sum -c - >/dev/null 2>&1; then
-            rm -f "$tmp"
-            trap - INT TERM
-            return 1
-        fi
-    fi
-
-    mv "$tmp" "$target"
-    trap - INT TERM
-    return 0
 }
 
 deploy_targeted_packages()
-{
-    rm -f /var/lock/opkg.lock /lib/apk/db/lock /var/run/apk.lock /run/apk/db.lock 2>/dev/null
+(
 
-    mkdir -p "$(dirname "$INSTALL_LOG")"
-    touch "$INSTALL_LOG"
-    rm -f "$TRANSACTION_LOG"
-    touch "$TRANSACTION_LOG"
+    mkdir -p "$(dirname "$INSTALL_LOG")" || return 1
+    mf_migrate_from_log || { log_error "Cannot preserve existing package records."; return 1; }
+    local before newly_installed="" journal="" staged_payload
 
-    if [ -z "$PACKAGES_TO_PROCESS" ]; then
-        PACKAGES_TO_PROCESS="$FINAL_PACKAGES"
-    fi
-    PACKAGES_PLANNED="$PACKAGES_TO_PROCESS"
+    [ -n "$1" ] && [ "$#" -ge 2 ] && [ "$#" -le 5 ] || { log_error "Missing deployment plan."; return 1; }
+    local PACKAGES_TO_PROCESS="$1"
+    local PACKAGES_PLANNED="$PACKAGES_TO_PROCESS" module_id="$2"
+
+    local feeds="${3:-}" patches="${4:-}" operation="${5:-install}"
+    local feed_needed="" staged_hash="" patch_needed="" needed
+    mkdir -p "${TMP_DIR:-/tmp/daypass}" || return 1
+    TMP_DIR=$(mktemp -d "${TMP_DIR:-/tmp/daypass}/deploy.XXXXXX") || return 1
+    # Once native mutation is possible, keep the journal and logs on failure.
+    trap '[ -f "$TMP_DIR/transaction.log" ] || rm -rf "$TMP_DIR"' EXIT
+    trap 'exit 130' INT
+    trap 'exit 143' TERM
 
     echo "  🔍 Executing Pre-Flight System Resource Validation ..."
     resource_snapshot
 
     APPLY_LIST="${TMP_DIR:-/tmp}/daypass_applied.list"
-    : > "$APPLY_LIST"
+    : > "$APPLY_LIST" || return 1
     PACKAGES_NEEDED=""
 
     echo
     log_info "Checking packages already on this router ..."
     for pkg in $PACKAGES_PLANNED; do
-        if command -v pkg_payload_required >/dev/null 2>&1 && ! pkg_payload_required "$pkg"; then
+        case "$pkg" in -*|*[!a-zA-Z0-9.+_-]*) log_error "Invalid package name [$pkg]."; return 1 ;; esac
+        needed=yes
+        case " $feeds " in
+            *" $pkg "*)
+                if [ "$operation" != update ] && pkg_installed_live "$pkg"; then needed=no; fi
+                ;;
+            *)
+                case " $patches " in
+                    *" $pkg "*) ;;
+                    *) if ! pkg_payload_required "$pkg"; then needed=no; fi ;;
+                esac
+                ;;
+        esac
+        if [ "$needed" = no ]; then
             printf "  ${GRAY}[SKIP]${RESET} Package %s is already installed and up-to-date.\n" "$pkg"
-            printf '%s\t%s\n' "$pkg" "(Already Installed)" >> "$APPLY_LIST"
+            printf '%s\t%s\n' "$pkg" "(Already Installed)" >> "$APPLY_LIST" || return 1
         else
             PACKAGES_NEEDED="$PACKAGES_NEEDED $pkg"
-            printf '%s\t%s\n' "$pkg" "pending" >> "$APPLY_LIST"
+            printf '%s\t%s\n' "$pkg" "pending" >> "$APPLY_LIST" || return 1
         fi
     done
     echo
 
-    if ! estimate_install_size; then
+    if ! estimate_install_size "$PACKAGES_NEEDED" "$feeds"; then
         log_error "Installation aborted due to system resource limits!"
         return 1
     fi
 
-    INSTALL_FILES=""
+    set --
     total_pkgs=0
     for p in $PACKAGES_NEEDED; do
         total_pkgs=$((total_pkgs + 1))
@@ -185,17 +163,26 @@ deploy_targeted_packages()
                 echo "  📦 [$current_idx/$total_pkgs] Downloading $pkg ... (Free RAM: ${curr_ram_fmt:-N/A})"
             fi
 
-            if ! download_package "$pkg"; then
+            case " $feeds " in
+                *" $pkg "*) feed_needed="$feed_needed $pkg"; continue ;;
+            esac
+            mkdir "$TMP_DIR/payload.$current_idx" || return 1
+            if ! download_package "$pkg" "$TMP_DIR/payload.$current_idx"; then
                 echo
                 log_error "Failed downloading dependency : [$pkg]"
-                rollback_failed_install
+                # No package-manager operation has started.
+                log_warn "Installation cancelled before applying any packages."
                 return 1
             fi
 
-            file=$(manifest_lookup "file" "$pkg")
-            file_basename=$(basename "$file")
-            INSTALL_FILES="$INSTALL_FILES $TMP_DIR/$file_basename"
-            echo "$pkg" >> "$TRANSACTION_LOG"
+            if [ -n "$staged_hash" ]; then
+                printf '%s %s\n' "$pkg" "manifest:$staged_hash" >> "$TMP_DIR/receipts" || return 1
+            fi
+            case " $patches " in
+                *" $pkg "*) printf '%s\n' "$staged_payload" >> "$TMP_DIR/patches" || return 1; patch_needed=yes ;;
+                *) set -- "$@" "$staged_payload" ;;
+            esac
+
         done
         echo
     else
@@ -205,46 +192,87 @@ deploy_targeted_packages()
 
     INSTALL_SUCCESS=1
     CURRENT_PKG_MGR="${PKG_MANAGER:-opkg}"
-    DAYPASS_OPKG_LOG="${DAYPASS_OPKG_LOG:-/tmp/daypass_opkg.log}"
-    DAYPASS_APK_LOG="${DAYPASS_APK_LOG:-/tmp/daypass_apk.log}"
+    DAYPASS_OPKG_LOG="$TMP_DIR/opkg.log"
+    DAYPASS_APK_LOG="$TMP_DIR/apk.log"
 
-    if [ -n "$INSTALL_FILES" ]; then
+    if [ -n "$PACKAGES_NEEDED" ]; then
+        before=$(pkg_installed_names) || { log_error "Cannot inspect installed packages."; return 1; }
+        journal="$TMP_DIR/transaction.log"
+        {
+            printf 'Requested: %s\n' "$PACKAGES_NEEDED" &&
+                printf 'Previously installed package names:\n%s\n' "$before"
+        } > "$journal" || return 1
+        before=$(printf '%s' "$before" | tr '\n' ' ')
+        for pkg in $PACKAGES_NEEDED; do
+            case " $before " in
+                *" $pkg "*) ;;
+                *) newly_installed="${newly_installed:+$newly_installed }$pkg" ;;
+            esac
+        done
         INSTALL_SUCCESS=0
-        case "$CURRENT_PKG_MGR" in
-            apk)
-                : > "$DAYPASS_APK_LOG"
-                (apk add --allow-untrusted --no-progress $INSTALL_FILES >"$DAYPASS_APK_LOG" 2>&1) &
-                BG_PID=$!
-                if command -v ui_spinner >/dev/null 2>&1; then
-                    ui_spinner "$BG_PID" "Installing packages ..."
-                elif command -v show_timer_progress >/dev/null 2>&1; then
-                    show_timer_progress "$BG_PID" "applying APK package bundle"
-                    wait "$BG_PID"
-                else
-                    wait "$BG_PID"
-                fi
-                [ $? -eq 0 ] && INSTALL_SUCCESS=1
-                ;;
-            opkg|*)
-                : > "$DAYPASS_OPKG_LOG"
-                (opkg install --force-checksum $INSTALL_FILES >"$DAYPASS_OPKG_LOG" 2>&1) &
-                BG_PID=$!
-                if command -v ui_spinner >/dev/null 2>&1; then
-                    ui_spinner "$BG_PID" "Installing packages ..."
-                elif command -v show_timer_progress >/dev/null 2>&1; then
-                    show_timer_progress "$BG_PID" "applying OPKG package bundle"
-                    wait "$BG_PID"
-                else
-                    wait "$BG_PID"
-                fi
-                [ $? -eq 0 ] && INSTALL_SUCCESS=1
-                ;;
-        esac
+        if [ "$#" -gt 0 ]; then
+            case "$CURRENT_PKG_MGR" in
+                apk)
+                    : > "$DAYPASS_APK_LOG"
+                    (apk add --allow-untrusted --no-progress "$@" >"$DAYPASS_APK_LOG" 2>&1) &
+                    BG_PID=$!
+                    if command -v ui_spinner >/dev/null 2>&1; then
+                        ui_spinner "$BG_PID" "Installing packages ..."
+                    elif command -v show_timer_progress >/dev/null 2>&1; then
+                        show_timer_progress "$BG_PID" "applying APK package bundle"
+                        wait "$BG_PID"
+                    else
+                        wait "$BG_PID"
+                    fi
+                    [ $? -eq 0 ] && INSTALL_SUCCESS=1
+                    ;;
+                opkg|*)
+                    : > "$DAYPASS_OPKG_LOG"
+                    (opkg install --force-checksum "$@" >"$DAYPASS_OPKG_LOG" 2>&1) &
+                    BG_PID=$!
+                    if command -v ui_spinner >/dev/null 2>&1; then
+                        ui_spinner "$BG_PID" "Installing packages ..."
+                    elif command -v show_timer_progress >/dev/null 2>&1; then
+                        show_timer_progress "$BG_PID" "applying OPKG package bundle"
+                        wait "$BG_PID"
+                    else
+                        wait "$BG_PID"
+                    fi
+                    [ $? -eq 0 ] && INSTALL_SUCCESS=1
+                    ;;
+            esac
+        else
+            INSTALL_SUCCESS=1
+        fi
+        if [ "$INSTALL_SUCCESS" = 1 ] && [ -n "$patch_needed" ]; then
+            while IFS= read -r payload; do
+                case "$CURRENT_PKG_MGR" in
+                    opkg) opkg install --force-reinstall --force-checksum "$payload" >> "$DAYPASS_OPKG_LOG" 2>&1 ;;
+                    apk) apk add --allow-untrusted "$payload" >> "$DAYPASS_APK_LOG" 2>&1 ;;
+                esac || { INSTALL_SUCCESS=0; break; }
+            done < "$TMP_DIR/patches"
+        fi
+        if [ "$INSTALL_SUCCESS" = 1 ] && [ -n "$feed_needed" ]; then
+            # Native feeds retain the manager's normal trust checks.
+            case "$CURRENT_PKG_MGR" in
+                opkg) opkg install $feed_needed >> "$DAYPASS_OPKG_LOG" 2>&1 ;;
+                apk) apk add --upgrade $feed_needed >> "$DAYPASS_APK_LOG" 2>&1 ;;
+            esac && {
+                for pkg in $feed_needed; do
+                    printf '%s feed\n' "$pkg" >> "$TMP_DIR/receipts" || return 1
+                done
+            } || INSTALL_SUCCESS=0
+        fi
     fi
 
     if [ "$INSTALL_SUCCESS" -eq 1 ]; then
+        if [ -f "$TMP_DIR/receipts" ]; then
+            while read -r pkg receipt; do
+                pkg_receipt "$pkg" "$receipt" || { log_error "Native install succeeded but receipt storage failed. Inspect $journal."; return 1; }
+            done < "$TMP_DIR/receipts"
+        fi
         _apply_tmp="${APPLY_LIST}.tmp"
-        : > "$_apply_tmp"
+        : > "$_apply_tmp" || return 1
         while IFS='	' read -r _ap_name _ap_note; do
             [ -n "$_ap_name" ] || continue
             if [ "$_ap_note" = "pending" ]; then
@@ -255,27 +283,25 @@ deploy_targeted_packages()
                     *) _ap_note="(Installed v${_ap_ver})" ;;
                 esac
             fi
-            printf '%s\t%s\n' "$_ap_name" "$_ap_note" >> "$_apply_tmp"
-            echo "$_ap_name" >> "$INSTALL_LOG"
+            printf '%s\t%s\n' "$_ap_name" "$_ap_note" >> "$_apply_tmp" || return 1
         done < "$APPLY_LIST"
-        mv "$_apply_tmp" "$APPLY_LIST"
-
-        if [ -f "$INSTALL_LOG" ]; then
-            sort -u "$INSTALL_LOG" -o "$INSTALL_LOG"
-        fi
+        mv "$_apply_tmp" "$APPLY_LIST" || return 1
 
         render_applied_components "$APPLY_LIST"
         resource_compare
 
-        rm -f $INSTALL_FILES 2>/dev/null
-        rm -f "$TRANSACTION_LOG"
-
-        log_success "All targeted packages deployed successfully!"
-
-        if command -v mf_record_install >/dev/null 2>&1; then
-            mf_record_install "${INSPECT_MODULE_ID:-${SELECTED_PROFILE:-proxy}}" "$PACKAGES_PLANNED"
+        if [ -n "$module_id" ]; then
+            mf_record_install "$module_id" "$PACKAGES_PLANNED" "$newly_installed" || {
+                log_error "Package processing finished but registry update failed. Inspect $journal."
+                return 1
+            }
+        elif ! mf_sync_install_log; then
+            log_error "Package processing finished but install log update failed."
+            return 1
         fi
 
+        [ -z "$journal" ] || rm -f "$journal" || return 1
+        log_success "All targeted packages deployed successfully!"
         return 0
     fi
 
@@ -285,9 +311,9 @@ deploy_targeted_packages()
         apk)  log_info "Details : ${DAYPASS_APK_LOG}" ;;
         *)    log_info "Details : ${DAYPASS_OPKG_LOG}" ;;
     esac
-    rollback_failed_install
+    log_warn "Native transaction may be partially applied. No packages were removed by DayPass. Inspect $journal and the manager log before retrying."
     return 1
-}
+)
 
 # $1 tab-separated file: package<TAB>note
 render_applied_components()
@@ -303,31 +329,4 @@ render_applied_components()
     done < "$1"
     ui_divider
     echo
-}
-
-rollback_failed_install()
-{
-    echo
-    log_warn "Initiating Selective Atomic Rollback Procedures ..."
-    echo
-
-    rm -f "$TMP_DIR"/*.part "$TMP_DIR"/*.apk "$TMP_DIR"/*.ipk 2>/dev/null
-
-    if [ -s "$TRANSACTION_LOG" ]; then
-        log_info "Rolling back modified packages from current session ..."
-        while read -r pkg; do
-            [ -z "$pkg" ] && continue
-            log_info "Rollback : Removing package [$pkg] ..."
-            
-            case "${PKG_MANAGER:-opkg}" in
-                apk)  apk del "$pkg" >/dev/null 2>&1 || true ;;
-                opkg|*) opkg remove "$pkg" >/dev/null 2>&1 || true ;;
-            esac
-        done < "$TRANSACTION_LOG"
-    else
-        log_info "No system packages were installed in this session. Skipping removal!"
-    fi
-
-    rm -f "$TRANSACTION_LOG"
-    log_success "Rollback procedure completed safely!"
 }

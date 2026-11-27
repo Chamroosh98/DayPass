@@ -262,7 +262,7 @@ help_menu() {
                 continue
                 ;;
             r|R)
-                help_cache_reset
+                help_cache_reset || { log_error "Help cache refresh incomplete."; ui_pause; continue; }
                 log_info "Manual cache cleared, re-downloading ..."
                 sleep 1
                 continue

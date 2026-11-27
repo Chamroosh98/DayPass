@@ -8,14 +8,15 @@ clean_ip_for_config() {
     echo "  📋 Available Configs :"
     ui_divider
 
-    local configs=""
+    local file name protocol choice
+    set --
     local i=1
     for file in "$CONFIG_DIR"/*.json; do
         [ -f "$file" ] || continue
         name=$(basename "$file" .json)
         protocol=$(jq -r '.protocol // "unknown"' "$file" 2>/dev/null)
         echo "  $i) $name  ${GRAY}($protocol)${RESET}"
-        configs="$configs $name"
+        set -- "$@" "$name"
         i=$((i + 1))
     done
 
@@ -30,7 +31,7 @@ clean_ip_for_config() {
 
     local idx=1
     local conf_name=""
-    for name in $configs; do
+    for name in "$@"; do
         if [ "$choice" = "$idx" ]; then
             conf_name="$name"
             break
@@ -43,7 +44,7 @@ clean_ip_for_config() {
         return 1
     fi
 
-    local file="$CONFIG_DIR/${conf_name}.json"
+    file="$CONFIG_DIR/${conf_name}.json"
     local share_link port old_addr core
     share_link=$(jq -r '.share_link // empty' "$file" 2>/dev/null)
     port=$(extract_port_from_link "$share_link")
@@ -106,7 +107,7 @@ clean_ip_for_config() {
     read -r clean_ip </dev/tty
     [ -z "$clean_ip" ] && { log_info "Cancelled."; return 0; }
 
-    apply_clean_ip_to_config "$conf_name" "$clean_ip"
+    apply_clean_ip_to_config "$conf_name" "$clean_ip" || return $?
 
     printf "  🫸🏻 Push updated config to the active engine now? [y/N] : "
     read -r push_now </dev/tty

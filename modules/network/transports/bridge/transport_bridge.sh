@@ -23,10 +23,10 @@ TRANSPORT_DIR="${DAYPASS_DIR:-/etc/daypass}/transport"
 TRANSPORT_ENGINES="passwall2 passwall singbox xray_direct wireguard openvpn"
 
 transport_valid_engine() {
-    [ -n "$1" ] || return 1
-    case " $TRANSPORT_ENGINES " in
-        *" $1 "*) return 0 ;;
-    esac
+    local candidate
+    for candidate in $TRANSPORT_ENGINES; do
+        [ "$candidate" = "$1" ] && return 0
+    done
     return 1
 }
 
@@ -70,19 +70,20 @@ transport_opt_get() {
     fi
 }
 
-transport_opt_set() {
-    local file="$TRANSPORT_DIR/$1.conf"
-
-    case "$1$2" in
-        *[!a-z0-9_]*) return 1 ;;
-    esac
-    mkdir -p "$TRANSPORT_DIR" 2>/dev/null || return 1
-
-    {
-        [ -f "$file" ] && grep -v "^$2=" "$file"
-        [ -n "$3" ] && echo "$2=$3"
-    } > "$file.tmp" && mv "$file.tmp" "$file"
-}
+transport_opt_set() (
+    local file="$TRANSPORT_DIR/$1.conf" tmp
+    transport_valid_engine "$1" || return 1
+    case "$2" in ''|*[!a-z0-9_]*) return 1 ;; esac
+    mkdir -p "$TRANSPORT_DIR" || return 1
+    [ ! -L "$file" ] && { [ ! -e "$file" ] || [ -f "$file" ]; } || return 1
+    tmp=$(mktemp "$TRANSPORT_DIR/.option.XXXXXX") || return 1
+    trap 'rm -f "$tmp"' EXIT
+    if [ -f "$file" ]; then
+        awk -v key="$2=" 'index($0,key) != 1' "$file" > "$tmp" || return 1
+    fi
+    if [ -n "$3" ]; then printf '%s=%s\n' "$2" "$3" >> "$tmp" || return 1; fi
+    mv "$tmp" "$file"
+)
 
 # ------------------------------------------------------------
 # Engine discovery & selection
@@ -100,10 +101,14 @@ transport_engine_label() {
 }
 
 transport_detect_engines() {
-    local engine
+    local engine found=1
     for engine in $TRANSPORT_ENGINES; do
-        transport_call "$engine" detect >/dev/null 2>&1 && echo "$engine"
+        if transport_call "$engine" detect >/dev/null 2>&1; then
+            echo "$engine"
+            found=0
+        fi
     done
+    return "$found"
 }
 
 # Saved engine if still installed, otherwise the first detected engine in priority order
@@ -141,7 +146,7 @@ set_active_engine() {
     fi
 
     mkdir -p "$TRANSPORT_DIR" 2>/dev/null || return 1
-    echo "$engine" > "$TRANSPORT_DIR/active_engine"
+    printf '%s\n' "$engine" > "$TRANSPORT_DIR/active_engine" || return 1
     log_success "Active transport engine : [$(transport_engine_label "$engine")]"
 }
 
@@ -410,6 +415,7 @@ _sl_l4_from_network() {
 parse_share_link() {
     local link="$1"
     local scheme body json creds decoded frag rest query hostpart
+    local SL_HOST="" SL_PORT="" SL_FRAGMENT="" SL_QUERY="" SL_USERINFO=""
     local sr_host sr_port sr_proto sr_method sr_obfs sr_pass
 
     PARSED_PROTOCOL=""
@@ -547,14 +553,14 @@ parse_share_link() {
                     ;;
                 *)
                     # legacy: ss://base64(method:password@host:port)
-                    decoded=$(_sl_b64 "$rest")
+                    decoded=$(_sl_b64 "$rest") || return 1
                     case "$decoded" in
                         *@*)
                             creds=${decoded%@*}
                             _sl_hostport "${decoded##*@}"
                             ;;
                         *)
-                            creds=""
+                            return 1
                             ;;
                     esac
                     ;;
@@ -562,6 +568,8 @@ parse_share_link() {
 
             PARSED_ADDRESS="$SL_HOST"
             PARSED_PORT="$SL_PORT"
+            [ -n "$SL_HOST" ] && [ -n "$SL_PORT" ] && [ "$SL_PORT" -le 65535 ] && [ "$SL_PORT" -gt 0 ] || return 1
+            case "$creds" in :*|"") return 1 ;; *:?*) ;; *) return 1 ;; esac
             PARSED_METHOD=${creds%%:*}
             case "$creds" in
                 *:*) PARSED_PASSWORD=${creds#*:} ;;
@@ -705,7 +713,7 @@ transport_push_config() {
         return 1
     fi
 
-    engine=$(_transport_target_engine "") || return 1
+    engine=$(_transport_target_engine "${2:-}") || return 1
 
     transport_call "$engine" push_node "$file" "$conf_name"
     rc=$?
@@ -734,13 +742,16 @@ transport_push_all() {
         name=$(basename "$file" .json)
         count=$((count + 1))
 
-        if transport_push_config "$name"; then
+        if transport_push_config "$name" "$engine"; then
             success=$((success + 1))
         fi
     done
 
     if [ "$count" -eq 0 ]; then
         log_warn "No configs to push!"
+    elif [ "$success" -lt "$count" ]; then
+        log_error "Imported $success of $count configs."
+        return 1
     else
         log_success "Finished: $success / $count config(s) processed."
     fi

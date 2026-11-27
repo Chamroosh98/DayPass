@@ -33,10 +33,7 @@ detect_system_architecture()
     fi
 
     # 4. Extract MAJOR Version (24 vs 25)
-    OW_MAJOR_VER="24"
-    if echo "$OPENWRT_VER" | grep -q "^25" || [ "$PKG_MGR" = "apk" ]; then
-        OW_MAJOR_VER="25"
-    fi
+    OW_MAJOR_VER="${OPENWRT_MAJOR:-${OPENWRT_VER%%.*}}"
 
     log_success "System architecture resolved : [$ARCH]"
     [ -n "$OPENWRT_VER" ] && log_info "OpenWrt Release version : [$OPENWRT_VER] (Major: v$OW_MAJOR_VER)"

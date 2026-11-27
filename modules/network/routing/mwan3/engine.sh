@@ -4,6 +4,7 @@
 # ============================================================
 
 install_mwan3_deps() {
+    local PKG_MANAGER="${PKG_MANAGER:-}"
     local PKGS="mwan3 luci-app-mwan3"
 
     log_info "Verifying Multi-WAN & LuCI Web Interface packages ..."
@@ -12,137 +13,104 @@ install_mwan3_deps() {
         return 0
     fi
 
+    case "${PKG_MANAGER:-}" in
+        apk|opkg) ;;
+        '')
+            if command -v apk >/dev/null && ! command -v opkg >/dev/null; then
+                PKG_MANAGER=apk
+            elif command -v opkg >/dev/null && ! command -v apk >/dev/null; then
+                PKG_MANAGER=opkg
+            else
+                log_error "Could not identify a single package manager."; return 1
+            fi ;;
+        *) log_error "Unsupported package manager."; return 1 ;;
+    esac
+    command -v pkg_update >/dev/null 2>&1 || return 1
     log_info "Updating package database ..."
-    if command -v pkg_update >/dev/null 2>&1; then
-        pkg_update >/dev/null 2>&1 || true
-    elif command -v opkg >/dev/null 2>&1; then
-        opkg update >/dev/null 2>&1 || true
-    elif command -v apk >/dev/null 2>&1; then
-        apk update >/dev/null 2>&1 || true
-    fi
+    pkg_update || return $?
+    log_info "Installing $PKGS ..."
+    case "$PKG_MANAGER" in
+        apk) apk add mwan3 luci-app-mwan3 || return $? ;;
+        opkg) opkg install mwan3 luci-app-mwan3 || return $? ;;
+    esac
+    log_success "mwan3 and LuCI Web Interface installed."
 
-    log_info "Installing mwan3 and LuCI Web Interface ($PKGS) ..."
-    if command -v pkg_install >/dev/null 2>&1; then
-        if pkg_install mwan3 && pkg_install luci-app-mwan3; then
-            log_success "mwan3 and LuCI Web Interface successfully installed."
-            return 0
-        fi
-    fi
-    if command -v opkg >/dev/null 2>&1; then
-        if opkg install $PKGS >/dev/null 2>&1; then
-            log_success "mwan3 & LuCI Web Panel installed via OPKG."
-            return 0
-        fi
-    fi
-    if command -v apk >/dev/null 2>&1; then
-        if apk add $PKGS >/dev/null 2>&1; then
-            log_success "mwan3 & LuCI Web Panel installed via APK."
-            return 0
-        fi
-    fi
-
-    log_error "Could not install mwan3 or luci-app-mwan3."
-    return 1
 }
 
-_mwan_clear_links() {
-    local sec kind
-    uci show mwan3 2>/dev/null | sed -n 's/^mwan3\.\([^=]*\)=\(interface\|member\)$/\1 \2/p' | \
-    while read -r sec kind; do
-        [ -n "$sec" ] || continue
-        uci -q delete "mwan3.$sec"
-    done
+# Private staging must still describe the same committed graph at publication.
+_mwan_check_baseline() {
+    local pending current
+    pending=$(uci changes mwan3) && [ -z "$pending" ] || return 1
+    current=$(uci show mwan3) && [ "$current" = "$1" ]
 }
 
-# $1: mode ("balanced" or "failover")
-apply_mwan3_mode() {
-    local mode="${1:-balanced}"
-    local list count iface metric rank member
-
-    log_info "Scanning WAN interfaces ..."
-    list=$(mwan_active_ifaces)
-    count=0
+# Existing rules can take precedence over a new catch-all. Refuse adoption,
+# including installations created by older DayPass versions without markers.
+apply_mwan3_mode() (
+    local mode="$1" delta config pending list iface member metric rank=0 ordered
+    local rule=daypass_default policy="daypass_$1" section
+    case "$mode" in balanced|failover) ;; *) return 1 ;; esac
+    pending=$(uci changes mwan3) && [ -z "$pending" ] || return 1
+    config=$(uci show mwan3) || return 1
+    for section in $(printf '%s\n' "$config" | sed -n 's/^mwan3\.\([^.]*\)=\(rule\|policy\|member\)$/\1/p'); do
+        [ "$(uci -q get "mwan3.$section.daypass_owner")" = mwan_v1 ] ||
+            { log_warn "Existing mwan3 policy graph requires manual integration."; return 1; }
+    done
+    [ -x /etc/init.d/mwan3 ] || return 1
+    list=$(mwan_active_ifaces) && [ -n "$list" ] || return 1
+    delta=$(mktemp -d /tmp/daypass_mwan.XXXXXX) || return 1
+    trap 'rm -f "$delta/mwan3" "$delta/order"; rmdir "$delta"' EXIT
     for iface in $list; do
-        count=$((count + 1))
-        metric=$(uci -q get "network.$iface.metric")
-        [ -n "$metric" ] || metric="default"
-        echo "  🌐 $iface  metric $metric"
+        case "$iface" in ''|daypass_*|*[!a-zA-Z0-9_]*) return 1 ;; esac
+        metric=$(uci -q get "network.$iface.metric") || metric=1000
+        case "$metric" in ''|*[!0-9]*) metric=1000 ;; esac
+        printf '%s %s\n' "$metric" "$iface" >> "$delta/order" || return 1
     done
+    ordered=$(sort -n "$delta/order") || return 1
 
-    if [ "$count" -eq 0 ]; then
-        log_warn "No active WAN interfaces found. Create wan, wan_usb, wwan, or wan_lan2 first."
-        return 1
+    # Only this private delta is written before the single commit.
+    mwan_stage_section() {
+        local name="$1" type="$2" old
+        old=$(uci -q get "mwan3.$name")
+        if [ -n "$old" ]; then
+            [ "$old" = "$type" ] &&
+                [ "$(uci -q get "mwan3.$name.daypass_owner")" = mwan_v1 ] || return 1
+        fi
+        uci -P "$delta" set "mwan3.$name=$type" &&
+            uci -P "$delta" set "mwan3.$name.daypass_owner=mwan_v1"
+    }
+
+    mwan_stage_section "$policy" policy && mwan_stage_section "$rule" rule || return 1
+    if uci -q get "mwan3.$policy.use_member" >/dev/null; then
+        uci -P "$delta" delete "mwan3.$policy.use_member" || return 1
     fi
-
-    log_info "Configuring mwan3 for $count WAN interface(s) with policy: [$mode] ..."
-
-    uci set mwan3.globals=globals
-    uci set mwan3.globals.mmx_mask='0x3f00'
-    _mwan_clear_links
-
-    for iface in $list; do
-        uci set "mwan3.$iface"=interface
-        uci set "mwan3.$iface.enabled"='1'
-        uci set "mwan3.$iface.family"='ipv4'
-        uci -q delete "mwan3.$iface.track_ip"
-        uci add_list "mwan3.$iface.track_ip"='1.1.1.1'
-        uci add_list "mwan3.$iface.track_ip"='8.8.8.8'
-        uci set "mwan3.$iface.reliability"='1'
-        uci set "mwan3.$iface.timeout"='2'
-        uci set "mwan3.$iface.interval"='5'
-
-        member="${iface}_m"
-        uci set "mwan3.$member"=member
-        uci set "mwan3.$member.interface"="$iface"
-        uci set "mwan3.$member.metric"='1'
-        uci set "mwan3.$member.weight"='1'
-    done
-
-    uci set mwan3.balanced=policy
-    uci -q delete mwan3.balanced.use_member
-    for iface in $list; do
-        uci add_list mwan3.balanced.use_member="${iface}_m"
-    done
-
-    uci set mwan3.failover=policy
-    uci -q delete mwan3.failover.use_member
-    rank=1
-    for iface in $(
-        for iface in $list; do
-            metric=$(uci -q get "network.$iface.metric")
-            case "$metric" in
-                ''|*[!0-9]*) metric=1000 ;;
-            esac
-            printf '%s %s\n' "$metric" "$iface"
-        done | sort -n | awk '{ print $2 }'
-    ); do
-        member="${iface}_fo"
-        uci set "mwan3.$member"=member
-        uci set "mwan3.$member.interface"="$iface"
-        uci set "mwan3.$member.metric"="$rank"
-        uci set "mwan3.$member.weight"='1'
-        uci add_list mwan3.failover.use_member="$member"
-        rank=$((rank + 1))
-    done
-
-    uci set mwan3.default_rule_v4=rule
-    uci set mwan3.default_rule_v4.dest_ip='0.0.0.0/0'
-    uci set mwan3.default_rule_v4.family='ipv4'
-    uci set mwan3.default_rule_v4.use_policy="$mode"
-
-    uci commit mwan3 || { log_error "Could not save mwan3."; return 1; }
-
-    if [ -x /etc/init.d/mwan3 ]; then
-        /etc/init.d/mwan3 enable >/dev/null 2>&1 || true
-        /etc/init.d/mwan3 restart >/dev/null 2>&1 || log_warn "mwan3 did not restart. Install it from option 1 if it is missing."
-    else
-        log_warn "mwan3 is not installed yet. The config is saved. Use option 1, then apply again."
-    fi
-
-    if [ "$mode" = "balanced" ]; then
-        log_success "mwan3 balanced policy now shares traffic across $count WAN interface(s)."
-    else
-        log_success "mwan3 failover policy active. Primary WAN is the one with the lowest metric."
-    fi
-    return 0
-}
+    while read -r metric iface; do
+        if uci -q get "mwan3.$iface" >/dev/null; then
+            [ "$(uci -q get "mwan3.$iface")" = interface ] &&
+                [ "$(uci -q get "mwan3.$iface.enabled")" = 1 ] || return 1
+        else
+            mwan_stage_section "$iface" interface &&
+                uci -P "$delta" set "mwan3.$iface.enabled=1" &&
+                uci -P "$delta" set "mwan3.$iface.family=ipv4" &&
+                uci -P "$delta" add_list "mwan3.$iface.track_ip=1.1.1.1" || return 1
+        fi
+        member="daypass_${mode}_$iface"
+        if [ "$mode" = balanced ]; then rank=1; else rank=$((rank+1)); fi
+        mwan_stage_section "$member" member &&
+            uci -P "$delta" set "mwan3.$member.interface=$iface" &&
+            uci -P "$delta" set "mwan3.$member.metric=$rank" &&
+            uci -P "$delta" set "mwan3.$member.weight=1" &&
+            uci -P "$delta" add_list "mwan3.$policy.use_member=$member" || return 1
+    done <<EOF
+$ordered
+EOF
+    uci -P "$delta" set "mwan3.$rule.dest_ip=0.0.0.0/0" &&
+        uci -P "$delta" set "mwan3.$rule.family=ipv4" &&
+        uci -P "$delta" set "mwan3.$rule.use_policy=$policy" || return 1
+    _mwan_check_baseline "$config" ||
+        { log_warn "mwan3 configuration changed during staging; apply cancelled."; return 1; }
+    uci -P "$delta" commit mwan3 || return 1
+    /etc/init.d/mwan3 enable && /etc/init.d/mwan3 restart ||
+        { log_error "mwan3 configuration saved; activation incomplete."; return 1; }
+    log_info "Applied DayPass $mode configuration. Check live policy in mwan3 status."
+)

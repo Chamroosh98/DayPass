@@ -218,7 +218,7 @@ network_check()
     printf "  ${GRAY:-}Press [Enter] to continue ... ${RESET:-}\n"
     read -r _ </dev/tty || daypass_quit
     echo
-    return 0
+    [ "$((GREEN_COUNT + YELLOW_COUNT))" -gt 0 ]
 }
 
 # Standalone execution handler

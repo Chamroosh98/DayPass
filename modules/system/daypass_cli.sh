@@ -4,7 +4,7 @@
 # Safe to source. Subcommands exit. menu/default returns.
 
 DAYPASS_CLI_URL_SUFFIX="/install.sh"
-DAYPASS_UPDATE_CHECK_STAMP="/tmp/daypass_update_check"
+DAYPASS_UPDATE_CHECK_STAMP="/tmp/daypass-cli-runtime/update-check"
 DAYPASS_UPDATE_INTERVAL=43200 # 12 hours in seconds
 
 # beta when REPO_URL ends in /beta, otherwise stable.
@@ -53,6 +53,17 @@ daypass_cli_self() {
     printf '%s\n' "$self"
 }
 
+daypass_cli_validate() {
+    local trailer checksum
+    trailer=$(tail -n 1 "$1") || return 1
+    checksum=$(sed '$d' "$1" | sha256sum) || return 1
+    [ "$trailer" = "# DayPass SHA256: ${checksum%% *}" ] &&
+        [ "$(head -n 1 "$1")" = '#!/bin/sh' ] &&
+        grep -Fxq '# DayPass Installer (Auto-generated via Go Action)' "$1" &&
+        grep -q '^daypass_cli_dispatch()' "$1" &&
+        sh -n "$1"
+}
+
 daypass_cli_fetch() {
     local url="$1"
     local dest="$2"
@@ -70,24 +81,45 @@ daypass_cli_fetch() {
 }
 
 # Check if enough time has passed since the last update check.
+_daypass_stamp_dir() {
+    local dir="${DAYPASS_UPDATE_CHECK_STAMP%/*}"
+    [ -d "$dir" ] || (umask 077; mkdir "$dir") || return 1
+    [ ! -L "$dir" ] && [ "$(stat -c '%u:%a' "$dir")" = "$(id -u):700" ]
+}
+
+_daypass_record_check() (
+    _daypass_stamp_dir || return 1
+    local stamp="$DAYPASS_UPDATE_CHECK_STAMP" tmp
+    [ ! -L "$stamp" ] && { [ ! -e "$stamp" ] || [ -f "$stamp" ]; } || return 1
+    tmp=$(mktemp "${stamp}.XXXXXX") || return 1
+    trap 'rm -f "$tmp"' EXIT
+    date +%s > "$tmp" && mv -f "$tmp" "$stamp"
+)
+
 _daypass_should_check_update() {
     local now last
-    [ -f "$DAYPASS_UPDATE_CHECK_STAMP" ] || return 0
-    now=$(date +%s 2>/dev/null || echo 0)
-    last=$(cat "$DAYPASS_UPDATE_CHECK_STAMP" 2>/dev/null || echo 0)
-    [ $((now - last)) -ge "$DAYPASS_UPDATE_INTERVAL" ]
+    _daypass_stamp_dir || return 1
+    [ ! -L "$DAYPASS_UPDATE_CHECK_STAMP" ] && [ -f "$DAYPASS_UPDATE_CHECK_STAMP" ] || return 0
+    now=$(date +%s) || return 0
+    [ "$(wc -c < "$DAYPASS_UPDATE_CHECK_STAMP")" -le 11 ] || return 0
+    last=$(cat "$DAYPASS_UPDATE_CHECK_STAMP") || return 0
+    case "$last" in ''|*[!0-9]*|0?*) return 0 ;; esac
+    [ "${#last}" -le 10 ] || return 0
+    awk -v now="$now" -v last="$last" -v interval="$DAYPASS_UPDATE_INTERVAL" \
+        'BEGIN { exit !(last+0 > now+0 || now-last >= interval) }'
 }
 
 # Oh-My-Zsh style interactive update notifier.
 daypass_cli_update_notifier() {
     local dest="$1"
+    shift
     local url tmp ans remote_ver
 
     _daypass_should_check_update || return 0
-    date +%s > "$DAYPASS_UPDATE_CHECK_STAMP" 2>/dev/null || true
+    _daypass_record_check || :
 
     url="${REPO_URL:-}${DAYPASS_CLI_URL_SUFFIX}"
-    tmp="/tmp/daypass.check.$$"
+    tmp=$(mktemp "${dest}.new.XXXXXX") || return 1
 
     # Silent fetch; if offline or failed, just skip without bothering the user.
     daypass_cli_fetch "$url" "$tmp" 2>/dev/null || {
@@ -102,7 +134,7 @@ daypass_cli_update_notifier() {
     fi
 
     # Verify syntax of the downloaded update before offering it.
-    sh -n "$tmp" 2>/dev/null || {
+    daypass_cli_validate "$tmp" 2>/dev/null || {
         rm -f "$tmp"
         return 0
     }
@@ -121,13 +153,13 @@ daypass_cli_update_notifier() {
 
     case "$ans" in
         y|Y|yes|YES)
-            chmod +x "$tmp" || true
-            if mv "$tmp" "$dest"; then
+            if chmod +x "$tmp" && mv "$tmp" "$dest"; then
                 log_success "DayPass updated successfully! Reloading..."
                 exec "$dest" "$@"
             else
                 log_error "Failed to apply update."
                 rm -f "$tmp"
+                return 1
             fi
             ;;
         *)
@@ -150,8 +182,8 @@ daypass_cli_ensure() {
 
     # Case 1: User ran 'daypass' directly from the installed path.
     if [ -n "$self" ] && [ "$self" = "$dest" ]; then
-        daypass_cli_update_notifier "$dest"
-        return 0
+        daypass_cli_update_notifier "$dest" "$@"
+        return $?
     fi
 
     # Case 2: Installed file already exists and matches the local running file.
@@ -160,7 +192,7 @@ daypass_cli_ensure() {
     fi
 
     # Case 3: First-time installation (or running from a different local file/pipe).
-    tmp="${dest}.new.$$"
+    tmp=$(mktemp "${dest}.new.XXXXXX") || return 1
     if [ -n "$self" ]; then
         cp "$self" "$tmp" || {
             log_error "Could not copy DayPass to [$dest]."
@@ -174,19 +206,18 @@ daypass_cli_ensure() {
             rm -f "$tmp"
             return 1
         }
-        sh -n "$tmp" || {
-            log_error "Downloaded DayPass failed the syntax check. [$dest] was not changed."
-            rm -f "$tmp"
-            return 1
-        }
     fi
-    chmod +x "$tmp" || true
+    daypass_cli_validate "$tmp" && chmod +x "$tmp" || {
+        log_error "Invalid or non-executable DayPass bundle."
+        rm -f "$tmp"
+        return 1
+    }
     mv "$tmp" "$dest" || {
         log_error "Could not install [$dest]."
         rm -f "$tmp"
         return 1
     }
-    date +%s > "$DAYPASS_UPDATE_CHECK_STAMP" 2>/dev/null || true
+    _daypass_record_check || :
     printf '  %s✅ DayPass persistent CLI installed! You can now simply run '\''daypass'\'' anytime.%s\n' \
         "${GREEN:-}" "${RESET:-}"
     return 0
@@ -195,8 +226,7 @@ daypass_cli_ensure() {
 daypass_cli_version() {
     local dest hash="unavailable"
 
-    dest=$(daypass_cli_dest 2>/dev/null || true)
-    [ -n "$dest" ] && [ -f "$dest" ] || dest=$(daypass_cli_self 2>/dev/null || true)
+    dest=$(daypass_cli_self 2>/dev/null || daypass_cli_dest 2>/dev/null || true)
     if [ -n "$dest" ] && [ -f "$dest" ]; then
         if command -v sha256sum >/dev/null 2>&1; then
             hash=$(sha256sum "$dest" 2>/dev/null | awk '{ print substr($1, 1, 12) }')
@@ -217,45 +247,49 @@ daypass_cli_update() {
         return 1
     }
     url="${REPO_URL:-}${DAYPASS_CLI_URL_SUFFIX}"
-    tmp="/tmp/daypass.new.$$"
+    tmp=$(mktemp "${dest}.new.XXXXXX") || return 1
     log_info "Fetching [$url] ..."
     daypass_cli_fetch "$url" "$tmp" || {
         log_error "Download failed."
         rm -f "$tmp"
         return 1
     }
-    sh -n "$tmp" || {
+    daypass_cli_validate "$tmp" || {
         log_error "Downloaded script failed sh -n. [$dest] was not changed."
         rm -f "$tmp"
         return 1
     }
     if [ -f "$dest" ] && cmp -s "$dest" "$tmp" 2>/dev/null; then
         rm -f "$tmp"
-        date +%s > "$DAYPASS_UPDATE_CHECK_STAMP" 2>/dev/null || true
+        _daypass_record_check || :
         log_info "DayPass is already up to date!"
         return 0
     fi
-    chmod +x "$tmp" || true
+    chmod +x "$tmp" || { rm -f "$tmp"; return 1; }
     mv "$tmp" "$dest" || {
         log_error "Could not replace [$dest]."
         rm -f "$tmp"
         return 1
     }
-    date +%s > "$DAYPASS_UPDATE_CHECK_STAMP" 2>/dev/null || true
+    _daypass_record_check || :
     log_success "daypass updated at [$dest]."
     return 0
 }
 
 daypass_cli_uninstall() {
-    local removed=0 path
-
+    local removed=0 failed=0 path
     for path in /usr/bin/daypass /usr/sbin/daypass; do
-        if [ -e "$path" ]; then
-            rm -f "$path" && removed=1
+        [ -e "$path" ] || [ -L "$path" ] || continue
+        if [ ! -L "$path" ] && [ -f "$path" ] && daypass_cli_validate "$path" &&
+            rm "$path" && [ ! -e "$path" ] && [ ! -L "$path" ]; then
+            removed=1
             log_success "Removed [$path]."
+        else
+            failed=1
+            log_error "Could not verify or remove [$path]."
         fi
     done
-    rm -f /tmp/daypass_pkg_cache /tmp/daypass_usb_pkg.log /tmp/daypass_update_check /tmp/daypass.new.* /tmp/daypass.check.* 2>/dev/null || true
+    [ "$failed" = 0 ] || return 1
     if [ "$removed" -eq 0 ]; then
         log_warn "daypass was not installed."
         return 1
@@ -280,8 +314,8 @@ daypass_cli_dispatch() {
             exit $?
             ;;
         menu|"")
-            daypass_cli_ensure || true
-            return 0
+            daypass_cli_ensure "$@"
+            return $?
             ;;
         *)
             printf '  Usage: daypass [menu|update|version|uninstall]\n'

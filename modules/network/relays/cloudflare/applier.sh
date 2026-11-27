@@ -8,7 +8,8 @@ apply_clean_ip_to_config() {
     local clean_ip="$2"
     local file="$CONFIG_DIR/${conf_name}.json"
 
-    if [ ! -f "$file" ]; then
+    case "$conf_name" in ''|.*|*/*) return 1 ;; esac
+    if [ ! -f "$file" ] || [ -L "$file" ]; then
         log_error "Config not found: [$conf_name]"
         return 1
     fi
@@ -38,11 +39,12 @@ apply_clean_ip_to_config() {
         return 1
     fi
 
-    tmp=$(mktemp)
-    if jq --arg link "$new_link" --arg ip "$clean_ip" \
-        '.share_link = $link | .clean_ip = $ip' \
+    local tmp rc
+    tmp=$(mktemp "$CONFIG_DIR/.clean-ip.XXXXXX") || return 1
+    if jq -e --arg old "$share_link" --arg link "$new_link" --arg ip "$clean_ip" \
+        'if .share_link == $old then .share_link = $link | .clean_ip = $ip else error("endpoint changed") end' \
         "$file" > "$tmp" 2>/dev/null; then
-        mv "$tmp" "$file"
+        mv "$tmp" "$file" || { rc=$?; rm -f "$tmp"; log_error "Failed to replace config."; return "$rc"; }
     else
         rm -f "$tmp"
         log_error "Failed to update config JSON!"

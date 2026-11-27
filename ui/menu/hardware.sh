@@ -100,7 +100,7 @@ _hw_pick_tether_device() {
 }
 
 hardware_setup_tethering() {
-    local iface metric_default stored
+    local iface metric_default stored requested_metric
 
     iface="${USB_WAN_IFACE:-wan_usb}"
     metric_default="${USB_WAN_DEFAULT_METRIC:-20}"
@@ -119,8 +119,9 @@ hardware_setup_tethering() {
     ui_read "Route metric [${metric_default}]"
     case "$UI_CHOICE" in
         q|Q) daypass_quit ;;
-        '') UI_CHOICE="$metric_default" ;;
-        *[!0-9]*) log_warn "Invalid metric!"; return 0 ;;
+        '') requested_metric="$metric_default" ;;
+        *[!0-9]*) log_warn "Invalid metric!"; return 1 ;;
+        *) requested_metric="$UI_CHOICE" ;;
     esac
 
     if ! command -v usb_net_hardware_present >/dev/null 2>&1 || ! usb_net_hardware_present; then
@@ -135,7 +136,7 @@ hardware_setup_tethering() {
 
     _hw_pick_tether_device || return 1
 
-    setup_usb_wan "$HW_DEVICE" "$UI_CHOICE"
+    setup_usb_wan "$HW_DEVICE" "$requested_metric"
 }
 
 # UCI interface names, one per line. Skips loopback.
@@ -382,14 +383,6 @@ hardware_modeswitch() {
     fi
 }
 
-hardware_remove_tethering() {
-    ui_read "Remove wan_usb? [y/N]"
-    case "$UI_CHOICE" in
-        y|Y) remove_usb_wan ;;
-        q|Q) daypass_quit ;;
-    esac
-}
-
 hardware_menu() {
     local HELP_MODULE_ID="hardware"
 
@@ -416,9 +409,9 @@ hardware_menu() {
             4) hardware_toggle_tethering ;;
             5)
                 if command -v usb_restore_settings >/dev/null 2>&1; then
-                    usb_restore_settings || true
+                    usb_restore_settings
                 else
-                    hardware_remove_tethering
+                    log_error "USB restore unavailable; ownership cannot be verified."
                 fi
                 ;;
             6) hardware_modeswitch ;;

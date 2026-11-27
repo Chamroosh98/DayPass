@@ -29,9 +29,9 @@
     },
     {
       "key": "5",
-      "title": "Restore / Reset USB Stack",
-      "description": "After confirmation, deletes wan_usb and its firewall membership, uninstalls Android, iOS and modem USB packages, deletes /tmp/daypass_pkg_cache, unbinds usb0, rndis and cdc-wdm tether interfaces, unloads those kernel modules, and restarts the network service.",
-      "usage_tip": "Enter keeps the current configuration. Yes leaves the drivers menu to read the live package database, so a removed set shows Not Installed."
+      "title": "USB Restore Status",
+      "description": "Shows the configured USB device binding when available. Automatic restore is blocked because USB setup does not record the previous binding or exclusive driver ownership.",
+      "usage_tip": "Use your pre-setup backup to identify the original configuration before attempting manual recovery."
     },
     {
       "key": "6",

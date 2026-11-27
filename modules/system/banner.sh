@@ -91,6 +91,7 @@ _sys_banner_template() {
  | |_| | (_| | |_| ||  __/ (_| \__ \__ \
  |____/ \__,_|\__, ||_|   \__,_|___/___/  @VERSION@
               |___/
+ DayPass Deployment Toolkit
  ---------------------------------------------------------------------
 
 DAYPASS_BANNER_EOF
@@ -118,7 +119,12 @@ system_banner_render() {
 # ------------------------------------------------------------
 system_banner_is_daypass() {
     [ -f "$SYS_BANNER_FILE" ] || return 1
-    grep -qF "$SYS_BANNER_TAG" "$SYS_BANNER_FILE" 2>/dev/null
+    grep -Fxq " $SYS_BANNER_TAG" "$SYS_BANNER_FILE" && return 0
+    # Earlier releases emitted the same artwork without the marker.
+    local expected actual
+    expected=$(_sys_banner_template | sed '/^ DayPass Deployment Toolkit$/d')
+    actual=$(sed '6s/  [^ ]*$/  @VERSION@/' "$SYS_BANNER_FILE") || return 1
+    [ "$actual" = "$expected" ]
 }
 
 # ------------------------------------------------------------
@@ -141,8 +147,15 @@ system_banner_status() {
 # ------------------------------------------------------------
 # Install (or refresh) the DayPass banner
 # ------------------------------------------------------------
-install_system_banner() {
-    SYS_BANNER_TMP="$SYS_BANNER_FILE.daypass-new"
+install_system_banner() (
+    umask 077
+    local stage
+    for path in "$SYS_BANNER_FILE" "$SYS_BANNER_BACKUP"; do
+        [ ! -L "$path" ] && { [ ! -e "$path" ] || [ -f "$path" ]; } || return 1
+    done
+    stage=$(mktemp -d "${SYS_BANNER_FILE}.stage.XXXXXX") || return 1
+    trap 'rm -rf "$stage"' EXIT
+    SYS_BANNER_TMP="$stage/banner"
 
     if ! system_banner_render > "$SYS_BANNER_TMP" 2>/dev/null; then
         rm -f "$SYS_BANNER_TMP" 2>/dev/null
@@ -166,7 +179,7 @@ install_system_banner() {
     # Keep the stock banner the first time only, so repeated installs
     # never overwrite the backup with our own banner.
     if [ ! -f "$SYS_BANNER_BACKUP" ] && [ -f "$SYS_BANNER_FILE" ] && ! system_banner_is_daypass; then
-        if cp "$SYS_BANNER_FILE" "$SYS_BANNER_BACKUP" 2>/dev/null; then
+        if cp -p "$SYS_BANNER_FILE" "$stage/original" && ln "$stage/original" "$SYS_BANNER_BACKUP"; then
             log_info "Original banner backed up to : [$SYS_BANNER_BACKUP]"
         else
             rm -f "$SYS_BANNER_TMP" 2>/dev/null
@@ -175,17 +188,17 @@ install_system_banner() {
         fi
     fi
 
+    chmod 644 "$SYS_BANNER_TMP" || return 1
     if ! mv "$SYS_BANNER_TMP" "$SYS_BANNER_FILE" 2>/dev/null; then
         rm -f "$SYS_BANNER_TMP" 2>/dev/null
         log_error "Failed to write [$SYS_BANNER_FILE]!"
         return 1
     fi
 
-    chmod 644 "$SYS_BANNER_FILE" 2>/dev/null
     log_success "DayPass login banner installed to [$SYS_BANNER_FILE]!"
     log_info "It shows on the next SSH or console login."
     return 0
-}
+)
 
 # ------------------------------------------------------------
 # Put the stock OpenWrt banner back
@@ -197,13 +210,12 @@ restore_system_banner() {
         return 1
     fi
 
-    if ! cp "$SYS_BANNER_BACKUP" "$SYS_BANNER_FILE" 2>/dev/null; then
+    [ ! -L "$SYS_BANNER_BACKUP" ] && [ ! -L "$SYS_BANNER_FILE" ] &&
+        { [ ! -e "$SYS_BANNER_FILE" ] || [ -f "$SYS_BANNER_FILE" ]; } || return 1
+    if ! mv -f "$SYS_BANNER_BACKUP" "$SYS_BANNER_FILE"; then
         log_error "Failed to restore [$SYS_BANNER_FILE] from the backup!"
         return 1
     fi
-
-    rm -f "$SYS_BANNER_BACKUP" 2>/dev/null
-    chmod 644 "$SYS_BANNER_FILE" 2>/dev/null
     log_success "Original OpenWrt login banner restored!"
     return 0
 }

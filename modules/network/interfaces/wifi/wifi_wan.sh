@@ -51,41 +51,10 @@ setup_wifi_wan() {
     printf "  🔒 Password (leave empty if open) : "
     read -r pass </dev/tty
 
-    # Logical interface
-    uci set network.wwan=interface
-    uci set network.wwan.proto='dhcp'
-    uci set network.wwan.metric='30'
-    uci commit network
-
-    # Station interface (never touches AP)
-    uci set wireless.wwan_sta=wifi-iface
-    uci set wireless.wwan_sta.device="$chosen"
-    uci set wireless.wwan_sta.mode='sta'
-    uci set wireless.wwan_sta.network='wwan'
-    uci set wireless.wwan_sta.ssid="$ssid"
-    uci set wireless.wwan_sta.disabled='0'
-
+    command -v wifi_connect_client >/dev/null || { log_error "Load the DayPass Wi-Fi client module."; return 1; }
     if [ -n "$pass" ]; then
-        uci set wireless.wwan_sta.encryption='psk2'
-        uci set wireless.wwan_sta.key="$pass"
+        wifi_connect_client "$chosen" "$ssid" psk "$pass"
     else
-        uci set wireless.wwan_sta.encryption='none'
+        wifi_connect_client "$chosen" "$ssid" none ""
     fi
-
-    uci commit wireless
-
-    # Firewall
-    local zone
-    zone=$(uci show firewall | grep "=zone" | while read -r l; do
-        s=$(echo "$l" | cut -d'.' -f2 | cut -d'=' -f1)
-        [ "$(uci -q get firewall.$s.name)" = "wan" ] && echo "$s" && break
-    done)
-    if [ -n "$zone" ]; then
-        uci -q del_list firewall.$zone.network='wwan'
-        uci add_list firewall.$zone.network='wwan'
-        uci commit firewall
-    fi
-
-    wifi reload >/dev/null 2>&1
-    log_success "Wi-Fi WAN connected to [$ssid] on radio [$chosen]!"
 }

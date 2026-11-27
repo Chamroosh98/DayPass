@@ -10,7 +10,7 @@ GEOSITE_URL=""
 
 add_selected_package()
 {
-    pkg="$1"
+    local pkg="$1"
     [ -z "$pkg" ] && return
 
     case " $SELECTED_PACKAGES " in

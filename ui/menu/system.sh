@@ -9,18 +9,19 @@ _system_log_fetch() {
     local lines="$2"
     local dest="$3"
 
-    : > "$dest"
+    local raw="$dest.raw" selected="$dest.raw" rc
+    logread > "$raw" || return 1
     if [ -n "$filter" ]; then
-        logread 2>/dev/null | grep -iE "$filter" | tail -n "$lines" > "$dest" 2>/dev/null || true
-    else
-        logread 2>/dev/null | tail -n "$lines" > "$dest" 2>/dev/null || true
+        selected="$dest.matches"
+        grep -iE "$filter" "$raw" > "$selected" || { rc=$?; [ "$rc" = 1 ] || return 1; }
     fi
+    tail -n "$lines" "$selected" > "$dest"
 }
 
 _system_log_render() {
     local filter="$1"
     local label="$2"
-    local lines dest shown
+    local lines
 
     render_persistent_header
     ui_title "📜 Log Viewer — $label"
@@ -41,8 +42,19 @@ _system_log_render() {
     esac
     [ "$lines" -gt 0 ] 2>/dev/null || lines=50
 
-    dest="/tmp/daypass_logview.$$"
-    _system_log_fetch "$filter" "$lines" "$dest"
+    _system_log_display "$filter" "$lines"
+}
+
+_system_log_display() (
+    umask 077
+    local filter="$1" lines="$2" work dest shown
+    work=$(mktemp -d /tmp/daypass-log.XXXXXX) || return 1
+    trap 'rm -rf "$work"' EXIT
+    dest="$work/view"
+    _system_log_fetch "$filter" "$lines" "$dest" || {
+        log_error "Could not read or filter the system log."
+        return 1
+    }
 
     echo
     if [ ! -s "$dest" ]; then
@@ -61,8 +73,7 @@ _system_log_render() {
         ui_divider
     fi
 
-    rm -f "$dest" 2>/dev/null
-}
+)
 
 system_log_viewer() {
     local HELP_MODULE_ID="system_menu"

@@ -3,6 +3,9 @@
 
 temp/
 test/
+AGENTS.md
+docs/audit/
+.github/test_release.py
 cache/
 *.log
 .DS_Store

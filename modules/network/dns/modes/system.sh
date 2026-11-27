@@ -6,8 +6,8 @@ apply_dns_system() {
     log_info "Applying DNS mode: system default ..."
 
     dns_dnsmasq_reset
-    dns_dnsmasq_commit
-    dns_engine_release
+    dns_dnsmasq_commit || return $?
+    dns_engine_release || return $?
 
     log_info "LAN clients use the router WAN/ISP DNS path."
     return 0

@@ -8,7 +8,8 @@
 install_profile_interactive()
 {
     local profile="$1"
-    local count title rel_label
+    local count title rel_label _ip_rc
+    local DAYPASS_RESOLVE_QUIET="${DAYPASS_RESOLVE_QUIET:-0}" DAYPASS_INSTALL_UI="${DAYPASS_INSTALL_UI:-0}"
 
     render_persistent_header
 

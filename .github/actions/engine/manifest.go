@@ -105,7 +105,7 @@ func GenerateManifest(archConfigPath, outputDir, owVersion string) error {
 	releaseType := os.Getenv("INPUT_RELEASE_TYPE") 
 	var cdnBaseUrl string
 
-	if releaseType != "" {
+	if releaseType == "beta" {
 		cdnBaseUrl = fmt.Sprintf("https://cdn.jsdelivr.net/gh/%s@packages/%s/v%s", repo, releaseType, owVersion)
 	} else {
 		cdnBaseUrl = fmt.Sprintf("https://cdn.jsdelivr.net/gh/%s@packages/v%s", repo, owVersion)

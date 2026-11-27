@@ -65,7 +65,7 @@ proxy_engine_activate() {
         case "$UI_CHOICE" in
             n|N) log_warn "Both engines may intercept traffic until one is stopped." ;;
             q|Q) daypass_quit ;;
-            *)   stop_engine "$previous" ;;
+            *)   stop_engine "$previous" || return $? ;;
         esac
     fi
 
@@ -78,7 +78,12 @@ proxy_engine_show_nodes() {
     local engine="$1"
     local nodes current id name proto host port
 
-    nodes=$(transport_call "$engine" list_nodes 2>/dev/null)
+    local rc
+    nodes=$(transport_call "$engine" list_nodes 2>/dev/null) || {
+        rc=$?
+        log_warn "Could not list endpoints for [$(transport_engine_label "$engine")] (status $rc)."
+        return "$rc"
+    }
     if [ -z "$nodes" ]; then
         log_warn "No nodes / endpoints found in [$(transport_engine_label "$engine")]."
         return 0
@@ -140,7 +145,7 @@ proxy_engine_actions_menu() {
             1) proxy_engine_activate "$engine" ;;
             2) start_engine "$engine" ;;
             3) stop_engine "$engine" ;;
-            4) stop_engine "$engine"; start_engine "$engine" ;;
+            4) stop_engine "$engine" && start_engine "$engine" ;;
             5) reload_rules "$engine" ;;
             6) proxy_engine_show_nodes "$engine" ;;
             0) return 0 ;;

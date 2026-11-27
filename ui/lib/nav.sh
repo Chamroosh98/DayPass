@@ -133,7 +133,7 @@ ui_spinner() {
     _sp_st=0
 
     case "$_sp_pid" in
-        ''|*[!0-9]*) return 1 ;;
+        ''|*[!0-9]*|0*) return 1 ;;
     esac
 
     if command -v tput >/dev/null 2>&1; then
@@ -177,15 +177,14 @@ ui_show_help() {
     fi
 }
 
-# Runs a menu/action function when it is loaded; a failing action never
-# ends the calling menu loop. $1 function, $2 label for the error message.
+# Runs a loaded action and returns its status to the calling menu. $1 function, $2 label for the error message.
 ui_run() {
     local fn="$1"
     local label="${2:-$1}"
     if [ "$#" -ge 2 ]; then shift 2; else shift "$#"; fi
 
     if command -v "$fn" >/dev/null 2>&1; then
-        "$fn" "$@" || true
+        "$fn" "$@" || return $?
         return 0
     fi
     log_error "$label module not found!"

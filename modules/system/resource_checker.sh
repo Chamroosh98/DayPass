@@ -59,27 +59,32 @@ resource_snapshot()
 estimate_install_size()
 {
     _est_list="${PACKAGES_TO_PROCESS:-${FINAL_PACKAGES:-}}"
-    [ -z "$_est_list" ] && return 0
-    [ -z "${MANIFEST_FILE:-}" ] || [ ! -f "$MANIFEST_FILE" ] && return 0
-
+    local needed="$1" feeds="$2" unknown=""
     TOTAL_REQUIRED_BYTES=0
     TOTAL_SAVED_BYTES=0
     RECLAIMABLE_BYTES=0
+    [ -n "$_est_list" ] || return 0
 
     for pkg in $_est_list; do
+        case " $feeds " in
+            *" $pkg "*)
+                case " $needed " in *" $pkg "*) unknown="$unknown $pkg" ;; esac
+                continue ;;
+        esac
         pkg_bytes=$(manifest_lookup "size" "$pkg")
-        [ -z "$pkg_bytes" ] || [ "$pkg_bytes" = "null" ] && pkg_bytes=0
-
-        # Payload size counts only packages that are missing or outdated.
-        if command -v pkg_payload_required >/dev/null 2>&1 && ! pkg_payload_required "$pkg"; then
-            TOTAL_SAVED_BYTES=$((TOTAL_SAVED_BYTES + pkg_bytes))
-        else
-            TOTAL_REQUIRED_BYTES=$((TOTAL_REQUIRED_BYTES + pkg_bytes))
-
-            inst_ver=$(pkg_get_installed_version "$pkg" 2>/dev/null | awk 'NR==1 { print $1 }')
-            if [ -n "$inst_ver" ]; then
-                RECLAIMABLE_BYTES=$((RECLAIMABLE_BYTES + pkg_bytes))
-            fi
+        case "$pkg_bytes" in
+            ''|*[!0-9]*)
+                case " $needed " in *" $pkg "*) unknown="$unknown $pkg" ;; esac
+                continue ;;
+        esac
+        case " $needed " in
+            *" $pkg "*) ;;
+            *) TOTAL_SAVED_BYTES=$((TOTAL_SAVED_BYTES + pkg_bytes)); continue ;;
+        esac
+        TOTAL_REQUIRED_BYTES=$((TOTAL_REQUIRED_BYTES + pkg_bytes))
+        inst_ver=$(pkg_get_installed_version "$pkg" 2>/dev/null | awk 'NR==1 { print $1 }')
+        if [ -n "$inst_ver" ]; then
+            RECLAIMABLE_BYTES=$((RECLAIMABLE_BYTES + pkg_bytes))
         fi
     done
 
@@ -87,6 +92,7 @@ estimate_install_size()
     TEMP_OVERHEAD=$((TOTAL_REQUIRED_BYTES / 10))
     PEAK_STORAGE_REQ=$((TOTAL_REQUIRED_BYTES + TEMP_OVERHEAD))
 
+    [ -z "$unknown" ] || log_warn "Payload sizes unavailable; estimates exclude:$unknown"
     log_info "Smart Resource Allocation Requirements :"
     log_info "  ├─ Payload Download Req   : [$(human_readable_bytes "$TOTAL_REQUIRED_BYTES")]"
     log_info "  ├─ Reclaimable Storage    : [$(human_readable_bytes "$RECLAIMABLE_BYTES")]"
@@ -116,7 +122,7 @@ estimate_install_size()
         fi
     fi
 
-    log_success "System resource check PASSED!"
+    log_success "Resource check passed for known payload sizes."
     return 0
 }
 
@@ -131,7 +137,7 @@ resource_compare()
     echo
     echo "  🤌🏻 DayPass Deployment Efficiency Summary"
     ui_divider
-    echo "    ├─ Total Downloaded Payload     : $(human_readable_bytes "$TOTAL_REQUIRED_BYTES")"
+    echo "    ├─ Estimated Manifest Payload   : $(human_readable_bytes "$TOTAL_REQUIRED_BYTES")"
     echo "    ├─ Total Network Traffic Saved  : $(human_readable_bytes "$TOTAL_SAVED_BYTES") "
     echo "    ├─ Net Storage Consumed         : $(human_readable_bytes "$USED_FLASH")"
     echo "    └─ Free Storage Remaining       : $(human_readable_bytes "$AFTER_FREE_FLASH")"
@@ -159,12 +165,11 @@ get_total_flash_bytes()
     echo $(( ${total_blocks:-0} * 1024 ))
 }
 
-show_system_resources_menu()
+_render_system_resources()
 {
     render_persistent_header
 
-    # Fetch Architecture
-    [ -z "$ARCH" ] && command -v detect_arch >/dev/null 2>&1 && detect_arch
+    local display_arch="${ARCH:-}"
 
     # Fetch OpenWrt Release & Date Details
     OW_VER="Unknown"
@@ -172,6 +177,7 @@ show_system_resources_menu()
     if [ -f /etc/openwrt_release ]; then
         . /etc/openwrt_release
         OW_VER="${DISTRIB_RELEASE:-Unknown}"
+        display_arch="${display_arch:-${DISTRIB_ARCH:-}}"
         
         if [ -n "$DISTRIB_REVISION" ]; then
             OW_DATE=" ($DISTRIB_REVISION)"
@@ -190,8 +196,8 @@ show_system_resources_menu()
 
     echo "  🖥️ System Hardware & Resource Status"
     ui_divider
-    printf "  🩻 Architecture      : ${CYAN}%s${RESET}\n" "${ARCH:-N/A}"
-    printf "  💡 OpenWrt System    : ${CYAN}%s [%s]${RESET}\n" "$OW_VER" "${PKG_MANAGER:-opkg}"
+    printf "  🩻 Architecture      : ${CYAN}%s${RESET}\n" "${display_arch:-N/A}"
+    printf "  💡 OpenWrt System    : ${CYAN}%s [%s]${RESET}\n" "$OW_VER$OW_DATE" "${PKG_MANAGER:-unknown}"
     ui_divider
     printf "  🧠 Total RAM         : %s\n" "$(human_readable_bytes "$tot_ram_b")"
     printf "     🟠 Used RAM       : ${YELLOW}%s${RESET}\n" "$(human_readable_bytes "$used_ram_b")"
@@ -203,21 +209,28 @@ show_system_resources_menu()
     ui_divider
     echo
 
-    if command -v ui_nav_footer >/dev/null 2>&1; then
-        ui_nav_footer
-    fi
-    printf "  ⁉️ Select option : "
-    read -r res_choice </dev/tty || daypass_quit
-    case "$res_choice" in
-        q|Q) daypass_quit ;;
-        h|H)
-            if command -v show_help >/dev/null 2>&1; then
-                show_help "system"
-                show_system_resources_menu
-            else
-                log_warn "Help module not loaded!"
-                sleep 1
-            fi
-            ;;
-    esac
+}
+
+show_system_resources_menu()
+{
+    while true; do
+        _render_system_resources
+        if command -v ui_nav_footer >/dev/null 2>&1; then
+            ui_nav_footer
+        fi
+        printf "  ⁉️ Select option : "
+        read -r res_choice </dev/tty || daypass_quit
+        case "$res_choice" in
+            q|Q) daypass_quit ;;
+            h|H)
+                if command -v show_help >/dev/null 2>&1; then
+                    show_help "system"
+                else
+                    log_warn "Help module not loaded!"
+                    return 0
+                fi
+                ;;
+            *) return 0 ;;
+        esac
+    done
 }

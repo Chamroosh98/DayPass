@@ -37,6 +37,11 @@ extract_host_port() {
         [ -n "$HOST" ] && [ -n "$PORT" ] && return 0
     fi
 
+    # A rejected Shadowsocks record cannot safely use the generic URI fallback.
+    if command -v parse_share_link >/dev/null 2>&1; then
+        case "$link" in ss://*) return 1 ;; esac
+    fi
+
     # VLESS / Trojan style: protocol://uuid@host:port
     HOST=$(echo "$link" | sed -n 's/.*@\([^:/]*\).*/\1/p' | head -1)
     PORT=$(echo "$link" | sed -n 's/.*@[^:]*:\([0-9]*\).*/\1/p' | head -1)

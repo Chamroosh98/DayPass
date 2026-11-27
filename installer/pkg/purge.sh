@@ -1,11 +1,9 @@
 #!/bin/sh
 # ============================================================
 # Groups tracked packages by config/package_profiles.json, then
-# stops services, removes packages, drops leftover UCI files and
-# flushes the LuCI index cache.
+# removes verified DayPass installations through the native package manager.
 # ============================================================
 
-PURGE_CORE_CONFIGS="network firewall dhcp system wireless luci rpcd uhttpd dropbear fstab ubootenv"
 
 # ------------------------------------------------------------
 _pu_tracked_file() {
@@ -25,69 +23,6 @@ _pu_in_words() {
         [ "$_pu_w" = "$_pu_needle" ] && return 0
     done
     return 1
-}
-
-_pu_union() {
-    _pu_out="$1"
-    shift
-    for _pu_w in $*; do
-        [ -n "$_pu_w" ] || continue
-        _pu_in_words "$_pu_w" "$_pu_out" || _pu_out="${_pu_out:+$_pu_out }$_pu_w"
-    done
-    printf '%s' "$_pu_out"
-}
-
-_pu_is_core_config() {
-    _pu_base="${1##*/}"
-    _pu_in_words "$_pu_base" "$PURGE_CORE_CONFIGS"
-}
-
-# Files owned by a package (needed before the package is deleted).
-_pu_pkg_files() {
-    case "${PKG_MANAGER:-opkg}" in
-        apk)
-            apk info -L "$1" 2>/dev/null
-            ;;
-        *)
-            opkg files "$1" 2>/dev/null
-            ;;
-    esac
-}
-
-# Init scripts shipped by the package, plus a luci-app-* / luci-proto-* name map.
-_pu_discover_services() {
-    _pu_pkg="$1"
-    _pu_pkg_files "$_pu_pkg" | sed -n 's|^/etc/init.d/\([^/]*\)$|\1|p'
-    case "$_pu_pkg" in
-        luci-app-*|luci-proto-*)
-            _pu_svc="${_pu_pkg#luci-app-}"
-            _pu_svc="${_pu_svc#luci-proto-}"
-            [ -x "/etc/init.d/$_pu_svc" ] && echo "$_pu_svc"
-            ;;
-        luci-i18n-*)
-            ;;
-        *)
-            [ -x "/etc/init.d/$_pu_pkg" ] && echo "$_pu_pkg"
-            ;;
-    esac
-}
-
-# UCI files shipped by the package, plus leftover names derived from the pkg.
-_pu_discover_configs() {
-    _pu_pkg="$1"
-    _pu_pkg_files "$_pu_pkg" | sed -n 's|^/etc/config/\([^/]*\)$|/etc/config/\1|p'
-    case "$_pu_pkg" in
-        luci-app-*|luci-proto-*)
-            _pu_cfg="${_pu_pkg#luci-app-}"
-            _pu_cfg="${_pu_cfg#luci-proto-}"
-            echo "/etc/config/$_pu_cfg"
-            ;;
-        luci-i18n-*|kmod-*)
-            ;;
-        *)
-            echo "/etc/config/$_pu_pkg"
-            ;;
-    esac
 }
 
 _pu_profiles_json() {
@@ -167,25 +102,6 @@ _pu_count_words() {
     echo "$_pu_n"
 }
 
-_pu_collect_preview() {
-    PURGE_SERVICES=""
-    PURGE_CONFIGS=""
-    for _pu_pkg in $1; do
-        [ -n "$_pu_pkg" ] || continue
-        for _pu_svc in $(_pu_discover_services "$_pu_pkg"); do
-            [ -x "/etc/init.d/$_pu_svc" ] || continue
-            _pu_in_words "$_pu_svc" "$PURGE_SERVICES" || \
-                PURGE_SERVICES="${PURGE_SERVICES:+$PURGE_SERVICES }$_pu_svc"
-        done
-        for _pu_cfg in $(_pu_discover_configs "$_pu_pkg"); do
-            [ -e "$_pu_cfg" ] || continue
-            _pu_is_core_config "$_pu_cfg" && continue
-            _pu_in_words "$_pu_cfg" "$PURGE_CONFIGS" || \
-                PURGE_CONFIGS="${PURGE_CONFIGS:+$PURGE_CONFIGS }$_pu_cfg"
-        done
-    done
-}
-
 _pu_print_list() {
     _pu_label="$1"
     _pu_items="$2"
@@ -200,7 +116,7 @@ _pu_print_list() {
 }
 
 # ------------------------------------------------------------
-# Deep-clean pipeline for a space-separated package list
+# Remove only proven DayPass installations with no retained module owner.
 # ------------------------------------------------------------
 purge_packages() {
     _pu_targets="$1"
@@ -211,22 +127,56 @@ purge_packages() {
         command -v apk >/dev/null 2>&1 && PKG_MGR="apk"
     }
 
-    _pu_collect_preview "$_pu_targets"
-    if [ -n "${PURGE_MODULE_ID:-}" ] && command -v mf_module_services >/dev/null 2>&1; then
-        PURGE_SERVICES="$(_pu_union "$PURGE_SERVICES" $(mf_module_services "$PURGE_MODULE_ID"))"
-        PURGE_CONFIGS="$(_pu_union "$PURGE_CONFIGS" $(mf_module_configs "$PURGE_MODULE_ID"))"
-    fi
-
-    echo
-    printf "  ${YELLOW}⚠️ The following will be removed${RESET}\n"
+    local pkg id owned owners selected_ids removable="" failed=0
+    selected_ids=$(mf_module_ids) || return 1
+    local members tracked="" retained resources protected resource other
+    for id in $selected_ids; do
+        members=$(mf_module_packages "$id")
+        [ -n "$members" ] || { log_error "Cannot determine package membership for [$id]."; return 1; }
+        tracked="$tracked $members"
+    done
+    for pkg in $_pu_targets; do
+        _pu_in_words "$pkg" "$removable" && continue
+        owners=0
+        owned=0
+        for id in $selected_ids; do
+            _pu_in_words "$pkg" "$(mf_module_packages "$id")" || continue
+            owners=$((owners + 1))
+            if [ -n "${PURGE_MODULE_ID:-}" ] && [ "$PURGE_MODULE_ID" != "$id" ]; then
+                owned=0
+                break
+            fi
+            if _pu_in_words "$pkg" "$(mf_module_owned "$id")"; then owned=1; fi
+        done
+        if [ "$owned" = 1 ] && { [ "$owners" = 1 ] || [ "${2:-}" = all ]; }; then
+            removable="${removable:+$removable }$pkg"
+        else
+            log_warn "Keeping [$pkg]: shared, pre-existing, or ownership unknown."
+            failed=1
+        fi
+    done
+    [ -n "$removable" ] || return 1
+    # Other targets may also remain installed if their removal fails.
+    # Check for known shared resources before making any changes.
+    for pkg in $removable; do
+        retained=""
+        for other in $tracked; do
+            [ "$other" = "$pkg" ] || retained="$retained $other"
+        done
+        [ -n "$retained" ] || continue
+        protected="$(mf_discover_configs "$retained") $(mf_discover_services "$retained")"
+        resources="$(mf_discover_configs "$pkg") $(mf_discover_services "$pkg")"
+        for resource in $resources; do
+            if _pu_in_words "$resource" "$protected"; then
+                log_warn "Keeping packages: another package also uses [$resource]."
+                return 1
+            fi
+        done
+    done
     ui_divider
-    _pu_print_list "Packages" "$_pu_targets"
-    _pu_print_list "Services" "$PURGE_SERVICES"
-    _pu_print_list "UCI configs" "$PURGE_CONFIGS"
+    _pu_print_list "Packages to remove" "$removable"
+    echo "  Package-owned files are handled by the native package manager."
     ui_divider
-    printf "  ${GRAY}LuCI index cache will be flushed and rpcd restarted.${RESET}\n"
-    echo
-
     printf "  ⁉️ Proceed with this purge? [y/N]: "
     read -r _pu_confirm </dev/tty || return 1
     case "$_pu_confirm" in
@@ -237,100 +187,47 @@ purge_packages() {
             ;;
     esac
 
-    echo
-    log_info "── 1/4  Service termination"
-    for _pu_svc in $PURGE_SERVICES; do
-        log_info "Stopping and disabling [$_pu_svc] ..."
-        if [ -x "/etc/init.d/$_pu_svc" ]; then
-            /etc/init.d/"$_pu_svc" stop >/dev/null 2>&1 || true
-            /etc/init.d/"$_pu_svc" disable >/dev/null 2>&1 || true
-        fi
-    done
-    log_success "Service termination finished."
-
-    echo
-    log_info "── 2/4  Package removal ($PKG_MGR)"
-    for _pu_pkg in $_pu_targets; do
-        [ -n "$_pu_pkg" ] || continue
-        log_info "Removing [$_pu_pkg] ..."
+    local remaining simulation
+    for pkg in $removable; do
         case "$PKG_MGR" in
             apk)
-                apk del "$_pu_pkg" >/dev/null 2>&1 || true
-                ;;
-            *)
-                opkg remove --autoremove "$_pu_pkg" >/dev/null 2>&1 \
-                    || opkg remove "$_pu_pkg" >/dev/null 2>&1 \
-                    || true
-                ;;
+                simulation=$(LC_ALL=C apk --simulate del "$pkg") || return 1
+                if ! printf '%s\n' "$simulation" | awk -v pkg="$pkg" '
+                    /^\([0-9]+\/[0-9]+\)/ {if ($2 != "Purging" || $3 != pkg) unsafe=1; count++}
+                    END {exit !(count==1 && !unsafe)}'; then
+                    log_error "Cannot confirm a single-package removal for [$pkg]."
+                    return 1
+                fi
+                apk del "$pkg" ;;
+            opkg) opkg remove "$pkg" ;;
+            *) log_error "Unsupported package manager."; return 1 ;;
+        esac || {
+            log_error "Removal failed for [$pkg]. Tracking retained."
+            failed=1
+            continue
+        }
+        remaining=$(pkg_installed_names) || {
+            log_error "Cannot verify removal of [$pkg]. Tracking retained."
+            return 1
+        }
+        if printf '%s\n' "$remaining" | grep -Fxq -- "$pkg"; then
+            log_error "Package [$pkg] remains installed. Tracking retained."
+            failed=1
+            continue
+        fi
+        case "$pkg" in
+            -*|*[!a-zA-Z0-9.+_-]*) return 1 ;;
         esac
-    done
-    if [ "$PKG_MGR" = "apk" ] && command -v apk >/dev/null 2>&1; then
-        apk autoremove >/dev/null 2>&1 || true
-    fi
-    log_success "Package removal finished."
-
-    echo
-    log_info "── 3/4  Config cleanup"
-    for _pu_cfg in $PURGE_CONFIGS; do
-        _pu_is_core_config "$_pu_cfg" && continue
-        if [ -e "$_pu_cfg" ]; then
-            log_info "Deleting [$_pu_cfg] ..."
-            rm -f "$_pu_cfg" 2>/dev/null || true
-        fi
-    done
-    log_success "Config cleanup finished."
-
-    echo
-    log_info "── 4/4  LuCI cache flush"
-    rm -f /tmp/luci-indexcache* 2>/dev/null || true
-    rm -rf /tmp/luci-modulecache 2>/dev/null || true
-    if [ -x /etc/init.d/rpcd ]; then
-        log_info "Restarting rpcd ..."
-        /etc/init.d/rpcd restart >/dev/null 2>&1 || true
-    fi
-    if [ -x /etc/init.d/uhttpd ]; then
-        /etc/init.d/uhttpd reload >/dev/null 2>&1 || true
-    fi
-    log_success "LuCI menus will refresh on the next page load."
-
-    echo
-    log_success "Purge completed."
-
-    if [ -n "${PURGE_MODULE_ID:-}" ] && command -v mf_unregister_module >/dev/null 2>&1; then
-        _pu_left="$(mf_module_packages "$PURGE_MODULE_ID")"
-        _pu_still=""
-        for _pu_pkg in $_pu_left; do
-            _pu_in_words "$_pu_pkg" "$_pu_targets" && continue
-            _pu_still="${_pu_still:+$_pu_still }$_pu_pkg"
-        done
-        if [ -z "$_pu_still" ]; then
-            mf_unregister_module "$PURGE_MODULE_ID"
+        rm -f "${DAYPASS_DIR:-/etc/daypass}/package-receipts/$pkg" || return 1
+        if [ -n "${PURGE_MODULE_ID:-}" ]; then
+            mf_drop_packages "$PURGE_MODULE_ID" "$pkg" && mf_sync_install_log || return 1
         else
-            mf_drop_packages "$PURGE_MODULE_ID" "$_pu_targets"
+            mf_drop_packages_from_all "$pkg" || return 1
         fi
-        mf_sync_install_log
-        PURGE_MODULE_ID=""
-    elif command -v mf_drop_packages_from_all >/dev/null 2>&1; then
-        mf_drop_packages_from_all "$_pu_targets"
-    else
-        _pu_logf="$(_pu_tracked_file)"
-        if [ -f "$_pu_logf" ]; then
-            _pu_keep=""
-            while IFS= read -r _pu_line || [ -n "$_pu_line" ]; do
-                [ -n "$_pu_line" ] || continue
-                _pu_in_words "$_pu_line" "$_pu_targets" && continue
-                _pu_keep="${_pu_keep:+$_pu_keep
-}$_pu_line"
-            done < "$_pu_logf"
-            if [ -n "$_pu_keep" ]; then
-                printf '%s\n' "$_pu_keep" | sort -u > "$_pu_logf"
-            else
-                rm -f "$_pu_logf"
-            fi
-        fi
-    fi
+    done
+    [ "$failed" -eq 0 ] || return 1
+    log_success "Package purge complete."
 
-    return 0
 }
 
 # ------------------------------------------------------------
@@ -406,15 +303,17 @@ _pu_category_menu() {
             1)
                 PURGE_MODULE_ID="$_pu_id"
                 purge_packages "$_pu_pkgs"
+                _pu_rc=$?
                 PURGE_MODULE_ID=""
-                return 0
+                return "$_pu_rc"
                 ;;
             2)
                 if _pu_pick_packages "$_pu_pkgs"; then
                     PURGE_MODULE_ID="$_pu_id"
                     purge_packages "$PURGE_SELECTION"
+                    _pu_rc=$?
                     PURGE_MODULE_ID=""
-                    return 0
+                    return "$_pu_rc"
                 fi
                 ;;
             0) return 0 ;;
@@ -431,7 +330,9 @@ _pu_category_menu() {
 # Interactive purge (maintenance menu option 1)
 # ------------------------------------------------------------
 purge_menu() {
-    command -v mf_migrate_from_log >/dev/null 2>&1 && mf_migrate_from_log >/dev/null 2>&1 || true
+    if command -v mf_migrate_from_log >/dev/null 2>&1; then
+        mf_migrate_from_log || { log_error "Package registry migration failed."; return 1; }
+    fi
 
     while true; do
         render_persistent_header
@@ -520,11 +421,8 @@ purge_menu() {
         esac
 
         if [ "$UI_CHOICE" -eq "$_pu_all_n" ]; then
-            for _pu_id in $_pu_ids; do
-                PURGE_MODULE_ID="$_pu_id"
-                purge_packages "$(mf_module_packages "$_pu_id")" || true
-            done
             PURGE_MODULE_ID=""
+            purge_packages "$_pu_all" all
             continue
         fi
 

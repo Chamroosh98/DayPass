@@ -81,7 +81,7 @@ config_manager_menu() {
                 fi
                 printf "  ✊🏻 Enter config name to push : "
                 read -r push_name </dev/tty
-                if [ -n "$push_name" ] && command -v transport_push_config >/dev/null 2>&1; then
+                if profile_valid_name "$push_name" && [ ! -L "$CONFIG_DIR/$push_name.json" ] && command -v transport_push_config >/dev/null 2>&1; then
                     transport_push_config "$push_name"
                 else
                     log_error "Invalid name or push function not found!"

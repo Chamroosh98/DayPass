@@ -11,7 +11,7 @@ cleanup_and_exit() {
     fi
 
     stty echo 2>/dev/null
-    rm -rf /tmp/daypass/*.part 2>/dev/null
+    [ -z "${MANIFEST_STAGE:-}" ] || rm -f "$MANIFEST_STAGE"
     
     echo ""
     exit 130
@@ -23,8 +23,6 @@ trap cleanup_and_exit INT TERM
 
 initialize_installer()
 {
-    # Clear lock files for both opkg (OpenWrt <=24) and apk (OpenWrt >=25)
-    rm -f /var/lock/opkg.lock /lib/apk/db/lock /var/run/apk.lock /run/apk/db.lock 2>/dev/null
     
     # 1. Detect package manager (opkg or apk)
     if command -v detect_package_manager >/dev/null 2>&1; then
@@ -33,7 +31,7 @@ initialize_installer()
 
     log_info "Updating package database ..."
     if command -v pkg_update >/dev/null 2>&1; then
-        pkg_update >/dev/null 2>&1 || log_warn "Package index update finished with warnings!"
+        pkg_update >/dev/null 2>&1 || log_warn "Index refresh failed; continuing with cached indexes for menu initialization."
     fi
 
     # 2. Setup temporary workspace
@@ -59,40 +57,9 @@ initialize_installer()
 
     log_info "Downloading architecture manifest from : [$MANIFEST_TARGET_URL]"
     
-    # 4. Download manifest using resilient fallback mechanisms (curl -> wget -> uclient-fetch)
-    DOWNLOAD_SUCCESS=0
-
-    if command -v curl >/dev/null 2>&1; then
-        curl -fsSL "$MANIFEST_TARGET_URL" -o "$MANIFEST_FILE" && DOWNLOAD_SUCCESS=1
-    elif command -v wget >/dev/null 2>&1; then
-        wget -qO "$MANIFEST_FILE" "$MANIFEST_TARGET_URL" && DOWNLOAD_SUCCESS=1
-    elif command -v uclient-fetch >/dev/null 2>&1; then
-        uclient-fetch -q -O "$MANIFEST_FILE" "$MANIFEST_TARGET_URL" && DOWNLOAD_SUCCESS=1
-    else
-        log_error "No network download utility found (curl, wget, or uclient-fetch)!"
-        exit 1
-    fi
-
-    # 5. Verify downloaded file presence and size
-    if [ "$DOWNLOAD_SUCCESS" -ne 1 ] || [ ! -s "$MANIFEST_FILE" ]; then
-        log_error "Failed to download or received empty manifest from : [$MANIFEST_TARGET_URL]"
-        exit 1
-    fi
-
-    # Log downloaded file size for telemetry
-    MANIFEST_SIZE=$(wc -c < "$MANIFEST_FILE" | awk '{print $1}')
-    log_info "Manifest downloaded successfully ($MANIFEST_SIZE bytes)."
-
     # 6. Detect host system target architecture
     if [ -z "${ARCH:-}" ]; then
-        if command -v detect_arch >/dev/null 2>&1; then
-            detect_arch
-        elif [ -f /etc/openwrt_release ]; then
-            . /etc/openwrt_release
-            ARCH="${DISTRIB_ARCH:-}"
-        fi
-        
-        [ -z "$ARCH" ] && ARCH="$(uname -m)"
+        detect_system_architecture || return 1
     fi
 
     if [ -z "$ARCH" ]; then
@@ -102,34 +69,30 @@ initialize_installer()
 
     log_info "Target System Architecture detected : [$ARCH]"
 
-    # 7. Validate JSON syntax integrity
-    if ! command -v jq >/dev/null 2>&1; then
-        log_error "jq parser utility is not available on host system!"
-        exit 1
-    fi
-
-    if ! jq empty "$MANIFEST_FILE" >/dev/null 2>&1; then
-        log_error "Manifest file is corrupted or invalid JSON!"
-        log_warn "JSON Parser Output Error:"
-        jq empty "$MANIFEST_FILE" 2>&1 | head -n 3 | sed 's/^/   └─ /'
-        exit 1
-    fi
-
-    # 8. Extract release metadata for diagnostic logs
-    MANIFEST_REL=$(jq -r '.release // "unknown"' "$MANIFEST_FILE" 2>/dev/null)
-    MANIFEST_GEN=$(jq -r '.generated_at // "unknown"' "$MANIFEST_FILE" 2>/dev/null)
-    log_info "Manifest Metadata -> Release : [$MANIFEST_REL] | Generated At : [$MANIFEST_GEN]"
-
-    # 9. Query architecture support in manifest
-    FOUND_ARCH=$(jq -r --arg arch "$ARCH" '.architectures[]? | select(.name == $arch) | .name' "$MANIFEST_FILE" 2>/dev/null | head -n1)
-
-    if [ -z "$FOUND_ARCH" ] || [ "$FOUND_ARCH" = "null" ]; then
-        log_error "Architecture [$ARCH] is NOT supported in this build manifest!"
-        log_warn "Available architectures in current manifest : "
-        
-        jq -r '.architectures[].name' "$MANIFEST_FILE" 2>/dev/null | sed 's/^/   • /'
-        
-        exit 1
+    command -v jq >/dev/null || { log_error "jq is required"; return 1; }
+    MANIFEST_STAGE=$(mktemp "$TMP_DIR/manifest.XXXXXX") || return 1
+    for client in curl wget uclient-fetch; do
+        command -v "$client" >/dev/null || continue
+        case "$client" in
+            curl) curl -fsSL "$MANIFEST_TARGET_URL" -o "$MANIFEST_STAGE" ;;
+            wget) wget -qO "$MANIFEST_STAGE" "$MANIFEST_TARGET_URL" ;;
+            uclient-fetch) uclient-fetch -q -O "$MANIFEST_STAGE" "$MANIFEST_TARGET_URL" ;;
+        esac || continue
+        if jq -es --arg arch "$ARCH" --arg major "${MANIFEST_PATH#v}" '
+            length == 1 and (.[0] |
+                (.release | tostring | split(".")[0]) == ($major | split("/")[0])
+                and any(.architectures[]; .name == $arch))
+        ' "$MANIFEST_STAGE" >/dev/null 2>&1; then
+            mv "$MANIFEST_STAGE" "$MANIFEST_FILE" || break
+            MANIFEST_STAGE=
+            break
+        fi
+    done
+    if [ -n "$MANIFEST_STAGE" ]; then
+        rm -f "$MANIFEST_STAGE"
+        MANIFEST_STAGE=
+        log_error "Could not fetch a valid manifest for $ARCH from $MANIFEST_TARGET_URL. Check the connection and retry."
+        return 1
     fi
 
     # 10. Success confirmation & environment export

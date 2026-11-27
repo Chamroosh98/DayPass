@@ -52,8 +52,7 @@ dns_engine_label() {
 # Stops engine DNS hijack / tunnel DNS routes
 dns_engine_release() {
     dns_engine_available || return 0
-    dns_engine_configure off >/dev/null 2>&1 || true
-    return 0
+    dns_engine_configure off >/dev/null 2>&1
 }
 
 get_dns_mode() {
@@ -75,7 +74,9 @@ set_dns_mode() {
 dns_restart_dnsmasq() {
     if [ -x /etc/init.d/dnsmasq ]; then
         /etc/init.d/dnsmasq reload >/dev/null 2>&1 || \
-            /etc/init.d/dnsmasq restart >/dev/null 2>&1 || true
+            /etc/init.d/dnsmasq restart >/dev/null 2>&1
+    else
+        return 1
     fi
 }
 
@@ -117,17 +118,21 @@ dns_dnsmasq_forward_only() {
 }
 
 dns_dnsmasq_commit() {
-    uci commit dhcp 2>/dev/null || true
+    uci commit dhcp 2>/dev/null || return $?
     dns_restart_dnsmasq
 }
 
 show_dns_status() {
     local mode upstream
-    mode=$(get_dns_mode)
+    if [ -f "$DNS_MODE_FILE" ]; then
+        mode=$(get_dns_mode) || return 1
+    else
+        mode="unset (default: system)"
+    fi
 
     echo "  🧭 Current DNS Status"
     ui_divider
-    echo "  🫀 Active Mode : ${GREEN}${mode}${RESET}"
+    echo "  🫀 Saved DNS mode : ${GREEN}${mode}${RESET}"
     echo "  🛡️ Engine      : ${CYAN}$(dns_engine_label)${RESET}"
 
     upstream=$(uci -q get dhcp.@dnsmasq[0].server 2>/dev/null | tr '\n' ' ')

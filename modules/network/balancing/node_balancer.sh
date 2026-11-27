@@ -109,6 +109,10 @@ select_nodes() {
         return 1
     fi
 
+    if [ "$rc" -ne 0 ]; then
+        log_error "Could not read node inventory for [$engine] (status $rc)."
+        return "$rc"
+    fi
     if [ -z "$nodes" ]; then
         log_warn "No nodes found in [$(transport_engine_label "$engine")]. Add some nodes first!"
         return 1
@@ -136,8 +140,8 @@ EOF
         return 1
     fi
 
-    : > "$BALANCER_DIR/nodes.list"
-    rm -f "$BALANCER_DIR/last_index"
+    local staged
+    staged=$(mktemp "$BALANCER_DIR/.selection.XXXXXX") || return 1
 
     added=0
     for num in $selected; do
@@ -145,8 +149,8 @@ EOF
         while IFS='|' read -r id name _; do
             [ -n "$id" ] || continue
             if [ "$num" = "$idx" ]; then
-                if ! grep -qxF "$engine|$id" "$BALANCER_DIR/nodes.list"; then
-                    echo "$engine|$id" >> "$BALANCER_DIR/nodes.list"
+                if ! grep -qxF "$engine|$id" "$staged"; then
+                    printf '%s\n' "$engine|$id" >> "$staged" || { rm -f "$staged"; return 1; }
                     log_success "Added : [$name]"
                     added=$((added + 1))
                 fi
@@ -158,8 +162,13 @@ EOF
     done
 
     if [ "$added" -eq 0 ]; then
+        rm -f "$staged"
         log_warn "No valid nodes selected!"
+        return 1
     else
+        [ ! -L "$BALANCER_DIR/nodes.list" ] && [ ! -d "$BALANCER_DIR/nodes.list" ] &&
+            mv "$staged" "$BALANCER_DIR/nodes.list" || { rm -f "$staged"; return 1; }
+        rm -f "$BALANCER_DIR/last_index" || return 1
         log_success "[$added] node(s) selected for balancing!"
     fi
 }
@@ -219,7 +228,7 @@ set_balancer_mode() {
 probe_nodes() {
     local engine="$1"
     local quiet="${2:-0}"
-    local id line name host port l4 total=0 up=0
+    local id line name host port l4 total=0 up=0 unknown=0
 
     : > "$BALANCER_DIR/probe.last"
 
@@ -242,7 +251,10 @@ probe_nodes() {
         transport_probe "$host" "$port" "$l4"
         echo "$id|$PROBE_STATE|$PROBE_MS|$PROBE_METHOD" >> "$BALANCER_DIR/probe.last"
 
-        [ "$PROBE_STATE" = "down" ] || up=$((up + 1))
+        case "$PROBE_STATE" in
+            up) up=$((up + 1)) ;;
+            unknown) unknown=$((unknown + 1)) ;;
+        esac
         if [ "$quiet" != "1" ]; then
             case "$PROBE_STATE" in
                 up)      echo "  ✅ $name  ${GRAY}($host:$port)${RESET}  ${GREEN}${PROBE_MS:-?} ms${RESET} ${GRAY}[$PROBE_METHOD]${RESET}" ;;
@@ -254,7 +266,7 @@ probe_nodes() {
 $(_nb_selected_ids "$engine")
 EOF
 
-    [ "$quiet" = "1" ] || log_info "$up / $total node(s) reachable."
+    [ "$quiet" = "1" ] || log_info "$up / $total node(s) confirmed reachable; $unknown unverified."
     [ "$total" -gt 0 ]
 }
 

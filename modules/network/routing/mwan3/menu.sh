@@ -5,7 +5,7 @@
 
 load_balancer_menu() {
     local HELP_MODULE_ID="network_multiwan"
-    local iface metric list icon padded_iface
+    local iface metric list icon padded_iface rc
 
     while true; do
         render_persistent_header
@@ -13,9 +13,9 @@ load_balancer_menu() {
         
         list=$(mwan_active_ifaces 2>/dev/null)
         if [ -z "$list" ]; then
-            printf "  ${GRAY}  No active WAN interfaces detected.${RESET}\n"
+            printf "  ${GRAY}  No enabled WAN interfaces detected.${RESET}\n"
         else
-            printf "  ${BOLD}${CYAN}📊 Active WAN Overview :${RESET}\n"
+            printf "  ${BOLD}${CYAN}📊 Enabled WAN Overview :${RESET}\n"
             for iface in $list; do
                 metric=$(uci -q get "network.$iface.metric")
                 [ -n "$metric" ] || metric="default"
@@ -43,12 +43,18 @@ load_balancer_menu() {
         c="$UI_CHOICE"
 
         case "$c" in
-            1) install_mwan3_deps || true ;;
-            2) setup_usb_wan 2>/dev/null || log_warn "USB module not loaded." ;;
-            3) wifi_client_menu || log_warn "Wi-Fi WAN module not loaded." ;;
+            1) install_mwan3_deps || { rc=$?; log_error "Multi-WAN dependencies failed ($rc)."; return "$rc"; } ;;
+            2) setup_usb_wan || log_warn "USB WAN setup did not complete." ;;
+            3) wifi_client_menu || log_warn "Wi-Fi WAN menu did not complete." ;;
             4) apply_mwan3_mode "balanced" || true ;;
             5) apply_mwan3_mode "failover" || true ;;
-            6) command -v mwan3 >/dev/null 2>&1 && mwan3 status || log_error "mwan3 not installed!" ;;
+            6)
+                if command -v mwan3 >/dev/null 2>&1; then
+                    mwan3 status || log_error "Could not read mwan3 status."
+                else
+                    log_error "mwan3 not installed!"
+                fi
+                ;;
             7) mwan_metric_menu; continue ;;
             q|Q) daypass_quit ;;
             h|H)

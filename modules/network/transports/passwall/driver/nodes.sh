@@ -117,7 +117,7 @@ _pw_select_node() {
     else
         _pw_set_global_node "$pkg" "$sect"
     fi
-    uci commit "$pkg"
+    uci commit "$pkg" || return $?
     _pw_reload "$pkg"
 }
 
@@ -141,6 +141,7 @@ _pw_push_node() {
         remarks="$PARSED_REMARKS"
         existing=$(_pw_node_id_by_remarks "$pkg" "$remarks") || existing=""
     else
+        case "$share_link" in ss://*) log_error "Incomplete Shadowsocks endpoint."; return 1 ;; esac
         log_warn "Could not read link of [$conf_name]; letting $label name the node."
     fi
 

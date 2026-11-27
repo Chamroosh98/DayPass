@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -65,7 +66,6 @@ func generateInstallScript(outputFile string) error {
 		"installer/init/globals.sh",
 		"ui/lib/styles.sh",
 		"ui/lib/box_utils.sh",
-		"ui/banner.sh",
 		"ui/lib/header.sh",
 		"ui/lib/progress.sh",
 		"ui/lib/help.sh",
@@ -124,7 +124,7 @@ func generateInstallScript(outputFile string) error {
 		"modules/network/dns/modes/tunnel.sh",
 		"modules/network/dns/modes/hybrid.sh",
 		"modules/network/dns/apply.sh",
-		"modules/network/dns/ui/menu.sh",
+		"ui/menu/dns.sh",
 
 		// 6. Network - Guest
 		"modules/network/interfaces/guest/network.sh",
@@ -133,24 +133,24 @@ func generateInstallScript(outputFile string) error {
 		// 7. Proxy - Config Management & Transports
 		"modules/network/profiles/storage.sh",
 		"modules/network/profiles/subscription.sh",
-		
+
 		// Bridge & Common
 		"modules/network/transports/bridge/transport_bridge.sh",
 		"modules/network/transports/common/core_common.sh",
-		
+
 		// Passwall Driver
 		"modules/network/transports/passwall/driver/core.sh",
 		"modules/network/transports/passwall/driver/routing.sh",
 		"modules/network/transports/passwall/driver/nodes.sh",
-		
+
 		// Other Proxy Engines
 		"modules/network/transports/singbox/singbox.sh",
 		"modules/network/transports/xray/xray.sh",
-		
+
 		// Tunnels
-		"modules/network/transports/tunnels/wireguard/wireguard.sh",
-		"modules/network/transports/tunnels/openvpn/openvpn.sh",
-		
+		"modules/network/tunnels/wireguard/wireguard.sh",
+		"modules/network/tunnels/openvpn/openvpn.sh",
+
 		"modules/network/profiles/manager.sh",
 
 		// 8. Proxy - Other Modules
@@ -196,7 +196,6 @@ func generateInstallScript(outputFile string) error {
 
 		// 13. UI Components & Interactive Menus
 		"ui/lib/state.sh",
-		"ui/menu/engine.sh",
 		"ui/lib/review.sh",
 		"ui/menu/packages.sh",
 		"ui/menu/hardware.sh",
@@ -213,8 +212,7 @@ func generateInstallScript(outputFile string) error {
 	for _, file := range installerFiles {
 		data, err := os.ReadFile(file)
 		if err != nil {
-			fmt.Printf("⚠️ Warning : File [%s] not found, skipping ...\n", file)
-			continue
+			return fmt.Errorf("read %s: %w", file, err)
 		}
 
 		scriptBuilder.WriteString(fmt.Sprintf("\n# 📄 Source : %s\n", filepath.Base(file)))
@@ -241,7 +239,7 @@ func generateInstallScript(outputFile string) error {
 		scriptBuilder.WriteString("DAYPASS_PROFILES_JSON\n}\n")
 		fmt.Printf("✅ [%s] embedded!\n", filepath.Base(profilesFile))
 	} else {
-		fmt.Printf("⚠️ Warning : File [%s] not found, skipping ...\n", profilesFile)
+		return fmt.Errorf("read %s: %w", profilesFile, err)
 	}
 
 	catalogFile := "config/package_catalog.json"
@@ -255,7 +253,7 @@ func generateInstallScript(outputFile string) error {
 		scriptBuilder.WriteString("DAYPASS_CATALOG_JSON\n}\n")
 		fmt.Printf("✅ [%s] embedded!\n", filepath.Base(catalogFile))
 	} else {
-		fmt.Printf("⚠️ Warning : File [%s] not found, skipping ...\n", catalogFile)
+		return fmt.Errorf("read %s: %w", catalogFile, err)
 	}
 
 	// Embedded Cloudflare Worker mirror (config/worker.js). The menu tells
@@ -278,7 +276,6 @@ func generateInstallScript(outputFile string) error {
 	scriptBuilder.WriteString("DAYPASS_WORKER_JS\n}\n")
 	fmt.Printf("✅ [%s] embedded!\n", filepath.Base(mirrorFile))
 
-
 	// Cleaned Runtime Execution Pipeline
 	scriptBuilder.WriteString(`
 
@@ -289,22 +286,22 @@ DEPLOYMENT_FAILED=0
 
 # 0. Persistent CLI: install /usr/bin/daypass, or handle update / version / uninstall
 if command -v daypass_cli_dispatch >/dev/null 2>&1; then
-    daypass_cli_dispatch "$@"
+    daypass_cli_dispatch "$@" || exit $?
 fi
 
 # 1. Pre-flight network bootstrap (skipped when a mirror or proxy is already set)
+check_version || exit 1
 network_bootstrap_startup
 
-# 2. Pre-flight connectivity check
-network_check || exit 1
+# Public-host diagnostics remain available from the diagnostics menu.
+# Dependency installs and manifest validation below check the configured sources.
 
 # 3. System environment discovery & version validation
-check_version || exit 1
 detect_system_architecture
 
 # 4. Core dependency initialization => with delay (2 secs) to ensure system stability after installing the dnsmasq-full tool!
-deploy_system_dependencies
-initialize_installer
+deploy_system_dependencies || exit 1
+initialize_installer || exit 1
 
 # 5. Optional Automatic UCI Config Backup
 if command -v backup_configs >/dev/null 2>&1; then
@@ -331,5 +328,7 @@ exit 0
 	if err := os.MkdirAll(filepath.Dir(outputFile), 0755); err != nil {
 		return err
 	}
+	digest := sha256.Sum256([]byte(scriptBuilder.String()))
+	fmt.Fprintf(&scriptBuilder, "# DayPass SHA256: %x\n", digest)
 	return os.WriteFile(outputFile, []byte(scriptBuilder.String()), 0755)
 }

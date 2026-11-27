@@ -3,8 +3,6 @@
 # Detect and initialize the active package manager engine (apk or opkg)
 detect_package_manager()
 {
-    # Clear lock files across all supported OpenWrt releases
-    rm -f /var/lock/opkg.lock /lib/apk/db/lock /var/run/apk.lock /run/apk/db.lock 2>/dev/null
     
     # 1. Identify standard package manager binary
     if command -v apk >/dev/null 2>&1; then
@@ -52,67 +50,32 @@ pkg_ipv4_flag()
     return 1
 }
 
-# Update package index with fallback logic for network/mirror failures
+# Return the manager's exit status, including after the optional IPv4 retry.
+pkg_update_attempt()
+{
+    "$PKG_MANAGER" update "$@" >/dev/null 2>&1 &
+    local pid=$!
+    if command -v ui_spinner >/dev/null 2>&1; then
+        ui_spinner "$pid" "Updating package database ..."
+    else
+        wait "$pid"
+    fi
+}
+
 pkg_update()
 {
-    [ -z "${PKG_MANAGER:-}" ] && detect_package_manager
-
-    log_info "Updating package indexes using [$PKG_MANAGER] ..." 2>/dev/null || echo "[INFO] Updating package indexes..."
-
-    if [ "$PKG_MANAGER" = "apk" ]; then
-        # Standard update first; if IPv6/DNS issues occur, fall back to IPv4
-        (apk update --network-timeout 5 >/dev/null 2>&1) &
-        if command -v ui_spinner >/dev/null 2>&1; then
-            ui_spinner $! "Updating package database ..."
-        else
-            wait $!
-        fi
-        if [ $? -ne 0 ]; then
-            _pf_flag=$(pkg_ipv4_flag apk) || _pf_flag=""
-            if [ -z "$_pf_flag" ]; then
-                log_warn "apk has no IPv4-only option on this build. Proceeding with the local cache ..." 2>/dev/null
-            else
-                log_warn "Standard APK update failed/timed out! Retrying with [$_pf_flag] ..." 2>/dev/null
-                (apk update "$_pf_flag" --network-timeout 5 >/dev/null 2>&1) &
-                if command -v ui_spinner >/dev/null 2>&1; then
-                    ui_spinner $! "Updating package database ..."
-                else
-                    wait $!
-                fi
-                if [ $? -ne 0 ]; then
-                    log_warn "APK update encountered repository warnings. Proceeding with local cache ..." 2>/dev/null
-                else
-                    log_success "APK indexes updated successfully using IPv4 fallback." 2>/dev/null
-                fi
-            fi
-        else
-            log_success "APK package indexes updated successfully." 2>/dev/null
-        fi
-
-    elif [ "$PKG_MANAGER" = "opkg" ]; then
-        (opkg update >/dev/null 2>&1) &
-        if command -v ui_spinner >/dev/null 2>&1; then
-            ui_spinner $! "Updating package database ..."
-        else
-            wait $!
-        fi
-        if [ $? -ne 0 ]; then
-            log_warn "OPKG update failed. Retrying with [--force-ipv4] ..." 2>/dev/null
-            (opkg update --force-ipv4 >/dev/null 2>&1) &
-            if command -v ui_spinner >/dev/null 2>&1; then
-                ui_spinner $! "Updating package database ..."
-            else
-                wait $!
-            fi
-            if [ $? -ne 0 ]; then
-                log_warn "OPKG update encountered minor mirror warnings. Proceeding anyway ..." 2>/dev/null
-            else
-                log_success "OPKG package indexes updated using IPv4." 2>/dev/null
-            fi
-        else
-            log_success "OPKG package indexes updated successfully." 2>/dev/null
-        fi
-    fi
+    local status flag
+    [ -n "${PKG_MANAGER:-}" ] || detect_package_manager
+    case "$PKG_MANAGER" in
+        apk) set -- --network-timeout 5 ;;
+        opkg) set -- ;;
+        *) return 1 ;;
+    esac
+    pkg_update_attempt "$@" && return 0
+    status=$?
+    flag=$(pkg_ipv4_flag "$PKG_MANAGER") || return "$status"
+    log_warn "Index refresh failed; retrying $PKG_MANAGER with $flag."
+    pkg_update_attempt "$flag" "$@"
 }
 
 # Get currently installed version string of a specific package
@@ -133,6 +96,14 @@ pkg_get_installed_version()
     elif [ "$PKG_MANAGER" = "opkg" ]; then
         opkg status "$pkg" 2>/dev/null | awk '/^Version:/ {print $2}'
     fi
+}
+
+pkg_versions_match()
+{
+    [ -n "$1" ] && [ -n "$2" ] || return 1
+    case "$1" in "$2"|"$2"-[0-9]*) return 0 ;; esac
+    case "$2" in "$1"-[0-9]*) return 0 ;; esac
+    return 1
 }
 
 # 0 = a payload download is required, 1 = already installed and current.
@@ -156,13 +127,7 @@ pkg_payload_required()
         ""|null|Latest|N/A) return 1 ;;
     esac
 
-    [ "$_pp_inst" = "$_pp_man" ] && return 1
-    case "$_pp_inst" in
-        "${_pp_man}"-[0-9]*) return 1 ;;
-    esac
-    case "$_pp_man" in
-        "${_pp_inst}"-[0-9]*) return 1 ;;
-    esac
+    pkg_versions_match "$_pp_inst" "$_pp_man" && return 1
     return 0
 }
 
@@ -172,21 +137,33 @@ pkg_installed()
     PACKAGE_NAME="$1"
     [ -z "$PACKAGE_NAME" ] && return 1
 
-    if [ -f /tmp/daypass_pkg_cache ] && grep -qx "$PACKAGE_NAME" /tmp/daypass_pkg_cache 2>/dev/null; then
-        return 0
-    fi
+    [ -n "${PKG_MANAGER:-}" ] || detect_package_manager
+    pkg_installed_live "$PACKAGE_NAME"
+}
 
-    [ -z "${PKG_MANAGER:-}" ] && detect_package_manager
+# A failed inventory must never look like an empty router.
+pkg_installed_names()
+{
+    local listing
+    case "${PKG_MANAGER:-}" in
+        apk) apk info ;;
+        opkg)
+            listing=$(opkg list-installed) || return 1
+            printf '%s\n' "$listing" | awk 'NF {print $1}'
+            ;;
+        *) return 1 ;;
+    esac
+}
 
+pkg_installed_live()
+{
     if [ "$PKG_MANAGER" = "apk" ]; then
-        apk info -e "$PACKAGE_NAME" >/dev/null 2>&1 || return 1
+        apk info -e "$1" >/dev/null 2>&1 || return 1
     elif [ "$PKG_MANAGER" = "opkg" ]; then
-        opkg status "$PACKAGE_NAME" 2>/dev/null | grep -q "Status: .* installed" || return 1
+        opkg status "$1" 2>/dev/null | grep -q "Status: .* installed" || return 1
     else
         return 1
     fi
-    printf '%s\n' "$PACKAGE_NAME" >> /tmp/daypass_pkg_cache
-    return 0
 }
 
 # Record a package that was just installed so later menus skip the package database.
@@ -206,7 +183,17 @@ pkg_install()
     [ -z "$PACKAGE_NAME" ] && return 1
     [ -z "${PKG_MANAGER:-}" ] && detect_package_manager
 
-    if pkg_installed "$PACKAGE_NAME"; then
+    if [ "${2:-}" = repair ]; then
+        # The bootstrap probe already proved this dependency is unusable.
+        # Repair a registered package; install a missing one without consulting the cache.
+        if pkg_installed_live "$PACKAGE_NAME"; then
+            case "$PKG_MANAGER" in
+                apk) apk fix --reinstall "$PACKAGE_NAME" ;;
+                opkg) opkg install --force-reinstall "$PACKAGE_NAME" ;;
+            esac
+            return $?
+        fi
+    elif pkg_installed "$PACKAGE_NAME"; then
         printf '  [✓] %s is already installed. Skipping.\n' "$PACKAGE_NAME"
         return 0
     fi

@@ -119,6 +119,9 @@ jobs:
           find build-artifacts/ -type f -exec ls -lh {} +
           echo "--------------------------------------------------------"
           echo "🚨 Checking for zero-byte or invalid files ..."
+          for required in install.sh manifest.json v24/manifest.json v25/manifest.json config/package_profiles.json help/index.json; do
+            test -s "build-artifacts/$required" || exit 1
+          done
           if find build-artifacts/ -type f -empty | grep -q .; then
             echo "❌ Error : Zero-byte files detected in build-artifacts!"
             find build-artifacts/ -type f -empty
@@ -183,6 +186,9 @@ jobs:
           fi
 
           echo "📤 Uploading assets to GitHub Release ..."
+          for archive in release-files/*.zip; do
+            test -s "$archive.sha256" || exit 1
+          done
           gh release upload "$TAG_NAME" release-files/* --clobber
 
           echo "✅ Pre-release uploaded successfully via GitHub CLI!"

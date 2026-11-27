@@ -13,7 +13,7 @@ mf_dir() {
 }
 
 _mf_init() {
-    mkdir -p "$(dirname "$(mf_path)")" "$(mf_dir)" 2>/dev/null || true
+    mkdir -p "$(dirname "$(mf_path)")" "$(mf_dir)" 2>/dev/null
 }
 
 _mf_safe_id() {
@@ -51,57 +51,44 @@ _mf_kv_get() {
     _mf_file="$1"
     _mf_key="$2"
     [ -f "$_mf_file" ] || return 1
-    sed -n "s/^${_mf_key}=//p" "$_mf_file" 2>/dev/null | head -n 1
-}
-
-_mf_kv_set() {
-    _mf_file="$1"
-    _mf_key="$2"
-    _mf_val="$3"
-    _mf_tmp="${_mf_file}.tmp"
-    mkdir -p "$(dirname "$_mf_file")" 2>/dev/null
-    if [ -f "$_mf_file" ]; then
-        grep -v "^${_mf_key}=" "$_mf_file" > "$_mf_tmp" 2>/dev/null || true
-    else
-        : > "$_mf_tmp"
-    fi
-    printf '%s=%s\n' "$_mf_key" "$_mf_val" >> "$_mf_tmp"
-    mv "$_mf_tmp" "$_mf_file"
+    sed -n "/^${_mf_key}=/{s/^${_mf_key}=//;p;q;}" "$_mf_file"
 }
 
 # Rebuild installed_manifest.json from manifest.d
-mf_export_json() {
-    _mf_init
+mf_export_json() (
+    _mf_init || return 1
     _mf_out="$(mf_path)"
-    _mf_tmp="${_mf_out}.tmp"
+    _mf_tmp=$(mktemp "${_mf_out}.XXXXXX") || exit 1
+    trap 'rm -f "$_mf_tmp"' EXIT
     _mf_first=1
 
-    printf '{\n  "modules": {\n' > "$_mf_tmp"
+    printf '{\n  "modules": {\n' > "$_mf_tmp" || return 1
     for _mf_file in "$(mf_dir)"/*; do
         [ -f "$_mf_file" ] || continue
         _mf_id="${_mf_file##*/}"
         _mf_safe_id "$_mf_id" || continue
-        [ "$_mf_first" -eq 1 ] || printf ',\n' >> "$_mf_tmp"
+        [ "$_mf_first" -eq 1 ] || printf ',\n' >> "$_mf_tmp" || return 1
         _mf_first=0
-        printf '    "%s": {\n' "$(_mf_json_escape "$_mf_id")" >> "$_mf_tmp"
-        printf '      "title": "%s",\n' "$(_mf_json_escape "$(_mf_kv_get "$_mf_file" title)")" >> "$_mf_tmp"
-        printf '      "category": "%s",\n' "$(_mf_json_escape "$(_mf_kv_get "$_mf_file" category)")" >> "$_mf_tmp"
-        printf '      "installed_at": "%s",\n' "$(_mf_json_escape "$(_mf_kv_get "$_mf_file" installed_at)")" >> "$_mf_tmp"
-        printf '      "packages": %s,\n' "$(_mf_json_str_array "$(_mf_kv_get "$_mf_file" packages)")" >> "$_mf_tmp"
-        printf '      "configs": %s,\n' "$(_mf_json_str_array "$(_mf_kv_get "$_mf_file" configs)")" >> "$_mf_tmp"
-        printf '      "services": %s\n' "$(_mf_json_str_array "$(_mf_kv_get "$_mf_file" services)")" >> "$_mf_tmp"
-        printf '    }' >> "$_mf_tmp"
+        printf '    "%s": {\n' "$(_mf_json_escape "$_mf_id")" >> "$_mf_tmp" || return 1
+        printf '      "title": "%s",\n' "$(_mf_json_escape "$(_mf_kv_get "$_mf_file" title)")" >> "$_mf_tmp" || return 1
+        printf '      "category": "%s",\n' "$(_mf_json_escape "$(_mf_kv_get "$_mf_file" category)")" >> "$_mf_tmp" || return 1
+        printf '      "installed_at": "%s",\n' "$(_mf_json_escape "$(_mf_kv_get "$_mf_file" installed_at)")" >> "$_mf_tmp" || return 1
+        printf '      "packages": %s,\n' "$(_mf_json_str_array "$(_mf_kv_get "$_mf_file" packages)")" >> "$_mf_tmp" || return 1
+        printf '      "configs": %s,\n' "$(_mf_json_str_array "$(_mf_kv_get "$_mf_file" configs)")" >> "$_mf_tmp" || return 1
+        printf '      "services": %s\n' "$(_mf_json_str_array "$(_mf_kv_get "$_mf_file" services)")" >> "$_mf_tmp" || return 1
+        printf '    }' >> "$_mf_tmp" || return 1
     done
-    printf '\n  }\n}\n' >> "$_mf_tmp"
+    printf '\n  }\n}\n' >> "$_mf_tmp" || return 1
     mv "$_mf_tmp" "$_mf_out"
-}
+)
 
 mf_module_ids() {
-    _mf_init
+    _mf_init || return 1
     for _mf_file in "$(mf_dir)"/*; do
         [ -f "$_mf_file" ] || continue
         _mf_id="${_mf_file##*/}"
-        _mf_safe_id "$_mf_id" && printf '%s\n' "$_mf_id"
+        _mf_safe_id "$_mf_id" || continue
+        printf '%s\n' "$_mf_id"
     done
 }
 
@@ -112,10 +99,12 @@ mf_has_modules() {
 mf_module_title()    { _mf_kv_get "$(mf_dir)/$1" title; }
 mf_module_category() { _mf_kv_get "$(mf_dir)/$1" category; }
 mf_module_packages() { _mf_kv_get "$(mf_dir)/$1" packages; }
+mf_module_owned()    { _mf_kv_get "$(mf_dir)/$1" owned; }
 mf_module_configs()  { _mf_kv_get "$(mf_dir)/$1" configs; }
 mf_module_services() { _mf_kv_get "$(mf_dir)/$1" services; }
 
 _mf_in_words() {
+    local _mf_w
     _mf_n="$1"
     _mf_h="$2"
     for _mf_w in $_mf_h; do
@@ -228,12 +217,14 @@ mf_register_module() {
     _mf_pkgs="$4"
     _mf_cfgs="$5"
     _mf_svcs="$6"
+    local owned="${7:-}"
 
     _mf_safe_id "$_mf_id" || return 1
-    _mf_init
+    _mf_init || return 1
 
     _mf_file="$(mf_dir)/$_mf_id"
     if [ -f "$_mf_file" ]; then
+        owned="$(_mf_union "$(_mf_kv_get "$_mf_file" owned)" $owned)"
         _mf_pkgs="$(_mf_union "$(_mf_kv_get "$_mf_file" packages)" $_mf_pkgs)"
         [ -z "$_mf_title" ] && _mf_title="$(_mf_kv_get "$_mf_file" title)"
         [ -z "$_mf_cat" ] && _mf_cat="$(_mf_kv_get "$_mf_file" category)"
@@ -246,21 +237,19 @@ mf_register_module() {
     [ -n "$_mf_cfgs" ] || _mf_cfgs="$(mf_discover_configs "$_mf_pkgs")"
     [ -n "$_mf_svcs" ] || _mf_svcs="$(mf_discover_services "$_mf_pkgs")"
 
-    {
-        printf 'title=%s\n' "$_mf_title"
-        printf 'category=%s\n' "$_mf_cat"
-        printf 'installed_at=%s\n' "$(date +%Y-%m-%d 2>/dev/null || echo unknown)"
-        printf 'packages=%s\n' "$_mf_pkgs"
-        printf 'configs=%s\n' "$_mf_cfgs"
-        printf 'services=%s\n' "$_mf_svcs"
-    } > "$_mf_file"
+    local staged
+    staged=$(mktemp "$(mf_dir)/.record.XXXXXX") || return 1
+    printf '%s\n' "title=$_mf_title" "category=$_mf_cat" \
+        "installed_at=$(date +%Y-%m-%d 2>/dev/null || echo unknown)" \
+        "owned=$owned" "packages=$_mf_pkgs" "configs=$_mf_cfgs" "services=$_mf_svcs" \
+        > "$staged" && mv "$staged" "$_mf_file" || { rm -f "$staged"; return 1; }
 
     mf_export_json
 }
 
 mf_unregister_module() {
     _mf_safe_id "$1" || return 1
-    rm -f "$(mf_dir)/$1"
+    rm -f "$(mf_dir)/$1" || return 1
     mf_export_json
 }
 
@@ -272,50 +261,74 @@ mf_drop_packages() {
     [ -f "$_mf_file" ] || return 0
 
     _mf_keep=""
-    for _mf_pkg in $(_mf_kv_get "$_mf_file" packages); do
+    local previous
+    previous=$(_mf_kv_get "$_mf_file" packages) || return 1
+    [ -n "$previous" ] || return 1
+    for _mf_pkg in $previous; do
         _mf_in_words "$_mf_pkg" "$_mf_drop" && continue
         _mf_keep="${_mf_keep:+$_mf_keep }$_mf_pkg"
     done
 
     if [ -z "$_mf_keep" ]; then
         mf_unregister_module "$_mf_id"
-        return 0
+        return $?
     fi
 
-    _mf_kv_set "$_mf_file" packages "$_mf_keep"
-    _mf_kv_set "$_mf_file" configs "$(mf_discover_configs "$_mf_keep")"
-    _mf_kv_set "$_mf_file" services "$(mf_discover_services "$_mf_keep")"
+    local owned="" item
+    for item in $(_mf_kv_get "$_mf_file" owned); do
+        _mf_in_words "$item" "$_mf_keep" && owned="${owned:+$owned }$item"
+    done
+    local staged
+    staged=$(mktemp "$(mf_dir)/.record.XXXXXX") || return 1
+    awk -v owned="$owned" -v packages="$_mf_keep" \
+        -v configs="$(mf_discover_configs "$_mf_keep")" -v services="$(mf_discover_services "$_mf_keep")" '
+        !/^(owned|packages|configs|services)=/ { print }
+        END { print "owned=" owned; print "packages=" packages; print "configs=" configs; print "services=" services }
+    ' "$_mf_file" > "$staged" && mv "$staged" "$_mf_file" || { rm -f "$staged"; return 1; }
     mf_export_json
 }
 
 mf_drop_packages_from_all() {
     for _mf_id in $(mf_module_ids); do
-        mf_drop_packages "$_mf_id" "$1"
+        mf_drop_packages "$_mf_id" "$1" || return 1
     done
     mf_sync_install_log
 }
 
 # Rebuild INSTALL_LOG from every module's package list.
-mf_sync_install_log() {
+mf_sync_install_log() (
     _mf_log="${INSTALL_LOG:-${DAYPASS_DIR:-/etc/daypass}/install.log}"
-    mkdir -p "$(dirname "$_mf_log")" 2>/dev/null
-    : > "$_mf_log"
-    for _mf_id in $(mf_module_ids); do
-        for _mf_pkg in $(mf_module_packages "$_mf_id"); do
-            printf '%s\n' "$_mf_pkg"
+    local ids names staged
+    mkdir -p "$(dirname "$_mf_log")" || return 1
+    staged=$(mktemp "${_mf_log}.XXXXXX") || return 1
+    trap 'rm -f "$staged"' EXIT
+    ids=$(mf_module_ids) || return 1
+    for _mf_id in $ids; do
+        names=$(mf_module_packages "$_mf_id") || return 1
+        for _mf_pkg in $names; do
+            printf '%s\n' "$_mf_pkg" >> "$staged" || return 1
         done
-    done | sort -u > "$_mf_log"
-    [ -s "$_mf_log" ] || rm -f "$_mf_log"
-}
+    done
+    sort -u "$staged" -o "$staged" && mv "$staged" "$_mf_log"
+)
 
 # Seed the registry from a legacy install.log grouped by package profiles.
 mf_migrate_from_log() {
-    mf_has_modules && return 0
+    local known="" missing="" id item
     _mf_log="${INSTALL_LOG:-${DAYPASS_DIR:-/etc/daypass}/install.log}"
-    [ -s "$_mf_log" ] || return 1
+    [ -s "$_mf_log" ] || return 0
 
-    _mf_pkgs=$(sort -u "$_mf_log" | tr '\n' ' ')
-    [ -n "$_mf_pkgs" ] || return 1
+    local legacy remaining ids names
+    legacy=$(sort -u "$_mf_log") || return 1
+    ids=$(mf_module_ids) || return 1
+    for id in $ids; do
+        names=$(mf_module_packages "$id") || return 1
+        known="$known $names"
+    done
+    for item in $legacy; do
+        _mf_in_words "$item" "$known" || missing="$missing $item"
+    done
+    [ -n "$missing" ] || return 0
 
     if command -v load_package_profiles >/dev/null 2>&1 && load_package_profiles \
         && command -v jq >/dev/null 2>&1; then
@@ -333,16 +346,25 @@ mf_migrate_from_log() {
             [.key, (.value.title // .key), ((.value | names) | join(" "))] | @tsv
         ' "$PROFILES_FILE" 2>/dev/null | while IFS="$(printf '\t')" read -r _mf_id _mf_title _mf_names; do
             _mf_hit=""
-            for _mf_pkg in $_mf_pkgs; do
+            for _mf_pkg in $missing; do
                 _mf_in_words "$_mf_pkg" "$_mf_names" && _mf_hit="${_mf_hit:+$_mf_hit }$_mf_pkg"
             done
-            [ -n "$_mf_hit" ] && mf_register_module "$_mf_id" "$_mf_title" "$_mf_title" "$_mf_hit"
-        done
+            [ -n "$_mf_hit" ] || continue
+            mf_register_module "$_mf_id" "$_mf_title" "$_mf_title" "$_mf_hit" || exit 1
+        done || return 1
     fi
 
-    if ! mf_has_modules; then
-        mf_register_module "daypass" "DayPass" "DayPass" "$_mf_pkgs"
-    fi
+    known=""
+    ids=$(mf_module_ids) || return 1
+    for id in $ids; do
+        names=$(mf_module_packages "$id") || return 1
+        known="$known $names"
+    done
+    remaining=""
+    for item in $missing; do
+        _mf_in_words "$item" "$known" || remaining="${remaining:+$remaining }$item"
+    done
+    [ -z "$remaining" ] || mf_register_module daypass DayPass DayPass "$remaining"
 }
 
 # Heading used by the inspection table.
@@ -397,6 +419,6 @@ mf_record_install() {
     _mf_id="$1"
     _mf_pkgs="$2"
     [ -n "$_mf_id" ] && [ -n "$_mf_pkgs" ] || return 1
-    mf_register_module "$_mf_id" "$(mf_title_for "$_mf_id")" "$(mf_category_for "$_mf_id")" "$_mf_pkgs"
+    mf_register_module "$_mf_id" "$(mf_title_for "$_mf_id")" "$(mf_category_for "$_mf_id")" "$_mf_pkgs" "" "" "${3:-}" || return 1
     mf_sync_install_log
 }

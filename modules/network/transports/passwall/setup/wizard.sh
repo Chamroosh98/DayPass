@@ -45,7 +45,7 @@ proxy_install_wizard()
 
     # 3. Deployment Pipeline
     render_persistent_header
-    if deploy_targeted_packages; then
+    if deploy_targeted_packages "$FINAL_PACKAGES" "$SELECTED_PROFILE" "$REVIEW_FEED_PACKAGES"; then
         echo
         log_success "All targeted components deployed successfully!"
 

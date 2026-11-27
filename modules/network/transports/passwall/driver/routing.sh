@@ -66,9 +66,9 @@ _pw_apply_route_mode() {
         *) return 1 ;;
     esac
 
-    uci commit "$pkg"
+    uci commit "$pkg" || return $?
     _pw_reload "$pkg"
-    return 0
+    return $?
 }
 
 _pw_dns_listen_port() {
@@ -109,9 +109,9 @@ _pw_dns_configure() {
     case "$2" in
         off)
             _pw_set "$pkg" "dns_redirect" "0" || true
-            uci commit "$pkg" 2>/dev/null || true
+            uci commit "$pkg" 2>/dev/null || return $?
             _pw_reload "$pkg"
-            return 0
+            return $?
             ;;
         doh)
             _pw_set "$pkg" "enabled" "1" || true
@@ -141,9 +141,9 @@ _pw_dns_configure() {
             ;;
         *) return 3 ;;
     esac
-    uci commit "$pkg" 2>/dev/null || true
+    uci commit "$pkg" 2>/dev/null || return $?
     _pw_reload "$pkg"
-    return 0
+    return $?
 }
 
 # --- Routing Hooks ---

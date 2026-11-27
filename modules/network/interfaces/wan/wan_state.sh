@@ -58,7 +58,7 @@ _ns_json_str() {
     [ -n "$json" ] || return 1
     if command -v jq >/dev/null 2>&1; then
         case "$field" in
-            up)     out=$(printf '%s\n' "$json" | jq -r '.up // empty' 2>/dev/null) ;;
+            up)     out=$(printf '%s\n' "$json" | jq -r 'if (.up | type) == "boolean" then .up else empty end' 2>/dev/null) ;;
             l3)     out=$(printf '%s\n' "$json" | jq -r '.l3_device // empty' 2>/dev/null) ;;
             device) out=$(printf '%s\n' "$json" | jq -r '.device // empty' 2>/dev/null) ;;
             metric) out=$(printf '%s\n' "$json" | jq -r '.metric // empty' 2>/dev/null) ;;
@@ -194,8 +194,10 @@ _ns_render_iface() {
         status_line="${YELLOW}⚠️ DISABLED${RESET}"
     elif [ "$up" = "true" ]; then
         status_line="${GREEN}🟢 UP${RESET}"
-    else
+    elif [ "$up" = "false" ]; then
         status_line="${RED}🔴 DOWN${RESET}"
+    else
+        status_line="Unknown"
     fi
 
     icon=$(_ns_iface_icon "$iface")
@@ -207,7 +209,7 @@ _ns_render_iface() {
     echo "  Status     : $status_line"
     echo "  Metric     : $metric"
     if rmetric=$(_ns_route_metric "$l3") || rmetric=$(_ns_route_metric "$device"); then
-        echo "  Traffic    : ${GREEN}[🚀 Active / Routing Traffic]${RESET}"
+        echo "  Traffic    : ${GREEN}[Default route]${RESET}"
     fi
 }
 
@@ -235,17 +237,13 @@ _ns_render_active() {
     for pair in $_NS_ROUTES; do
         n=$((n + 1))
     done
-    if [ "$n" -ge 2 ]; then
-        balancing=1
-    fi
-
     if [ "$balancing" -eq 1 ]; then
-        echo "  Load balancing is active across:"
-    elif [ "$n" -eq 0 ] && [ -z "$online" ]; then
-        echo "  ${GRAY}No default route.${RESET}"
-        return 0
+        echo "  Balanced policy configured; multiple WANs reported online."
+    fi
+    if [ "$n" -eq 0 ]; then
+        echo "  ${GRAY}No default route reported in the main IPv4 table.${RESET}"
     else
-        echo "  Outbound traffic:"
+        echo "  Main IPv4 default routes:"
     fi
 
     for pair in $_NS_ROUTES; do
@@ -261,7 +259,7 @@ _ns_render_active() {
             iface=""
         done
         [ -n "$iface" ] || iface="$dev"
-        printf "    %s %-12s dev %-8s metric %-4s ${GREEN}[🚀 Active / Routing Traffic]${RESET}\n" \
+        printf "    %s %-12s dev %-8s metric %-4s ${GREEN}[Default route]${RESET}\n" \
             "$(_ns_iface_icon "$iface")" "$iface" "$dev" "$metric"
     done
 

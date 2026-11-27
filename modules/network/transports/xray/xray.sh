@@ -76,7 +76,8 @@ tdrv_xray_direct_dns_configure() {
 
 # id|name|protocol|host|port|l4 (vnext / servers / wireguard peers)
 tdrv_xray_direct_list_nodes() {
-    jq -r '
+    local rows
+    rows=$(jq -r '
         .outbounds[]? | select(.tag != null) | . as $o
         | ( (.settings.vnext[]?   | "\($o.tag)|\($o.tag)|\($o.protocol)|\(.address)|\(.port)|tcp"),
             (.settings.servers[]? | "\($o.tag)|\($o.tag)|\($o.protocol)|\(.address)|\(.port)|tcp"),
@@ -84,7 +85,9 @@ tdrv_xray_direct_list_nodes() {
                 | (.endpoint | tostring) as $ep
                 | ($ep | split(":")) as $p
                 | "\($o.tag)|\($o.tag)|\($o.protocol)|\($p[:-1] | join(":") | ltrimstr("[") | rtrimstr("]"))|\($p[-1])|udp") )
-    ' "$(_xr_conffile)" 2>/dev/null | tr -d '\r'
+    ' "$(_xr_conffile)" 2>/dev/null) || return $?
+    [ -n "$rows" ] || return 0
+    printf '%s\n' "$rows" | tr -d '\r'
 }
 
 # Xray uses the first outbound as the default

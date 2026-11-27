@@ -36,7 +36,7 @@ tool_is_available()
         return 0
     fi
 
-    if [ "$PKG_DB_OK" -eq 1 ] && pkg_installed "$1"; then
+    if [ -z "$probe" ] && [ "$PKG_DB_OK" -eq 1 ] && pkg_installed_live "$1"; then
         TOOL_REASON="present (package database)"
         return 0
     fi
@@ -76,6 +76,117 @@ scan_required_tools()
     echo
 }
 
+# Keep both packages on persistent storage until DNS is running again.
+bootstrap_dnsmasq() (
+    set -e
+    stage="${DAYPASS_DIR:-/etc/daypass}/dns-recovery"
+    mkdir -p "$stage" || return 1
+    cd "$stage" || return 1
+    # Serialize the recovery journal, independently of the native package lock.
+    exec 9>transaction.lock || return 1
+    flock -n 9 || { log_error "DNS recovery needs an available flock lock."; return 1; }
+
+    dns_installed() {
+        case "$PKG_MANAGER" in
+            apk) apk info -e "$1" ;;
+            opkg) opkg status "$1" | grep -q '^Status: .* installed$' ;;
+        esac
+    }
+
+    dns_install() {
+        case "$PKG_MANAGER" in
+            apk) apk add "$1" ;;
+            opkg) opkg install "$1" ;;
+        esac
+    }
+
+    dns_remove() {
+        case "$PKG_MANAGER" in
+            apk) apk del "$1" ;;
+            opkg) opkg remove "$1" ;;
+        esac
+    }
+
+    dns_backup_valid() {
+        backup=$(cat original) || return 1
+        case "$backup" in ./*/*) return 1 ;; ./dnsmasq_*.ipk|./dnsmasq-[0-9]*.apk) ;; *) return 1 ;; esac
+        [ -s "$backup" ] && [ -s original.sha256 ] &&
+            [ "$(sha256sum "$backup")" = "$(cat original.sha256)" ]
+    }
+
+    dns_restore_original() {
+        dns_backup_valid || return 1
+        if dns_installed dnsmasq-full; then dns_remove dnsmasq-full || return 1; fi
+        dns_install "$backup" && dns_installed dnsmasq && /etc/init.d/dnsmasq restart
+    }
+
+    if [ -f pending ]; then
+        grep -Eqx "restore|fresh" pending || return 1
+        if dns_installed dnsmasq-full && /etc/init.d/dnsmasq restart; then
+            rm -f pending
+            return 0
+        fi
+        if grep -qx restore pending; then
+            dns_restore_original || return 1
+        fi
+        rm -f pending
+        log_warn "Recovered the previous DNS configuration. Retry bootstrap."
+        return 1
+    fi
+
+    rm -f original original.sha256 ./*.ipk ./*.apk || return 1
+    packages=dnsmasq-full
+    if dns_installed dnsmasq; then
+        packages="dnsmasq dnsmasq-full"
+        version=$(pkg_get_installed_version dnsmasq)
+        [ -n "$version" ] || return 1
+    fi
+    for pkg in $packages; do
+        case "$PKG_MANAGER" in
+            apk) request="$pkg"; [ "$pkg" != dnsmasq ] || request="dnsmasq=$version"
+                apk fetch "$request" || return 1; set -- "./$pkg"-[0-9]*.apk ;;
+            opkg) opkg download "$pkg" || return 1; set -- "./${pkg}_"*.ipk ;;
+        esac
+        [ "$#" -eq 1 ] && [ -s "$1" ] || return 1
+        if [ "$pkg" = dnsmasq ]; then
+            case "$PKG_MANAGER" in
+                apk)
+                    [ "$1" = "./dnsmasq-$version.apk" ] && apk verify "$1" || return 1 ;;
+                opkg)
+                    case "$1" in "./dnsmasq_${version}_"*.ipk) ;; *) return 1 ;; esac
+                    digest=$(opkg info dnsmasq | awk -v ver="$version" '
+                        BEGIN {RS=""; FS="\n"}
+                        {v=""; h=""; for(i=1;i<=NF;i++) {
+                            if($i ~ /^Version: /) v=substr($i,10)
+                            if($i ~ /^SHA256sum: /) h=substr($i,12)
+                        }; if(v==ver && h!="") {print h; exit}}')
+                    [ -n "$digest" ] && printf '%s  %s\n' "$digest" "$1" | sha256sum -c - || return 1 ;;
+            esac
+            printf '%s\n' "$1" > original && sha256sum "$1" > original.sha256 || return 1
+        else
+            replacement=$1
+        fi
+    done
+    mode=fresh
+    if [ "$packages" != dnsmasq-full ]; then
+        dns_backup_valid && [ -s "$(cat original)" ] || return 1
+        mode=restore
+    fi
+    printf '%s\n' "$mode" > pending.new && mv pending.new pending &&
+        grep -qx "$mode" pending && sync || return 1
+    if [ "$mode" = restore ]; then dns_remove dnsmasq || return 1; fi
+    if dns_install "$replacement" && dns_installed dnsmasq-full && /etc/init.d/dnsmasq restart; then
+        rm -f pending original ./*.ipk ./*.apk
+        return 0
+    fi
+    log_error "DNS installation failed. Restoring the previous package."
+    if [ "$mode" = restore ]; then
+        dns_restore_original || return 1
+    fi
+    rm -f pending
+    return 1
+)
+
 deploy_system_dependencies()
 {
     detect_package_manager
@@ -86,6 +197,10 @@ deploy_system_dependencies()
         else
             OW_MAJOR_VER="24"
         fi
+    fi
+
+    if [ -f "${DAYPASS_DIR:-/etc/daypass}/dns-recovery/pending" ]; then
+        bootstrap_dnsmasq || return 1
     fi
 
     COMMON_DEPS="ca-bundle ca-certificates curl jq "
@@ -103,7 +218,7 @@ deploy_system_dependencies()
     # The package-database helper decides HOW tools are validated : with it we can
     # also recognise packages that ship no binary (ca-bundle, luci-* modules...).
     PKG_DB_OK=0
-    if command -v pkg_installed >/dev/null 2>&1; then
+    if command -v pkg_installed_live >/dev/null 2>&1; then
         PKG_DB_OK=1
     else
         log_warn "Package database helper [pkg_installed] unavailable : validating with binary probes only!"
@@ -114,7 +229,7 @@ deploy_system_dependencies()
 
     DNSMASQ_FULL_MISSING=0
     if [ -f /etc/openwrt_release ] && [ "$PKG_DB_OK" -eq 1 ]; then
-        if ! pkg_installed "dnsmasq-full"; then
+        if ! pkg_installed_live "dnsmasq-full"; then
             DNSMASQ_FULL_MISSING=1
         fi
     fi
@@ -134,20 +249,15 @@ deploy_system_dependencies()
     DEP_LOG="/tmp/daypass_deps_install.log"
     : > "$DEP_LOG" 2>/dev/null || DEP_LOG="/dev/null"
 
-    (pkg_update >/dev/null 2>&1) &
-    BG_PID=$!
-    if command -v ui_spinner >/dev/null 2>&1; then
-        ui_spinner "$BG_PID" "Updating package database ..."
-    elif command -v show_timer_progress >/dev/null 2>&1; then
-        show_timer_progress "$BG_PID" "refreshing package index"
-        wait "$BG_PID"
-    else
-        wait "$BG_PID"
-    fi
+    pkg_update || {
+        local refresh_status=$?
+        log_error "Cannot refresh $PKG_MANAGER indexes for required dependencies."
+        return "$refresh_status"
+    }
 
     if [ -n "$MISSING_PACKAGES" ]; then
         for pkg in $MISSING_PACKAGES; do
-            (pkg_install "$pkg" >> "$DEP_LOG" 2>&1) &
+            (pkg_install "$pkg" repair >> "$DEP_LOG" 2>&1) &
             BG_PID=$!
 
             if command -v ui_spinner >/dev/null 2>&1; then
@@ -178,55 +288,26 @@ deploy_system_dependencies()
         if tool_is_available "$pkg"; then
             log_success "Verified : [$pkg] is ready! ($TOOL_REASON)"
         else
-            probe="$(tool_probe_for "$pkg")"
-            if [ -n "$probe" ]; then
-                VERIFY_FAILED=1
-                UNVERIFIED_TOOLS="$UNVERIFIED_TOOLS $pkg"
-                log_error "Unverified : [$pkg] still has no [$probe] binary! ($TOOL_REASON)"
-            else
-                log_warn "Could not verify [$pkg] (no binary probe) - continuing anyway."
-            fi
+            VERIFY_FAILED=1
+            UNVERIFIED_TOOLS="$UNVERIFIED_TOOLS $pkg"
+            log_error "Required dependency [$pkg] unavailable: $TOOL_REASON"
         fi
     done
 
-    if [ "$DNSMASQ_FULL_MISSING" -eq 1 ]; then
-        log_info "Checking dnsmasq installation status ..."
-        (
-            case "$PKG_MANAGER" in
-                opkg)
-                    opkg remove dnsmasq --force-depends >/dev/null 2>&1 || true
-                    opkg install dnsmasq-full  --force-overwrite >/dev/null 2>&1 || true
-                    ;;
-                apk)
-                    apk del dnsmasq >/dev/null 2>&1 || true
-                    apk add --allow-untrusted dnsmasq-full  >/dev/null 2>&1 || true
-                    ;;
-            esac
-        ) &
-        
-        BG_PID=$!
-        if command -v show_timer_progress >/dev/null 2>&1; then
-            show_timer_progress "$BG_PID" "optimizing DNS engine (dnsmasq-full)"
-        fi
-        wait "$BG_PID"
-        
-        echo "nameserver 8.8.8.8" > /tmp/resolv.conf.auto 2>/dev/null || true
-        /etc/init.d/dnsmasq restart >/dev/null 2>&1 || true
-        /etc/init.d/network reload >/dev/null 2>&1 || true
-        sleep 2
-
-        log_success "dnsmasq-full installed and DNS engine restarted successfully."
-    elif [ "$PKG_DB_OK" -eq 1 ]; then
-        log_success "dnsmasq-full is already present."
-    fi
-
-    # Final verdict : a required tool that still has no binary is a real failure,
-    # not something to report as a success.
     if [ "$VERIFY_FAILED" -eq 1 ]; then
         log_warn "Some required tools could not be verified after installation :${UNVERIFIED_TOOLS}"
         log_warn "DayPass may not work correctly until they are installed."
         return 1
     fi
 
+    if [ "$DNSMASQ_FULL_MISSING" -eq 1 ]; then
+        bootstrap_dnsmasq || return 1
+        log_success "dnsmasq-full installed and DNS service restarted."
+    elif [ "$PKG_DB_OK" -eq 1 ]; then
+        log_success "dnsmasq-full is already present."
+    fi
+
+    # Final verdict : a required tool that still has no binary is a real failure,
+    # not something to report as a success.
     log_success "All system dependencies configured successfully!"
 }

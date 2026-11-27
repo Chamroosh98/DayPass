@@ -67,152 +67,30 @@ _usb_pm() {
     return 1
 }
 
-# Drop a lock only when no package manager process is holding it.
-_usb_clear_pkg_lock() {
-    if pidof opkg >/dev/null 2>&1 || pidof apk >/dev/null 2>&1; then
-        log_warn "A package manager process is already running."
-        return 0
-    fi
-    rm -f /var/lock/opkg.lock /lib/apk/db/lock /var/run/apk.lock /run/apk/db.lock 2>/dev/null
-}
-
-# $1 seconds, then the command. Returns 124 when the deadline passes.
-# Stdin is closed so opkg/apk cannot wait on a prompt. Output goes to the log.
-_usb_run_bounded() {
-    _ub_sec="$1"
-    _ub_n=0
-    _ub_pid=""
-    shift
-
-    : >/tmp/daypass_usb_pkg.log
-    "$@" </dev/null >>/tmp/daypass_usb_pkg.log 2>&1 &
-    _ub_pid=$!
-    while kill -0 "$_ub_pid" 2>/dev/null; do
-        _ub_n=$((_ub_n + 1))
-        if [ "$_ub_n" -ge "$_ub_sec" ]; then
-            kill "$_ub_pid" 2>/dev/null
-            sleep 1
-            kill -9 "$_ub_pid" 2>/dev/null
-            wait "$_ub_pid" 2>/dev/null
-            return 124
-        fi
-        sleep 1
-    done
-    wait "$_ub_pid"
-}
-
-_usb_show_pkg_log() {
-    [ -s /tmp/daypass_usb_pkg.log ] || return 0
-    log_warn "Package manager said:"
-    tail -n 6 /tmp/daypass_usb_pkg.log 2>/dev/null | sed 's/^/    /'
-}
-
+# Run once, in the foreground. The native manager owns its locks and diagnostics.
 _usb_dep_update() {
-    _ub_pm=""
-    _ub_st=1
-
-    _ub_pm=$(_usb_pm) || return 1
-    _usb_clear_pkg_lock
-    log_info "Updating package indexes..."
-
-    case "$_ub_pm" in
-        apk)
-            _usb_run_bounded 40 apk update --no-interactive
-            _ub_st=$?
-            if [ "$_ub_st" -ne 0 ] && [ "$_ub_st" -ne 124 ]; then
-                _ua_flag=""
-                if command -v pkg_ipv4_flag >/dev/null 2>&1; then
-                    _ua_flag=$(pkg_ipv4_flag apk) || _ua_flag=""
-                fi
-                if [ -n "$_ua_flag" ]; then
-                    log_warn "apk update did not finish. Retrying with $_ua_flag."
-                    _usb_run_bounded 40 apk update "$_ua_flag" --no-interactive --network-timeout 15
-                    _ub_st=$?
-                else
-                    log_warn "apk has no IPv4-only option on this build. Not retrying with a forced address family."
-                fi
-            fi
-            ;;
-        opkg)
-            _usb_run_bounded 40 opkg update
-            _ub_st=$?
-            if [ "$_ub_st" -ne 0 ] && [ "$_ub_st" -ne 124 ]; then
-                log_warn "opkg update did not finish. Retrying with --force-ipv4."
-                _usb_run_bounded 40 opkg update --force-ipv4
-                _ub_st=$?
-            fi
-            ;;
-    esac
-
-    if [ "$_ub_st" -eq 124 ]; then
-        log_warn "Package index update timed out. The feed did not answer."
-        _usb_show_pkg_log
-        return 1
-    fi
-    if [ "$_ub_st" -ne 0 ]; then
-        log_warn "Package index update failed. Install will try the local cache."
-        _usb_show_pkg_log
-        return 1
-    fi
+    local pm
+    pm=$(_usb_pm) || return 1
+    log_info "Updating package indexes with $pm ..."
+    "$pm" update </dev/null || return $?
     log_success "Package indexes updated."
-    return 0
 }
 
-# $1 package. Returns 0 on install, 1 when the install failed or timed out.
 _usb_dep_install_one() {
-    _ud_pkg="$1"
-    _ub_pm=""
-    _ub_st=1
-
-    [ -n "$_ud_pkg" ] || return 1
-    if command -v pkg_installed >/dev/null 2>&1 && pkg_installed "$_ud_pkg"; then
-        printf '  ✅ %s is already installed. Skipping.\n' "$_ud_pkg"
+    local pkg="$1" pm
+    [ -n "$pkg" ] || return 1
+    if command -v pkg_installed >/dev/null 2>&1 && pkg_installed "$pkg"; then
         return 0
     fi
-    _ub_pm=$(_usb_pm) || return 1
-    log_info "Installing $_ud_pkg ..."
-
-    case "$_ub_pm" in
-        apk)
-            _usb_run_bounded 90 apk add --no-interactive --no-cache --allow-untrusted "$_ud_pkg"
-            _ub_st=$?
-            if [ "$_ub_st" -ne 0 ] && [ "$_ub_st" -ne 124 ]; then
-                _ua_flag=""
-                if command -v pkg_ipv4_flag >/dev/null 2>&1; then
-                    _ua_flag=$(pkg_ipv4_flag apk) || _ua_flag=""
-                fi
-                if [ -n "$_ua_flag" ]; then
-                    log_warn "apk add failed for $_ud_pkg. Retrying with $_ua_flag."
-                    _usb_run_bounded 90 apk add "$_ua_flag" --no-interactive --no-cache --allow-untrusted --network-timeout 20 "$_ud_pkg"
-                    _ub_st=$?
-                else
-                    log_warn "apk has no IPv4-only option on this build. Not retrying $_ud_pkg with a forced address family."
-                fi
-            fi
-            ;;
-        opkg)
-            _usb_run_bounded 90 opkg install --force-checksum --force-overwrite "$_ud_pkg"
-            _ub_st=$?
-            if [ "$_ub_st" -ne 0 ] && [ "$_ub_st" -ne 124 ]; then
-                log_warn "opkg install failed for $_ud_pkg. Retrying with --force-ipv4."
-                _usb_run_bounded 90 opkg install --force-ipv4 --force-checksum --force-overwrite "$_ud_pkg"
-                _ub_st=$?
-            fi
-            ;;
+    pm=$(_usb_pm) || return 1
+    log_info "Installing $pkg ..."
+    case "$pm" in
+        apk) apk add --no-cache "$pkg" </dev/null || return $? ;;
+        opkg) opkg install "$pkg" </dev/null || return $? ;;
+        *) return 1 ;;
     esac
-
-    if [ "$_ub_st" -eq 124 ]; then
-        log_warn "Timed out installing $_ud_pkg."
-        _usb_show_pkg_log
-        return 1
-    fi
-    if [ "$_ub_st" -ne 0 ]; then
-        log_warn "Could not install $_ud_pkg."
-        _usb_show_pkg_log
-        return 1
-    fi
-    log_success "$_ud_pkg installed."
-    command -v pkg_cache_add >/dev/null 2>&1 && pkg_cache_add "$_ud_pkg"
+    log_success "$pkg installed."
+    command -v pkg_cache_add >/dev/null 2>&1 && pkg_cache_add "$pkg"
     return 0
 }
 
@@ -360,17 +238,16 @@ usb_driver_packages() {
 usb_install_driver_set() {
     _ud_set="$1"
     _ud_list=""
-    _ud_failed=0
 
     usb_driver_packages "$_ud_set" >/dev/null || return 1
     _ud_list=$(_usb_set_missing "$_ud_set")
     [ -n "$_ud_list" ] || return 0
 
-    _usb_dep_update || true
+    _usb_dep_update || return $?
     for _ud_pkg in $_ud_list; do
-        _usb_dep_install_one "$_ud_pkg" || _ud_failed=1
+        _usb_dep_install_one "$_ud_pkg" || return $?
     done
-    [ "$_ud_failed" -eq 0 ]
+    return 0
 }
 
 # $1 set  $2 already-installed sentence  $3 success  $4 warn
@@ -389,57 +266,10 @@ _usb_offer_driver_set() {
         log_success "$_ud_ok"
         log_info "If your phone isn't detected after plugging it in, reboot the router once - newly installed USB kernel modules sometimes don't bind to the port until the next boot."
     else
+        local rc=$?
         log_warn "$_ud_bad"
+        return "$rc"
     fi
-}
-
-_usb_dep_remove_one() {
-    _ud_pkg="$1"
-    _ud_had=0
-
-    if command -v opkg >/dev/null 2>&1 \
-        && opkg list-installed "$_ud_pkg" 2>/dev/null | grep -q "^${_ud_pkg} "; then
-        _ud_had=1
-        opkg remove "$_ud_pkg" >/dev/null 2>&1 || return 1
-    fi
-    if command -v apk >/dev/null 2>&1 && apk info -e "$_ud_pkg" >/dev/null 2>&1; then
-        _ud_had=1
-        apk del "$_ud_pkg" >/dev/null 2>&1 || return 1
-    fi
-    [ "$_ud_had" -eq 0 ] && return 0
-    if command -v opkg >/dev/null 2>&1 \
-        && opkg list-installed "$_ud_pkg" 2>/dev/null | grep -q "^${_ud_pkg} "; then
-        return 1
-    fi
-    if command -v apk >/dev/null 2>&1 && apk info -e "$_ud_pkg" >/dev/null 2>&1; then
-        return 1
-    fi
-    return 0
-}
-
-# Packages DayPass may have installed, plus common tether/modem extras.
-usb_purge_package_list() {
-    printf '%s %s %s %s\n' \
-        "$(usb_driver_packages full 2>/dev/null)" \
-        "kmod-usb-net-ncm kmod-usb-net-cdc-eem kmod-usb-net-cdc-subset" \
-        "libimobiledevice libplist libusbmuxd" \
-        "kmod-usb-serial-option kmod-usb-serial-wwan kmod-usb-wwan"
-}
-
-# Remove Android, iOS, modem, and extra tether packages. Missing names are fine.
-usb_purge_driver_packages() {
-    _ud_failed=0
-    _ud_seen=" "
-    _ud_pkg=""
-
-    for _ud_pkg in $(usb_purge_package_list); do
-        case " $_ud_seen " in
-            *" $_ud_pkg "*) continue ;;
-        esac
-        _ud_seen="$_ud_seen $_ud_pkg "
-        _usb_dep_remove_one "$_ud_pkg" || _ud_failed=1
-    done
-    [ "$_ud_failed" -eq 0 ]
 }
 
 usb_driver_menu() {
@@ -526,10 +356,10 @@ ensure_usb_tether_deps() {
 
     [ -n "$_ud_missing" ] || return 0
 
-    _usb_dep_update || true
+    _usb_dep_update || return $?
 
     for _ud_pkg in $_ud_missing; do
-        _usb_dep_install_one "$_ud_pkg" || _ud_failed=1
+        _usb_dep_install_one "$_ud_pkg" || return $?
     done
 
     for _ud_spec in $USB_TETHER_DEP_MAP; do

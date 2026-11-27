@@ -5,14 +5,23 @@
 
 _wifi_format_band() {
     case "$1" in
-        *5g*|*a*|*ac*|*ax*) printf "5 GHz (802.11 a/ac/ax)" ;;
-        *)                  printf "2.4 GHz (802.11 b/g/n)" ;;
+        2g|11b|11g) printf '2.4 GHz' ;;
+        5g|11a)     printf '5 GHz' ;;
+        6g)         printf '6 GHz' ;;
+        60g|11ad)   printf '60 GHz' ;;
+        *)          printf 'unknown band' ;;
     esac
+}
+
+wifi_clear_scan_files() {
+    case "$1" in /tmp/daypass_wifi.??????) ;; *) return 1 ;; esac
+    rm -f "$1/networks" "$1/networks.raw" "$1/networks.records" "$1/networks.sorted"
+    rmdir "$1"
 }
 
 wifi_client_wizard() {
     local radios idx radio_list r band choice chosen
-    local scan_file="/tmp/daypass_wifi_scan.txt"
+    local scan_dir scan_file _scan_pid
     
     while true; do
         render_persistent_header
@@ -55,14 +64,21 @@ wifi_client_wizard() {
 
     # Scanning Phase
     echo
-    wifi_scan_networks "$chosen" &
+    scan_dir=$(mktemp -d /tmp/daypass_wifi.XXXXXX) || return 1
+    scan_file="$scan_dir/networks"
+    wifi_scan_networks "$chosen" "$scan_file" &
     _scan_pid=$!
     
-    ui_spinner "$_scan_pid" "Scanning Wi-Fi networks on $chosen ..." || true
-    wait "$_scan_pid" 2>/dev/null || true
+    if ! ui_spinner "$_scan_pid" "Scanning Wi-Fi networks on $chosen ..."; then
+        wifi_clear_scan_files "$scan_dir"
+        log_warn "Wi-Fi scan failed on $chosen."
+        ui_pause
+        return 1
+    fi
     
     if [ ! -s "$scan_file" ]; then
-        log_warn "No Wi-Fi networks found nearby or radio is busy."
+        wifi_clear_scan_files "$scan_dir"
+        log_warn "No supported Wi-Fi networks found on $chosen."
         ui_pause
         return 0
     fi
@@ -85,28 +101,29 @@ wifi_client_wizard() {
         net_choice="$UI_CHOICE"
         
         case "$net_choice" in
-            0) rm -f "$scan_file"; return 0 ;;
-            q|Q) rm -f "$scan_file"; daypass_quit ;;
+            0) wifi_clear_scan_files "$scan_dir"; return 0 ;;
+            q|Q) wifi_clear_scan_files "$scan_dir"; daypass_quit ;;
             h|H) ui_show_help "wifi_client"; continue ;;
             ''|*[!0-9]*) log_warn "Invalid selection"; continue ;;
         esac
         
         if [ "$net_choice" -ge 1 ] && [ "$net_choice" -le "$net_count" ]; then
             local selected_line=$(sed -n "${net_choice}p" "$scan_file")
-            target_ssid=$(echo "$selected_line" | cut -d'|' -f1)
-            target_sig=$(echo "$selected_line" | cut -d'|' -f2)
-            target_enc=$(echo "$selected_line" | cut -d'|' -f3)
+            target_ssid=$(printf '%s\n' "$selected_line" | cut -d'|' -f1)
+            target_sig=$(printf '%s\n' "$selected_line" | cut -d'|' -f2)
+            target_enc=$(printf '%s\n' "$selected_line" | cut -d'|' -f3)
             break
         fi
     done
-    rm -f "$scan_file"
+    wifi_clear_scan_files "$scan_dir"
 
     # Password Phase
     local target_pass=""
+    [ -n "$target_ssid" ] || return 1
     if [ "$target_enc" = "psk" ]; then
         while true; do
             printf "\n  🔒 Enter Password for [${YELLOW}%s${RESET}]: " "$target_ssid"
-            read -r target_pass </dev/tty
+            IFS= read -r target_pass </dev/tty || return 1
             
             if [ ${#target_pass} -ge 8 ]; then
                 break
@@ -114,13 +131,16 @@ wifi_client_wizard() {
                 log_error "Password must be at least 8 characters long!"
             fi
         done
-    else
+    elif [ "$target_enc" = "none" ]; then
         log_info "Open network selected. No password required."
+    else
+        log_warn "Unsupported Wi-Fi authentication."
+        return 1
     fi
 
     # Connect
     echo
-    wifi_connect_client "$chosen" "$target_ssid" "$target_enc" "$target_pass"
+    wifi_connect_client "$chosen" "$target_ssid" "$target_enc" "$target_pass" || return $?
     ui_pause
 }
 
@@ -163,7 +183,7 @@ wifi_client_menu() {
         echo
         
         echo "  🔍 1) Scan and Connect to a Wi-Fi Network"
-        echo "  ❌ 2) Disconnect and Remove ALL Wi-Fi Clients"
+        echo "  ❌ 2) Remove DayPass-owned Wi-Fi clients"
         
         ui_nav_footer
         ui_prompt 2
@@ -171,15 +191,10 @@ wifi_client_menu() {
         case "$UI_CHOICE" in
             1) wifi_client_wizard ;;
             2) 
-                for sec in $(uci show wireless 2>/dev/null | grep "=wifi-iface" | cut -d'.' -f2 | cut -d'=' -f1); do
-                    mode=$(uci -q get wireless.$sec.mode)
-                    if [ "$mode" = "sta" ]; then
-                        uci -q delete wireless.$sec
-                    fi
+                for sec in $(uci show wireless | sed -n 's/^wireless\.\(daypass_sta_[a-zA-Z0-9_]*\)=wifi-iface$/\1/p'); do
+                    [ "$(uci -q get "wireless.$sec.daypass_owner")" = wifi_v1 ] || continue
+                    wifi_remove_owned_iface "$sec" sta || { log_error "Client removal incomplete."; break; }
                 done
-                uci commit wireless
-                wifi reload >/dev/null 2>&1
-                log_success "All Wi-Fi Client configurations removed."
                 ui_pause
                 ;;
             0) return 0 ;;

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # 1. Purge Packages Installed by DayPass (selective engine in installer/pkg/purge.sh)
-purge_daypass_packages()
+maintenance_purge_packages()
 {
     if command -v purge_menu >/dev/null 2>&1; then
         purge_menu
@@ -28,6 +28,7 @@ factory_reset_system()
             firstboot -y && reboot
         else
             log_error "Command 'firstboot' not found on this system!"
+            return 1
         fi
     else
         log_info "Factory reset aborted!"
@@ -37,22 +38,26 @@ factory_reset_system()
 # 3. Clean DayPass Temporary Cache
 clean_daypass_cache()
 {
-    log_info "Cleaning DayPass temporary files and package caches ..."
-    rm -rf "${DAYPASS_DIR:?}"/*.apk "${DAYPASS_DIR:?}"/*.ipk "${DAYPASS_DIR:?}"/*.part 2>/dev/null
-    log_success "Cache cleaned successfully!"
+    # Deployers clean their own workspaces; remaining files can be recovery evidence.
+    log_info "Downloads are cleaned by each transaction. No separately owned cache files to remove."
 }
 
 # 4. Backup System Configuration
 backup_system_config()
-{
-    BACKUP_FILE="/tmp/backup-$(date +%Y%m%d_%H%M%S).tar.gz"
+(
+    umask 077
+    local dir
+    dir=$(mktemp -d /tmp/daypass-system-backup.XXXXXX) || return 1
     log_info "Generating OpenWrt system configuration backup ..."
-    if sysupgrade -b "$BACKUP_FILE" >/dev/null 2>&1; then
-        log_success "Backup saved to : [$BACKUP_FILE]"
+    if sysupgrade -b "$dir/archive.part" && gzip -t "$dir/archive.part" &&
+        tar -tzf "$dir/archive.part" >/dev/null && mv "$dir/archive.part" "$dir/backup.tar.gz"; then
+        log_success "Backup saved to : [$dir/backup.tar.gz]"
     else
+        rm -rf "$dir"
         log_error "Failed to generate system backup!"
+        return 1
     fi
-}
+)
 
 # Maintenance Sub-Menu
 maintenance_menu()
@@ -65,7 +70,7 @@ maintenance_menu()
         printf "  🛠️ ${BOLD}DayPass Maintenance & Recovery${RESET}\n"
         ui_divider
         printf "  🧹 1) Purge DayPass Installed Packages\n"
-        printf "  🗑️ 2) Clean Temporary Cache & Downloads\n"
+        printf "  🗑️ 2) Temporary Download Cleanup Status\n"
         printf "  💾 3) Backup System Configuration\n"
         printf "  🚨 4) Factory Reset OpenWrt (Firstboot)\n"
         printf "  🪧 5) SSH Login Banner (install / restore)\n"
@@ -74,7 +79,7 @@ maintenance_menu()
         choice="$UI_CHOICE"
 
         case "$choice" in
-            1) purge_daypass_packages ;;
+            1) maintenance_purge_packages ;;
             2) clean_daypass_cache ;;
             3) backup_system_config ;;
             4) factory_reset_system ;;

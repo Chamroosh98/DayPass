@@ -438,9 +438,9 @@ show_routing_status() {
 
     if [ -f "$ROUTING_DIR/current_mode" ]; then
         mode=$(cat "$ROUTING_DIR/current_mode")
-        echo "  🫀 Active Mode : ${GREEN}$mode${RESET}"
+        echo "  🫀 Saved routing mode : ${GREEN}$mode${RESET}"
     else
-        echo "  🫀 Active Mode : ${GRAY}Not configured${RESET}"
+        echo "  🫀 Saved routing mode : ${GRAY}Not configured${RESET}"
     fi
 
     engine=$(get_active_engine)

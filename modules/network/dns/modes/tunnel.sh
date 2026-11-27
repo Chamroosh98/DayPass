@@ -24,7 +24,7 @@ apply_dns_tunnel() {
     fi
 
     dns_dnsmasq_forward_only "$endpoint"
-    dns_dnsmasq_commit
+    dns_dnsmasq_commit || return $?
 
     log_info "dnsmasq forwards to $label ($endpoint); LAN DNS goes through the tunnel."
     return 0

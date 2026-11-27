@@ -11,15 +11,13 @@ _banner_row()
 
 show_banner()
 {
-    VERSION="${DAYPASS_VERSION}"
-
     printf '\n'
 
     _banner_row '   ____              ' ' ____               '
     _banner_row '  |  _ \  __ _ _   _ ' '|  _ \  __ _ ___ ___'
     _banner_row '  | | | |/ _` | | | |' '| |_) / _` / __/ __|'
     _banner_row '  | |_| | (_| | |_| |' '|  __/ (_| \__ \__ \'
-    _banner_row '  |____/ \__,_|\__, |' '|_|   \__,_|___/___/' "${GRAY} ${VERSION}${RESET}"
+    _banner_row '  |____/ \__,_|\__, |' '|_|   \__,_|___/___/' "${GRAY} ${DAYPASS_VERSION}${RESET}"
     _banner_row '               |___/ ' ''
 
     printf '%s%s%s\n' "$GRAY" \

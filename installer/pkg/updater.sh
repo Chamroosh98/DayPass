@@ -20,6 +20,8 @@ inspect_and_confirm_updates()
     ui_divider
 
     PACKAGES_TO_PROCESS=""
+    UPDATE_FEEDS=""
+    UPDATE_PATCHES=""
     UPGRADE_COUNT=0
     INSTALL_COUNT=0
     SKIP_COUNT=0
@@ -37,24 +39,54 @@ inspect_and_confirm_updates()
         
         [ -z "$manif_ver" ] || [ "$manif_ver" = "null" ] && manif_ver="N/A"
 
-        ACTION_STR=""
+        ACTION_STR="[Version unknown]"
         
-        if [ "$inst_ver" = "None" ]; then
+        receipt=$(pkg_receipt "$pkg" 2>/dev/null)
+        if [ "$receipt" = feed ] || { [ -z "$receipt" ] && [ -z "$(manifest_lookup file "$pkg")" ]; }; then
+            ACTION_STR="[Source unavailable]"
+            if pkg_feed_available "$pkg"; then
+                ACTION_STR="[Feed current]"
+                if [ "$inst_ver" = None ]; then
+                    ACTION_STR="[Feed install]"
+                else
+                    case "$PKG_MANAGER" in
+                        opkg) listing=$(opkg list-upgradable) && listing=$(printf '%s\n' "$listing" | awk -v n="$pkg" '$1==n') ;;
+                        apk) listing=$(apk list -u "$pkg") ;;
+                    esac || { log_error "Cannot inspect feed updates for [$pkg]."; return 1; }
+                    [ -z "$listing" ] || ACTION_STR="[Feed upgrade]"
+                fi
+                case "$ACTION_STR" in
+                    "[Feed install]"|"[Feed upgrade]")
+                        UPDATE_FEEDS="$UPDATE_FEEDS $pkg"
+                        PACKAGES_TO_PROCESS="$PACKAGES_TO_PROCESS $pkg"
+                        if [ "$inst_ver" = None ]; then INSTALL_COUNT=$((INSTALL_COUNT + 1)); else UPGRADE_COUNT=$((UPGRADE_COUNT + 1)); fi ;;
+                    *) SKIP_COUNT=$((SKIP_COUNT + 1)) ;;
+                esac
+            else
+                SKIP_COUNT=$((SKIP_COUNT + 1))
+            fi
+        elif [ -z "$(manifest_lookup file "$pkg")" ]; then
+            ACTION_STR="[Manifest unavailable]"
+            SKIP_COUNT=$((SKIP_COUNT + 1))
+        elif [ "$inst_ver" = "None" ]; then
             ACTION_STR="${GREEN}[➕ Install]${RESET}"
             INSTALL_COUNT=$((INSTALL_COUNT + 1))
             PACKAGES_TO_PROCESS="$PACKAGES_TO_PROCESS $pkg"
-        elif [ "$manif_ver" != "N/A" ] && [ "$manif_ver" != "Latest" ] && [ "$inst_ver" != "$manif_ver" ]; then
+        elif [ "$manif_ver" != "N/A" ] && [ "$manif_ver" != "Latest" ] && ! pkg_versions_match "$inst_ver" "$manif_ver"; then
             ACTION_STR="${YELLOW}[🔄 Upgrade]${RESET}"
             UPGRADE_COUNT=$((UPGRADE_COUNT + 1))
             PACKAGES_TO_PROCESS="$PACKAGES_TO_PROCESS $pkg"
-        elif [ "$manif_ver" = "Latest" ] || [ "$inst_ver" = "$manif_ver" ]; then
+        else
+            manif_hash=$(printf %s "$manif_hash" | tr A-F a-f)
             inst_hash=$(pkg_get_installed_hash "$pkg" 2>/dev/null)
             if [ -n "$manif_hash" ] && [ "$manif_hash" != "null" ] && [ -n "$inst_hash" ] && [ "$inst_hash" != "$manif_hash" ]; then
+                UPDATE_PATCHES="$UPDATE_PATCHES $pkg"
                 ACTION_STR="${ORANGE}[🩹 Patch]${RESET}"
                 UPGRADE_COUNT=$((UPGRADE_COUNT + 1))
                 PACKAGES_TO_PROCESS="$PACKAGES_TO_PROCESS $pkg"
             else
-                ACTION_STR="${GREEN}[✅ Up-to-date]${RESET}"
+                ACTION_STR="[Digest unknown]"
+                [ -z "$inst_hash" ] || [ -z "$manif_hash" ] || ACTION_STR="[Current]"
                 SKIP_COUNT=$((SKIP_COUNT + 1))
             fi
         fi
@@ -72,23 +104,17 @@ inspect_and_confirm_updates()
     echo
 
     if [ -z "$PACKAGES_TO_PROCESS" ]; then
-        log_success "All packages are up-to-date! No changes required!"
+        log_success "No actionable package updates. See individual results above."
         return 2
     fi
 
     printf "  ⁉️ Do you want to proceed with deployment? [Y/n] : "
-    read -r user_confirm </dev/tty
+    read -r user_confirm </dev/tty || return 3
     echo
 
     case "$user_confirm" in
-        [nN][oO]|[nN])
-            log_warn "Update cancelled by user!"
-            return 3
-            ;;
-        *)
-            log_info "User confirmed. Proceeding with updates ..."
-            echo
-            ;;
+        ""|[yY]|[yY][eE][sS]) log_info "User confirmed. Proceeding with updates ..." ;;
+        *) log_warn "Update cancelled."; return 3 ;;
     esac
 
     export PACKAGES_TO_PROCESS
@@ -98,10 +124,12 @@ inspect_and_confirm_updates()
 
 update_packages_menu()
 {
+    local UPDATE_FEEDS="" UPDATE_PATCHES="" FINAL_PACKAGES="" PACKAGES_TO_PROCESS=""
+    local INSPECT_MODULE_ID="" INSPECT_MODULE_TITLE="" INSPECT_MODULE_CATEGORY=""
     render_persistent_header
 
     if command -v mf_migrate_from_log >/dev/null 2>&1; then
-        mf_migrate_from_log >/dev/null 2>&1 || true
+        mf_migrate_from_log || { log_error "Package registry migration failed."; return 1; }
     fi
 
     if command -v mf_has_modules >/dev/null 2>&1 && mf_has_modules; then
@@ -160,7 +188,7 @@ update_packages_menu()
         log_warn "No installed packages log found. Please install DayPass packages first!"
         echo
         printf "  ${GRAY}Press [ENTER] to go back ...${RESET}"
-        read -r _ </dev/tty || daypass_quit
+        read -r _ </dev/tty || :
         return 1
     fi
 
@@ -169,19 +197,23 @@ update_packages_menu()
 
     if [ "$INSPECT_STATUS" -eq 2 ] || [ "$INSPECT_STATUS" -eq 3 ]; then
         printf "  ${GRAY}Press [ENTER] to go back ...${RESET}"
-        read -r _ </dev/tty || daypass_quit
+        read -r _ </dev/tty || :
         return 0
     fi
 
-    if deploy_targeted_packages; then
+    [ "$INSPECT_STATUS" -eq 0 ] || return "$INSPECT_STATUS"
+    local deploy_status=0
+    if deploy_targeted_packages "$PACKAGES_TO_PROCESS" "$INSPECT_MODULE_ID" "$UPDATE_FEEDS" "$UPDATE_PATCHES" update; then
         echo
         log_success "All packages updated successfully!"
     else
+        deploy_status=$?
         echo
         log_error "Update process failed!"
     fi
 
     echo
     printf "  ${GRAY}Press [ENTER] to go back ...${RESET}"
-    read -r _ </dev/tty || daypass_quit
+    read -r _ </dev/tty || :
+    return "$deploy_status"
 }

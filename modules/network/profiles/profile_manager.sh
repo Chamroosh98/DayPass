@@ -16,21 +16,22 @@ mkdir -p "$ROUTING_DIR"
 # Show current active profile
 
 show_active_profile() {
-    echo "  🎭 Current Active Profile"
+    local active mode
+    echo "  🎭 Saved Profile"
     ui_divider
 
     if [ -f "$PROFILE_DIR/active" ]; then
         active=$(cat "$PROFILE_DIR/active")
-        echo "  🫀 Active Profile : ${GREEN}$active${RESET}"
+        echo "  🫀 Saved profile : ${GREEN}$active${RESET}"
     else
-        echo "  🫀 Active Profile : ${GRAY}None${RESET}"
+        echo "  🫀 Saved profile : ${GRAY}None${RESET}"
     fi
 
     if [ -f "$ROUTING_DIR/current_mode" ]; then
         mode=$(cat "$ROUTING_DIR/current_mode")
-        echo "  🚦 Routing Mode   : ${CYAN}$mode${RESET}"
+        echo "  🚦 Saved routing mode : ${CYAN}$mode${RESET}"
     else
-        echo "  🚦 Routing Mode   : ${GRAY}Not set${RESET}"
+        echo "  🚦 Saved routing mode : ${GRAY}Not set${RESET}"
     fi
 
     ui_divider
@@ -54,85 +55,21 @@ list_profiles() {
 # Apply a profile (calls real routing functions when possible)
 
 apply_profile() {
-    local profile="$1"
-
+    local profile="$1" action tmp
     case "$profile" in
-        balanced)
-            echo "balanced" > "$PROFILE_DIR/active"
-
-            if command -v apply_iran_direct >/dev/null 2>&1; then
-                apply_iran_direct
-            else
-                echo "iran_direct" > "$ROUTING_DIR/current_mode"
-                log_warn "Routing module not fully loaded. Mode saved locally."
-            fi
-
-            log_success "Profile [⚖️ Balanced] applied!"
-            log_info "Iranian sites → Direct | Foreign sites → Proxy"
-            ;;
-
-        gaming)
-            echo "gaming" > "$PROFILE_DIR/active"
-
-            # Gaming currently uses Iran Direct as base
-            if command -v apply_iran_direct >/dev/null 2>&1; then
-                apply_iran_direct
-            else
-                echo "iran_direct" > "$ROUTING_DIR/current_mode"
-                log_warn "Routing module not fully loaded. Mode saved locally."
-            fi
-
-            log_success "Profile [🕹️ Gaming] applied!"
-            log_info "Optimized for lower latency and stability."
-            ;;
-
-        streaming)
-            echo "streaming" > "$PROFILE_DIR/active"
-
-            if command -v apply_iran_direct >/dev/null 2>&1; then
-                apply_iran_direct
-            else
-                echo "iran_direct" > "$ROUTING_DIR/current_mode"
-                log_warn "Routing module not fully loaded. Mode saved locally."
-            fi
-
-            log_success "Profile [📺 Streaming] applied!"
-            log_info "Optimized for YouTube / Netflix style traffic."
-            ;;
-
-        global)
-            echo "global" > "$PROFILE_DIR/active"
-
-            if command -v apply_global_proxy >/dev/null 2>&1; then
-                apply_global_proxy
-            else
-                echo "global_proxy" > "$ROUTING_DIR/current_mode"
-                log_warn "Routing module not fully loaded. Mode saved locally."
-            fi
-
-            log_success "Profile [🌎 Global Proxy] applied!"
-            log_info "All traffic will go through proxy."
-            ;;
-
-        direct)
-            echo "direct" > "$PROFILE_DIR/active"
-
-            if command -v apply_direct_only >/dev/null 2>&1; then
-                apply_direct_only
-            else
-                echo "direct_only" > "$ROUTING_DIR/current_mode"
-                log_warn "Routing module not fully loaded. Mode saved locally."
-            fi
-
-            log_success "Profile [🎯 Direct Only] applied!"
-            log_info "Proxy disabled. All traffic is direct."
-            ;;
-
-        *)
-            log_error "Unknown profile!"
-            return 1
-            ;;
+        balanced|gaming|streaming) action=apply_iran_direct ;;
+        global) action=apply_global_proxy ;;
+        direct) action=apply_direct_only ;;
+        *) log_error "Unknown profile."; return 1 ;;
     esac
+    command -v "$action" >/dev/null || { log_error "Routing module unavailable."; return 1; }
+    [ ! -L "$PROFILE_DIR/active" ] && [ ! -d "$PROFILE_DIR/active" ] || return 1
+    tmp=$(mktemp "$PROFILE_DIR/.active.XXXXXX") || return 1
+    printf '%s\n' "$profile" > "$tmp" && "$action" ||
+        { local rc=$?; rm -f "$tmp"; return "$rc"; }
+    mv "$tmp" "$PROFILE_DIR/active" || { rm -f "$tmp"; return 1; }
+    log_success "Profile [$profile] applied."
+
 }
 
 

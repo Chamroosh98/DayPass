@@ -9,6 +9,7 @@ guest_menu() {
         render_persistent_header
 
         ui_title "👥 Guest Network Management"
+        echo "  Guest network and QoS changes are blocked pending isolation and ownership checks."
         echo "  🍚 1) Setup Guest Network (Interface + Firewall)"
         echo "  🛜 2) Setup Guest WiFi"
         echo "  🛣️ 3) Bandwidth Control (QoS / SQM)"

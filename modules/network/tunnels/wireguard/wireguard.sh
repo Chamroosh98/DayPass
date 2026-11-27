@@ -111,24 +111,27 @@ tdrv_wireguard_active_node() {
 # Enables the chosen endpoint peer and disables the other endpoint peers of the interface
 tdrv_wireguard_select_node() {
     local target="$1"
-    local net sect found=0
+    local net sect peers endpoints=""
     net=$(_wg_network) || return 1
-
-    for sect in $(_wg_peers "$net"); do
-        [ -n "$(uci -q get "network.$sect.endpoint_host")" ] || continue
+    peers=$(_wg_peers "$net") || return 1
+    for sect in $peers; do
+        [ -n "$(uci -q get "network.$sect.endpoint_host")" ] && endpoints="$endpoints $sect"
+    done
+    local matched=0
+    for sect in $endpoints; do
+        [ "$sect" = "$target" ] && matched=1
+    done
+    [ "$matched" = 1 ] || return 1
+    for sect in $endpoints; do
         if [ "$sect" = "$target" ]; then
-            uci -q delete "network.$sect.disabled"
-            found=1
+            if uci -q get "network.$sect.disabled" >/dev/null; then
+                uci -q delete "network.$sect.disabled" || return 1
+            fi
         else
-            uci set "network.$sect.disabled=1"
+            uci set "network.$sect.disabled=1" || return 1
         fi
     done
 
-    if [ "$found" -eq 0 ]; then
-        uci revert network 2>/dev/null
-        return 1
-    fi
-
-    uci commit network
+    uci commit network || return 1
     ifup "$net" >/dev/null 2>&1
 }

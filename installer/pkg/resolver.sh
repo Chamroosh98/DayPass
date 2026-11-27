@@ -129,45 +129,27 @@ _pr_detect_environment()
         fi
     fi
 
-    if [ -z "${OPENWRT_MAJOR:-}" ] && [ -f /etc/openwrt_release ]; then
-        OPENWRT_MAJOR="$(
+    if [ -f /etc/openwrt_release ]; then
+        local detected_major
+        detected_major="$(
             . /etc/openwrt_release 2>/dev/null
             echo "$DISTRIB_RELEASE" | cut -d'.' -f1
         )"
-    fi
-
-    case "${OPENWRT_MAJOR:-}" in
-        ''|*[!0-9]*)
-            case "${PKG_MANAGER:-}" in
-                apk)  OPENWRT_MAJOR="25" ;;
-                opkg) OPENWRT_MAJOR="24" ;;
-                *)
-                    _pr_log ERROR "Unable to detect the OpenWrt release or package manager (opkg/apk)!"
-                    return 1
-                    ;;
-            esac
-            ;;
-    esac
-
-    PROFILE_RELEASE="$OPENWRT_MAJOR"
-    if ! jq -e --arg r "$PROFILE_RELEASE" '.releases[$r]' "$PROFILES_FILE" >/dev/null 2>&1; then
-        case "${PKG_MANAGER:-}" in
-            apk)  PROFILE_RELEASE="25" ;;
-            opkg) PROFILE_RELEASE="24" ;;
-        esac
-        if ! jq -e --arg r "$PROFILE_RELEASE" '.releases[$r]' "$PROFILES_FILE" >/dev/null 2>&1; then
-            _pr_log ERROR "OpenWrt release [$OPENWRT_MAJOR] has no package profile definition!"
+        if [ -n "${OPENWRT_MAJOR:-}" ] && [ "$detected_major" != "$OPENWRT_MAJOR" ]; then
+            _pr_log ERROR "Configured OpenWrt release conflicts with the device release."
             return 1
         fi
-        _pr_log WARN "OpenWrt [$OPENWRT_MAJOR] is not listed; using the [$PROFILE_RELEASE.x] package set for [$PKG_MANAGER]."
+        OPENWRT_MAJOR="$detected_major"
     fi
 
-    _pr_expected_pm="$(jq -r --arg r "$PROFILE_RELEASE" '.releases[$r].package_manager // empty' "$PROFILES_FILE" 2>/dev/null)"
-    if [ -z "${PKG_MANAGER:-}" ]; then
-        PKG_MANAGER="$_pr_expected_pm"
-    elif [ -n "$_pr_expected_pm" ] && [ "$_pr_expected_pm" != "$PKG_MANAGER" ]; then
-        _pr_log WARN "OpenWrt [$PROFILE_RELEASE.x] normally uses [$_pr_expected_pm], but [$PKG_MANAGER] was detected."
-    fi
+    PROFILE_RELEASE="${OPENWRT_MAJOR:-}"
+    case "$PROFILE_RELEASE:$PKG_MANAGER" in
+        24:opkg|25:apk) ;;
+        *) _pr_log ERROR "Unsupported OpenWrt/package manager pair [$PROFILE_RELEASE/$PKG_MANAGER]."; return 1 ;;
+    esac
+    command -v "$PKG_MANAGER" >/dev/null 2>&1 &&
+        jq -e --arg r "$PROFILE_RELEASE" --arg pm "$PKG_MANAGER" \
+            '.releases[$r].package_manager == $pm' "$PROFILES_FILE" >/dev/null || return 1
 
     _PR_ARCH="${ARCH:-}"
     if [ -z "$_PR_ARCH" ] && [ -f /etc/openwrt_release ]; then
@@ -177,8 +159,16 @@ _pr_detect_environment()
         )"
     fi
 
+    [ -n "$_PR_ARCH" ] || return 1
     export PKG_MANAGER OPENWRT_MAJOR PROFILE_RELEASE
     return 0
+}
+
+_pr_valid_manifest()
+{
+    jq -es --arg arch "$_PR_ARCH" --arg major "$PROFILE_RELEASE" '
+        length == 1 and (.[0] | (.release | tostring | split(".")[0]) == $major
+            and any(.architectures[]; .name == $arch))' "$1" >/dev/null 2>&1
 }
 
 # Sets _PR_MANIFEST to a readable manifest; with "download" it may fetch one from REPO_URL
@@ -186,7 +176,7 @@ _pr_locate_manifest()
 {
     _PR_MANIFEST=""
     for _pr_candidate in "${MANIFEST_FILE:-}" "${TMP_DIR:-/tmp/daypass}/manifest.json" "/tmp/manifest.json" "manifest.json"; do
-        if [ -n "$_pr_candidate" ] && [ -s "$_pr_candidate" ] && jq -e '.architectures' "$_pr_candidate" >/dev/null 2>&1; then
+        if [ -n "$_pr_candidate" ] && [ -s "$_pr_candidate" ] && _pr_valid_manifest "$_pr_candidate"; then
             _PR_MANIFEST="$_pr_candidate"
             return 0
         fi
@@ -201,12 +191,14 @@ _pr_locate_manifest()
     mkdir -p "${TMP_DIR:-/tmp/daypass}" 2>/dev/null
     _pr_target="${TMP_DIR:-/tmp/daypass}/manifest.json"
     _pr_log INFO "Downloading package manifest : [${REPO_URL}/${_pr_manifest_path}]"
-    if _pr_fetch "${REPO_URL}/${_pr_manifest_path}" "$_pr_target" && jq -e '.architectures' "$_pr_target" >/dev/null 2>&1; then
+    local stage
+    stage=$(mktemp "${_pr_target}.XXXXXX") || return 1
+    if _pr_fetch "${REPO_URL}/${_pr_manifest_path}" "$stage" && _pr_valid_manifest "$stage" && mv "$stage" "$_pr_target"; then
         _PR_MANIFEST="$_pr_target"
         return 0
     fi
 
-    rm -f "$_pr_target"
+    rm -f "$stage"
     _pr_log WARN "Package manifest is unavailable; manifest-only packages cannot be installed."
     return 1
 }
@@ -450,21 +442,14 @@ _pr_is_installed()
 
 _pr_refresh_index()
 {
-    [ "${_PR_INDEX_REFRESHED:-0}" = "1" ] && return 1
-    _PR_INDEX_REFRESHED=1
-
-    _pr_log INFO "Refreshing package indexes with [$PKG_MANAGER] ..."
-    case "$PKG_MANAGER" in
-        apk)  (apk update >/dev/null 2>&1 </dev/null) & ;;
-        opkg) (opkg update >/dev/null 2>&1 </dev/null) & ;;
-        *)    return 0 ;;
-    esac
-    if command -v ui_spinner >/dev/null 2>&1; then
-        ui_spinner $! "Updating package database ..." || true
+    [ "${_PR_INDEX_ATTEMPTED:-0}" = 0 ] || return 1
+    _PR_INDEX_ATTEMPTED=1
+    if command -v pkg_update >/dev/null 2>&1; then
+        pkg_update || return $?
     else
-        wait $! || true
+        "$PKG_MANAGER" update </dev/null || return $?
     fi
-    return 0
+    _PR_INDEX_REFRESHED=1
 }
 
 # $1 = package name or local file, $2 = "file" for verified local packages
@@ -514,6 +499,30 @@ _pr_install_from_feed()
     return 1
 }
 
+# Stage a manifest payload inside the caller's private transaction directory.
+_pr_stage_payload()
+{
+    local url="$1" target="$2" digest="$3" part="$2.part"
+    case "$digest" in *[!0123456789abcdefABCDEF]*) digest="" ;; esac
+    if [ "${#digest}" -ne 64 ]; then
+        _pr_log ERROR "Missing or invalid SHA-256 for [$url]."
+        return 1
+    fi
+    if [ -s "$target" ] && printf '%s  %s\n' "$digest" "$target" | sha256sum -c - >/dev/null 2>&1; then
+        return 0
+    fi
+    if ! _pr_fetch "$url" "$part" ||
+        ! printf '%s  %s\n' "$digest" "$part" | sha256sum -c - >/dev/null 2>&1; then
+        _pr_log ERROR "Could not obtain verified package [$url]."
+        rm -f "$part"
+        return 1
+    fi
+    [ ! -d "$target" ] && mv "$part" "$target" || {
+        _pr_log ERROR "Could not stage verified package [$target]."
+        return 1
+    }
+}
+
 _pr_install_from_manifest()
 {
     _pm_entry="$(_pr_manifest_entry "$1")" || return 1
@@ -530,25 +539,16 @@ _pr_install_from_manifest()
     mkdir -p "${TMP_DIR:-/tmp/daypass}" 2>/dev/null
     _pm_target="${TMP_DIR:-/tmp/daypass}/$(basename "$_pm_file")"
 
-    if [ -s "$_pm_target" ] && [ -n "$_pm_sha" ] && echo "$_pm_sha  $_pm_target" | sha256sum -c - >/dev/null 2>&1; then
-        :
-    elif ! _pr_fetch "${_pm_base}/${_pm_file}" "$_pm_target.part"; then
-        _pr_log ERROR "Download failed : [${_pm_base}/${_pm_file}]"
-        return 1
-    elif [ -n "$_pm_sha" ] && ! echo "$_pm_sha  $_pm_target.part" | sha256sum -c - >/dev/null 2>&1; then
-        rm -f "$_pm_target.part"
-        _pr_log ERROR "Checksum mismatch for [$1]!"
-        return 1
-    else
-        mv "$_pm_target.part" "$_pm_target"
-    fi
+    _pr_stage_payload "${_pm_base}/${_pm_file}" "$_pm_target" "$_pm_sha" || return 1
 
     if _pr_pm_install "$_pm_target" file; then
+        candidate_receipt="manifest:$(printf %s "$_pm_sha" | tr A-F a-f)"
         rm -f "$_pm_target"
         return 0
     fi
 
     if _pr_refresh_index && _pr_pm_install "$_pm_target" file; then
+        candidate_receipt="manifest:$(printf %s "$_pm_sha" | tr A-F a-f)"
         rm -f "$_pm_target"
         return 0
     fi
@@ -558,8 +558,38 @@ _pr_install_from_manifest()
     return 1
 }
 
+# Last successful DayPass install, keyed by the concrete package name.
+pkg_receipt()
+{
+    local dir="${DAYPASS_DIR:-/etc/daypass}/package-receipts" staged
+    case "$1" in ""|-*|*[!a-zA-Z0-9.+_-]*) return 1 ;; esac
+    if [ "$#" = 1 ]; then
+        [ -f "$dir/$1" ] && cat "$dir/$1"
+        return $?
+    fi
+    mkdir -p "$dir" && staged=$(mktemp "$dir/.receipt.XXXXXX") || return 1
+    printf '%s\n' "$2" > "$staged" && mv "$staged" "$dir/$1"
+}
+
+pkg_get_installed_hash()
+{
+    local receipt
+    receipt=$(pkg_receipt "$1") || return 1
+    case "$receipt" in manifest:*) printf '%s\n' "${receipt#manifest:}" ;; *) return 1 ;; esac
+}
+
+pkg_feed_available()
+{
+    case "$PKG_MANAGER" in
+        opkg) opkg list "$1" 2>/dev/null | awk -v n="$1" '$1==n {found=1} END {exit !found}' ;;
+        apk) apk search -x "$1" 2>/dev/null | grep -q . ;;
+        *) return 1 ;;
+    esac
+}
+
 _pr_install_candidate()
 {
+    candidate_receipt=feed
     case "$2" in
         manifest)
             if ! _pr_manifest_entry "$1" >/dev/null; then
@@ -605,7 +635,7 @@ _pr_rollback()
 }
 
 install_profile()
-{
+(
     _ip_profile="${1:-}"
 
     resolve_profile "$_ip_profile" || return 1
@@ -628,8 +658,18 @@ install_profile()
         _pr_locate_manifest download
     fi
 
-    mkdir -p "${TMP_DIR:-/tmp/daypass}" 2>/dev/null
+    mkdir -p "${TMP_DIR:-/tmp/daypass}" || return 1
+    TMP_DIR=$(mktemp -d "${TMP_DIR:-/tmp/daypass}/profile.XXXXXX") || return 1
+    trap 'rm -rf "$TMP_DIR"' EXIT
+    trap 'exit 130' INT
+    trap 'exit 143' TERM
+    _PR_INDEX_ATTEMPTED=0
     _PR_INDEX_REFRESHED=0
+    local before owned="" satisfied="" item
+    if command -v mf_record_install >/dev/null 2>&1; then
+        mf_migrate_from_log || { _pr_log ERROR "Cannot preserve existing package records."; return 1; }
+        before=$(pkg_installed_names) || { _pr_log ERROR "Cannot verify pre-install package inventory."; return 1; }
+    fi
     _ip_session=""
     _ip_done=0
     _ip_skipped=0
@@ -661,6 +701,7 @@ install_profile()
         done
 
         if [ -n "$_ip_present" ]; then
+            satisfied="${satisfied:+$satisfied }$_ip_present"
             if [ "$_ip_ui" = "1" ]; then
                 log_info "[$_ip_idx/$_ip_total] $_ip_label — already on this router."
             else
@@ -682,12 +723,14 @@ install_profile()
             [ "$_ip_candidate" != "$_ip_name" ] && [ "$_ip_ui" != "1" ] && \
                 _pr_log INFO "Trying alternative [$_ip_candidate] ..."
             if _pr_install_candidate "$_ip_candidate" "$_ip_source"; then
+                printf '%s %s\n' "$_ip_candidate" "$candidate_receipt" >> "$TMP_DIR/receipts" || return 1
                 _ip_installed="$_ip_candidate"
                 break
             fi
         done
 
         if [ -n "$_ip_installed" ]; then
+            satisfied="${satisfied:+$satisfied }$_ip_installed"
             _ip_session="${_ip_session:+$_ip_session }$_ip_installed"
             _ip_done=$((_ip_done + 1))
             if [ "$_ip_ui" = "1" ]; then
@@ -716,25 +759,30 @@ install_profile()
 $PROFILE_PLAN
 EOF
 
-    if [ -n "$_ip_session" ] && [ -n "${INSTALL_LOG:-}" ]; then
-        mkdir -p "$(dirname "$INSTALL_LOG")" 2>/dev/null
-        for _ip_pkg in $_ip_session; do
-            echo "$_ip_pkg" >> "$INSTALL_LOG"
-        done
-        sort -u "$INSTALL_LOG" -o "$INSTALL_LOG" 2>/dev/null
+    if [ -f "$TMP_DIR/receipts" ]; then
+        while read -r item candidate_receipt; do
+            pkg_receipt "$item" "$candidate_receipt" || { _pr_log ERROR "Native installation succeeded but receipt storage failed."; return 1; }
+        done < "$TMP_DIR/receipts"
+    fi
+    if ! command -v mf_record_install >/dev/null 2>&1 && [ -n "${INSTALL_LOG:-}" ]; then
+        local log_stage
+        mkdir -p "$(dirname "$INSTALL_LOG")" && log_stage=$(mktemp "${INSTALL_LOG}.XXXXXX") || return 1
+        if [ -f "$INSTALL_LOG" ]; then cat "$INSTALL_LOG" > "$log_stage" || return 1; fi
+        for item in $satisfied; do printf '%s\n' "$item" >> "$log_stage" || return 1; done
+        sort -u "$log_stage" -o "$log_stage" && mv "$log_stage" "$INSTALL_LOG" || return 1
     fi
 
     # Record the whole resolved suite (including already-present packages)
     # so purge can remove the module as a unit.
     if command -v mf_record_install >/dev/null 2>&1; then
-        _ip_tracked=""
-        for _ip_name in $PROFILE_PACKAGES; do
-            if command -v _pr_is_installed >/dev/null 2>&1 && _pr_is_installed "$_ip_name"; then
-                _ip_tracked="${_ip_tracked:+$_ip_tracked }$_ip_name"
+        for item in $_ip_session; do
+            if ! printf '%s\n' "$before" | grep -Fxq -- "$item"; then
+                owned="${owned:+$owned }$item"
             fi
         done
-        [ -z "$_ip_tracked" ] && _ip_tracked="$_ip_session"
-        [ -n "$_ip_tracked" ] && mf_record_install "$_ip_profile" "$_ip_tracked"
+        if [ -n "$satisfied" ]; then
+            mf_record_install "$_ip_profile" "$satisfied" "$owned" || { _pr_log ERROR "Native operations finished but registry update failed."; return 1; }
+        fi
     fi
 
     if [ "$_ip_ui" = "1" ]; then
@@ -744,7 +792,7 @@ EOF
         _pr_log SUCCESS "Profile [$_ip_profile] finished : $_ip_done installed, $_ip_skipped already present, $_ip_failed_optional optional skipped."
     fi
     return 0
-}
+)
 
 # Installer UI flow: resolves the default profile from the SELECTED_* state into FINAL_PACKAGES
 resolve_packages()
@@ -757,7 +805,39 @@ resolve_packages()
         return 1
     fi
 
-    FINAL_PACKAGES="$PROFILE_PACKAGES"
+    REVIEW_FEED_PACKAGES=""
+    local primary source optional alternatives rest candidate chosen kind
+    while IFS='|' read -r primary source optional alternatives rest; do
+        [ -n "$primary" ] || continue
+        chosen=""
+        for candidate in $primary $alternatives; do
+            if _pr_is_installed "$candidate"; then chosen="$candidate"; break; fi
+        done
+        for candidate in ${chosen:-$primary $alternatives}; do
+            kind="$source"
+            if [ "$source" = auto ] && [ -n "$chosen" ] && [ "$(pkg_receipt "$candidate" 2>/dev/null)" = feed ]; then
+                kind=feed
+            elif [ "$source" != feed ] && _pr_manifest_entry "$candidate" >/dev/null; then
+                kind=manifest
+            elif [ "$source" != manifest ] && { [ -n "$chosen" ] || pkg_feed_available "$candidate"; }; then
+                kind=feed
+            else
+                continue
+            fi
+            chosen="$candidate"
+            break
+        done
+        if [ -z "$chosen" ]; then
+            _pr_log WARN "No available candidate for [$primary]."
+            [ "$optional" = 1 ] && continue
+            return 1
+        fi
+        [ "$kind" != feed ] || REVIEW_FEED_PACKAGES="$REVIEW_FEED_PACKAGES $chosen"
+        FINAL_PACKAGES="${FINAL_PACKAGES:+$FINAL_PACKAGES }$chosen"
+    done <<EOF
+$PROFILE_PLAN
+EOF
+    [ -n "$FINAL_PACKAGES" ] || return 1
     _pr_log INFO "Final deployment target list : [$FINAL_PACKAGES]"
     export FINAL_PACKAGES
     return 0

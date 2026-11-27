@@ -69,13 +69,16 @@ tdrv_singbox_dns_configure() {
 
 # id|name|protocol|host|port|l4 (outbounds with a server, plus WireGuard endpoint peers)
 tdrv_singbox_list_nodes() {
-    jq -r '
+    local rows
+    rows=$(jq -r '
         def l4: if (.type // "") | IN("hysteria", "hysteria2", "tuic", "wireguard") then "udp" else "tcp" end;
         (.outbounds[]? | select(.server != null and .tag != null)
             | "\(.tag)|\(.tag)|\(.type // "unknown")|\(.server)|\(.server_port // "")|\(l4)"),
         (.endpoints[]? | select(.tag != null) | . as $e | .peers[]? | select(.address != null)
             | "\($e.tag)|\($e.tag)|\($e.type // "wireguard")|\(.address)|\(.port // "")|udp")
-    ' "$(_sb_conffile)" 2>/dev/null | tr -d '\r'
+    ' "$(_sb_conffile)" 2>/dev/null) || return $?
+    [ -n "$rows" ] || return 0
+    printf '%s\n' "$rows" | tr -d '\r'
 }
 
 tdrv_singbox_active_node() {
