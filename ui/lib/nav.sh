@@ -55,12 +55,14 @@ ui_pause() {
     read -r _ </dev/tty || daypass_quit
 }
 
-# $1 "root" | "main" (back to main menu) | anything else (back one level)
+# $1 "root" | "main" | "review" (compact cancel footer) | default (back)
 ui_nav_footer() {
     _nav_muted="${COLOR_MUTED:-${GRAY:-\033[90m}}"
     case "${1:-}" in
+        back) _nav_back="0) Back" ;;
         root) _nav_back="0) Exit DayPass" ;;
         main) _nav_back="0) Back to Main Menu" ;;
+        review) _nav_back="0) Cancel" ;;
         *)    _nav_back="0) Back / Skip" ;;
     esac
     if [ "${1:-}" != "root" ]; then
@@ -68,10 +70,10 @@ ui_nav_footer() {
     else
         _nav_line="$_nav_back   h) Help"
     fi
-    echo
+    if [ "${1:-}" != "review" ]; then echo; fi
     ui_divider
     printf "  ${_nav_muted}%s${RESET}\n" "$_nav_line"
-    echo
+    if [ "${1:-}" != "review" ]; then echo; fi
 }
 
 # Horizontal pager. $1 current page, $2 page count, then optional extra actions.

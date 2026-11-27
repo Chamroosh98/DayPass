@@ -136,7 +136,6 @@ proxy_engine_actions_menu() {
         echo "  🔁 4) Restart"
         echo "  🔄 5) Reload Rules"
         echo "  🧶 6) Show Nodes / Endpoints"
-        ui_divider
         ui_nav_footer
 
         ui_prompt 6

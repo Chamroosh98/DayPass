@@ -352,6 +352,9 @@ apply_routing_mode() {
 
     case "$intercept" in
         self)
+            if transport_has_hook "$engine" route_preflight; then
+                transport_call "$engine" route_preflight "$mode" || return $?
+            fi
             _rt_managed_active && _rt_clear_managed
             transport_call "$engine" apply_route_mode "$mode"
             rc=$?
@@ -466,6 +469,7 @@ show_routing_status() {
 # ------------------------------------------------------------
 routing_menu() {
     local HELP_MODULE_ID="proxy_routing"
+    local active iran_hint
 
     while true; do
         render_persistent_header
@@ -474,7 +478,12 @@ routing_menu() {
         ui_divider
         show_routing_status
         echo
-        echo "  👑 1) Iran Direct + Foreign Proxy   (Recommended)"
+        active=$(get_active_engine)
+        case "$active" in
+            passwall|passwall2) iran_hint="Blocked until loaded GeoIP/GeoSite tags can be verified" ;;
+            *) iran_hint="Recommended" ;;
+        esac
+        printf '  👑 1) Iran Direct + Foreign Proxy   (%s)\n' "$iran_hint"
         echo "  🌏 2) Global Proxy                  (All traffic via proxy)"
         echo "  🎯 3) Direct Only                   (Disable proxy)"
         echo "  👀 4) Show current rules"

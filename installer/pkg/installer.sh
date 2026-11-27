@@ -88,7 +88,7 @@ deploy_targeted_packages()
 
     mkdir -p "$(dirname "$INSTALL_LOG")" || return 1
     mf_migrate_from_log || { log_error "Cannot preserve existing package records."; return 1; }
-    local before newly_installed="" journal="" staged_payload
+    local before after newly_installed="" journal="" staged_payload
 
     [ -n "$1" ] && [ "$#" -ge 2 ] && [ "$#" -le 5 ] || { log_error "Missing deployment plan."; return 1; }
     local PACKAGES_TO_PROCESS="$1"
@@ -266,6 +266,18 @@ deploy_targeted_packages()
     fi
 
     if [ "$INSTALL_SUCCESS" -eq 1 ]; then
+        after=$(pkg_installed_names) || {
+            log_error "Could not verify the installed package inventory."
+            [ -z "$journal" ] || log_info "Transaction details are in $journal."
+            return 1
+        }
+        for pkg in $PACKAGES_PLANNED; do
+            if ! printf '%s\n' "$after" | grep -Fxq -- "$pkg"; then
+                log_error "The package manager did not report [$pkg] as installed."
+                [ -z "$journal" ] || log_info "Transaction details are in $journal."
+                return 1
+            fi
+        done
         if [ -f "$TMP_DIR/receipts" ]; then
             while read -r pkg receipt; do
                 pkg_receipt "$pkg" "$receipt" || { log_error "Native install succeeded but receipt storage failed. Inspect $journal."; return 1; }
@@ -277,7 +289,6 @@ deploy_targeted_packages()
             [ -n "$_ap_name" ] || continue
             if [ "$_ap_note" = "pending" ]; then
                 _ap_ver=$(pkg_get_installed_version "$_ap_name" 2>/dev/null | awk 'NR==1 { print $1 }')
-                [ -z "$_ap_ver" ] && _ap_ver=$(manifest_lookup "version" "$_ap_name" 2>/dev/null)
                 case "$_ap_ver" in
                     ""|null|Latest|N/A) _ap_note="(Installed)" ;;
                     *) _ap_note="(Installed v${_ap_ver})" ;;

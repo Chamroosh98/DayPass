@@ -7,7 +7,7 @@
 #   list_package_profiles      Compact CLI list of profile ids (menu uses profile_status_dashboard)
 #   resolve_profile <name>     Build PROFILE_PLAN / PROFILE_PACKAGES without installing
 #   install_profile <name>     Resolve and install a profile (DAYPASS_DRY_RUN=1 only prints the plan)
-#   resolve_packages           Resolve the default profile into FINAL_PACKAGES (installer UI flow)
+#   resolve_packages [name]    Build a review plan using the named or default profile
 
 PROFILES_FILE="${PROFILES_FILE:-}"
 PROFILE_PLAN=""
@@ -203,6 +203,12 @@ _pr_locate_manifest()
     return 1
 }
 
+_pr_valid_digest()
+{
+    case "$1" in *[!0123456789abcdefABCDEF]*) return 1 ;; esac
+    [ "${#1}" -eq 64 ]
+}
+
 # Prints "file|sha256" for an exact manifest package match on the current architecture
 _pr_manifest_entry()
 {
@@ -216,7 +222,8 @@ _pr_manifest_entry()
     case "$_pr_entry" in
         ''|'|'*) return 1 ;;
     esac
-    echo "$_pr_entry"
+    _pr_valid_digest "${_pr_entry#*|}" || return 1
+    printf '%s\n' "$_pr_entry"
 }
 
 # JSON object with the current values of every variable referenced by the profiles
@@ -503,8 +510,7 @@ _pr_install_from_feed()
 _pr_stage_payload()
 {
     local url="$1" target="$2" digest="$3" part="$2.part"
-    case "$digest" in *[!0123456789abcdefABCDEF]*) digest="" ;; esac
-    if [ "${#digest}" -ne 64 ]; then
+    if ! _pr_valid_digest "$digest"; then
         _pr_log ERROR "Missing or invalid SHA-256 for [$url]."
         return 1
     fi
@@ -794,32 +800,34 @@ EOF
     return 0
 )
 
-# Installer UI flow: resolves the default profile from the SELECTED_* state into FINAL_PACKAGES
+# Installer UI flow: resolve SELECTED_* into validated target names and sources.
 resolve_packages()
 {
     FINAL_PACKAGES=""
+    REVIEW_FEED_PACKAGES=""
 
-    if ! resolve_profile ""; then
+    if ! resolve_profile "${1:-}"; then
         _pr_log ERROR "Package resolution finished with an empty target package list :("
         export FINAL_PACKAGES
         return 1
     fi
 
-    REVIEW_FEED_PACKAGES=""
-    local primary source optional alternatives rest candidate chosen kind
+    local primary source optional alternatives rest candidate installed chosen kind
+    local targets="" feeds=""
     while IFS='|' read -r primary source optional alternatives rest; do
         [ -n "$primary" ] || continue
+        installed=""
         chosen=""
         for candidate in $primary $alternatives; do
-            if _pr_is_installed "$candidate"; then chosen="$candidate"; break; fi
+            if _pr_is_installed "$candidate"; then installed="$candidate"; break; fi
         done
-        for candidate in ${chosen:-$primary $alternatives}; do
+        for candidate in $installed $primary $alternatives; do
             kind="$source"
-            if [ "$source" = auto ] && [ -n "$chosen" ] && [ "$(pkg_receipt "$candidate" 2>/dev/null)" = feed ]; then
+            if [ "$source" = auto ] && [ "$candidate" = "$installed" ] && [ "$(pkg_receipt "$candidate" 2>/dev/null)" = feed ]; then
                 kind=feed
             elif [ "$source" != feed ] && _pr_manifest_entry "$candidate" >/dev/null; then
                 kind=manifest
-            elif [ "$source" != manifest ] && { [ -n "$chosen" ] || pkg_feed_available "$candidate"; }; then
+            elif [ "$source" != manifest ] && { [ "$candidate" = "$installed" ] || pkg_feed_available "$candidate"; }; then
                 kind=feed
             else
                 continue
@@ -832,12 +840,15 @@ resolve_packages()
             [ "$optional" = 1 ] && continue
             return 1
         fi
-        [ "$kind" != feed ] || REVIEW_FEED_PACKAGES="$REVIEW_FEED_PACKAGES $chosen"
-        FINAL_PACKAGES="${FINAL_PACKAGES:+$FINAL_PACKAGES }$chosen"
+        case " $targets " in *" $chosen "*) continue ;; esac
+        [ "$kind" != feed ] || feeds="${feeds:+$feeds }$chosen"
+        targets="${targets:+$targets }$chosen"
     done <<EOF
 $PROFILE_PLAN
 EOF
-    [ -n "$FINAL_PACKAGES" ] || return 1
+    [ -n "$targets" ] || return 1
+    FINAL_PACKAGES="$targets"
+    REVIEW_FEED_PACKAGES="$feeds"
     _pr_log INFO "Final deployment target list : [$FINAL_PACKAGES]"
     export FINAL_PACKAGES
     return 0

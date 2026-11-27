@@ -1,13 +1,13 @@
 {
   "module_id": "packages",
   "title": "Package Profiles & Dependencies",
-  "summary": "Installs the package profiles from config/package_profiles.json. Each profile shows its resolved package plan before anything is installed; failed required packages roll the profile back.",
+  "summary": "Installs the package profiles from config/package_profiles.json. Each profile shows its resolved package targets before installation. Passwall deployment keeps a journal on package-manager failure.",
   "items": [
     {
       "key": "1",
       "title": "Proxy & Evasion Cores",
-      "description": "Passwall wizard: Passwall-1 or Passwall-2, then Recommended or Custom package selection, review and deploy.",
-      "usage_tip": "0 on any wizard step goes back without installing."
+      "description": "Choose Passwall 1 or Passwall 2, then Recommended or Custom. Recommended selects Xray and standard GeoIP/GeoSite packages. Iran Direct is a separate routing action.",
+      "usage_tip": "At review, 0 cancels deployment. The package manager may add dependencies to the reviewed targets."
     },
     {
       "key": "2",

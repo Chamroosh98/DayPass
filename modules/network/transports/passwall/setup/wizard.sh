@@ -1,65 +1,73 @@
 #!/bin/sh
-# ============================================================
-# DayPass - Passwall & Passwall 2 Installation Wizard
-# ============================================================
+# Passwall and Passwall 2 installation wizard.
 
-# Proxy stack wizard: Passwall app -> mode -> review -> deploy
 proxy_install_wizard()
 {
-    render_persistent_header
+    local SELECTED_PROFILE SELECTED_MODE SELECTED_ENGINE SELECTED_LANGUAGE SELECTED_GEO
+    local SELECTED_PACKAGES GEOIP_URL GEOSITE_URL FINAL_PACKAGES REVIEW_FEED_PACKAGES
+    local MANIFEST_FILE="${MANIFEST_FILE:-}" _PR_MANIFEST _PR_ARCH wizard_status
+    reset_state
 
-    ui_title "🕵️‍♀️ Select Package Type"
-    echo "  1) 🔒 Passwall-1  (Legacy Stable Release)"
-    echo "  2) 🔒 Passwall-2  (Modern Release - Recommended)"
-    ui_nav_footer
+    while true; do
+        render_persistent_header
+        ui_title "Select Passwall version"
+        echo "  1) Passwall 1"
+        echo "  2) Passwall 2 (Recommended)"
+        ui_nav_footer
+        ui_prompt 2
 
-    ui_prompt 2
+        case "$UI_CHOICE" in
+            1) SELECTED_PROFILE="passwall" ;;
+            2) SELECTED_PROFILE="passwall2" ;;
+            0) return 0 ;;
+            *)
+                ui_nav_common "$UI_CHOICE" "packages" && continue
+                log_warn "Select Passwall 1 or Passwall 2."
+                sleep 1
+                continue
+                ;;
+        esac
 
-    SELECTED_PACKAGES=""
+        export SELECTED_PROFILE
+        wizard_status=0
+        menu_mode || wizard_status=$?
+        case "$wizard_status" in
+            0) break ;;
+            1) continue ;;
+            *) return "$wizard_status" ;;
+        esac
+    done
 
-    case "$UI_CHOICE" in
-        1)
-            SELECTED_PROFILE="passwall"
-            ;;
-        2)
-            SELECTED_PROFILE="passwall2"
-            ;;
-        0)
-            return 0
-            ;;
-        *)
-            ui_nav_common "$UI_CHOICE" "packages" && return 0
-            log_error "Invalid choice! Returning to menu ..."
-            sleep 1
-            return 1
+    review_install || wizard_status=$?
+    case "$wizard_status" in
+        0) ;;
+        1) return 0 ;;
+        *) return "$wizard_status" ;;
+    esac
+
+    case "$SELECTED_GEO" in
+        iran-full|iran-lite)
+            if ! pw_stage_iran_assets "$SELECTED_PROFILE" "$SELECTED_GEO" "$GEOIP_URL" "$GEOSITE_URL"; then
+                log_error "Dataset staging failed. Package deployment was cancelled."
+                ui_pause
+                return 1
+            fi
             ;;
     esac
 
-    export SELECTED_PROFILE
-
-    # 1. Select Mode & Populate Profile Variables (Recommended or Custom)
-    menu_mode || return 0
-
-    # 2. Review Summary Screen
-    review_install || return 0
-
-    # 3. Deployment Pipeline
+    MANIFEST_FILE="$_PR_MANIFEST"
+    local ARCH="$_PR_ARCH"
     render_persistent_header
     if deploy_targeted_packages "$FINAL_PACKAGES" "$SELECTED_PROFILE" "$REVIEW_FEED_PACKAGES"; then
-        echo
-        log_success "All targeted components deployed successfully!"
-
-        if command -v system_banner_post_install >/dev/null 2>&1; then
-            system_banner_post_install
+        if command -v system_banner_post_install >/dev/null 2>&1 &&
+            ! system_banner_post_install; then
+            log_warn "Package deployment succeeded. The login banner could not be installed."
         fi
-
         ui_pause
-    else
-        echo
-        log_error "Installation process failed!"
-        ui_pause
-        return 1
+        return 0
     fi
 
-    return 0
+    log_error "Package deployment failed."
+    ui_pause
+    return 1
 }

@@ -1241,12 +1241,14 @@
       "manual": "main",
       "modules": [
         "ui/menu/packages.sh",
-        "ui/menu/mode.sh",
-        "ui/menu/engine.sh",
-        "ui/menu/language.sh",
-        "ui/menu/geo.sh",
-        "ui/menu/custom.sh",
-        "ui/review.sh",
+        "modules/network/transports/passwall/setup/wizard.sh",
+        "modules/network/transports/passwall/setup/recommended.sh",
+        "modules/network/transports/passwall/setup/mode.sh",
+        "modules/network/transports/passwall/setup/engine.sh",
+        "modules/network/transports/passwall/setup/language.sh",
+        "modules/network/transports/passwall/setup/geo.sh",
+        "modules/network/transports/passwall/setup/custom.sh",
+        "ui/lib/review.sh",
         "installer/pkg/resolver.sh",
         "installer/pkg/installer.sh",
         "config/package_profiles.json"
@@ -1266,17 +1268,16 @@
         "install_profile",
         "resolve_packages",
         "review_install",
-        "deploy_targeted_packages",
-        "rollback_failed_install"
+        "deploy_targeted_packages"
       ],
       "summary": "Installs the package profiles declared in config/package_profiles.json: the Passwall wizard, VPN & tunnels, USB & hardware drivers and network tools.",
       "behavior": [
-        "Profiles come from config/package_profiles.json, which the build embeds in install.sh as daypass_embedded_profiles and load_package_profiles reads (a downloaded copy wins when available).",
-        "resolve_profile prints the resolved package plan (name, source, optional, alternatives) before anything is installed; a failed required package rolls the profile back.",
-        "The Passwall wizard (option 1) asks for Passwall 1 or Passwall 2, then Recommended or Custom packages. Engines: Auto, Xray (xray-core) or Sing-box (sing-box).",
-        "Passwall 2 languages: fa, en, zh-cn, ru (luci-i18n-passwall2-*).",
-        "Geo data: Skip, Official (v2ray-geoip / v2ray-geosite), Iran Full or Iran Lite (Chocolate4U/Iran-v2ray-rules geoip/geosite .dat).",
-        "A successful wizard deployment also installs the DayPass login banner through system_banner_post_install."
+        "Profiles come from config/package_profiles.json, which the build embeds in install.sh as daypass_embedded_profiles and load_package_profiles reads (an explicit local profile file can override it).",
+        "resolve_profile builds the package plan with names, sources, optional flags and alternatives. The Passwall wizard uses a batch deployment path that keeps logs and a journal on native failure.",
+        "The Passwall wizard (option 1) asks for Passwall 1 or Passwall 2, then Recommended or Custom packages. Recommended selects Xray, standard GeoIP/GeoSite packages and Persian translation when available. Custom Auto uses Xray as the profile default.",
+        "Passwall 2 offers Persian, built-in English, Simplified Chinese and Russian. Translation packs depend on manifest availability.",
+        "Geo data: Skip adds no dataset targets through the Geo menu. Official requests the standard datasets. Iran Full and Iran Lite stage verified datasets without activating them. The package manager may install datasets as dependencies.",
+        "After successful package deployment, DayPass attempts to install the login banner unless opted out. Iran Direct is available separately in the routing menu and requires a proxy node."
       ],
       "state_files": [
         "/etc/daypass/install.log",
@@ -1937,7 +1938,7 @@
           "DNS Manager: dnsmasq upstream control (noresolv, server list, strictorder) and Passwall dns_redirect.",
           "DNS Recovery: temporary /etc/resolv.conf override with backup/restore.",
           "Passwall 1/2 node management and routing modes; engines Xray or sing-box installed by the profile installer.",
-          "Geo databases (official or Iran Full/Lite rule sets) chosen at install.",
+          "Official GeoIP/GeoSite packages can be installed. Iran Full/Lite pairs can be staged for later activation.",
           "Cloudflare Worker mirror rewrite of opkg/apk feeds.",
           "Network checker (nslookup, HTTPS) and public IP providers (ipwho.is, ipapi.co, ifconfig.co).",
           "DHCP server settings for lan and guest."

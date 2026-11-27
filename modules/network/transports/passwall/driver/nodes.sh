@@ -78,8 +78,9 @@ _pw_restore_real_node() {
 }
 
 _pw_list_nodes() {
-    local pkg="$1" sect name proto host port l4
-    for sect in $(uci -q show "$pkg" 2>/dev/null | sed -n "s/^$pkg\.\([^.]*\)=nodes$/\1/p"); do
+    local pkg="$1" config sect name proto host port l4
+    config=$(uci -q show "$pkg" 2>/dev/null) || return $?
+    for sect in $(printf '%s\n' "$config" | sed -n "s/^$pkg\.\([^.]*\)=nodes$/\1/p"); do
         host=$(uci -q get "$pkg.$sect.address")
         [ -n "$host" ] || continue
         port=$(uci -q get "$pkg.$sect.port")
@@ -99,8 +100,7 @@ _pw_active_node() {
     cur=$(uci -q get "$1.@global[0].node" 2>/dev/null)
     [ -z "$cur" ] && cur=$(uci -q get "$1.@global[0].tcp_node" 2>/dev/null)
     if [ "$cur" = "$PW_SHUNT_ID" ]; then
-        uci -q get "$1.$PW_SHUNT_ID.default_node" 2>/dev/null
-        return 0
+        cur=$(uci -q get "$1.$PW_SHUNT_ID.default_node" 2>/dev/null) || return $?
     fi
     [ -n "$cur" ] && echo "$cur"
 }

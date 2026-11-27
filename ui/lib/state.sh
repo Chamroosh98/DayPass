@@ -1,6 +1,7 @@
 #!/bin/sh
 
 SELECTED_PROFILE=""
+SELECTED_MODE=""
 SELECTED_ENGINE="auto"
 SELECTED_LANGUAGE="none"
 SELECTED_GEO="none"
@@ -22,6 +23,7 @@ add_selected_package()
 reset_state()
 {
     SELECTED_PROFILE=""
+    SELECTED_MODE=""
     SELECTED_ENGINE="auto"
     SELECTED_LANGUAGE="none"
     SELECTED_GEO="none"

@@ -30,7 +30,7 @@
       "file": "packages.json",
       "module_id": "packages",
       "title": "Package Profiles & Dependencies",
-      "summary": "Installs the package profiles from config/package_profiles.json. Each profile shows its resolved package plan before anything is installed; failed required packages roll the profile back.",
+      "summary": "Installs the package profiles from config/package_profiles.json. Each profile shows its resolved package targets before installation. Passwall deployment keeps a journal on package-manager failure.",
       "item_count": 9,
       "sources": [
         "ui/menu/packages.sh",

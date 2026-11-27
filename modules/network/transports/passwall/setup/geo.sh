@@ -4,12 +4,12 @@ geo_menu()
 {
     while true; do
         render_persistent_header
-        ui_title "🕵️‍♀️ Select Geo Database"
-        echo "  🫸🏻 1) Skip       (The DB files won't install)"
-        echo "  👔 2) Official   (Standard packages)"
-        echo "  🍺 3) Iran Full  (Full database)"
-        echo "  🍷 4) Iran Lite  (Compact database)"
-        ui_nav_footer
+        ui_title "Select GeoIP/GeoSite data"
+        echo "  1) Skip adding GeoIP/GeoSite targets"
+        echo "  2) Official (standard packages)"
+        echo "  3) Iran Full (stage only)"
+        echo "  4) Iran Lite (stage only)"
+        ui_nav_footer back
 
         ui_prompt 4
 
@@ -23,13 +23,6 @@ geo_menu()
                 ;;
             2)
                 SELECTED_GEO="official"
-                if [ "${PKG_MANAGER:-opkg}" = "apk" ]; then
-                    add_selected_package "geosite" 2>/dev/null || add_selected_package "v2ray-geosite"
-                    add_selected_package "geoip" 2>/dev/null || add_selected_package "v2ray-geoip"
-                else
-                    add_selected_package "v2ray-geoip"
-                    add_selected_package "v2ray-geosite"
-                fi
                 break
                 ;;
             3)
@@ -44,8 +37,9 @@ geo_menu()
                 GEOSITE_URL="https://raw.githubusercontent.com/Chocolate4U/Iran-v2ray-rules/release/geosite-lite.dat"
                 break
                 ;;
-            0) return 0 ;;
+            0) return 1 ;;
             q|Q) daypass_quit ;;
+            h|H) ui_show_help "packages" ;;
             *)
                 log_warn "Invalid choice!"
                 sleep 1

@@ -10,12 +10,12 @@ language_menu()
 
     while true; do
         render_persistent_header
-        ui_title "🕵️‍♀️ Select Language (Passwall 2)"
-        echo "  1) 🦁☀️ Persian  (fa)"
-        echo "  2) 🇬🇧   English  (en)"
-        echo "  3) 🇨🇳   Chinese  (zh)"
-        echo "  4) 🇷🇺   Russian  (ru)"
-        ui_nav_footer
+        ui_title "Select Passwall 2 translation"
+        echo "  1) Persian (fa)"
+        echo "  2) English (built in)"
+        echo "  3) Simplified Chinese (zh-cn)"
+        echo "  4) Russian (ru)"
+        ui_nav_footer back
 
         ui_prompt 4
 
@@ -39,8 +39,9 @@ language_menu()
                 add_selected_package "luci-i18n-passwall2-ru"
                 break
                 ;;
-            0) return 0 ;;
+            0) return 1 ;;
             q|Q) daypass_quit ;;
+            h|H) ui_show_help "packages" ;;
             *)
                 log_warn "Invalid choice!"
                 sleep 1

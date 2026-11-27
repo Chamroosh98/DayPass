@@ -6,8 +6,7 @@ show_custom_help()
     echo "  📖 ${BOLD}Custom Selection Guide & Keyboard Shortcuts${RESET}"
     ui_divider
     echo "  🔹 ${YELLOW}Toggle Item (1-6):${RESET} Enter item number to Select [✔] or Deselect [ ]."
-    echo "  🔹 ${YELLOW}Language Notice:${RESET} Selecting a new language (e.g. -fa) automatically"
-    echo "     replaces previously selected translations for clean config."
+    echo "  🔹 Choose the engine, translation and Geo data after saving this list."
     echo "  🔹 ${YELLOW}[n] / [p]:${RESET} Next or previous page on the navigation bar."
     echo "  🔹 ${YELLOW}[d]:${RESET} Save the current selection and continue to Review."
     _nav_muted="${COLOR_MUTED:-$GRAY}"
@@ -23,31 +22,29 @@ show_custom_help()
 
 toggle_custom_package()
 {
-    pkg_to_toggle="$1"
+    local pkg_to_toggle="$1" p new_selection="" translation_prefix=""
+    local selected=no
 
-    case "$pkg_to_toggle" in
-        luci-i18n-passwall*-*)
-            base_prefix=$(echo "$pkg_to_toggle" | sed -E 's/-(fa|ru|zh-cn|zh-tw|en)$//')
-            NEW_SEL=""
-            for p in $SELECTED_PACKAGES; do
-                case "$p" in
-                    ${base_prefix}-*) ;;
-                    *) NEW_SEL="$NEW_SEL $p" ;;
-                esac
-            done
-            SELECTED_PACKAGES="$NEW_SEL"
-            ;;
+    case " $SELECTED_PACKAGES " in
+        *" $pkg_to_toggle "*) selected=yes ;;
     esac
+    case "$pkg_to_toggle" in
+        luci-i18n-passwall2-*) translation_prefix=luci-i18n-passwall2- ;;
+        luci-i18n-passwall-*) translation_prefix=luci-i18n-passwall- ;;
+    esac
+    for p in $SELECTED_PACKAGES; do
+        [ "$p" != "$pkg_to_toggle" ] || continue
+        if [ "$selected" = no ] && [ -n "$translation_prefix" ]; then
+            case "$p" in "$translation_prefix"*) continue ;; esac
+        fi
+        new_selection="${new_selection:+$new_selection }$p"
+    done
 
-    if echo " $SELECTED_PACKAGES " | grep -q " $pkg_to_toggle "; then
-        NEW_SEL=""
-        for p in $SELECTED_PACKAGES; do
-            [ "$p" != "$pkg_to_toggle" ] && NEW_SEL="$NEW_SEL $p"
-        done
-        SELECTED_PACKAGES="$NEW_SEL"
-        log_info "Removed package : [$pkg_to_toggle]"
+    if [ "$selected" = yes ]; then
+        SELECTED_PACKAGES="$new_selection"
+        log_info "Removed package [$pkg_to_toggle]"
     else
-        SELECTED_PACKAGES="$SELECTED_PACKAGES $pkg_to_toggle"
+        SELECTED_PACKAGES="${new_selection:+$new_selection }$pkg_to_toggle"
         log_success "Selected package: [$pkg_to_toggle]"
 
         if [ "$pkg_to_toggle" = "sing-box" ] || [ "$pkg_to_toggle" = "xray-core" ]; then
@@ -62,7 +59,6 @@ toggle_custom_package()
         fi
     fi
 
-    SELECTED_PACKAGES=$(echo "$SELECTED_PACKAGES" | xargs)
     export SELECTED_PACKAGES
 }
 
@@ -80,39 +76,49 @@ custom_render_nav_bar() {
 
 handle_custom_profile()
 {
-    if [ -z "$MANIFEST_FILE" ] || [ ! -f "$MANIFEST_FILE" ]; then
-        if [ -f "/tmp/manifest.json" ]; then
-            MANIFEST_FILE="/tmp/manifest.json"
-        elif [ -n "${DAYPASS_HOME:-}" ] && [ -f "$DAYPASS_HOME/manifest.json" ]; then
-            MANIFEST_FILE="$DAYPASS_HOME/manifest.json"
-        elif [ -f "manifest.json" ]; then
-            MANIFEST_FILE="manifest.json"
-        else
-            OW_VER="25"
-            [ "${PKG_MANAGER:-opkg}" = "opkg" ] && OW_VER="24"
-            if [ -n "${DAYPASS_HOME:-}" ] && [ -f "$DAYPASS_HOME/build-artifacts/v${OW_VER}/manifest.json" ]; then
-                MANIFEST_FILE="$DAYPASS_HOME/build-artifacts/v${OW_VER}/manifest.json"
-            else
-                MANIFEST_FILE="build-artifacts/v${OW_VER}/manifest.json"
+    local TARGET_PROFILE ALL_AVAILABLE_PKGS APP_FEED candidate
+    local PAGE_SIZE CURRENT_PAGE TOTAL_PKGS TOTAL_PAGES
+    local FIRST_RENDER SEL_COUNT _p START_IDX END_IDX item_no curr_idx pkg is_selected
+    local _last cmd TARGET_INDEX idx saved_packages
+
+    if ! load_package_profiles || ! _pr_detect_environment; then
+        log_error "Could not determine the package profile or router release."
+        ui_pause
+        return 2
+    fi
+    if ! _pr_locate_manifest; then
+        for candidate in \
+            "${DAYPASS_HOME:-.}/manifest.json" \
+            "${DAYPASS_HOME:-.}/build-artifacts/v$PROFILE_RELEASE/manifest.json" \
+            "build-artifacts/v$PROFILE_RELEASE/manifest.json"; do
+            if [ -s "$candidate" ] && _pr_valid_manifest "$candidate"; then
+                _PR_MANIFEST="$candidate"
+                break
             fi
-        fi
+        done
     fi
 
+    if [ -z "$_PR_MANIFEST" ]; then
+        log_error "No valid package manifest for $_PR_ARCH on OpenWrt $PROFILE_RELEASE."
+        ui_pause
+        return 2
+    fi
+    MANIFEST_FILE="$_PR_MANIFEST"
     TARGET_PROFILE="${SELECTED_PROFILE:-passwall2}"
+    case "$TARGET_PROFILE" in passwall) APP_FEED=passwall_luci ;; *) APP_FEED=passwall2 ;; esac
 
-    if [ "$TARGET_PROFILE" = "passwall" ]; then
-        ALL_AVAILABLE_PKGS="$(jq -r --arg arch "$ARCH" \
-            '.architectures[] | select(.name==$arch) | (.feeds["passwall_luci"][]?.package, .feeds["passwall_packages"][]?.package)' \
-            "$MANIFEST_FILE" 2>/dev/null | sort -u)"
-    else
-        ALL_AVAILABLE_PKGS="$(jq -r --arg arch "$ARCH" \
-            '.architectures[] | select(.name==$arch) | (.feeds["passwall2"][]?.package, .feeds["passwall_packages"][]?.package)' \
-            "$MANIFEST_FILE" 2>/dev/null | sort -u)"
-    fi
-
-    if [ -z "$ALL_AVAILABLE_PKGS" ]; then
-        log_error "No packages found in manifest [$MANIFEST_FILE] for architecture : [$ARCH]"
-        return 1
+    if ! ALL_AVAILABLE_PKGS="$(jq -r --arg arch "$_PR_ARCH" --arg app_feed "$APP_FEED" '
+        [
+            .architectures[] | select(.name == $arch) | .feeds as $feeds
+            | ($feeds[$app_feed][]?, $feeds.passwall_packages[]?,
+                (if $app_feed == "passwall_luci" then $feeds.passwall[]? else empty end))
+            | .package | strings
+            | select(test("^luci-app-passwall2?$|^luci-i18n-") | not)
+        ] | unique[]
+    ' "$MANIFEST_FILE" 2>/dev/null)"; then
+        log_error "Could not read package choices from [$MANIFEST_FILE]."
+        ui_pause
+        return 2
     fi
 
     PAGE_SIZE=6
@@ -121,6 +127,7 @@ handle_custom_profile()
     set -- $ALL_AVAILABLE_PKGS
     TOTAL_PKGS=$#
     TOTAL_PAGES=$(( (TOTAL_PKGS + PAGE_SIZE - 1) / PAGE_SIZE ))
+    [ "$TOTAL_PAGES" -gt 0 ] || TOTAL_PAGES=1
     
     FIRST_RENDER=1
 
@@ -132,8 +139,9 @@ handle_custom_profile()
             SEL_COUNT=$((SEL_COUNT + 1))
         done
 
-        echo "  🛠️ ${BOLD}Custom Package Selection${RESET} ${GRAY}(Page ${YELLOW}$CURRENT_PAGE${RESET}${GRAY}/$TOTAL_PAGES | Selected : ${GREEN}$SEL_COUNT${RESET}${GRAY})${RESET}"
+        echo "  🛠️ ${BOLD}Custom Package Selection${RESET} ${GRAY}(Selected: ${GREEN}$SEL_COUNT${RESET}${GRAY})${RESET}"
         ui_divider "$GRAY"
+        printf '  %s\n' "The profile includes the selected Passwall app and its base tools."
 
         START_IDX=$(( (CURRENT_PAGE - 1) * PAGE_SIZE + 1 ))
         END_IDX=$(( CURRENT_PAGE * PAGE_SIZE ))
@@ -165,8 +173,11 @@ handle_custom_profile()
         custom_render_nav_bar
 
         _last=$((${item_no:-1} - 1))
-        [ "$_last" -ge 1 ] || _last=1
-        printf "  ⁉️ Select option or toggle [1-%s] : " "$_last"
+        if [ "$_last" -gt 0 ]; then
+            printf "  ⁉️ Select option or toggle [1-%s] : " "$_last"
+        else
+            printf "  ⁉️ Select option : "
+        fi
         read -r cmd </dev/tty || daypass_quit
 
         case "$cmd" in
@@ -188,20 +199,12 @@ handle_custom_profile()
                 return 1
                 ;;
             d|D)
-                if [ -z "$SELECTED_PACKAGES" ]; then
-                    log_warn "No packages selected! Please select at least one package!"
-                    sleep 1
-                else
-                    # Trigger modular sub-menus for Custom mode
-                    engine_menu || true
-                    language_menu || true
-                    geo_menu || true
-
-                    SELECTED_MODE="custom"
-                    export SELECTED_MODE SELECTED_ENGINE SELECTED_LANGUAGE SELECTED_GEO
-                    log_info "Custom package selection and preferences saved!"
+                saved_packages="$SELECTED_PACKAGES"
+                if engine_menu && language_menu && geo_menu; then
+                    log_info "Custom package selection and preferences saved."
                     break
                 fi
+                SELECTED_PACKAGES="$saved_packages"
                 ;;
             [1-9])
                 if [ "$cmd" -ge 1 ] && [ "$cmd" -lt "$item_no" ]; then

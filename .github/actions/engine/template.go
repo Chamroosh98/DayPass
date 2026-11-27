@@ -191,6 +191,7 @@ func generateInstallScript(outputFile string) error {
 		"modules/network/transports/passwall/setup/mode.sh",
 		"modules/network/transports/passwall/setup/language.sh",
 		"modules/network/transports/passwall/setup/geo.sh",
+		"modules/network/transports/passwall/setup/geo_assets.sh",
 		"modules/network/transports/passwall/setup/engine.sh",
 		"modules/network/transports/passwall/setup/wizard.sh",
 

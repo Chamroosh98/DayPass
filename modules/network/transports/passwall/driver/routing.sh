@@ -3,8 +3,18 @@
 # DayPass - Passwall Driver: Routing & DNS
 # ============================================================
 
+# A UCI path or process environment does not prove the running core loaded
+# those files. Xray can close the DAT files, and sing-box uses converted rules.
+_pw_route_preflight() {
+    [ "$2" = iran_direct ] || return 0
+    log_error "Iran Direct blocked for [$1]: cannot verify the running core's loaded GeoIP/GeoSite selectors."
+    return 1
+}
+
 _pw_apply_iran_direct() {
     local pkg="$1" node rule core domains
+
+    _pw_route_preflight "$pkg" iran_direct || return $?
 
     if ! node=$(_pw_real_node "$pkg"); then
         log_error "No proxy node is selected in $pkg. Pick a node first."
@@ -147,6 +157,8 @@ _pw_dns_configure() {
 }
 
 # --- Routing Hooks ---
+tdrv_passwall2_route_preflight() { _pw_route_preflight passwall2 "$1"; }
+tdrv_passwall_route_preflight()  { _pw_route_preflight passwall "$1"; }
 tdrv_passwall2_apply_route_mode() { _pw_apply_route_mode passwall2 "$1"; }
 tdrv_passwall2_dns_endpoint()     { echo "127.0.0.1#$(_pw_dns_listen_port passwall2)"; }
 tdrv_passwall2_dns_configure()    { _pw_dns_configure passwall2 "$1"; }
