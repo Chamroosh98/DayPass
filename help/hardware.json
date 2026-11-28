@@ -1,0 +1,73 @@
+{
+  "module_id": "hardware",
+  "title": "Hardware & USB Tethering Manager",
+  "summary": "USB tethering operations: drivers, setup, failover, toggle, reset, modem mode-switch, and a dedicated Network Interfaces State view.",
+  "items": [
+    {
+      "key": "1",
+      "title": "Install Drivers (RNDIS / CDC-Ether / NCM)",
+      "description": "Installs the kernel modules OpenWrt needs before a phone can appear as a USB network device. 1 is RNDIS, CDC-Ether and CDC-NCM. 2 is ipheth and usbmuxd. 3 is both plus QMI, MBIM and usb-modeswitch.",
+      "usage_tip": "Each line shows Installed, Partial, or Not Installed. A complete set is skipped so the router does not download it again."
+    },
+    {
+      "key": "2",
+      "title": "Setup USB Tethering",
+      "description": "Creates network.wan_usb only when a live USB network device is present (usb0, rndis, ncm, or USB-backed eth). Adds it to the firewall wan zone and brings it up.",
+      "usage_tip": "Install drivers first. If nothing is plugged in, Setup stops and does not write /etc/config/network. Open Network Interfaces State after enabling tethering on the phone."
+    },
+    {
+      "key": "3",
+      "title": "Failover & Metrics Configuration",
+      "description": "Lists wan, wan_usb, wan6 and other WAN interfaces with their metrics. Choosing one writes network.<iface>.metric.",
+      "usage_tip": "A lower metric is preferred. Enter on the metric prompt leaves that interface unchanged."
+    },
+    {
+      "key": "4",
+      "title": "Toggle Interface Status",
+      "description": "Lists every UCI network interface with UCI Enabled/Disabled and live UP/DOWN. Choosing one enables and runs ifup, or disables and runs ifdown.",
+      "usage_tip": "0 returns to the Hardware menu. An interface that is Disabled or DOWN is brought up. An interface that is Enabled and UP is brought down."
+    },
+    {
+      "key": "5",
+      "title": "Restore / Reset USB Stack",
+      "description": "After confirmation, deletes wan_usb and its firewall membership, uninstalls Android, iOS and modem USB packages, deletes /tmp/daypass_pkg_cache, unbinds usb0, rndis and cdc-wdm tether interfaces, unloads those kernel modules, and restarts the network service.",
+      "usage_tip": "Enter keeps the current configuration. Yes leaves the drivers menu to read the live package database, so a removed set shows Not Installed."
+    },
+    {
+      "key": "6",
+      "title": "Modem Mode Switch",
+      "description": "Runs usb-modeswitch / usb_modeswitch (and usb_modeswitch_dispatcher when present) to move USB modems out of storage mode.",
+      "usage_tip": "If usb-modeswitch is missing, DayPass installs the usb-modeswitch package and then runs it. No manual opkg or apk command is required."
+    },
+    {
+      "key": "7",
+      "title": "Network Interfaces State",
+      "description": "Full-screen list of every UCI network interface (lan, wan, wan6, wan_usb, …) with device, protocol, live ubus status and metric.",
+      "usage_tip": "Enter returns to the Hardware menu. Status is 🟢 UP (with IP), 🔴 DOWN, or ⚠️ DISABLED."
+    },
+    {
+      "key": "8",
+      "title": "System Resources",
+      "description": "Opens the system resource screen.",
+      "usage_tip": "RAM and flash figures come from the live router."
+    },
+    {
+      "key": "0",
+      "title": "Back to Main Menu",
+      "description": "Returns to the main menu.",
+      "usage_tip": "Nothing is changed by leaving this menu."
+    },
+    {
+      "key": "q",
+      "title": "Quit DayPass",
+      "description": "Ends the DayPass session from any menu.",
+      "usage_tip": "Ctrl+C does the same and restores the terminal."
+    },
+    {
+      "key": "h",
+      "title": "Help",
+      "description": "Opens the manual of the current screen.",
+      "usage_tip": "Enter or 0 inside a manual returns to the screen you came from; q quits DayPass."
+    }
+  ]
+}
