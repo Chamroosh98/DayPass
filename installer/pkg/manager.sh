@@ -53,7 +53,7 @@ pkg_ipv4_flag()
 # Return the manager's exit status, including after the optional IPv4 retry.
 pkg_update_attempt()
 {
-    "$PKG_MANAGER" update "$@" >/dev/null 2>&1 &
+    "$PKG_MANAGER" update "$@" >>"${PKG_UPDATE_LOG:-/dev/null}" 2>&1 &
     local pid=$!
     if command -v ui_spinner >/dev/null 2>&1; then
         ui_spinner "$pid" "Updating package database ..."
@@ -67,7 +67,7 @@ pkg_update()
     local status flag
     [ -n "${PKG_MANAGER:-}" ] || detect_package_manager
     case "$PKG_MANAGER" in
-        apk) set -- --network-timeout 5 ;;
+        apk) set -- --timeout 5 ;;
         opkg) set -- ;;
         *) return 1 ;;
     esac
@@ -76,6 +76,47 @@ pkg_update()
     flag=$(pkg_ipv4_flag "$PKG_MANAGER") || return "$status"
     log_warn "Index refresh failed; retrying $PKG_MANAGER with $flag."
     pkg_update_attempt "$flag" "$@"
+}
+
+# No arguments means a fresh index is required. A repository-only operation
+# can pass the exact package names requested by the feed-only batch.
+pkg_apk_repository_ready()
+{
+    local PKG_UPDATE_LOG refresh_status package cached_hit
+    PKG_UPDATE_LOG=$(mktemp /tmp/daypass-apk-index.XXXXXX) || return 1
+    if pkg_update; then
+        rm -f "$PKG_UPDATE_LOG"
+        return 0
+    else
+        refresh_status=$?
+    fi
+
+    log_warn "APK repository refresh failed (exit $refresh_status). Details: [$PKG_UPDATE_LOG]"
+    cat "$PKG_UPDATE_LOG" >&2
+    if [ "$#" -gt 0 ]; then
+        if ! cached_hit=$(apk --no-network query --from repositories --available \
+                --summarize name "$@" 2>>"$PKG_UPDATE_LOG"); then
+            log_error "APK could not read local repository metadata."
+            cat "$PKG_UPDATE_LOG" >&2
+            return "$refresh_status"
+        fi
+        for package do
+            if ! printf '%s\n' "$cached_hit" | grep -Fxq -- "$package"; then
+                log_error "APK has no usable local repository record for [$package]."
+                cat "$PKG_UPDATE_LOG" >&2
+                return "$refresh_status"
+            fi
+        done
+        if apk --no-network add --simulate --upgrade "$@" </dev/null >>"$PKG_UPDATE_LOG" 2>&1; then
+            log_info "APK resolved the requested repository packages using local metadata."
+            return 0
+        fi
+        log_error "APK could not resolve the requested packages without a repository connection."
+        cat "$PKG_UPDATE_LOG" >&2
+    else
+        log_error "A successful APK refresh is required before downloading local package payloads."
+    fi
+    return "$refresh_status"
 }
 
 # Get currently installed version string of a specific package

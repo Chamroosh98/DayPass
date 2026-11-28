@@ -30,8 +30,15 @@ initialize_installer()
     fi
 
     log_info "Updating package database ..."
-    if command -v pkg_update >/dev/null 2>&1; then
-        pkg_update >/dev/null 2>&1 || log_warn "Index refresh failed; continuing with cached indexes for menu initialization."
+    DAYPASS_APK_INDEX_READY=0
+    if [ "$PKG_MANAGER" = apk ]; then
+        if pkg_apk_repository_ready; then
+            DAYPASS_APK_INDEX_READY=1
+        else
+            log_warn "APK repository readiness will be checked again before package deployment."
+        fi
+    elif command -v pkg_update >/dev/null 2>&1; then
+        pkg_update >/dev/null 2>&1 || log_warn "Index refresh failed; menu initialization will continue."
     fi
 
     # 2. Setup temporary workspace

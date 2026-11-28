@@ -136,6 +136,24 @@ deploy_targeted_packages()
     done
     echo
 
+    if [ -n "$PACKAGES_NEEDED" ] && [ "${PKG_MANAGER:-opkg}" = apk ] &&
+       [ "${DAYPASS_APK_INDEX_READY:-0}" != 1 ]; then
+        log_info "Checking APK repository readiness ..."
+        local repository_only=1
+        for pkg in $PACKAGES_NEEDED; do
+            case " $feeds " in
+                *" $pkg "*) ;;
+                *) repository_only=0; break ;;
+            esac
+        done
+
+        if [ "$repository_only" = 1 ]; then
+            pkg_apk_repository_ready $PACKAGES_NEEDED || return $?
+        else
+            pkg_apk_repository_ready || return $?
+        fi
+    fi
+
     if ! estimate_install_size "$PACKAGES_NEEDED" "$feeds"; then
         log_error "Installation aborted due to system resource limits!"
         return 1
@@ -149,10 +167,18 @@ deploy_targeted_packages()
 
     if [ "$total_pkgs" -gt 0 ]; then
         current_idx=0
-        log_info "Downloading required packages ..."
+        log_info "Staging package payloads ..."
 
         for pkg in $PACKAGES_NEEDED; do
             current_idx=$((current_idx + 1))
+
+            case " $feeds " in
+                *" $pkg "*)
+                    feed_needed="$feed_needed $pkg"
+                    log_info "Queued router-feed package [$pkg] for native installation."
+                    continue
+                    ;;
+            esac
 
             curr_ram_bytes=$(get_free_ram_bytes 2>/dev/null)
             curr_ram_fmt=$(human_readable_bytes "$curr_ram_bytes" 2>/dev/null)
@@ -163,9 +189,6 @@ deploy_targeted_packages()
                 echo "  📦 [$current_idx/$total_pkgs] Downloading $pkg ... (Free RAM: ${curr_ram_fmt:-N/A})"
             fi
 
-            case " $feeds " in
-                *" $pkg "*) feed_needed="$feed_needed $pkg"; continue ;;
-            esac
             mkdir "$TMP_DIR/payload.$current_idx" || return 1
             if ! download_package "$pkg" "$TMP_DIR/payload.$current_idx"; then
                 echo
@@ -196,6 +219,7 @@ deploy_targeted_packages()
     DAYPASS_APK_LOG="$TMP_DIR/apk.log"
 
     if [ -n "$PACKAGES_NEEDED" ]; then
+        log_info "Starting native package installation ..."
         before=$(pkg_installed_names) || { log_error "Cannot inspect installed packages."; return 1; }
         journal="$TMP_DIR/transaction.log"
         {
@@ -266,6 +290,7 @@ deploy_targeted_packages()
     fi
 
     if [ "$INSTALL_SUCCESS" -eq 1 ]; then
+        log_info "Verifying installed packages ..."
         after=$(pkg_installed_names) || {
             log_error "Could not verify the installed package inventory."
             [ -z "$journal" ] || log_info "Transaction details are in $journal."

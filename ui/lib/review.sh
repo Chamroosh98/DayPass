@@ -57,9 +57,9 @@ review_install()
     while true; do
         render_persistent_header
         ui_title "📊 $title — Installation Plan"
-        printf '  🛠️  %-18s : %s\n' "Installation Mode" "$mode"
-        printf '  ⚙️  %-18s : %s\n' "Proxy Engine" "${engine_packages:-None selected}"
-        printf '  🗣️  %-18s : %s\n' "Translation" "${translations:-No additional pack}"
+        printf '  🛠️ %-18s : %s\n' "Installation Mode" "$mode"
+        printf '  ⚙️ %-18s : %s\n' "Proxy Engine" "${engine_packages:-None selected}"
+        printf '  🗣️ %-18s : %s\n' "Translation" "${translations:-No additional pack}"
         printf '  🌐 %-18s : %s\n' "Geo Database" "$dataset"
         printf '  📦 %-18s : %s\n' "Geo Data Targets" "${geo_packages:-None selected}"
         printf '  🚦 %-18s : %s\n' "Routing" "Configure separately in Traffic Routing"

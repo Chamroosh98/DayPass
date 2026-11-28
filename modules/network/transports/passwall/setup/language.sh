@@ -10,7 +10,7 @@ language_menu()
 
     while true; do
         render_persistent_header
-        ui_title "🕵️‍♀️ Select Passwall 2 translation"
+        ui_title "⁉️ Select Passwall 2 translation"
         echo "  1) 🦁☀️ Persian (fa)"
         echo "  2) 🇬🇧 English (built in)"
         echo "  3) 🇨🇳 Simplified Chinese (zh-cn)"

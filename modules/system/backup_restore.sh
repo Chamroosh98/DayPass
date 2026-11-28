@@ -10,12 +10,18 @@ CONFIG_PATHS="/etc/config/passwall /etc/config/passwall2 /etc/config/xray /etc/c
 backup_configs()
 (
     umask 077
-    local dir path stage archive latest target
+    local dir path stage archive latest target metadata owner
+    owner=$(id -u) || return 1
     [ "$BACKUP_DIR" = /tmp/daypass/backups ] || return 1
     for dir in /tmp/daypass "$BACKUP_DIR"; do
         [ -d "$dir" ] || mkdir "$dir" || return 1
-        [ ! -L "$dir" ] && [ "$(stat -c %u "$dir")" = "$(id -u)" ] || return 1
-        case "$(stat -c %a "$dir")" in [0-7][0145][0145]) ;; *) return 1 ;; esac
+        [ ! -L "$dir" ] || return 1
+        metadata=$(LC_ALL=C ls -ldn "$dir") || return 1
+        case "$metadata" in
+            d[r-][w-][x-][r-]-[x-][r-]-[x-]\ *) ;;
+            *) return 1 ;;
+        esac
+        [ "$(printf '%s\n' "$metadata" | awk 'NR == 1 { print $3 }')" = "$owner" ] || return 1
     done
     [ ! -L /etc/config ] || return 1
     set --
@@ -23,7 +29,10 @@ backup_configs()
         case "$path" in /etc/config/passwall|/etc/config/passwall2|/etc/config/xray|/etc/config/sing-box|/etc/config/niki) ;; *) return 1 ;; esac
         [ ! -L "$path" ] || return 1
         [ -e "$path" ] || continue
-        [ -f "$path" ] && [ "$(stat -c %h "$path")" = 1 ] && [ "$(wc -c < "$path")" -le 8388608 ] || return 1
+        [ -f "$path" ] || return 1
+        metadata=$(LC_ALL=C ls -ldn "$path") || return 1
+        [ "$(printf '%s\n' "$metadata" | awk 'NR == 1 { print $2 }')" = 1 ] &&
+            [ "$(wc -c < "$path")" -le 8388608 ] || return 1
         set -- "$@" "${path#/}"
     done
     [ "$#" -gt 0 ] || { echo "No engine configs to back up."; return 0; }

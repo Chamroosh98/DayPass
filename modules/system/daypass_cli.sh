@@ -82,9 +82,13 @@ daypass_cli_fetch() {
 
 # Check if enough time has passed since the last update check.
 _daypass_stamp_dir() {
-    local dir="${DAYPASS_UPDATE_CHECK_STAMP%/*}"
+    local dir="${DAYPASS_UPDATE_CHECK_STAMP%/*}" metadata owner
     [ -d "$dir" ] || (umask 077; mkdir "$dir") || return 1
-    [ ! -L "$dir" ] && [ "$(stat -c '%u:%a' "$dir")" = "$(id -u):700" ]
+    [ ! -L "$dir" ] || return 1
+    owner=$(id -u) || return 1
+    metadata=$(LC_ALL=C ls -ldn "$dir") || return 1
+    case "$metadata" in drwx------\ *) ;; *) return 1 ;; esac
+    [ "$(printf '%s\n' "$metadata" | awk 'NR == 1 { print $3 }')" = "$owner" ]
 }
 
 _daypass_record_check() (
