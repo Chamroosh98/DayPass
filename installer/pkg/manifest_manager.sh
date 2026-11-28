@@ -340,7 +340,11 @@ mf_migrate_from_log() {
                     ((.depends // [])[]?),
                     ((.packages // [])[]? | if type == "string" then . else empty end)
                 ]
-                | map(select(type == "string" and test("^[A-Za-z0-9._+-]+$")))
+                # Preserve the old end anchor, which also accepts one trailing LF.
+                | map(select(strings | rtrimstr("\n") | explode
+                    | length > 0 and all(.[];
+                        (. >= 48 and . <= 57) or (. >= 65 and . <= 90) or
+                        (. >= 97 and . <= 122) or . == 43 or . == 45 or . == 46 or . == 95)))
                 | unique;
             .profiles | to_entries[] |
             [.key, (.value.title // .key), ((.value | names) | join(" "))] | @tsv

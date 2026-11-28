@@ -6,10 +6,10 @@ engine_menu()
 
     while true; do
         render_persistent_header
-        ui_title "Select proxy engine"
-        echo "  1) Auto (profile defaults to Xray)"
-        echo "  2) Xray"
-        echo "  3) Sing-box"
+        ui_title "🕵️‍♀️ Select proxy engine"
+        echo "  1) ⚡ Auto (profile defaults to Xray)"
+        echo "  2) ✖️ Xray"
+        echo "  3) 📦 Sing-box"
         ui_nav_footer back
 
         ui_prompt 3

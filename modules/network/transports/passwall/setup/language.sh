@@ -10,11 +10,11 @@ language_menu()
 
     while true; do
         render_persistent_header
-        ui_title "Select Passwall 2 translation"
-        echo "  1) Persian (fa)"
-        echo "  2) English (built in)"
-        echo "  3) Simplified Chinese (zh-cn)"
-        echo "  4) Russian (ru)"
+        ui_title "🕵️‍♀️ Select Passwall 2 translation"
+        echo "  1) 🦁☀️ Persian (fa)"
+        echo "  2) 🇬🇧 English (built in)"
+        echo "  3) 🇨🇳 Simplified Chinese (zh-cn)"
+        echo "  4) 🇷🇺 Russian (ru)"
         ui_nav_footer back
 
         ui_prompt 4

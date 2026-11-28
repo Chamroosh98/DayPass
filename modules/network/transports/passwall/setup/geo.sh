@@ -4,11 +4,11 @@ geo_menu()
 {
     while true; do
         render_persistent_header
-        ui_title "Select GeoIP/GeoSite data"
-        echo "  1) Skip adding GeoIP/GeoSite targets"
-        echo "  2) Official (standard packages)"
-        echo "  3) Iran Full (stage only)"
-        echo "  4) Iran Lite (stage only)"
+        ui_title "🕵️‍♀️ Select GeoIP/GeoSite data"
+        echo "  1) 🫸🏻 Skip adding GeoIP/GeoSite targets"
+        echo "  2) 👔 Official (standard packages)"
+        echo "  3) 🍺 Iran Full (stage only)"
+        echo "  4) 🍷 Iran Lite (stage only)"
         ui_nav_footer back
 
         ui_prompt 4

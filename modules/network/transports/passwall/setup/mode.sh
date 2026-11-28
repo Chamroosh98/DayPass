@@ -6,9 +6,9 @@ menu_mode()
 
     while true; do
         render_persistent_header
-        ui_title "Select installation mode"
-        echo "  1) Recommended (Xray and standard GeoIP/GeoSite packages)"
-        echo "  2) Custom      (Choose packages and preferences)"
+        ui_title "🕵️‍♀️ Select installation mode"
+        echo "  1) ⚡ Recommended (Xray and standard GeoIP/GeoSite packages)"
+        echo "  2) 🛠️ Custom      (Choose packages and preferences)"
         ui_nav_footer
         ui_prompt 2
 

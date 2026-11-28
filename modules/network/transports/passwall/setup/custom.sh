@@ -113,10 +113,11 @@ handle_custom_profile()
             | ($feeds[$app_feed][]?, $feeds.passwall_packages[]?,
                 (if $app_feed == "passwall_luci" then $feeds.passwall[]? else empty end))
             | .package | strings
-            | select(test("^luci-app-passwall2?$|^luci-i18n-") | not)
+            | select(. != "luci-app-passwall" and . != "luci-app-passwall2"
+                and (startswith("luci-i18n-") | not))
         ] | unique[]
     ' "$MANIFEST_FILE" 2>/dev/null)"; then
-        log_error "Could not read package choices from [$MANIFEST_FILE]."
+        log_error "Could not read package choices for $_PR_ARCH from [$MANIFEST_FILE]."
         ui_pause
         return 2
     fi

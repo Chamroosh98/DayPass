@@ -10,9 +10,9 @@ proxy_install_wizard()
 
     while true; do
         render_persistent_header
-        ui_title "Select Passwall version"
-        echo "  1) Passwall 1"
-        echo "  2) Passwall 2 (Recommended)"
+        ui_title "🕵️‍♀️ Select Passwall version"
+        echo "  1) 🔒 Passwall 1"
+        echo "  2) 🔒 Passwall 2 (Recommended)"
         ui_nav_footer
         ui_prompt 2
 
